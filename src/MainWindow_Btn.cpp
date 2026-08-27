@@ -1117,10 +1117,7 @@ void MainWindow::on_btnTestWebDav_clicked() {
   }
 }
 
-void MainWindow::on_btnReader_clicked() {
-  on_btnHome_clicked();
-  m_Reader->openReader();
-}
+void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
 
 void MainWindow::on_btnFind_clicked() {
   mui->frameMain->hide();
@@ -1558,11 +1555,11 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mui->qwMainDate->isHidden()) {
+  /*if (!mui->qwMainDate->isHidden()) {
     mui->btnHome->clicked();
 
     return;
-  }
+  }*/
 
   if (mui->frameMain->isVisible()) {
     mui->frameMain->hide();
@@ -1571,12 +1568,12 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (mui->frameMain->isHidden()) {
+  /*if (mui->frameMain->isHidden()) {
     m_Method->openMainEntranceWindow();
     mw_one->setMini();
 
     return;
-  }
+  }*/
 }
 
 void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
@@ -1658,3 +1655,11 @@ void MainWindow::on_btnAIAPIListOk_clicked(int index) {
   mw_one->m_Preferences->openPreferences();
   mw_one->m_Preferences->ui->cboxEndpoint->setCurrentIndex(index);
 }
+
+void MainWindow::on_btnNewTab_clicked() { on_actionAdd_Tab_triggered(); }
+
+void MainWindow::on_btnDelTab_clicked() { on_actionDel_Tab_triggered(); }
+
+void MainWindow::on_btnRenameTab_clicked() { on_actionRename_triggered(); }
+
+void MainWindow::on_btnAddTabItem_clicked() { on_btnAdd_clicked(); }

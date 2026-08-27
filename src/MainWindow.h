@@ -493,7 +493,8 @@ class MainWindow : public QMainWindow {
   QVariantList buildRecentList();
 
   void clickMainTab(int index);
-  protected:
+
+ protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;
@@ -997,6 +998,14 @@ class MainWindow : public QMainWindow {
   void on_btnOpenSearchView_clicked();
 
   void on_btnOpenBookFile_clicked();
+
+  void on_btnNewTab_clicked();
+
+  void on_btnDelTab_clicked();
+
+  void on_btnRenameTab_clicked();
+
+  void on_btnAddTabItem_clicked();
 
  private:
   QNetworkAccessManager* m_ainetMgr;

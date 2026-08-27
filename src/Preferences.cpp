@@ -347,6 +347,10 @@ void Preferences::initOptions() {
     mui->btnHome->hide();
     mui->qwMainDate->hide();
     mui->qwMainEvent->hide();
+    mui->btnNewTab->hide();
+    mui->btnDelTab->hide();
+    mui->btnRenameTab->hide();
+    mui->btnAddTabItem->hide();
     mui->btnSteps->hide();
 
     mui->btnReader->hide();

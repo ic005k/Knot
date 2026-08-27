@@ -90,6 +90,24 @@ public class MainEntrance extends AppCompatActivity {
     public static final int MENU_ID_TAB_RECYCLE_BIN = 8;
     public static final int MENU_ID_ABOUT = 9;
 
+    /** 菜单项：携带原始ID和显示文本 */
+    private static class MenuItem {
+
+        final int id;
+        final String label;
+
+        MenuItem(int id, String label) {
+            this.id = id;
+            this.label = label;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return label; // ArrayAdapter 调用 toString() 显示文本
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,6 +179,10 @@ public class MainEntrance extends AppCompatActivity {
         mTopBtnHome.setOnClickListener(v -> {
             // TODO
         });
+        // 隐藏主页按钮（保留引用，将来恢复只需 setVisibility(VISIBLE)）
+        mTopBtnHome.setVisibility(View.GONE);
+
+        // 此时剩下4个按钮，每个weight=1，总有效权重=4，自动均分整行，布局均匀。
 
         mTopBtnAdd = findViewById(R.id.top_btn_add_layout);
         ivTopAdd = findViewById(R.id.iv_top_add);
@@ -356,8 +378,9 @@ public class MainEntrance extends AppCompatActivity {
      */
     private void showNativeMainMenu(View anchorView) {
         ListPopupWindow popupWindow = new ListPopupWindow(this);
-        String[] menuItems = getMainMenuItems();
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        ArrayList<MenuItem> menuItems = buildMenuItems();
+
+        ArrayAdapter<MenuItem> adapter = new ArrayAdapter<>(
             this,
             android.R.layout.simple_list_item_1,
             menuItems
@@ -366,32 +389,27 @@ public class MainEntrance extends AppCompatActivity {
         popupWindow.setAnchorView(anchorView);
         popupWindow.setModal(true);
 
-        // ========== 解决文字被截断：计算文本实际宽度 ==========
+        // ========== 计算文本宽度 ==========
         android.graphics.Paint paint = new android.graphics.Paint();
-        // 直接用16sp，不再读取不存在的系统dimen
         float textSizeSp = 16f;
         float density = getResources().getDisplayMetrics().scaledDensity;
         paint.setTextSize(textSizeSp * density);
 
         int maxWidth = 0;
-        for (String text : menuItems) {
-            int w = (int) paint.measureText(text);
-            if (w > maxWidth) {
-                maxWidth = w;
-            }
+        for (MenuItem item : menuItems) {
+            int w = (int) paint.measureText(item.label);
+            if (w > maxWidth) maxWidth = w;
         }
-        // 增加边距padding，避免文字贴边，最小宽度保护
-        int contentWidth = maxWidth + dp2px(32);
-        int minWidth = dp2px(220);
-        contentWidth = Math.max(contentWidth, minWidth);
+        int contentWidth = Math.max(maxWidth + dp2px(32), dp2px(220));
 
         popupWindow.setContentWidth(contentWidth);
         popupWindow.setWidth(contentWidth);
-        // 向左偏移，防止菜单被屏幕右边界截断
         popupWindow.setHorizontalOffset(dp2px(-8));
 
+        // ✅ 通过 MenuItem.id 分发，不依赖 position
         popupWindow.setOnItemClickListener((parent, view, position, id) -> {
-            handleMenuItemClick(position);
+            MenuItem clicked = menuItems.get(position);
+            handleMenuItemClick(clicked.id);
             popupWindow.dismiss();
         });
         popupWindow.show();
@@ -406,7 +424,7 @@ public class MainEntrance extends AppCompatActivity {
     /**
      * 获取菜单文本数组，跟随全局语言切换中英文
      */
-    private String[] getMainMenuItems() {
+    /*private String[] getMainMenuItems() {
         if (MyActivity.zh_cn) {
             return new String[] {
                 "增加标签页",
@@ -434,6 +452,51 @@ public class MainEntrance extends AppCompatActivity {
                 "About",
             };
         }
+    }*/
+
+    /**
+     * 构建菜单列表
+     * 当前已隐藏：新建/删除/重命名标签页（取消注释即可恢复）
+     */
+    private ArrayList<MenuItem> buildMenuItems() {
+        boolean zh = MyActivity.zh_cn;
+        ArrayList<MenuItem> items = new ArrayList<>();
+
+        // -------- 以下三项暂时隐藏，将来启用时取消注释即可 --------
+        // items.add(new MenuItem(MENU_ID_ADD_TAB,    zh ? "增加标签页"       : "Add Tab"));
+        // items.add(new MenuItem(MENU_ID_DELETE_TAB, zh ? "删除标签页"       : "Delete Tab"));
+        // items.add(new MenuItem(MENU_ID_RENAME_TAB, zh ? "重命名标签页"     : "Rename Tab"));
+
+        items.add(
+            new MenuItem(MENU_ID_EXPORT_DATA, zh ? "导出数据" : "Export Data")
+        );
+        items.add(
+            new MenuItem(MENU_ID_IMPORT_DATA, zh ? "导入数据" : "Import Data")
+        );
+        items.add(
+            new MenuItem(MENU_ID_PREFERENCE, zh ? "偏好设置" : "Preferences")
+        );
+        items.add(
+            new MenuItem(
+                MENU_ID_CLOUD_BACKUP_RESTORE,
+                zh ? "云备份与恢复数据" : "Cloud Backup & Restore"
+            )
+        );
+        items.add(
+            new MenuItem(
+                MENU_ID_BACKUP_FILE_LIST,
+                zh ? "备份文件列表" : "Backup File List"
+            )
+        );
+        items.add(
+            new MenuItem(
+                MENU_ID_TAB_RECYCLE_BIN,
+                zh ? "标签页回收箱" : "Tab Recycle Bin"
+            )
+        );
+        items.add(new MenuItem(MENU_ID_ABOUT, zh ? "关于" : "About"));
+
+        return items;
     }
 
     /**

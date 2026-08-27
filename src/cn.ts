@@ -68,7 +68,7 @@
     </message>
     <message>
         <location filename="AboutThis.cpp" line="61"/>
-        <location filename="AboutThis.cpp" line="266"/>
+        <location filename="AboutThis.cpp" line="272"/>
         <source>Download link copied.</source>
         <translation>下载链接已拷贝</translation>
     </message>
@@ -108,7 +108,7 @@
         <translation>目前使用的是最新版！</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="278"/>
+        <location filename="AboutThis.cpp" line="284"/>
         <source>Log</source>
         <translation>日志</translation>
     </message>
@@ -242,7 +242,7 @@
         <translation type="vanished">下载文件成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1162"/>
+        <location filename="CloudBackup.cpp" line="1168"/>
         <source>Downloading data?</source>
         <translation>下载数据？</translation>
     </message>
@@ -261,18 +261,18 @@
         <translation>此操作将更新云端的数据</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="231"/>
-        <location filename="CloudBackup.cpp" line="396"/>
+        <location filename="CloudBackup.cpp" line="233"/>
+        <location filename="CloudBackup.cpp" line="398"/>
         <source>Authentication failed.</source>
         <translation>认证失败，请检查网址、用户名、密码。如果使用坚果云，请使用“应用密码”而不是主密码，“应用密码”可通过坚果云网页端登录后进行设置。</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="235"/>
+        <location filename="CloudBackup.cpp" line="237"/>
         <source>Upload error</source>
         <translation>上传错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="400"/>
+        <location filename="CloudBackup.cpp" line="402"/>
         <source>Download error</source>
         <translation>下载错误</translation>
     </message>
@@ -293,17 +293,17 @@
         <translation type="vanished">最终大小：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1163"/>
+        <location filename="CloudBackup.cpp" line="1169"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation>此操作将会用云端的文件覆盖本地文件</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="360"/>
+        <location filename="CloudBackup.cpp" line="362"/>
         <source>Successfully downloaded file,File saved to</source>
         <translation>文件下载成功，已保存到</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="370"/>
+        <location filename="CloudBackup.cpp" line="372"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
@@ -534,7 +534,9 @@
         <translation type="vanished">总计</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="567"/>
+        <location filename="EditRecord.cpp" line="587"/>
+        <location filename="EditRecord.cpp" line="605"/>
+        <location filename="EditRecord.cpp" line="610"/>
         <source>Add</source>
         <translation>增加</translation>
     </message>
@@ -605,7 +607,7 @@
 <context>
     <name>MainHelper</name>
     <message>
-        <location filename="MainHelper.cpp" line="165"/>
+        <location filename="MainHelper.cpp" line="172"/>
         <source>Restore Tab</source>
         <translation>恢复标签页</translation>
     </message>
@@ -666,14 +668,14 @@
         <translation type="vanished">云备份与恢复数据</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="339"/>
-        <location filename="MainHelper.cpp" line="373"/>
+        <location filename="MainHelper.cpp" line="346"/>
+        <location filename="MainHelper.cpp" line="380"/>
         <source>Backup File List</source>
         <translation>备份文件列表</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="274"/>
-        <location filename="MainHelper.cpp" line="404"/>
+        <location filename="MainHelper.cpp" line="281"/>
+        <location filename="MainHelper.cpp" line="411"/>
         <source>Tab Recycle</source>
         <translation>标签页回收箱</translation>
     </message>
@@ -682,10 +684,10 @@
         <translation type="vanished">分享文件</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="274"/>
-        <location filename="MainHelper.cpp" line="339"/>
-        <location filename="MainHelper.cpp" line="373"/>
-        <location filename="MainHelper.cpp" line="404"/>
+        <location filename="MainHelper.cpp" line="281"/>
+        <location filename="MainHelper.cpp" line="346"/>
+        <location filename="MainHelper.cpp" line="380"/>
+        <location filename="MainHelper.cpp" line="411"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
@@ -695,13 +697,13 @@
         <translation type="vanished">滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="360"/>
-        <location filename="MainHelper.cpp" line="384"/>
+        <location filename="MainHelper.cpp" line="367"/>
+        <location filename="MainHelper.cpp" line="391"/>
         <source>Whether to remove</source>
         <translation>是否删除</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="419"/>
+        <location filename="MainHelper.cpp" line="426"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
@@ -721,7 +723,7 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="MainWindow.ui" line="2110"/>
+        <location filename="MainWindow.ui" line="2166"/>
         <source>Reader</source>
         <translation>阅读</translation>
     </message>
@@ -730,36 +732,37 @@
         <translation type="vanished">最大化</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2019"/>
+        <location filename="MainWindow.ui" line="2075"/>
         <source>Stats</source>
         <translation>统计</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1446"/>
+        <location filename="MainWindow.ui" line="1465"/>
         <source>Menu</source>
         <translation>菜单</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="190"/>
-        <location filename="MainWindow.ui" line="1054"/>
-        <location filename="MainWindow.ui" line="1130"/>
-        <location filename="MainWindow.ui" line="1153"/>
-        <location filename="MainWindow.ui" line="2408"/>
-        <location filename="MainWindow.ui" line="2429"/>
-        <location filename="MainWindow.ui" line="3512"/>
-        <location filename="MainWindow.ui" line="3535"/>
-        <location filename="MainWindow.ui" line="4361"/>
-        <location filename="MainWindow.ui" line="4421"/>
-        <location filename="MainWindow.ui" line="4745"/>
-        <location filename="MainWindow.ui" line="5567"/>
-        <location filename="MainWindow.ui" line="5678"/>
-        <location filename="MainWindow.ui" line="5764"/>
-        <location filename="MainWindow.ui" line="5942"/>
-        <location filename="MainWindow.ui" line="6737"/>
-        <location filename="MainWindow.ui" line="6805"/>
-        <location filename="MainWindow.ui" line="6879"/>
-        <location filename="MainWindow.ui" line="7445"/>
-        <location filename="MainWindow.ui" line="7901"/>
+        <location filename="MainWindow.ui" line="1048"/>
+        <location filename="MainWindow.ui" line="1124"/>
+        <location filename="MainWindow.ui" line="1147"/>
+        <location filename="MainWindow.ui" line="2464"/>
+        <location filename="MainWindow.ui" line="2485"/>
+        <location filename="MainWindow.ui" line="3568"/>
+        <location filename="MainWindow.ui" line="3591"/>
+        <location filename="MainWindow.ui" line="4417"/>
+        <location filename="MainWindow.ui" line="4477"/>
+        <location filename="MainWindow.ui" line="4801"/>
+        <location filename="MainWindow.ui" line="5623"/>
+        <location filename="MainWindow.ui" line="5734"/>
+        <location filename="MainWindow.ui" line="5820"/>
+        <location filename="MainWindow.ui" line="5998"/>
+        <location filename="MainWindow.ui" line="6793"/>
+        <location filename="MainWindow.ui" line="6861"/>
+        <location filename="MainWindow.ui" line="6935"/>
+        <location filename="MainWindow.ui" line="7478"/>
+        <location filename="MainWindow.ui" line="7530"/>
+        <location filename="MainWindow.ui" line="7986"/>
         <source>...</source>
         <translation></translation>
     </message>
@@ -784,7 +787,7 @@
         <translation type="vanished">下一页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4452"/>
+        <location filename="MainWindow.ui" line="4508"/>
         <source>List</source>
         <translation>列表</translation>
     </message>
@@ -793,11 +796,12 @@
         <translation type="vanished">选择文本</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1580"/>
-        <location filename="MainWindow.ui" line="3025"/>
-        <location filename="MainWindow.ui" line="5863"/>
-        <location filename="MainWindow.ui" line="6303"/>
-        <location filename="MainWindow.ui" line="6413"/>
+        <location filename="MainWindow.ui" line="1599"/>
+        <location filename="MainWindow.ui" line="1895"/>
+        <location filename="MainWindow.ui" line="3081"/>
+        <location filename="MainWindow.ui" line="5919"/>
+        <location filename="MainWindow.ui" line="6359"/>
+        <location filename="MainWindow.ui" line="6469"/>
         <source>Del</source>
         <translation>删除</translation>
     </message>
@@ -807,53 +811,53 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="20"/>
-        <location filename="MainWindow.ui" line="8023"/>
+        <location filename="MainWindow.ui" line="8108"/>
         <source>Knot</source>
         <translation></translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="52"/>
-        <location filename="MainWindow.ui" line="4774"/>
+        <location filename="MainWindow.ui" line="4830"/>
         <source>Title</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1332"/>
+        <location filename="MainWindow.ui" line="1326"/>
         <source>Book Name</source>
         <translation></translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="100"/>
-        <location filename="MainWindow.ui" line="1107"/>
-        <location filename="MainWindow.ui" line="2761"/>
-        <location filename="MainWindow.ui" line="2838"/>
-        <location filename="MainWindow.ui" line="2921"/>
-        <location filename="MainWindow.ui" line="3103"/>
-        <location filename="MainWindow.ui" line="3625"/>
-        <location filename="MainWindow.ui" line="4705"/>
-        <location filename="MainWindow.ui" line="4937"/>
-        <location filename="MainWindow.ui" line="5089"/>
-        <location filename="MainWindow.ui" line="5157"/>
-        <location filename="MainWindow.ui" line="5437"/>
-        <location filename="MainWindow.ui" line="6036"/>
-        <location filename="MainWindow.ui" line="6242"/>
-        <location filename="MainWindow.ui" line="6543"/>
-        <location filename="MainWindow.ui" line="7393"/>
-        <location filename="MainWindow.ui" line="7780"/>
-        <location filename="MainWindow.ui" line="7860"/>
-        <location filename="MainWindow.ui" line="7941"/>
+        <location filename="MainWindow.ui" line="1101"/>
+        <location filename="MainWindow.ui" line="2817"/>
+        <location filename="MainWindow.ui" line="2894"/>
+        <location filename="MainWindow.ui" line="2977"/>
+        <location filename="MainWindow.ui" line="3159"/>
+        <location filename="MainWindow.ui" line="3681"/>
+        <location filename="MainWindow.ui" line="4761"/>
+        <location filename="MainWindow.ui" line="4993"/>
+        <location filename="MainWindow.ui" line="5145"/>
+        <location filename="MainWindow.ui" line="5213"/>
+        <location filename="MainWindow.ui" line="5493"/>
+        <location filename="MainWindow.ui" line="6092"/>
+        <location filename="MainWindow.ui" line="6298"/>
+        <location filename="MainWindow.ui" line="6599"/>
+        <location filename="MainWindow.ui" line="7449"/>
+        <location filename="MainWindow.ui" line="7865"/>
+        <location filename="MainWindow.ui" line="7945"/>
+        <location filename="MainWindow.ui" line="8026"/>
         <source>Back</source>
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="598"/>
-        <location filename="MainWindow.ui" line="6065"/>
+        <location filename="MainWindow.ui" line="592"/>
+        <location filename="MainWindow.ui" line="6121"/>
         <source>Open</source>
         <translation>打开</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="173"/>
-        <location filename="MainWindow.ui" line="5045"/>
+        <location filename="MainWindow.ui" line="5101"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
@@ -870,8 +874,8 @@
         <translation type="vanished">输入待办文本  [Ctrl+Enter]</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4794"/>
-        <location filename="MainWindow_Init.cpp" line="1010"/>
+        <location filename="MainWindow.ui" line="4850"/>
+        <location filename="MainWindow_Init.cpp" line="1012"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
@@ -888,7 +892,7 @@
         <translation type="vanished">刷新令牌</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1664"/>
+        <location filename="MainWindow.ui" line="1683"/>
         <source>Upload</source>
         <translation>上传</translation>
     </message>
@@ -929,15 +933,15 @@
         <translation type="vanished">输出到PDF</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2764"/>
-        <location filename="MainWindow.ui" line="2835"/>
-        <location filename="MainWindow.ui" line="2851"/>
-        <location filename="MainWindow.ui" line="3116"/>
-        <location filename="MainWindow.ui" line="3638"/>
-        <location filename="MainWindow.ui" line="5160"/>
-        <location filename="MainWindow.ui" line="6049"/>
-        <location filename="MainWindow.ui" line="6255"/>
-        <location filename="MainWindow.ui" line="7647"/>
+        <location filename="MainWindow.ui" line="2820"/>
+        <location filename="MainWindow.ui" line="2891"/>
+        <location filename="MainWindow.ui" line="2907"/>
+        <location filename="MainWindow.ui" line="3172"/>
+        <location filename="MainWindow.ui" line="3694"/>
+        <location filename="MainWindow.ui" line="5216"/>
+        <location filename="MainWindow.ui" line="6105"/>
+        <location filename="MainWindow.ui" line="6311"/>
+        <location filename="MainWindow.ui" line="7732"/>
         <source>Esc</source>
         <translation></translation>
     </message>
@@ -950,12 +954,12 @@
         <translation type="vanished">设置密码</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3002"/>
+        <location filename="MainWindow.ui" line="3058"/>
         <source>Zoom +</source>
         <translation>放大</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2973"/>
+        <location filename="MainWindow.ui" line="3029"/>
         <source>Zoom -</source>
         <translation>缩小</translation>
     </message>
@@ -964,7 +968,7 @@
         <translation type="vanished">注销</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5525"/>
+        <location filename="MainWindow.ui" line="5581"/>
         <source>Hide</source>
         <translation>隐藏</translation>
     </message>
@@ -973,40 +977,45 @@
         <translation type="vanished">转到</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1622"/>
-        <location filename="MainWindow.ui" line="5544"/>
-        <location filename="MainWindow.ui" line="6117"/>
-        <location filename="MainWindow.ui" line="8085"/>
+        <location filename="MainWindow.ui" line="1641"/>
+        <location filename="MainWindow.ui" line="5600"/>
+        <location filename="MainWindow.ui" line="6173"/>
+        <location filename="MainWindow.ui" line="8170"/>
         <source>Find</source>
         <translation>查找</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1931"/>
+        <location filename="MainWindow.ui" line="1882"/>
+        <source>New</source>
+        <translation>新建</translation>
+    </message>
+    <message>
+        <location filename="MainWindow.ui" line="1987"/>
         <source>Tab Title</source>
         <translation>标签页标题</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2180"/>
+        <location filename="MainWindow.ui" line="2236"/>
         <source>VectorStatus</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2249"/>
+        <location filename="MainWindow.ui" line="2305"/>
         <source>Exercise</source>
         <translation>运动</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2362"/>
+        <location filename="MainWindow.ui" line="2418"/>
         <source>Data Encryption (AES256):</source>
         <translation>数据加密（AES256）：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2394"/>
+        <location filename="MainWindow.ui" line="2450"/>
         <source>Enable</source>
         <translation>启用</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2681"/>
+        <location filename="MainWindow.ui" line="2737"/>
         <source>Backup</source>
         <translation>备份</translation>
     </message>
@@ -1015,17 +1024,17 @@
         <translation type="vanished">如果通过上面的方式登录失败，可以粘贴带有认证码的网址以获得认证：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2482"/>
+        <location filename="MainWindow.ui" line="2538"/>
         <source>WebDAV :</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2324"/>
+        <location filename="MainWindow.ui" line="2380"/>
         <source>WebDAV</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2588"/>
+        <location filename="MainWindow.ui" line="2644"/>
         <source>https://dav.jianguoyun.com/dav/</source>
         <translation></translation>
     </message>
@@ -1034,58 +1043,58 @@
         <translation type="vanished">用户名</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2371"/>
+        <location filename="MainWindow.ui" line="2427"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2417"/>
+        <location filename="MainWindow.ui" line="2473"/>
         <source>Validate</source>
         <translation>验证</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2583"/>
+        <location filename="MainWindow.ui" line="2639"/>
         <source>https://data.cstcloud.cn/dav/</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2650"/>
+        <location filename="MainWindow.ui" line="2706"/>
         <source>Automatic Synchronization</source>
         <translation>自动同步</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2663"/>
+        <location filename="MainWindow.ui" line="2719"/>
         <source>Note: Data synchronization is performed automatically when Todo and Notes are opened and closed.</source>
         <translation>提示：当打开或关闭待办和笔记时，数据将自动同步。</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3883"/>
+        <location filename="MainWindow.ui" line="3939"/>
         <source>Current </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3912"/>
+        <location filename="MainWindow.ui" line="3968"/>
         <source>Now</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3951"/>
+        <location filename="MainWindow.ui" line="4007"/>
         <source>0 KM</source>
         <translation></translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="150"/>
-        <location filename="MainWindow.ui" line="3993"/>
+        <location filename="MainWindow.ui" line="4049"/>
         <source>AI</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4644"/>
+        <location filename="MainWindow.ui" line="4700"/>
         <source>Options</source>
         <translation>选项</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4016"/>
+        <location filename="MainWindow.ui" line="4072"/>
         <source>GPS</source>
         <translation></translation>
     </message>
@@ -1102,12 +1111,12 @@
         <translation type="vanished">平均速度</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4035"/>
+        <location filename="MainWindow.ui" line="4091"/>
         <source>Direction</source>
         <translation>方向</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4064"/>
+        <location filename="MainWindow.ui" line="4120"/>
         <source>Voice</source>
         <translation>语音</translation>
     </message>
@@ -1116,46 +1125,46 @@
         <translation type="vanished">骑行</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4338"/>
+        <location filename="MainWindow.ui" line="4394"/>
         <source>Hike</source>
         <oldsource>Hiking</oldsource>
         <translation>徒步</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="432"/>
-        <location filename="MainWindow.ui" line="4354"/>
+        <location filename="MainWindow.ui" line="4410"/>
         <source>Run</source>
         <oldsource>Running</oldsource>
         <translation>跑步</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4249"/>
+        <location filename="MainWindow.ui" line="4305"/>
         <source>Ride</source>
         <translation>骑行</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4441"/>
+        <location filename="MainWindow.ui" line="4497"/>
         <source>GPS Info</source>
         <translation>GPS信息</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4480"/>
+        <location filename="MainWindow.ui" line="4536"/>
         <source>Sel Date</source>
         <translation>选择年月</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4496"/>
+        <location filename="MainWindow.ui" line="4552"/>
         <source>getGpsListData</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4566"/>
-        <location filename="MainWindow.ui" line="4670"/>
+        <location filename="MainWindow.ui" line="4622"/>
+        <location filename="MainWindow.ui" line="4726"/>
         <source>Map</source>
         <translation>地图</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4572"/>
+        <location filename="MainWindow.ui" line="4628"/>
         <source>GPS Date Time</source>
         <translation>GPS 日期 时间</translation>
     </message>
@@ -1164,23 +1173,23 @@
         <translation type="vanished">发送邮件</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5649"/>
+        <location filename="MainWindow.ui" line="5705"/>
         <source>F</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5919"/>
+        <location filename="MainWindow.ui" line="5975"/>
         <source>to PDF</source>
         <translation>输出PDF</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5817"/>
-        <location filename="MainWindow.ui" line="7558"/>
+        <location filename="MainWindow.ui" line="5873"/>
+        <location filename="MainWindow.ui" line="7643"/>
         <source>Up</source>
         <translation>上移</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2294"/>
+        <location filename="MainWindow.ui" line="2350"/>
         <source>OneDrive</source>
         <translation></translation>
     </message>
@@ -1189,42 +1198,42 @@
         <translation type="vanished">粘贴带有认证码的网址以获得认证：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2521"/>
+        <location filename="MainWindow.ui" line="2577"/>
         <source>WebDAV Url:</source>
         <translation>WebDAV网址：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2541"/>
+        <location filename="MainWindow.ui" line="2597"/>
         <source>Select</source>
         <translation>选取</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2555"/>
+        <location filename="MainWindow.ui" line="2611"/>
         <source>Test</source>
         <translation>测试</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2593"/>
+        <location filename="MainWindow.ui" line="2649"/>
         <source>https://soya.infini-cloud.net/dav/</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2598"/>
+        <location filename="MainWindow.ui" line="2654"/>
         <source>https://app.koofr.net/dav/Koofr/</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2611"/>
+        <location filename="MainWindow.ui" line="2667"/>
         <source>UserName:</source>
         <translation>用户名：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2633"/>
+        <location filename="MainWindow.ui" line="2689"/>
         <source>Password:</source>
         <translation>密码：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2796"/>
+        <location filename="MainWindow.ui" line="2852"/>
         <source>Note Graph View</source>
         <translation>笔记图谱</translation>
     </message>
@@ -1233,35 +1242,35 @@
         <translation type="vanished">语音播报</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5840"/>
-        <location filename="MainWindow.ui" line="7581"/>
+        <location filename="MainWindow.ui" line="5896"/>
+        <location filename="MainWindow.ui" line="7666"/>
         <source>Down</source>
         <translation>下移</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5886"/>
-        <location filename="MainWindow.ui" line="7604"/>
+        <location filename="MainWindow.ui" line="5942"/>
+        <location filename="MainWindow.ui" line="7689"/>
         <source>MoveTo</source>
         <translation>移动到</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5971"/>
+        <location filename="MainWindow.ui" line="6027"/>
         <source>Tree</source>
         <oldsource>View Tree</oldsource>
         <translation>树</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6140"/>
+        <location filename="MainWindow.ui" line="6196"/>
         <source>Tools</source>
         <translation>工具</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7359"/>
+        <location filename="MainWindow.ui" line="7415"/>
         <source>Reading List</source>
         <translation>阅读列表</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7468"/>
+        <location filename="MainWindow.ui" line="7553"/>
         <source>Remove</source>
         <translation>移除</translation>
     </message>
@@ -1290,12 +1299,12 @@
         <translation type="vanished">工具栏</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8060"/>
+        <location filename="MainWindow.ui" line="8145"/>
         <source>Remarks</source>
         <translation>备注</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2148"/>
+        <location filename="MainWindow.ui" line="2204"/>
         <source>Ctrl + T</source>
         <translation></translation>
     </message>
@@ -1325,124 +1334,124 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="632"/>
+        <location filename="MainWindow.ui" line="626"/>
         <source>BookList</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="658"/>
+        <location filename="MainWindow.ui" line="652"/>
         <source>CataInfo</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="785"/>
+        <location filename="MainWindow.ui" line="779"/>
         <source>Go to Page</source>
         <translation>转到页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="852"/>
+        <location filename="MainWindow.ui" line="846"/>
         <source>Auto Stop Playback</source>
         <translation>自动停止播放</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="859"/>
+        <location filename="MainWindow.ui" line="853"/>
         <source>90</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="866"/>
+        <location filename="MainWindow.ui" line="860"/>
         <source>Minutes</source>
         <translation>分钟</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="903"/>
+        <location filename="MainWindow.ui" line="897"/>
         <source>Style1</source>
         <translation>风格1</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="936"/>
+        <location filename="MainWindow.ui" line="930"/>
         <source>Style2</source>
         <translation>风格2</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="968"/>
+        <location filename="MainWindow.ui" line="962"/>
         <source>Style3</source>
         <translation>风格3</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="988"/>
+        <location filename="MainWindow.ui" line="982"/>
         <source>BG</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="995"/>
+        <location filename="MainWindow.ui" line="989"/>
         <source>#FFFFFF</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1002"/>
+        <location filename="MainWindow.ui" line="996"/>
         <source>FG</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1009"/>
+        <location filename="MainWindow.ui" line="1003"/>
         <source>#000000</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1035"/>
+        <location filename="MainWindow.ui" line="1029"/>
         <source>Font</source>
         <translation>字体</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1092"/>
+        <location filename="MainWindow.ui" line="1086"/>
         <source>Total Reading</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1188"/>
+        <location filename="MainWindow.ui" line="1182"/>
         <source>A-</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1226"/>
+        <location filename="MainWindow.ui" line="1220"/>
         <source>A+</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="559"/>
+        <location filename="MainWindow.ui" line="553"/>
         <source>1
 1</source>
         <translation></translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="463"/>
-        <location filename="MainWindow_Btn.cpp" line="296"/>
+        <location filename="MainWindow_Btn.cpp" line="293"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="684"/>
+        <location filename="MainWindow.ui" line="678"/>
         <source>Misc</source>
         <translation>杂项</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="802"/>
+        <location filename="MainWindow.ui" line="796"/>
         <source>Scroll Speed</source>
         <translation>滚动速度</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="815"/>
+        <location filename="MainWindow.ui" line="809"/>
         <source>-</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="841"/>
+        <location filename="MainWindow.ui" line="835"/>
         <source>+</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="876"/>
+        <location filename="MainWindow.ui" line="870"/>
         <source>Style</source>
         <translation>风格</translation>
     </message>
@@ -1451,22 +1460,22 @@
         <translation type="vanished">移动</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2164"/>
+        <location filename="MainWindow.ui" line="2220"/>
         <source>Ctrl+T</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2205"/>
+        <location filename="MainWindow.ui" line="2261"/>
         <source>Ctrl + N</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2208"/>
+        <location filename="MainWindow.ui" line="2264"/>
         <source>Notes</source>
         <translation>笔记</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2221"/>
+        <location filename="MainWindow.ui" line="2277"/>
         <source>Ctrl+N</source>
         <translation></translation>
     </message>
@@ -1479,34 +1488,34 @@
         <translation type="vanished">笔记名称</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2884"/>
+        <location filename="MainWindow.ui" line="2940"/>
         <source>ImgInfo</source>
         <translation></translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="213"/>
-        <location filename="MainWindow.ui" line="2944"/>
-        <location filename="MainWindow.ui" line="5179"/>
+        <location filename="MainWindow.ui" line="3000"/>
+        <location filename="MainWindow.ui" line="5235"/>
         <source>Share</source>
         <translation>分享</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1483"/>
+        <location filename="MainWindow.ui" line="1502"/>
         <source>Home</source>
         <translation>主页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3144"/>
+        <location filename="MainWindow.ui" line="3200"/>
         <source>High Priority</source>
         <translation>高优先级</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3357"/>
+        <location filename="MainWindow.ui" line="3413"/>
         <source>Ctrl+Return</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3182"/>
+        <location filename="MainWindow.ui" line="3238"/>
         <source>Low Priority</source>
         <translation>低优先级</translation>
     </message>
@@ -1520,43 +1529,43 @@
         <translation type="vanished">返回</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3258"/>
+        <location filename="MainWindow.ui" line="3314"/>
         <source>Set Time</source>
         <translation>设置时间</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3296"/>
-        <location filename="MainWindow.ui" line="6000"/>
-        <location filename="MainWindow.ui" line="7683"/>
+        <location filename="MainWindow.ui" line="3352"/>
+        <location filename="MainWindow.ui" line="6056"/>
+        <location filename="MainWindow.ui" line="7768"/>
         <source>Recycle</source>
         <translation>回收箱</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3412"/>
+        <location filename="MainWindow.ui" line="3468"/>
         <source>Ctrl + Enter</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3418"/>
+        <location filename="MainWindow.ui" line="3474"/>
         <source>Enter the to-do list text</source>
         <translation>输入待办事项文本</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3585"/>
+        <location filename="MainWindow.ui" line="3641"/>
         <source>Todo Recycle Box : </source>
         <translation>待办事项回收箱：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3663"/>
-        <location filename="MainWindow.ui" line="7497"/>
+        <location filename="MainWindow.ui" line="3719"/>
+        <location filename="MainWindow.ui" line="7582"/>
         <source>Clear All</source>
         <translation>全部清除</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2694"/>
-        <location filename="MainWindow.ui" line="3733"/>
-        <location filename="MainWindow.ui" line="5475"/>
-        <location filename="MainWindow.ui" line="6274"/>
+        <location filename="MainWindow.ui" line="2750"/>
+        <location filename="MainWindow.ui" line="3789"/>
+        <location filename="MainWindow.ui" line="5531"/>
+        <location filename="MainWindow.ui" line="6330"/>
         <source>Restore</source>
         <translation>恢复</translation>
     </message>
@@ -1565,8 +1574,8 @@
         <translation type="vanished">切线截距</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="828"/>
-        <location filename="MainWindow.ui" line="2502"/>
+        <location filename="MainWindow.ui" line="822"/>
+        <location filename="MainWindow.ui" line="2558"/>
         <source>Default</source>
         <translation>默认</translation>
     </message>
@@ -1595,11 +1604,11 @@
         <translation type="vanished">厘米    本次：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2740"/>
-        <location filename="MainWindow.ui" line="3935"/>
-        <location filename="MainWindow.ui" line="4518"/>
-        <location filename="MainWindow.ui" line="4537"/>
-        <location filename="MainWindow.ui" line="6995"/>
+        <location filename="MainWindow.ui" line="2796"/>
+        <location filename="MainWindow.ui" line="3991"/>
+        <location filename="MainWindow.ui" line="4574"/>
+        <location filename="MainWindow.ui" line="4593"/>
+        <location filename="MainWindow.ui" line="7051"/>
         <source>0</source>
         <translation></translation>
     </message>
@@ -1608,7 +1617,7 @@
         <translation type="vanished">运行时间</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3973"/>
+        <location filename="MainWindow.ui" line="4029"/>
         <source>Reset</source>
         <translation>复位</translation>
     </message>
@@ -1618,27 +1627,27 @@
         <translation type="vanished">输出到图像</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4824"/>
-        <location filename="MainWindow.ui" line="4850"/>
+        <location filename="MainWindow.ui" line="4880"/>
+        <location filename="MainWindow.ui" line="4906"/>
         <source>2022  01  01</source>
         <oldsource>2022</oldsource>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3896"/>
-        <location filename="MainWindow.ui" line="4837"/>
+        <location filename="MainWindow.ui" line="3952"/>
+        <location filename="MainWindow.ui" line="4893"/>
         <source>to</source>
         <translation>到</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4956"/>
+        <location filename="MainWindow.ui" line="5012"/>
         <source>View Category</source>
         <translation>查看分类</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4906"/>
-        <location filename="MainWindow.ui" line="6773"/>
-        <location filename="MainWindow.cpp" line="409"/>
+        <location filename="MainWindow.ui" line="4962"/>
+        <location filename="MainWindow.ui" line="6829"/>
+        <location filename="MainWindow.cpp" line="416"/>
         <source>Details</source>
         <translation>详细</translation>
     </message>
@@ -1651,27 +1660,27 @@
         <translation type="vanished">到</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5060"/>
+        <location filename="MainWindow.ui" line="5116"/>
         <source>Results</source>
         <translation>结果</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5261"/>
+        <location filename="MainWindow.ui" line="5317"/>
         <source>View1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5286"/>
+        <location filename="MainWindow.ui" line="5342"/>
         <source>View2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5311"/>
+        <location filename="MainWindow.ui" line="5367"/>
         <source>View3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5370"/>
+        <location filename="MainWindow.ui" line="5426"/>
         <source>AI Analysis</source>
         <translation>AI分析</translation>
     </message>
@@ -1688,34 +1697,35 @@
         <translation type="vanished">显示查找</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6208"/>
+        <location filename="MainWindow.ui" line="6264"/>
         <source>Note Recycle</source>
         <translation>笔记回收箱</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6348"/>
+        <location filename="MainWindow.ui" line="1908"/>
+        <location filename="MainWindow.ui" line="6404"/>
         <source>Rename</source>
         <translation>重命名</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6468"/>
+        <location filename="MainWindow.ui" line="6524"/>
         <source>Sel Tab</source>
         <translation>选择标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1074"/>
-        <location filename="MainWindow.ui" line="6373"/>
-        <location filename="MainWindow.ui" line="6494"/>
+        <location filename="MainWindow.ui" line="1068"/>
+        <location filename="MainWindow.ui" line="6429"/>
+        <location filename="MainWindow.ui" line="6550"/>
         <source>Info</source>
         <translation>信息</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4460"/>
+        <location filename="MainWindow.ui" line="4516"/>
         <source>Chart</source>
         <translation>图表</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2072"/>
+        <location filename="MainWindow.ui" line="2128"/>
         <source>Tabs</source>
         <translation>标签页</translation>
     </message>
@@ -1728,7 +1738,7 @@
         <translation type="vanished">当前 ：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5023"/>
+        <location filename="MainWindow.ui" line="5079"/>
         <source>&amp;&amp;</source>
         <translation></translation>
     </message>
@@ -1737,87 +1747,87 @@
         <translation type="vanished">管理</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6509"/>
+        <location filename="MainWindow.ui" line="6565"/>
         <source>Move Up</source>
         <translation>上移</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6522"/>
+        <location filename="MainWindow.ui" line="6578"/>
         <source>Move Down</source>
         <translation>下移</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6904"/>
+        <location filename="MainWindow.ui" line="6960"/>
         <source>Month Sum : 0</source>
         <translation>月总计：0</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6934"/>
+        <location filename="MainWindow.ui" line="6990"/>
         <source>1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6953"/>
+        <location filename="MainWindow.ui" line="7009"/>
         <source>2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6972"/>
+        <location filename="MainWindow.ui" line="7028"/>
         <source>3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7014"/>
+        <location filename="MainWindow.ui" line="7070"/>
         <source>.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7033"/>
+        <location filename="MainWindow.ui" line="7089"/>
         <source>&lt;-</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7056"/>
+        <location filename="MainWindow.ui" line="7112"/>
         <source>4</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7075"/>
+        <location filename="MainWindow.ui" line="7131"/>
         <source>5</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7094"/>
+        <location filename="MainWindow.ui" line="7150"/>
         <source>6</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7117"/>
+        <location filename="MainWindow.ui" line="7173"/>
         <source>7</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7136"/>
+        <location filename="MainWindow.ui" line="7192"/>
         <source>8</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7155"/>
+        <location filename="MainWindow.ui" line="7211"/>
         <source>9</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7200"/>
+        <location filename="MainWindow.ui" line="7256"/>
         <source>00:00:00</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7212"/>
+        <location filename="MainWindow.ui" line="7268"/>
         <source>Hour</source>
         <translation>时</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7307"/>
+        <location filename="MainWindow.ui" line="7363"/>
         <source>Minute</source>
         <translation>分</translation>
     </message>
@@ -1826,27 +1836,27 @@
         <translation type="vanished">清除所有的记录</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7634"/>
+        <location filename="MainWindow.ui" line="7719"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7726"/>
+        <location filename="MainWindow.ui" line="7811"/>
         <source>Note Search Results:</source>
         <translation>笔记搜索结果：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7738"/>
+        <location filename="MainWindow.ui" line="7823"/>
         <source>Clear</source>
         <translation>清除</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7752"/>
+        <location filename="MainWindow.ui" line="7837"/>
         <source>Note Title</source>
         <translation>笔记标题</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7793"/>
+        <location filename="MainWindow.ui" line="7878"/>
         <source>Note Link</source>
         <oldsource>Copy Note Link</oldsource>
         <translation>笔记链接</translation>
@@ -1856,41 +1866,41 @@
         <translation type="vanished">打开搜索结果</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7885"/>
+        <location filename="MainWindow.ui" line="7970"/>
         <source>Recent Notes:</source>
         <translation>最近的笔记：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7894"/>
+        <location filename="MainWindow.ui" line="7979"/>
         <source>Input the title keyword</source>
         <translation>输入笔记标题关键字</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7806"/>
-        <location filename="MainWindow.ui" line="7954"/>
+        <location filename="MainWindow.ui" line="7891"/>
+        <location filename="MainWindow.ui" line="8039"/>
         <source>View</source>
         <translation>查看</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5630"/>
-        <location filename="MainWindow.ui" line="5745"/>
+        <location filename="MainWindow.ui" line="5686"/>
+        <location filename="MainWindow.ui" line="5801"/>
         <source>0/0</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="7994"/>
+        <location filename="MainWindow.ui" line="8079"/>
         <source>AI API List:</source>
         <translation>AI API 列表：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8045"/>
+        <location filename="MainWindow.ui" line="8130"/>
         <location filename="MainWindow_Menu.cpp" line="280"/>
         <location filename="MainWindow_Menu.cpp" line="319"/>
         <source>Rename Tab</source>
         <translation>重命名标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8095"/>
+        <location filename="MainWindow.ui" line="8180"/>
         <location filename="MainWindow_Menu.cpp" line="329"/>
         <source>Preferences</source>
         <translation>偏好设置</translation>
@@ -1904,9 +1914,9 @@
         <translation type="vanished">图表分类：</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6835"/>
-        <location filename="MainWindow.cpp" line="407"/>
-        <location filename="MainWindow_Init.cpp" line="1009"/>
+        <location filename="MainWindow.ui" line="6891"/>
+        <location filename="MainWindow.cpp" line="414"/>
+        <location filename="MainWindow_Init.cpp" line="1011"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
@@ -1915,14 +1925,15 @@
         <translation type="vanished">放大</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="1538"/>
-        <location filename="MainWindow.ui" line="3344"/>
-        <location filename="MainWindow.ui" line="6590"/>
+        <location filename="MainWindow.ui" line="1557"/>
+        <location filename="MainWindow.ui" line="1921"/>
+        <location filename="MainWindow.ui" line="3400"/>
+        <location filename="MainWindow.ui" line="6646"/>
         <source>Add</source>
         <translation>增加</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="2151"/>
+        <location filename="MainWindow.ui" line="2207"/>
         <source>ToDo</source>
         <translation>待办</translation>
     </message>
@@ -1939,8 +1950,8 @@
         <translation type="vanished">减少一次</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4807"/>
-        <location filename="MainWindow_Init.cpp" line="1041"/>
+        <location filename="MainWindow.ui" line="4863"/>
+        <location filename="MainWindow_Init.cpp" line="1043"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
@@ -1949,14 +1960,14 @@
         <translation type="vanished">数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="407"/>
+        <location filename="MainWindow.cpp" line="414"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6088"/>
-        <location filename="MainWindow.ui" line="7819"/>
-        <location filename="MainWindow.ui" line="7967"/>
+        <location filename="MainWindow.ui" line="6144"/>
+        <location filename="MainWindow.ui" line="7904"/>
+        <location filename="MainWindow.ui" line="8052"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
@@ -1965,49 +1976,49 @@
         <translation type="vanished">重命名标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8050"/>
+        <location filename="MainWindow.ui" line="8135"/>
         <location filename="MainWindow_Menu.cpp" line="104"/>
         <location filename="MainWindow_Menu.cpp" line="317"/>
         <source>Add Tab</source>
         <translation>增加标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8055"/>
+        <location filename="MainWindow.ui" line="8140"/>
         <location filename="MainWindow_Menu.cpp" line="121"/>
         <location filename="MainWindow_Menu.cpp" line="318"/>
         <source>Del Tab</source>
         <translation>删除标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8065"/>
+        <location filename="MainWindow.ui" line="8150"/>
         <location filename="MainWindow_Menu.cpp" line="333"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8070"/>
+        <location filename="MainWindow.ui" line="8155"/>
         <location filename="MainWindow_Menu.cpp" line="326"/>
         <source>Export Data</source>
         <translation>导出数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8075"/>
+        <location filename="MainWindow.ui" line="8160"/>
         <location filename="MainWindow_Menu.cpp" line="327"/>
         <source>Import Data</source>
         <translation>导入数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8080"/>
+        <location filename="MainWindow.ui" line="8165"/>
         <source>View App Data</source>
         <translation>查看App数据</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8100"/>
+        <location filename="MainWindow.ui" line="8185"/>
         <source>Memos</source>
         <translation>备忘录</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="8090"/>
+        <location filename="MainWindow.ui" line="8175"/>
         <location filename="MainWindow_Menu.cpp" line="323"/>
         <source>Report</source>
         <translation>报表</translation>
@@ -2025,16 +2036,16 @@
         <translation type="vanished">描述</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6394"/>
-        <location filename="MainWindow.ui" line="6617"/>
+        <location filename="MainWindow.ui" line="6450"/>
+        <location filename="MainWindow.ui" line="6673"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5357"/>
-        <location filename="MainWindow.ui" line="6432"/>
-        <location filename="MainWindow.ui" line="6661"/>
-        <location filename="MainWindow.ui" line="7422"/>
+        <location filename="MainWindow.ui" line="5413"/>
+        <location filename="MainWindow.ui" line="6488"/>
+        <location filename="MainWindow.ui" line="6717"/>
+        <location filename="MainWindow.ui" line="7507"/>
         <source>Ok</source>
         <translation>确定</translation>
     </message>
@@ -2047,10 +2058,10 @@
         <translation type="vanished">天数</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3698"/>
-        <location filename="MainWindow.ui" line="5198"/>
-        <location filename="MainWindow.ui" line="5456"/>
-        <location filename="MainWindow.ui" line="7660"/>
+        <location filename="MainWindow.ui" line="3754"/>
+        <location filename="MainWindow.ui" line="5254"/>
+        <location filename="MainWindow.ui" line="5512"/>
+        <location filename="MainWindow.ui" line="7745"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
@@ -2060,8 +2071,8 @@
         <translation type="vanished">最后的一条记录将被删除或移动</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4871"/>
-        <location filename="MainWindow.cpp" line="1127"/>
+        <location filename="MainWindow.ui" line="4927"/>
+        <location filename="MainWindow.cpp" line="1160"/>
         <location filename="MainWindow_Init.cpp" line="188"/>
         <source>Total</source>
         <translation>总计</translation>
@@ -2083,12 +2094,12 @@
         <translation type="vanished">今天</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="971"/>
+        <location filename="MainWindow_Init.cpp" line="973"/>
         <source>Slide Right to Start or Stop</source>
         <translation>滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="1008"/>
+        <location filename="MainWindow_Init.cpp" line="1010"/>
         <source>Freq</source>
         <translation>频次</translation>
     </message>
@@ -2106,8 +2117,8 @@
         <translation>是否删除</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="712"/>
-        <location filename="MainWindow_Init.cpp" line="1007"/>
+        <location filename="MainWindow.cpp" line="719"/>
+        <location filename="MainWindow_Init.cpp" line="1009"/>
         <source>Date</source>
         <translation>日期</translation>
     </message>
@@ -2116,14 +2127,14 @@
         <translation type="vanished">频次</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3774"/>
-        <location filename="MainWindow.ui" line="3799"/>
+        <location filename="MainWindow.ui" line="3830"/>
+        <location filename="MainWindow.ui" line="3855"/>
         <source>Steps</source>
         <translation>步数</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="3220"/>
-        <location filename="MainWindow.cpp" line="844"/>
+        <location filename="MainWindow.ui" line="3276"/>
+        <location filename="MainWindow.cpp" line="851"/>
         <source>Modify</source>
         <translation>修改</translation>
     </message>
@@ -2152,9 +2163,9 @@
         <translation type="vanished">暂停</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="4408"/>
-        <location filename="MainWindow_Btn.cpp" line="293"/>
-        <location filename="MainWindow_Btn.cpp" line="298"/>
+        <location filename="MainWindow.ui" line="4464"/>
+        <location filename="MainWindow_Btn.cpp" line="290"/>
+        <location filename="MainWindow_Btn.cpp" line="295"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
@@ -2166,14 +2177,14 @@
         <translation>标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="6642"/>
-        <location filename="MainWindow.ui" line="6690"/>
-        <location filename="MainWindow.cpp" line="408"/>
+        <location filename="MainWindow.ui" line="6698"/>
+        <location filename="MainWindow.ui" line="6746"/>
+        <location filename="MainWindow.cpp" line="415"/>
         <source>Category</source>
         <translation>分类</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="421"/>
+        <location filename="MainWindow.cpp" line="428"/>
         <source>Del Item</source>
         <translation>删除条目</translation>
     </message>
@@ -2215,7 +2226,7 @@
         <translation type="vanished">请开启APP的存储权限！</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="335"/>
+        <location filename="MyThread.cpp" line="337"/>
         <source>The data was exported successfully.</source>
         <translation>数据导出成功。</translation>
     </message>
@@ -2259,22 +2270,22 @@
         <translation type="vanished">最后一条记录将被删除</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="414"/>
+        <location filename="MainWindow.cpp" line="421"/>
         <source>The last record of today will be moved.</source>
         <translation>今天的最后一条记录将被移动</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="416"/>
+        <location filename="MainWindow.cpp" line="423"/>
         <source>The last record of today will be deleted.</source>
         <translation>今天的最后一条记录将被删除</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="391"/>
+        <location filename="MainWindow.cpp" line="398"/>
         <source>Only the current day&apos;s records can be moved.</source>
         <translation>只能移动当天的记录</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="393"/>
+        <location filename="MainWindow.cpp" line="400"/>
         <source>Only the current day&apos;s records can be deleted.</source>
         <translation>只能删除当天的记录</translation>
     </message>
@@ -2404,12 +2415,12 @@
         <translation>今天的日志被复制到了剪贴板，您可以在任何地方粘贴它。</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="830"/>
+        <location filename="MainWindow.cpp" line="837"/>
         <source>Only the data of the current year can be modified.</source>
         <translation>只允许修改当前年的数据。</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="1003"/>
+        <location filename="MainWindow.cpp" line="1036"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
@@ -2434,31 +2445,31 @@
         <translation>是否导入这个数据？</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="596"/>
-        <location filename="MainWindow_Btn.cpp" line="649"/>
-        <location filename="MainWindow_Btn.cpp" line="686"/>
+        <location filename="MainWindow_Btn.cpp" line="608"/>
+        <location filename="MainWindow_Btn.cpp" line="661"/>
+        <location filename="MainWindow_Btn.cpp" line="698"/>
         <source>Tip</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="596"/>
-        <location filename="MainWindow_Btn.cpp" line="649"/>
-        <location filename="MainWindow_Btn.cpp" line="686"/>
+        <location filename="MainWindow_Btn.cpp" line="608"/>
+        <location filename="MainWindow_Btn.cpp" line="661"/>
+        <location filename="MainWindow_Btn.cpp" line="698"/>
         <source>No consumption record data available</source>
         <translation>暂无消费记录数据</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="1037"/>
+        <location filename="MainWindow_Btn.cpp" line="1060"/>
         <source>Total Reading: </source>
         <translation>总阅读时间：</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="1089"/>
+        <location filename="MainWindow_Btn.cpp" line="1112"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="1093"/>
+        <location filename="MainWindow_Btn.cpp" line="1116"/>
         <source>WebDav connection successful.</source>
         <translation>WebDav连接成功</translation>
     </message>
@@ -2506,8 +2517,8 @@
         <translation type="vanished">请开启录音权限！</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="695"/>
-        <location filename="MainWindow_Btn.cpp" line="1052"/>
+        <location filename="MainWindow.ui" line="689"/>
+        <location filename="MainWindow_Btn.cpp" line="1075"/>
         <source>Reading Progress</source>
         <translation>阅读进度</translation>
     </message>
@@ -2516,9 +2527,9 @@
         <translation type="vanished">当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="165"/>
-        <location filename="MainWindow_Btn.cpp" line="995"/>
-        <location filename="MainWindow_Btn.cpp" line="1006"/>
+        <location filename="MainWindow_Btn.cpp" line="162"/>
+        <location filename="MainWindow_Btn.cpp" line="1018"/>
+        <location filename="MainWindow_Btn.cpp" line="1029"/>
         <location filename="MainWindow_Menu.cpp" line="312"/>
         <source>Share to</source>
         <translation>分享到</translation>
@@ -2528,13 +2539,13 @@
         <translation type="vanished">隐藏查找</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5120"/>
+        <location filename="MainWindow.ui" line="5176"/>
         <location filename="MainWindow_Menu.cpp" line="336"/>
         <source>Backup File List</source>
         <translation>备份文件列表</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5403"/>
+        <location filename="MainWindow.ui" line="5459"/>
         <location filename="MainWindow_Menu.cpp" line="337"/>
         <source>Tab Recycle</source>
         <translation>标签页回收箱</translation>
@@ -2544,7 +2555,7 @@
         <translation type="vanished">恢复标签页</translation>
     </message>
     <message>
-        <location filename="MainWindow.ui" line="5217"/>
+        <location filename="MainWindow.ui" line="5273"/>
         <source>Import</source>
         <translation>导入</translation>
     </message>
@@ -2699,32 +2710,32 @@
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="709"/>
+        <location filename="Comm/Method.cpp" line="754"/>
         <source>Results</source>
         <translation>结果</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="732"/>
+        <location filename="Comm/Method.cpp" line="777"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="735"/>
+        <location filename="Comm/Method.cpp" line="780"/>
         <source>Category</source>
         <translation>分类</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="738"/>
+        <location filename="Comm/Method.cpp" line="783"/>
         <source>Details</source>
         <translation>详细</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="920"/>
+        <location filename="Comm/Method.cpp" line="965"/>
         <source>Processing...</source>
         <translation>处理中...</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="3531"/>
+        <location filename="Comm/Method.cpp" line="3576"/>
         <source>Please check the attachment.</source>
         <translation>请查收附件</translation>
     </message>
@@ -2738,12 +2749,12 @@
     </message>
     <message>
         <location filename="Comm/Method.cpp" line="197"/>
-        <location filename="Comm/Method.cpp" line="1011"/>
+        <location filename="Comm/Method.cpp" line="1056"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="Comm/Method.cpp" line="1012"/>
+        <location filename="Comm/Method.cpp" line="1057"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
@@ -3238,6 +3249,7 @@
     </message>
     <message>
         <location filename="Notes/Notes_UI.cpp" line="134"/>
+        <location filename="Notes/Notes_UI.cpp" line="134"/>
         <source>Page size</source>
         <translation>页面尺寸</translation>
     </message>
@@ -3256,6 +3268,7 @@
         <translation>横向</translation>
     </message>
     <message>
+        <location filename="Notes/Notes_UI.cpp" line="165"/>
         <location filename="Notes/Notes_UI.cpp" line="165"/>
         <source>Orientation</source>
         <translation>方向</translation>
@@ -3780,48 +3793,48 @@
         <translation>输入1-50</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="197"/>
+        <location filename="Preferences.cpp" line="199"/>
         <source>ExtraSmall</source>
         <translation>极小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="197"/>
+        <location filename="Preferences.cpp" line="199"/>
         <source>Small</source>
         <translation>小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="197"/>
+        <location filename="Preferences.cpp" line="199"/>
         <source>Default</source>
         <translation>正常（默认）</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="198"/>
+        <location filename="Preferences.cpp" line="200"/>
         <source>Large</source>
         <translation>大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="198"/>
+        <location filename="Preferences.cpp" line="200"/>
         <source>XLarge</source>
         <translation>超大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="198"/>
+        <location filename="Preferences.cpp" line="200"/>
         <source>XXLarge</source>
         <translation>特大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="199"/>
+        <location filename="Preferences.cpp" line="201"/>
         <source>XXXLarge</source>
         <translation>最大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="209"/>
+        <location filename="Preferences.cpp" line="211"/>
         <source>Font</source>
         <translation>字体</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="850"/>
-        <location filename="Preferences.cpp" line="876"/>
+        <location filename="Preferences.cpp" line="862"/>
+        <location filename="Preferences.cpp" line="888"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
@@ -3926,18 +3939,18 @@ Model ID: %1</source>
         <translation type="vanished">连接测试通过！模型 ID：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="851"/>
-        <location filename="Preferences.cpp" line="877"/>
+        <location filename="Preferences.cpp" line="863"/>
+        <location filename="Preferences.cpp" line="889"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation>接入地址 / API 密钥 / 模型 ID 不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="920"/>
+        <location filename="Preferences.cpp" line="932"/>
         <source>Save Failed</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="920"/>
+        <location filename="Preferences.cpp" line="932"/>
         <source>Cannot open config file to write</source>
         <translation>无法打开配置文件写入数据</translation>
     </message>
@@ -3948,7 +3961,7 @@ Model ID: %1</source>
     <message>
         <location filename="Preferences.ui" line="85"/>
         <location filename="Preferences.cpp" line="33"/>
-        <location filename="Preferences.cpp" line="204"/>
+        <location filename="Preferences.cpp" line="206"/>
         <source>Font Size</source>
         <translation>字体大小</translation>
     </message>
@@ -3958,8 +3971,8 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="144"/>
-        <location filename="Preferences.cpp" line="271"/>
-        <location filename="Preferences.cpp" line="277"/>
+        <location filename="Preferences.cpp" line="273"/>
+        <location filename="Preferences.cpp" line="279"/>
         <source>Custom Font</source>
         <translation>自选字体</translation>
     </message>
@@ -4017,7 +4030,7 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="440"/>
-        <location filename="Preferences.cpp" line="635"/>
+        <location filename="Preferences.cpp" line="647"/>
         <source>Select Model</source>
         <translation>选择模型</translation>
     </message>
@@ -4147,7 +4160,7 @@ Model ID: %1</source>
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="210"/>
+        <location filename="Preferences.cpp" line="212"/>
         <source>Font Files (*.*)</source>
         <translation>字体文件 (*.*)</translation>
     </message>
@@ -4156,7 +4169,7 @@ Model ID: %1</source>
         <translation type="vanished">自动备份</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="520"/>
+        <location filename="Preferences.cpp" line="526"/>
         <source>Password validation error.</source>
         <translation>密码验证错误</translation>
     </message>
@@ -4195,55 +4208,55 @@ Model ID: %1</source>
     <name>QInstaller</name>
     <message>
         <location filename="AutoUpdate.cpp" line="248"/>
-        <location filename="Comm/Method.cpp" line="2676"/>
+        <location filename="Comm/Method.cpp" line="2721"/>
         <source>bytes</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="249"/>
-        <location filename="Comm/Method.cpp" line="2677"/>
+        <location filename="Comm/Method.cpp" line="2722"/>
         <source>KiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="250"/>
-        <location filename="Comm/Method.cpp" line="2678"/>
+        <location filename="Comm/Method.cpp" line="2723"/>
         <source>MiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="251"/>
-        <location filename="Comm/Method.cpp" line="2679"/>
+        <location filename="Comm/Method.cpp" line="2724"/>
         <source>GiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="252"/>
-        <location filename="Comm/Method.cpp" line="2680"/>
+        <location filename="Comm/Method.cpp" line="2725"/>
         <source>TiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="253"/>
-        <location filename="Comm/Method.cpp" line="2681"/>
+        <location filename="Comm/Method.cpp" line="2726"/>
         <source>PiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="254"/>
-        <location filename="Comm/Method.cpp" line="2682"/>
+        <location filename="Comm/Method.cpp" line="2727"/>
         <source>EiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="255"/>
-        <location filename="Comm/Method.cpp" line="2683"/>
+        <location filename="Comm/Method.cpp" line="2728"/>
         <source>ZiB</source>
         <translation></translation>
     </message>
     <message>
         <location filename="AutoUpdate.cpp" line="256"/>
-        <location filename="Comm/Method.cpp" line="2684"/>
+        <location filename="Comm/Method.cpp" line="2729"/>
         <source>YiB</source>
         <translation></translation>
     </message>
@@ -4316,12 +4329,12 @@ Model ID: %1</source>
         <translation type="vanished">加载中，请稍候...</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="27"/>
+        <location filename="MainHelper.cpp" line="55"/>
         <source>Add</source>
         <translation>增加</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="141"/>
+        <location filename="main.cpp" line="142"/>
         <source>The application is already running!</source>
         <translation>应用程序已在运行中！</translation>
     </message>
@@ -4336,17 +4349,17 @@ Model ID: %1</source>
         <translation>输入备注</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="96"/>
+        <location filename="EditRecord.cpp" line="109"/>
         <source>Modify Item</source>
         <translation>修改条目</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="104"/>
+        <location filename="EditRecord.cpp" line="117"/>
         <source>Add Item</source>
         <translation>增加条目</translation>
     </message>
     <message>
-        <location filename="EditRecord.cpp" line="189"/>
+        <location filename="EditRecord.cpp" line="209"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
@@ -4369,4223 +4382,230 @@ Model ID: %1</source>
 <context>
     <name>QsciCommand</name>
     <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="59"/>
-        <source>Move down one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="69"/>
-        <source>Extend selection down one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="79"/>
-        <source>Extend rectangular selection down one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="86"/>
-        <source>Scroll view down one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="96"/>
-        <source>Move up one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="106"/>
-        <source>Extend selection up one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="116"/>
-        <source>Extend rectangular selection up one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="123"/>
-        <source>Scroll view up one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="133"/>
-        <source>Scroll to start of document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="143"/>
-        <source>Scroll to end of document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="153"/>
-        <source>Scroll vertically to centre current line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="160"/>
-        <source>Move down one paragraph</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="166"/>
-        <source>Extend selection down one paragraph</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="173"/>
-        <source>Move up one paragraph</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="179"/>
-        <source>Extend selection up one paragraph</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="190"/>
-        <source>Move left one character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="200"/>
-        <source>Extend selection left one character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="211"/>
-        <source>Extend rectangular selection left one character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="222"/>
-        <source>Move right one character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="232"/>
-        <source>Extend selection right one character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="243"/>
-        <source>Extend rectangular selection right one character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="254"/>
-        <source>Move left one word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="264"/>
-        <source>Extend selection left one word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="274"/>
-        <source>Move right one word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="280"/>
-        <source>Extend selection right one word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="286"/>
-        <source>Move to end of previous word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="292"/>
-        <source>Extend selection to end of previous word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="303"/>
-        <source>Move to end of next word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="313"/>
-        <source>Extend selection to end of next word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="320"/>
-        <source>Move left one word part</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="326"/>
-        <source>Extend selection left one word part</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="333"/>
-        <source>Move right one word part</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="339"/>
-        <source>Extend selection right one word part</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="350"/>
-        <source>Move to start of document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="360"/>
-        <source>Extend selection to start of document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="371"/>
-        <source>Extend rectangular selection to start of document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="382"/>
-        <source>Move to start of display line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="392"/>
-        <source>Extend selection to start of display line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="399"/>
-        <source>Move to start of display or document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="406"/>
-        <source>Extend selection to start of display or document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="417"/>
-        <source>Move to first visible character in document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="428"/>
-        <source>Extend selection to first visible character in document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="439"/>
-        <source>Extend rectangular selection to first visible character in document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="446"/>
-        <source>Move to first visible character of display in document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="453"/>
-        <source>Extend selection to first visible character in display or document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="464"/>
-        <source>Move to end of document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="474"/>
-        <source>Extend selection to end of document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="485"/>
-        <source>Extend rectangular selection to end of document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="496"/>
-        <source>Move to end of display line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="506"/>
-        <source>Extend selection to end of display line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="513"/>
-        <source>Move to end of display or document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="520"/>
-        <source>Extend selection to end of display or document line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="531"/>
-        <source>Move to start of document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="541"/>
-        <source>Extend selection to start of document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="552"/>
-        <source>Move to end of document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="562"/>
-        <source>Extend selection to end of document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="569"/>
-        <source>Move up one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="575"/>
-        <source>Extend selection up one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="581"/>
-        <source>Extend rectangular selection up one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="592"/>
-        <source>Move down one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="602"/>
-        <source>Extend selection down one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="612"/>
-        <source>Extend rectangular selection down one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="619"/>
-        <source>Stuttered move up one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="625"/>
-        <source>Stuttered extend selection up one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="632"/>
-        <source>Stuttered move down one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="638"/>
-        <source>Stuttered extend selection down one page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="649"/>
-        <source>Delete current character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="659"/>
-        <source>Delete previous character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="665"/>
-        <source>Delete previous character if not at start of line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="672"/>
-        <source>Delete word to left</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="678"/>
-        <source>Delete word to right</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="688"/>
-        <source>Delete right to end of next word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="695"/>
-        <source>Delete line to left</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="705"/>
-        <source>Delete line to right</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="711"/>
-        <source>Delete current line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="717"/>
-        <source>Cut current line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="723"/>
-        <source>Copy current line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="729"/>
-        <source>Transpose current and previous lines</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="736"/>
-        <source>Duplicate the current line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="742"/>
-        <source>Select all</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="748"/>
-        <source>Move selected lines up one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="754"/>
-        <source>Move selected lines down one line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="761"/>
-        <source>Duplicate selection</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="767"/>
-        <source>Convert selection to lower case</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="773"/>
-        <source>Convert selection to upper case</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="779"/>
-        <source>Cut selection</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="785"/>
-        <source>Copy selection</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="791"/>
         <source>Paste</source>
-        <translation type="unfinished">粘贴</translation>
+        <translation type="obsolete">粘贴</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="797"/>
-        <source>Toggle insert/overtype</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="803"/>
-        <source>Insert newline</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="809"/>
-        <source>Formfeed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="815"/>
-        <source>Indent one level</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="821"/>
-        <source>De-indent one level</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="827"/>
         <source>Cancel</source>
-        <translation type="unfinished">取消</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="833"/>
-        <source>Undo last command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="843"/>
-        <source>Redo last command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="849"/>
-        <source>Zoom in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscicommandset.cpp" line="855"/>
-        <source>Zoom out</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">取消</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerAVS</name>
     <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="290"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="293"/>
-        <source>Block comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="296"/>
-        <source>Nested block comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="299"/>
-        <source>Line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="302"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="305"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="308"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="311"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="314"/>
-        <source>Triple double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="317"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="320"/>
-        <source>Filter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="323"/>
-        <source>Plugin</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="326"/>
-        <source>Function</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="329"/>
-        <source>Clip property</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeravs.cpp" line="332"/>
-        <source>User defined</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerAsm</name>
     <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="396"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="399"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="402"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="405"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="408"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="411"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="414"/>
-        <source>CPU instruction</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="417"/>
-        <source>FPU instruction</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="420"/>
-        <source>Register</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="423"/>
-        <source>Directive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="426"/>
-        <source>Directive operand</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="429"/>
-        <source>Block comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="432"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="435"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="438"/>
-        <source>Extended instruction</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerasm.cpp" line="441"/>
-        <source>Comment directive</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerBash</name>
     <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="203"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="206"/>
         <source>Error</source>
-        <translation type="unfinished">错误</translation>
+        <translation type="obsolete">错误</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="209"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="212"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="215"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="218"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="221"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="224"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="227"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="230"/>
-        <source>Scalar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="233"/>
-        <source>Parameter expansion</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="236"/>
-        <source>Backticks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="239"/>
-        <source>Here document delimiter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbash.cpp" line="242"/>
-        <source>Single-quoted here document</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerBatch</name>
-    <message>
-        <location filename="../lib/qsci/qscilexerbatch.cpp" line="174"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbatch.cpp" line="177"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbatch.cpp" line="180"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbatch.cpp" line="183"/>
-        <source>Label</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbatch.cpp" line="186"/>
-        <source>Hide command character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbatch.cpp" line="189"/>
-        <source>External command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbatch.cpp" line="192"/>
-        <source>Variable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerbatch.cpp" line="195"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerCMake</name>
     <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="190"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="193"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="196"/>
-        <source>String</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="199"/>
-        <source>Left quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="202"/>
-        <source>Right quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="205"/>
-        <source>Function</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="208"/>
-        <source>Variable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="211"/>
-        <source>Label</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="214"/>
-        <source>User defined</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="217"/>
-        <source>WHILE block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="220"/>
-        <source>FOREACH block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="223"/>
-        <source>IF block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="226"/>
-        <source>MACRO block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="229"/>
-        <source>Variable within a string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercmake.cpp" line="232"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerCPP</name>
     <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="364"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="367"/>
-        <source>Inactive default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="370"/>
-        <source>C comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="373"/>
-        <source>Inactive C comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="376"/>
-        <source>C++ comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="379"/>
-        <source>Inactive C++ comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="382"/>
-        <source>JavaDoc style C comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="385"/>
-        <source>Inactive JavaDoc style C comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="388"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="391"/>
-        <source>Inactive number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="394"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="397"/>
-        <source>Inactive keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="400"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="403"/>
-        <source>Inactive double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="406"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="409"/>
-        <source>Inactive single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="412"/>
-        <source>IDL UUID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="415"/>
-        <source>Inactive IDL UUID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="418"/>
-        <source>Pre-processor block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="421"/>
-        <source>Inactive pre-processor block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="424"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="427"/>
-        <source>Inactive operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="430"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="433"/>
-        <source>Inactive identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="436"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="439"/>
-        <source>Inactive unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="442"/>
-        <source>C# verbatim string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="445"/>
-        <source>Inactive C# verbatim string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="448"/>
-        <source>JavaScript regular expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="451"/>
-        <source>Inactive JavaScript regular expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="454"/>
-        <source>JavaDoc style C++ comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="457"/>
-        <source>Inactive JavaDoc style C++ comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="460"/>
-        <source>Secondary keywords and identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="463"/>
-        <source>Inactive secondary keywords and identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="466"/>
-        <source>JavaDoc keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="469"/>
-        <source>Inactive JavaDoc keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="472"/>
-        <source>JavaDoc keyword error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="475"/>
-        <source>Inactive JavaDoc keyword error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="478"/>
-        <source>Global classes and typedefs</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="481"/>
-        <source>Inactive global classes and typedefs</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="484"/>
-        <source>C++ raw string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="487"/>
-        <source>Inactive C++ raw string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="490"/>
-        <source>Vala triple-quoted verbatim string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="493"/>
-        <source>Inactive Vala triple-quoted verbatim string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="496"/>
-        <source>Pike hash-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="499"/>
-        <source>Inactive Pike hash-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="502"/>
-        <source>Pre-processor C comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="505"/>
-        <source>Inactive pre-processor C comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="508"/>
-        <source>JavaDoc style pre-processor comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="511"/>
-        <source>Inactive JavaDoc style pre-processor comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="514"/>
-        <source>User-defined literal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="517"/>
-        <source>Inactive user-defined literal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="520"/>
-        <source>Task marker</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="523"/>
-        <source>Inactive task marker</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="526"/>
-        <source>Escape sequence</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercpp.cpp" line="529"/>
-        <source>Inactive escape sequence</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerCSS</name>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="232"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="235"/>
-        <source>Tag</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="238"/>
-        <source>Class selector</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="241"/>
-        <source>Pseudo-class</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="244"/>
-        <source>Unknown pseudo-class</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="247"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="250"/>
-        <source>CSS1 property</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="253"/>
-        <source>Unknown property</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="256"/>
-        <source>Value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="259"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="262"/>
-        <source>ID selector</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="265"/>
-        <source>Important</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="268"/>
-        <source>@-rule</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="271"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="274"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="277"/>
-        <source>CSS2 property</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="280"/>
-        <source>Attribute</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="283"/>
-        <source>CSS3 property</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="286"/>
-        <source>Pseudo-element</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="289"/>
-        <source>Extended CSS property</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="292"/>
-        <source>Extended pseudo-class</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="295"/>
-        <source>Extended pseudo-element</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="298"/>
-        <source>Media rule</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercss.cpp" line="301"/>
-        <source>Variable</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerCSharp</name>
-    <message>
-        <location filename="../lib/qsci/qscilexercsharp.cpp" line="105"/>
-        <source>Verbatim string</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerCoffeeScript</name>
     <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="258"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="261"/>
-        <source>C-style comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="264"/>
-        <source>C++-style comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="267"/>
-        <source>JavaDoc C-style comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="270"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="273"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="276"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="279"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="282"/>
-        <source>IDL UUID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="285"/>
-        <source>Pre-processor block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="288"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="291"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="294"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="297"/>
-        <source>C# verbatim string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="300"/>
-        <source>Regular expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="303"/>
-        <source>JavaDoc C++-style comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="306"/>
-        <source>Secondary keywords and identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="309"/>
-        <source>JavaDoc keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="312"/>
-        <source>JavaDoc keyword error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="315"/>
-        <source>Global classes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="318"/>
-        <source>Block comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="321"/>
-        <source>Block regular expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="324"/>
-        <source>Block regular expression comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexercoffeescript.cpp" line="327"/>
-        <source>Instance property</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerD</name>
     <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="266"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="269"/>
-        <source>Block comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="272"/>
-        <source>Line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="275"/>
-        <source>DDoc style block comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="278"/>
-        <source>Nesting comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="281"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="284"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="287"/>
-        <source>Secondary keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="290"/>
-        <source>Documentation keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="293"/>
-        <source>Type definition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="296"/>
-        <source>String</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="299"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="302"/>
-        <source>Character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="305"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="308"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="311"/>
-        <source>DDoc style line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="314"/>
-        <source>DDoc keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="317"/>
-        <source>DDoc keyword error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="320"/>
-        <source>Backquoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="323"/>
-        <source>Raw string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="326"/>
-        <source>User defined 1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="329"/>
-        <source>User defined 2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerd.cpp" line="332"/>
-        <source>User defined 3</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerDiff</name>
     <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="106"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="109"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="112"/>
-        <source>Command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="115"/>
-        <source>Header</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="118"/>
         <source>Position</source>
-        <translation type="unfinished">位置</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="121"/>
-        <source>Removed line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="124"/>
-        <source>Added line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="127"/>
-        <source>Changed line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="130"/>
-        <source>Added adding patch</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="133"/>
-        <source>Removed adding patch</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="136"/>
-        <source>Added removing patch</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerdiff.cpp" line="139"/>
-        <source>Removed removing patch</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerEDIFACT</name>
-    <message>
-        <location filename="../lib/qsci/qscilexeredifact.cpp" line="94"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeredifact.cpp" line="97"/>
-        <source>Segment start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeredifact.cpp" line="100"/>
-        <source>Segment end</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeredifact.cpp" line="103"/>
-        <source>Element separator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeredifact.cpp" line="106"/>
-        <source>Composite separator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeredifact.cpp" line="109"/>
-        <source>Release separator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeredifact.cpp" line="112"/>
-        <source>UNA segment header</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeredifact.cpp" line="115"/>
-        <source>UNH segment header</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeredifact.cpp" line="118"/>
-        <source>Badly formed segment</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">位置</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerFortran77</name>
     <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="185"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="188"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="191"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="194"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="197"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="200"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="203"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="206"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="209"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="212"/>
-        <source>Intrinsic function</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="215"/>
-        <source>Extended function</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="218"/>
-        <source>Pre-processor block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="221"/>
-        <source>Dotted operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="224"/>
-        <source>Label</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerfortran77.cpp" line="227"/>
-        <source>Continuation</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerHTML</name>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="563"/>
-        <source>HTML default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="566"/>
-        <source>Tag</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="569"/>
-        <source>Unknown tag</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="572"/>
-        <source>Attribute</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="575"/>
-        <source>Unknown attribute</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="578"/>
-        <source>HTML number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="581"/>
-        <source>HTML double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="584"/>
-        <source>HTML single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="587"/>
-        <source>Other text in a tag</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="590"/>
-        <source>HTML comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="593"/>
-        <source>Entity</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="596"/>
-        <source>End of a tag</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="599"/>
-        <source>Start of an XML fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="602"/>
-        <source>End of an XML fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="605"/>
-        <source>Script tag</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="608"/>
-        <source>Start of an ASP fragment with @</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="611"/>
-        <source>Start of an ASP fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="614"/>
-        <source>CDATA</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="617"/>
-        <source>Start of a PHP fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="620"/>
-        <source>Unquoted HTML value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="623"/>
-        <source>ASP X-Code comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="626"/>
-        <source>SGML default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="629"/>
-        <source>SGML command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="632"/>
-        <source>First parameter of an SGML command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="635"/>
-        <source>SGML double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="638"/>
-        <source>SGML single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="641"/>
-        <source>SGML error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="644"/>
-        <source>SGML special entity</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="647"/>
-        <source>SGML comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="650"/>
-        <source>First parameter comment of an SGML command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="653"/>
-        <source>SGML block default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="656"/>
-        <source>Start of a JavaScript fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="659"/>
-        <source>JavaScript default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="662"/>
-        <source>JavaScript comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="665"/>
-        <source>JavaScript line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="668"/>
-        <source>JavaDoc style JavaScript comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="671"/>
-        <source>JavaScript number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="674"/>
-        <source>JavaScript word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="677"/>
-        <source>JavaScript keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="680"/>
-        <source>JavaScript double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="683"/>
-        <source>JavaScript single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="686"/>
-        <source>JavaScript symbol</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="689"/>
-        <source>JavaScript unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="692"/>
-        <source>JavaScript regular expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="695"/>
-        <source>Start of an ASP JavaScript fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="698"/>
-        <source>ASP JavaScript default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="701"/>
-        <source>ASP JavaScript comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="704"/>
-        <source>ASP JavaScript line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="707"/>
-        <source>JavaDoc style ASP JavaScript comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="710"/>
-        <source>ASP JavaScript number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="713"/>
-        <source>ASP JavaScript word</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="716"/>
-        <source>ASP JavaScript keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="719"/>
-        <source>ASP JavaScript double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="722"/>
-        <source>ASP JavaScript single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="725"/>
-        <source>ASP JavaScript symbol</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="728"/>
-        <source>ASP JavaScript unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="731"/>
-        <source>ASP JavaScript regular expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="734"/>
-        <source>Start of a VBScript fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="737"/>
-        <source>VBScript default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="740"/>
-        <source>VBScript comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="743"/>
-        <source>VBScript number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="746"/>
-        <source>VBScript keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="749"/>
-        <source>VBScript string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="752"/>
-        <source>VBScript identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="755"/>
-        <source>VBScript unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="758"/>
-        <source>Start of an ASP VBScript fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="761"/>
-        <source>ASP VBScript default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="764"/>
-        <source>ASP VBScript comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="767"/>
-        <source>ASP VBScript number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="770"/>
-        <source>ASP VBScript keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="773"/>
-        <source>ASP VBScript string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="776"/>
-        <source>ASP VBScript identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="779"/>
-        <source>ASP VBScript unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="782"/>
-        <source>Start of a Python fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="785"/>
-        <source>Python default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="788"/>
-        <source>Python comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="791"/>
-        <source>Python number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="794"/>
-        <source>Python double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="797"/>
-        <source>Python single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="800"/>
-        <source>Python keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="803"/>
-        <source>Python triple double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="806"/>
-        <source>Python triple single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="809"/>
-        <source>Python class name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="812"/>
-        <source>Python function or method name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="815"/>
-        <source>Python operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="818"/>
-        <source>Python identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="821"/>
-        <source>Start of an ASP Python fragment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="824"/>
-        <source>ASP Python default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="827"/>
-        <source>ASP Python comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="830"/>
-        <source>ASP Python number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="833"/>
-        <source>ASP Python double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="836"/>
-        <source>ASP Python single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="839"/>
-        <source>ASP Python keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="842"/>
-        <source>ASP Python triple double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="845"/>
-        <source>ASP Python triple single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="848"/>
-        <source>ASP Python class name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="851"/>
-        <source>ASP Python function or method name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="854"/>
-        <source>ASP Python operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="857"/>
-        <source>ASP Python identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="860"/>
-        <source>PHP default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="863"/>
-        <source>PHP double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="866"/>
-        <source>PHP single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="869"/>
-        <source>PHP keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="872"/>
-        <source>PHP number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="875"/>
-        <source>PHP variable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="878"/>
-        <source>PHP comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="881"/>
-        <source>PHP line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="884"/>
-        <source>PHP double-quoted variable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhtml.cpp" line="887"/>
-        <source>PHP operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerHex</name>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="104"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="107"/>
-        <source>Record start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="110"/>
-        <source>Record type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="113"/>
-        <source>Unknown record type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="116"/>
-        <source>Byte count</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="119"/>
-        <source>Incorrect byte count</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="122"/>
-        <source>No address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="125"/>
-        <source>Data address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="128"/>
-        <source>Record count</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="131"/>
-        <source>Start address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="134"/>
-        <source>Extended address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="137"/>
-        <source>Odd data</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="140"/>
-        <source>Even data</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="143"/>
-        <source>Unknown data</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="146"/>
-        <source>Checksum</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="149"/>
-        <source>Incorrect checksum</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerhex.cpp" line="152"/>
-        <source>Trailing garbage after a record</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerIDL</name>
-    <message>
-        <location filename="../lib/qsci/qscilexeridl.cpp" line="97"/>
-        <source>UUID</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerJSON</name>
     <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="160"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="163"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="166"/>
-        <source>String</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="169"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="172"/>
-        <source>Property</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="175"/>
-        <source>Escape sequence</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="178"/>
-        <source>Line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="181"/>
-        <source>Block comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="184"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="187"/>
-        <source>IRI</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="190"/>
-        <source>JSON-LD compact IRI</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="193"/>
-        <source>JSON keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="196"/>
-        <source>JSON-LD keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerjson.cpp" line="199"/>
-        <source>Parsing error</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerJavaScript</name>
-    <message>
-        <location filename="../lib/qsci/qscilexerjavascript.cpp" line="107"/>
-        <source>Regular expression</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerLua</name>
     <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="227"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="230"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="233"/>
-        <source>Line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="236"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="239"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="242"/>
-        <source>String</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="245"/>
-        <source>Character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="248"/>
-        <source>Literal string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="251"/>
-        <source>Preprocessor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="254"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="257"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="260"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="263"/>
-        <source>Basic functions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="266"/>
-        <source>String, table and maths functions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="269"/>
-        <source>Coroutines, i/o and system facilities</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="272"/>
-        <source>User defined 1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="275"/>
-        <source>User defined 2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="278"/>
-        <source>User defined 3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="281"/>
-        <source>User defined 4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerlua.cpp" line="284"/>
-        <source>Label</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerMakefile</name>
     <message>
-        <location filename="../lib/qsci/qscilexermakefile.cpp" line="126"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermakefile.cpp" line="129"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermakefile.cpp" line="132"/>
-        <source>Preprocessor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermakefile.cpp" line="135"/>
-        <source>Variable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermakefile.cpp" line="138"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermakefile.cpp" line="141"/>
-        <source>Target</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermakefile.cpp" line="144"/>
         <source>Error</source>
-        <translation type="unfinished">错误</translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerMarkdown</name>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="222"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="225"/>
-        <source>Special</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="228"/>
-        <source>Strong emphasis using double asterisks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="231"/>
-        <source>Strong emphasis using double underscores</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="234"/>
-        <source>Emphasis using single asterisks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="237"/>
-        <source>Emphasis using single underscores</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="240"/>
-        <source>Level 1 header</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="243"/>
-        <source>Level 2 header</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="246"/>
-        <source>Level 3 header</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="249"/>
-        <source>Level 4 header</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="252"/>
-        <source>Level 5 header</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="255"/>
-        <source>Level 6 header</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="258"/>
-        <source>Pre-char</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="261"/>
-        <source>Unordered list item</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="264"/>
-        <source>Ordered list item</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="267"/>
-        <source>Block quote</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="270"/>
-        <source>Strike out</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="273"/>
-        <source>Horizontal rule</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="276"/>
-        <source>Link</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="279"/>
-        <source>Code between backticks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="282"/>
-        <source>Code between double backticks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermarkdown.cpp" line="285"/>
-        <source>Code block</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">错误</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerMatlab</name>
     <message>
-        <location filename="../lib/qsci/qscilexermatlab.cpp" line="133"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermatlab.cpp" line="136"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermatlab.cpp" line="139"/>
-        <source>Command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermatlab.cpp" line="142"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermatlab.cpp" line="145"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermatlab.cpp" line="148"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermatlab.cpp" line="151"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermatlab.cpp" line="154"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexermatlab.cpp" line="157"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerPO</name>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="99"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="102"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="105"/>
-        <source>Message identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="108"/>
-        <source>Message identifier text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="111"/>
-        <source>Message string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="114"/>
-        <source>Message string text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="117"/>
-        <source>Message context</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="120"/>
-        <source>Message context text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="123"/>
-        <source>Fuzzy flag</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="126"/>
-        <source>Programmer comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="129"/>
-        <source>Reference</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="132"/>
-        <source>Flags</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="135"/>
-        <source>Message identifier text end-of-line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="138"/>
-        <source>Message string text end-of-line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpo.cpp" line="141"/>
-        <source>Message context text end-of-line</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerPOV</name>
     <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="277"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="280"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="283"/>
-        <source>Comment line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="286"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="289"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="292"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="295"/>
-        <source>String</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="298"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="301"/>
-        <source>Directive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="304"/>
-        <source>Bad directive</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="307"/>
-        <source>Objects, CSG and appearance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="310"/>
-        <source>Types, modifiers and items</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="313"/>
-        <source>Predefined identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="316"/>
-        <source>Predefined functions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="319"/>
-        <source>User defined 1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="322"/>
-        <source>User defined 2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpov.cpp" line="325"/>
-        <source>User defined 3</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerPascal</name>
     <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="256"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="259"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="262"/>
-        <source>&apos;{ ... }&apos; style comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="265"/>
-        <source>&apos;(* ... *)&apos; style comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="268"/>
-        <source>Line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="271"/>
-        <source>&apos;{$ ... }&apos; style pre-processor block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="274"/>
-        <source>&apos;(*$ ... *)&apos; style pre-processor block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="277"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="280"/>
-        <source>Hexadecimal number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="283"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="286"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="289"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="292"/>
-        <source>Character</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="295"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpascal.cpp" line="298"/>
-        <source>Inline asm</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerPerl</name>
     <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="328"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="331"/>
         <source>Error</source>
-        <translation type="unfinished">错误</translation>
+        <translation type="obsolete">错误</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="334"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="337"/>
-        <source>POD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="340"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="343"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="346"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="349"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="352"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="355"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="358"/>
-        <source>Scalar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="361"/>
-        <source>Array</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="364"/>
-        <source>Hash</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="367"/>
-        <source>Symbol table</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="370"/>
-        <source>Regular expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="373"/>
-        <source>Substitution</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="376"/>
-        <source>Backticks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="379"/>
-        <source>Data section</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="382"/>
-        <source>Here document delimiter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="385"/>
-        <source>Single-quoted here document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="388"/>
-        <source>Double-quoted here document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="391"/>
-        <source>Backtick here document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="394"/>
-        <source>Quoted string (q)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="397"/>
-        <source>Quoted string (qq)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="400"/>
-        <source>Quoted string (qx)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="403"/>
-        <source>Quoted string (qr)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="406"/>
-        <source>Quoted string (qw)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="409"/>
-        <source>POD verbatim</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="412"/>
-        <source>Subroutine prototype</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="415"/>
-        <source>Format identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="418"/>
-        <source>Format body</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="421"/>
-        <source>Double-quoted string (interpolated variable)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="424"/>
-        <source>Translation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="427"/>
-        <source>Regular expression (interpolated variable)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="430"/>
-        <source>Substitution (interpolated variable)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="433"/>
-        <source>Backticks (interpolated variable)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="436"/>
-        <source>Double-quoted here document (interpolated variable)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="439"/>
-        <source>Backtick here document (interpolated variable)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="442"/>
-        <source>Quoted string (qq, interpolated variable)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="445"/>
-        <source>Quoted string (qx, interpolated variable)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerperl.cpp" line="448"/>
-        <source>Quoted string (qr, interpolated variable)</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerPostScript</name>
     <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="259"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="262"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="265"/>
-        <source>DSC comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="268"/>
-        <source>DSC comment value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="271"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="274"/>
-        <source>Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="277"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="280"/>
-        <source>Literal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="283"/>
-        <source>Immediately evaluated literal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="286"/>
-        <source>Array parenthesis</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="289"/>
-        <source>Dictionary parenthesis</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="292"/>
-        <source>Procedure parenthesis</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="295"/>
-        <source>Text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="298"/>
-        <source>Hexadecimal string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="301"/>
-        <source>Base85 string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpostscript.cpp" line="304"/>
-        <source>Bad string character</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerProperties</name>
-    <message>
-        <location filename="../lib/qsci/qscilexerproperties.cpp" line="120"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerproperties.cpp" line="123"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerproperties.cpp" line="126"/>
-        <source>Section</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerproperties.cpp" line="129"/>
-        <source>Assignment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerproperties.cpp" line="132"/>
-        <source>Default value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerproperties.cpp" line="135"/>
-        <source>Key</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerPython</name>
     <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="238"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="241"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="244"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="247"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="250"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="253"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="256"/>
-        <source>Triple single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="259"/>
-        <source>Triple double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="262"/>
-        <source>Class name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="265"/>
-        <source>Function or method name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="268"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="271"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="274"/>
-        <source>Comment block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="277"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="280"/>
-        <source>Highlighted identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="283"/>
-        <source>Decorator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="286"/>
-        <source>Double-quoted f-string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="289"/>
-        <source>Single-quoted f-string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="292"/>
-        <source>Triple single-quoted f-string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerpython.cpp" line="295"/>
-        <source>Triple double-quoted f-string</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerRuby</name>
     <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="248"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="251"/>
         <source>Error</source>
-        <translation type="unfinished">错误</translation>
+        <translation type="obsolete">错误</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="254"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="257"/>
-        <source>POD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="260"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="263"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="266"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="269"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="272"/>
-        <source>Class name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="275"/>
-        <source>Function or method name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="278"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="281"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="284"/>
-        <source>Regular expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="287"/>
-        <source>Global</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="290"/>
-        <source>Symbol</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="293"/>
-        <source>Module name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="296"/>
-        <source>Instance variable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="299"/>
-        <source>Class variable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="302"/>
-        <source>Backticks</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="305"/>
-        <source>Data section</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="308"/>
-        <source>Here document delimiter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="311"/>
-        <source>Here document</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="314"/>
-        <source>%q string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="317"/>
-        <source>%Q string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="320"/>
-        <source>%x string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="323"/>
-        <source>%r string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="326"/>
-        <source>%w string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="329"/>
-        <source>Demoted keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="332"/>
-        <source>stdin</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="335"/>
-        <source>stdout</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerruby.cpp" line="338"/>
-        <source>stderr</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerSQL</name>
     <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="266"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="269"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="272"/>
-        <source>Comment line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="275"/>
-        <source>JavaDoc style comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="278"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="281"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="284"/>
-        <source>Double-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="287"/>
-        <source>Single-quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="290"/>
-        <source>SQL*Plus keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="293"/>
-        <source>SQL*Plus prompt</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="296"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="299"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="302"/>
-        <source>SQL*Plus comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="305"/>
-        <source># comment line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="308"/>
-        <source>JavaDoc keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="311"/>
-        <source>JavaDoc keyword error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="314"/>
-        <source>User defined 1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="317"/>
-        <source>User defined 2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="320"/>
-        <source>User defined 3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="323"/>
-        <source>User defined 4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="326"/>
-        <source>Quoted identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexersql.cpp" line="329"/>
-        <source>Quoted operator</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerSpice</name>
     <message>
-        <location filename="../lib/qsci/qscilexerspice.cpp" line="166"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerspice.cpp" line="169"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerspice.cpp" line="172"/>
-        <source>Command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerspice.cpp" line="175"/>
-        <source>Function</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerspice.cpp" line="178"/>
-        <source>Parameter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerspice.cpp" line="181"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerspice.cpp" line="184"/>
-        <source>Delimiter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerspice.cpp" line="187"/>
-        <source>Value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerspice.cpp" line="190"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerTCL</name>
     <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="292"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="295"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="298"/>
-        <source>Comment line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="301"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="304"/>
-        <source>Quoted keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="307"/>
-        <source>Quoted string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="310"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="313"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="316"/>
-        <source>Substitution</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="319"/>
-        <source>Brace substitution</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="322"/>
-        <source>Modifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="325"/>
-        <source>Expand keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="328"/>
-        <source>TCL keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="331"/>
-        <source>Tk keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="334"/>
-        <source>iTCL keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="337"/>
-        <source>Tk command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="340"/>
-        <source>User defined 1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="343"/>
-        <source>User defined 2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="346"/>
-        <source>User defined 3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="349"/>
-        <source>User defined 4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="352"/>
-        <source>Comment box</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertcl.cpp" line="355"/>
-        <source>Comment block</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QsciLexerTeX</name>
-    <message>
-        <location filename="../lib/qsci/qscilexertex.cpp" line="187"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertex.cpp" line="190"/>
-        <source>Special</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertex.cpp" line="193"/>
-        <source>Group</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertex.cpp" line="196"/>
-        <source>Symbol</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertex.cpp" line="199"/>
-        <source>Command</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexertex.cpp" line="202"/>
-        <source>Text</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerVHDL</name>
     <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="207"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="210"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="213"/>
-        <source>Comment line</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="216"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="219"/>
-        <source>String</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="222"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="225"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="228"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="231"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="234"/>
-        <source>Standard operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="237"/>
-        <source>Attribute</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="240"/>
-        <source>Standard function</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="243"/>
-        <source>Standard package</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="246"/>
-        <source>Standard type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="249"/>
-        <source>User defined</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexervhdl.cpp" line="252"/>
-        <source>Comment block</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerVerilog</name>
     <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="296"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="299"/>
-        <source>Inactive default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="302"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="305"/>
-        <source>Inactive comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="308"/>
-        <source>Line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="311"/>
-        <source>Inactive line comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="314"/>
-        <source>Bang comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="317"/>
-        <source>Inactive bang comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="320"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="323"/>
-        <source>Inactive number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="326"/>
-        <source>Primary keywords and identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="329"/>
-        <source>Inactive primary keywords and identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="332"/>
-        <source>String</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="335"/>
-        <source>Inactive string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="338"/>
-        <source>Secondary keywords and identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="341"/>
-        <source>Inactive secondary keywords and identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="344"/>
-        <source>System task</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="347"/>
-        <source>Inactive system task</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="350"/>
-        <source>Preprocessor block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="353"/>
-        <source>Inactive preprocessor block</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="356"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="359"/>
-        <source>Inactive operator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="362"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="365"/>
-        <source>Inactive identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="368"/>
-        <source>Unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="371"/>
-        <source>Inactive unclosed string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="374"/>
-        <source>User defined tasks and identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="377"/>
-        <source>Inactive user defined tasks and identifiers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="380"/>
-        <source>Keyword comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="383"/>
-        <source>Inactive keyword comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="386"/>
-        <source>Input port declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="389"/>
-        <source>Inactive input port declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="392"/>
-        <source>Output port declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="395"/>
-        <source>Inactive output port declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="398"/>
-        <source>Input/output port declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="401"/>
-        <source>Inactive input/output port declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="404"/>
-        <source>Port connection</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexerverilog.cpp" line="407"/>
-        <source>Inactive port connection</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciLexerYAML</name>
     <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="170"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="173"/>
-        <source>Comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="176"/>
-        <source>Identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="179"/>
-        <source>Keyword</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="182"/>
         <source>Number</source>
-        <translation type="unfinished">数字</translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="185"/>
-        <source>Reference</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="188"/>
-        <source>Document delimiter</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="191"/>
-        <source>Text block marker</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="194"/>
-        <source>Syntax error marker</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../lib/qsci/qscilexeryaml.cpp" line="197"/>
-        <source>Operator</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">数字</translation>
     </message>
 </context>
 <context>
     <name>QsciScintilla</name>
     <message>
-        <location filename="../lib/qsci/qsciscintilla.cpp" line="4478"/>
         <source>&amp;Undo</source>
-        <translation>撤销</translation>
+        <translation type="vanished">撤销</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qsciscintilla.cpp" line="4482"/>
         <source>&amp;Redo</source>
-        <translation>恢复</translation>
+        <translation type="vanished">恢复</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qsciscintilla.cpp" line="4488"/>
         <source>Cu&amp;t</source>
-        <translation>剪切</translation>
+        <translation type="vanished">剪切</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qsciscintilla.cpp" line="4493"/>
         <source>&amp;Copy</source>
-        <translation>拷贝</translation>
+        <translation type="vanished">拷贝</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qsciscintilla.cpp" line="4499"/>
         <source>&amp;Paste</source>
-        <translation>粘贴</translation>
+        <translation type="vanished">粘贴</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qsciscintilla.cpp" line="4503"/>
         <source>Delete</source>
-        <translation>删除</translation>
+        <translation type="vanished">删除</translation>
     </message>
     <message>
-        <location filename="../lib/qsci/qsciscintilla.cpp" line="4510"/>
         <source>Select All</source>
-        <translation>全选</translation>
+        <translation type="vanished">全选</translation>
     </message>
 </context>
 <context>
@@ -8653,22 +4673,22 @@ Model ID: %1</source>
 <context>
     <name>Reader</name>
     <message>
-        <location filename="Reader/Reader.cpp" line="50"/>
+        <location filename="Reader/Reader.cpp" line="77"/>
         <source>bottom</source>
         <translation>底部</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="96"/>
+        <location filename="Reader/Reader.cpp" line="123"/>
         <source>Knot</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="96"/>
+        <location filename="Reader/Reader.cpp" line="123"/>
         <source>Txt Files (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1405"/>
+        <location filename="Reader/Reader.cpp" line="1437"/>
         <source>Clear reading marks for the current book?</source>
         <translation>清除当前书籍的阅读标记？</translation>
     </message>
@@ -8677,7 +4697,7 @@ Model ID: %1</source>
         <translation type="vanished">滚动值</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="484"/>
+        <location filename="Reader/Reader.cpp" line="510"/>
         <source>Scroll Speed</source>
         <translation>滚动速度</translation>
     </message>
@@ -8687,17 +4707,17 @@ Model ID: %1</source>
         <translation>信息</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1830"/>
+        <location filename="Reader/Reader.cpp" line="1864"/>
         <source>Remove from list?</source>
         <translation>从列表中移除？</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="1849"/>
+        <location filename="Reader/Reader.cpp" line="1878"/>
         <source>The EPUB file was opened with an error.</source>
         <translation>EPUB文件打开出错</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="2080"/>
+        <location filename="Reader/Reader.cpp" line="2086"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
@@ -8724,7 +4744,7 @@ Model ID: %1</source>
         <translation type="vanished">页</translation>
     </message>
     <message>
-        <location filename="Reader/Reader.cpp" line="884"/>
+        <location filename="Reader/Reader.cpp" line="910"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation></translation>
@@ -9117,7 +5137,7 @@ Model ID: %1</source>
 <context>
     <name>SliderButton</name>
     <message>
-        <location filename="MainHelper.h" line="136"/>
+        <location filename="MainHelper.h" line="137"/>
         <source>Slide Right to Start.</source>
         <translation>滑动到右边启动</translation>
     </message>
@@ -9136,7 +5156,7 @@ Model ID: %1</source>
         <translation type="vanished">暂停</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="754"/>
+        <location filename="Exercise/Steps.cpp" line="759"/>
         <source>Start</source>
         <translation>启动</translation>
     </message>
@@ -9145,12 +5165,12 @@ Model ID: %1</source>
         <translation type="vanished">步数</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="673"/>
+        <location filename="Exercise/Steps.cpp" line="678"/>
         <source>Calorie</source>
         <translation>卡路里</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="753"/>
+        <location filename="Exercise/Steps.cpp" line="758"/>
         <source>No GPS signal...</source>
         <oldsource>Search the GPS...</oldsource>
         <translation>没有GPS信号...</translation>
@@ -9161,20 +5181,20 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Exercise/ShowSportChart.cpp" line="95"/>
-        <location filename="Exercise/Steps.cpp" line="1351"/>
-        <location filename="Exercise/Steps.cpp" line="1448"/>
-        <location filename="Exercise/Steps.cpp" line="1778"/>
-        <location filename="Exercise/Steps.cpp" line="1789"/>
+        <location filename="Exercise/Steps.cpp" line="1356"/>
+        <location filename="Exercise/Steps.cpp" line="1453"/>
+        <location filename="Exercise/Steps.cpp" line="1780"/>
+        <location filename="Exercise/Steps.cpp" line="1791"/>
         <source>Hike</source>
         <oldsource>Hiking</oldsource>
         <translation>徒步</translation>
     </message>
     <message>
         <location filename="Exercise/ShowSportChart.cpp" line="96"/>
-        <location filename="Exercise/Steps.cpp" line="1352"/>
-        <location filename="Exercise/Steps.cpp" line="1453"/>
-        <location filename="Exercise/Steps.cpp" line="1780"/>
-        <location filename="Exercise/Steps.cpp" line="1791"/>
+        <location filename="Exercise/Steps.cpp" line="1357"/>
+        <location filename="Exercise/Steps.cpp" line="1458"/>
+        <location filename="Exercise/Steps.cpp" line="1782"/>
+        <location filename="Exercise/Steps.cpp" line="1793"/>
         <source>Run</source>
         <oldsource>Running</oldsource>
         <translation>跑步</translation>
@@ -9213,14 +5233,14 @@ Model ID: %1</source>
         <translation type="vanished">Activity无效，GPS启动失败</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1189"/>
-        <location filename="Exercise/Steps.cpp" line="1370"/>
+        <location filename="Exercise/Steps.cpp" line="1194"/>
+        <location filename="Exercise/Steps.cpp" line="1375"/>
         <source>Exercise Duration</source>
         <translation>运动时长</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1064"/>
-        <location filename="Exercise/Steps.cpp" line="1373"/>
+        <location filename="Exercise/Steps.cpp" line="1069"/>
+        <location filename="Exercise/Steps.cpp" line="1378"/>
         <source>Average Speed</source>
         <translation>平均速度</translation>
     </message>
@@ -9230,33 +5250,33 @@ Model ID: %1</source>
         <translation>方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1188"/>
+        <location filename="Exercise/Steps.cpp" line="1193"/>
         <source>Current Distance</source>
         <translation>当前距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1373"/>
+        <location filename="Exercise/Steps.cpp" line="1378"/>
         <source>Max Speed</source>
         <translation>最大速度</translation>
     </message>
     <message>
         <location filename="Exercise/ShowSportChart.cpp" line="137"/>
-        <location filename="Exercise/Steps.cpp" line="1774"/>
+        <location filename="Exercise/Steps.cpp" line="1776"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1785"/>
+        <location filename="Exercise/Steps.cpp" line="1787"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2351"/>
+        <location filename="Exercise/Steps.cpp" line="2353"/>
         <source>Today</source>
         <translation>今天</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="2352"/>
+        <location filename="Exercise/Steps.cpp" line="2354"/>
         <source>km</source>
         <translation>公里</translation>
     </message>
@@ -9277,10 +5297,10 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Exercise/ShowSportChart.cpp" line="94"/>
-        <location filename="Exercise/Steps.cpp" line="1350"/>
-        <location filename="Exercise/Steps.cpp" line="1443"/>
-        <location filename="Exercise/Steps.cpp" line="1776"/>
-        <location filename="Exercise/Steps.cpp" line="1787"/>
+        <location filename="Exercise/Steps.cpp" line="1355"/>
+        <location filename="Exercise/Steps.cpp" line="1448"/>
+        <location filename="Exercise/Steps.cpp" line="1778"/>
+        <location filename="Exercise/Steps.cpp" line="1789"/>
         <source>Ride</source>
         <translation>骑行</translation>
     </message>
@@ -9295,155 +5315,155 @@ Model ID: %1</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3097"/>
+        <location filename="Exercise/Steps.cpp" line="3099"/>
         <source>Uphill: </source>
         <translation>上坡：</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3097"/>
         <location filename="Exercise/Steps.cpp" line="3099"/>
         <location filename="Exercise/Steps.cpp" line="3101"/>
+        <location filename="Exercise/Steps.cpp" line="3103"/>
         <source> km</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3099"/>
+        <location filename="Exercise/Steps.cpp" line="3101"/>
         <source>Flat: </source>
         <translation>平路：</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3100"/>
+        <location filename="Exercise/Steps.cpp" line="3102"/>
         <source>Downhill: </source>
         <translation>下坡：</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3186"/>
+        <location filename="Exercise/Steps.cpp" line="3188"/>
         <source>Invalid Direction</source>
         <translation>无效方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3207"/>
+        <location filename="Exercise/Steps.cpp" line="3209"/>
         <source>Northeast</source>
         <translation>东北</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3209"/>
+        <location filename="Exercise/Steps.cpp" line="3211"/>
         <source>Southeast</source>
         <translation>东南</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3211"/>
+        <location filename="Exercise/Steps.cpp" line="3213"/>
         <source>Southwest</source>
         <translation>西南</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3213"/>
+        <location filename="Exercise/Steps.cpp" line="3215"/>
         <source>Northwest</source>
         <translation>西北</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3225"/>
+        <location filename="Exercise/Steps.cpp" line="3227"/>
         <source>East by North</source>
         <translation>东偏北</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3277"/>
+        <location filename="Exercise/Steps.cpp" line="3279"/>
         <source>Edit Remarks</source>
         <translation>编辑备注</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3285"/>
+        <location filename="Exercise/Steps.cpp" line="3287"/>
         <source>Please enter remarks here...</source>
         <translation>请在这里输入备注...</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3312"/>
+        <location filename="Exercise/Steps.cpp" line="3314"/>
         <source>Parse remarks file failed: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3318"/>
+        <location filename="Exercise/Steps.cpp" line="3320"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3319"/>
+        <location filename="Exercise/Steps.cpp" line="3321"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3426"/>
-        <location filename="Exercise/Steps.cpp" line="3438"/>
+        <location filename="Exercise/Steps.cpp" line="3428"/>
+        <location filename="Exercise/Steps.cpp" line="3440"/>
         <source>Warning</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3427"/>
+        <location filename="Exercise/Steps.cpp" line="3429"/>
         <source>Failed to save remarks: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3439"/>
+        <location filename="Exercise/Steps.cpp" line="3441"/>
         <source>Write remarks to file failed: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3222"/>
+        <location filename="Exercise/Steps.cpp" line="3224"/>
         <source>North by East</source>
         <translation>北偏东</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3233"/>
+        <location filename="Exercise/Steps.cpp" line="3235"/>
         <source>South by East</source>
         <translation>南偏东</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3230"/>
+        <location filename="Exercise/Steps.cpp" line="3232"/>
         <source>East by South</source>
         <translation>东偏南</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3241"/>
+        <location filename="Exercise/Steps.cpp" line="3243"/>
         <source>West by South</source>
         <translation>西偏南</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3238"/>
+        <location filename="Exercise/Steps.cpp" line="3240"/>
         <source>South by West</source>
         <translation>南偏西</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3249"/>
+        <location filename="Exercise/Steps.cpp" line="3251"/>
         <source>North by West</source>
         <translation>北偏西</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3246"/>
+        <location filename="Exercise/Steps.cpp" line="3248"/>
         <source>West by North</source>
         <translation>西偏北</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3197"/>
+        <location filename="Exercise/Steps.cpp" line="3199"/>
         <source>Due North</source>
         <translation>正北方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3199"/>
+        <location filename="Exercise/Steps.cpp" line="3201"/>
         <source>Due East</source>
         <translation>正东方向</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3201"/>
+        <location filename="Exercise/Steps.cpp" line="3203"/>
         <source>Due South</source>
         <translation>正南方</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3203"/>
+        <location filename="Exercise/Steps.cpp" line="3205"/>
         <source>Due West</source>
         <translation>正西方</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="3262"/>
+        <location filename="Exercise/Steps.cpp" line="3264"/>
         <source>degrees</source>
         <translation>度</translation>
     </message>
@@ -9457,24 +5477,24 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Exercise/ShowSportChart.cpp" line="182"/>
-        <location filename="Exercise/Steps.cpp" line="432"/>
-        <location filename="Exercise/Steps.cpp" line="1193"/>
+        <location filename="Exercise/Steps.cpp" line="437"/>
+        <location filename="Exercise/Steps.cpp" line="1198"/>
         <source>Total Distance</source>
         <translation>总距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1357"/>
+        <location filename="Exercise/Steps.cpp" line="1362"/>
         <source>Distance</source>
         <translation>距离</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1186"/>
-        <location filename="Exercise/Steps.cpp" line="1370"/>
+        <location filename="Exercise/Steps.cpp" line="1191"/>
+        <location filename="Exercise/Steps.cpp" line="1375"/>
         <source>Duration</source>
         <translation>持续时间</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="424"/>
+        <location filename="Exercise/Steps.cpp" line="429"/>
         <source>GPS Info</source>
         <translation>GPS信息</translation>
     </message>
@@ -9507,7 +5527,7 @@ Model ID: %1</source>
         <translation type="vanished">周日</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="818"/>
+        <location filename="Exercise/Steps.cpp" line="823"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
@@ -9516,14 +5536,14 @@ Model ID: %1</source>
         <translation type="vanished">速度</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="1355"/>
+        <location filename="Exercise/Steps.cpp" line="1360"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
     <message>
-        <location filename="Exercise/Steps.cpp" line="285"/>
-        <location filename="Exercise/Steps.cpp" line="421"/>
-        <location filename="Exercise/Steps.cpp" line="678"/>
+        <location filename="Exercise/Steps.cpp" line="290"/>
+        <location filename="Exercise/Steps.cpp" line="426"/>
+        <location filename="Exercise/Steps.cpp" line="683"/>
         <source>KM</source>
         <translation>公里</translation>
     </message>
@@ -9806,39 +5826,39 @@ Model ID: %1</source>
         <translation>修改待办</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="336"/>
-        <location filename="Todo/Todo.cpp" line="339"/>
-        <location filename="Todo/Todo.cpp" line="800"/>
+        <location filename="Todo/Todo.cpp" line="340"/>
+        <location filename="Todo/Todo.cpp" line="343"/>
+        <location filename="Todo/Todo.cpp" line="804"/>
         <source>Alarm</source>
         <translation>定时提醒</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="540"/>
-        <location filename="Todo/Todo.cpp" line="597"/>
+        <location filename="Todo/Todo.cpp" line="544"/>
+        <location filename="Todo/Todo.cpp" line="601"/>
         <source>Todo</source>
         <translation>待办事项</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1123"/>
-        <location filename="Todo/Todo.cpp" line="1307"/>
-        <location filename="Todo/Todo.cpp" line="1354"/>
-        <location filename="Todo/Todo.cpp" line="1394"/>
-        <location filename="Todo/Todo.cpp" line="1406"/>
-        <location filename="Todo/Todo.cpp" line="1418"/>
-        <location filename="Todo/Todo.cpp" line="1431"/>
-        <location filename="Todo/Todo.cpp" line="1444"/>
+        <location filename="Todo/Todo.cpp" line="1127"/>
+        <location filename="Todo/Todo.cpp" line="1311"/>
+        <location filename="Todo/Todo.cpp" line="1358"/>
+        <location filename="Todo/Todo.cpp" line="1398"/>
+        <location filename="Todo/Todo.cpp" line="1410"/>
+        <location filename="Todo/Todo.cpp" line="1422"/>
+        <location filename="Todo/Todo.cpp" line="1435"/>
+        <location filename="Todo/Todo.cpp" line="1448"/>
         <source>Voice</source>
         <translation>语音</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="763"/>
-        <location filename="Todo/Todo.cpp" line="830"/>
+        <location filename="Todo/Todo.cpp" line="767"/>
+        <location filename="Todo/Todo.cpp" line="834"/>
         <location filename="Todo/Todo_JavaNotify.cpp" line="116"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="247"/>
+        <location filename="Todo/Todo.cpp" line="251"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
@@ -9847,53 +5867,53 @@ Model ID: %1</source>
         <translation type="vanished">待办闹钟</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1162"/>
+        <location filename="Todo/Todo.cpp" line="1166"/>
         <source>Editor</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1194"/>
+        <location filename="Todo/Todo.cpp" line="1198"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1195"/>
+        <location filename="Todo/Todo.cpp" line="1199"/>
         <source>Copy</source>
         <translation>拷贝</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1196"/>
+        <location filename="Todo/Todo.cpp" line="1200"/>
         <source>Share</source>
         <translation>分享</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1197"/>
+        <location filename="Todo/Todo.cpp" line="1201"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1251"/>
+        <location filename="Todo/Todo.cpp" line="1255"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1290"/>
+        <location filename="Todo/Todo.cpp" line="1294"/>
         <source>Done</source>
         <translation>完成</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1317"/>
-        <location filename="Todo/Todo.cpp" line="1340"/>
+        <location filename="Todo/Todo.cpp" line="1321"/>
+        <location filename="Todo/Todo.cpp" line="1344"/>
         <source>Recording audio in progress...</source>
         <translation>音频记录进行中...</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1521"/>
+        <location filename="Todo/Todo.cpp" line="1525"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1598"/>
+        <location filename="Todo/Todo.cpp" line="1602"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>
