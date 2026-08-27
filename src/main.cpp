@@ -478,6 +478,9 @@ void loadTheme(bool isDark) {
 
   if (isNeedExecDeskShortcut) {
     isNeedExecDeskShortcut = false;
+
+    m_Method->closeMainEntranceWindow();
+
     QTimer::singleShot(1000, nullptr, []() {
       if (mw_one) mw_one->execDeskShortcut();  // 空指针校验
     });

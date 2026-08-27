@@ -1588,6 +1588,15 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void closeMainEntranceWindow() {
+        if (
+            MainEntrance.mInstance != null &&
+            !MainEntrance.mInstance.isFinishing()
+        ) {
+            MainEntrance.mInstance.finish();
+        }
+    }
+
     public static void openMDWindow() {
         Intent i = new Intent(getMyAppContext(), MDActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

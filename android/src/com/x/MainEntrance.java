@@ -30,6 +30,9 @@ public class MainEntrance extends AppCompatActivity {
 
     private OnBackPressedCallback mBackCallback;
 
+    // 静态实例引用
+    public static MainEntrance mInstance = null;
+
     private RecyclerView mRvMaintabGrid;
     private CategoryGridAdapter mCatAdapter;
     private WeakReference<MainEntrance> mSelfWeakRef;
@@ -111,6 +114,8 @@ public class MainEntrance extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mInstance = this;
 
         // 注册返回拦截回调
         mBackCallback = new OnBackPressedCallback(true /* enabled */) {
@@ -368,6 +373,7 @@ public class MainEntrance extends AppCompatActivity {
         }
 
         mSelfWeakRef.clear();
+        mInstance = null; // 清空，防止内存泄漏
 
         PublicJavaCallCpp("mainentrance_destroy");
     }
@@ -420,39 +426,6 @@ public class MainEntrance extends AppCompatActivity {
         final float scale = getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
     }
-
-    /**
-     * 获取菜单文本数组，跟随全局语言切换中英文
-     */
-    /*private String[] getMainMenuItems() {
-        if (MyActivity.zh_cn) {
-            return new String[] {
-                "增加标签页",
-                "删除标签页",
-                "重命名标签页",
-                "导出数据",
-                "导入数据",
-                "偏好设置",
-                "云备份与恢复数据",
-                "备份文件列表",
-                "标签页回收箱",
-                "关于",
-            };
-        } else {
-            return new String[] {
-                "Add Tab",
-                "Delete Tab",
-                "Rename Tab",
-                "Export Data",
-                "Import Data",
-                "Preferences",
-                "Cloud Backup & Restore",
-                "Backup File List",
-                "Tab Recycle Bin",
-                "About",
-            };
-        }
-    }*/
 
     /**
      * 构建菜单列表

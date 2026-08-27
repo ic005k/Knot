@@ -49,15 +49,6 @@ MainWindow::MainWindow(QWidget* parent)
     updateMainTab();
   });
 
-  if (isAndroid) {
-    QTimer::singleShot(2000, this, SLOT(on_ReceiveShare()));
-
-    if (m_Method->getExecDone() == "false") {
-      m_Method->setExecDone("true");
-      QTimer::singleShot(2000, this, SLOT(on_ExecShortcut()));
-    }
-  }
-
   m_Method->setAndroidFontSize(fontSize);
 
   m_CloudBackup->init_CloudBacup();
@@ -72,6 +63,16 @@ MainWindow::MainWindow(QWidget* parent)
     mui->f_Menu->hide();
     mui->f_Btn->hide();
     m_Method->openMainEntranceWindow();
+
+    QTimer::singleShot(2000, this, SLOT(on_ReceiveShare()));
+
+    if (m_Method->getExecDone() == "false") {
+      m_Method->setExecDone("true");
+
+      m_Method->closeMainEntranceWindow();
+
+      QTimer::singleShot(2000, this, SLOT(on_ExecShortcut()));
+    }
   }
 }
 
@@ -102,7 +103,6 @@ void MainWindow::on_ExecShortcut() {
   keyType = m_Method->getKeyType();
   if (keyType == "todo") m_Todo->NewTodo();
   if (keyType == "note") mui->btnNotes->click();
-  ;
   if (keyType == "reader") m_Reader->ContinueReading();
   if (keyType == "add") mui->btnAdd->click();
   if (keyType == "exercise") {

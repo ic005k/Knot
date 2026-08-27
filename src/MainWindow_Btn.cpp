@@ -862,10 +862,6 @@ void MainWindow::on_btnNotes_clicked() { m_Notes->openNotes(); }
 void MainWindow::on_btnAdd_clicked() {
   // m_EditRecord->monthSum();
 
-  if (isAndroid) {
-    mui->frameMain->show();
-  }
-
   m_EditRecord->on_AddRecord();
 }
 
@@ -1544,22 +1540,11 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  // if (m_Reader->isBookListWinVisible()) {
-  //  on_btnBackBookList_clicked();
-  // return;
-  //}
-
   if (!mui->frameNotesTree->isHidden()) {
     mui->btnBack_Tree->click();
 
     return;
   }
-
-  /*if (!mui->qwMainDate->isHidden()) {
-    mui->btnHome->clicked();
-
-    return;
-  }*/
 
   if (mui->frameMain->isVisible()) {
     mui->frameMain->hide();
@@ -1567,13 +1552,6 @@ void MainWindow::onAndroidBackHandle() {
 
     return;
   }
-
-  /*if (mui->frameMain->isHidden()) {
-    m_Method->openMainEntranceWindow();
-    mw_one->setMini();
-
-    return;
-  }*/
 }
 
 void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {

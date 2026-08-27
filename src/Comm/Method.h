@@ -649,6 +649,7 @@ QScrollBar::sub-page:horizontal {
   QString getTempSwapStr();
   void setTempSwapStr(const QString &str);
   void openMainEntranceWindow();
+  void closeMainEntranceWindow();
   protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 

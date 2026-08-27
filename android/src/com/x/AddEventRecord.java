@@ -338,7 +338,9 @@ public class AddEventRecord extends AppCompatActivity {
             onBackPressed();
         });
 
-        btnCancel.setOnClickListener(v -> finish());
+        btnCancel.setOnClickListener(v -> {
+            finish();
+        });
 
         btnCategory.setOnClickListener(v -> {
             // TODO:打开分类弹窗
@@ -465,5 +467,11 @@ public class AddEventRecord extends AppCompatActivity {
             };
         }
     }
+
     ///////////////////////////////////////////////////////////////////
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PublicJavaCallCpp("cancel_add_event_record");
+    }
 }

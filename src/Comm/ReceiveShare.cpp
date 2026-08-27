@@ -456,6 +456,8 @@ void ReceiveShare::callJavaNotify9() {
   QString type = Reg.value("book/type", "filepicker").toString();
   if (QFile::exists(file)) {
     if (type == "defaultopen") {
+      m_Method->closeMainEntranceWindow();
+
       closeAllChildWindows();
 
       m_Method->Sleep(100);

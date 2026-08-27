@@ -202,6 +202,8 @@ static void JavaNotify_7() {
 
 static void JavaNotify_8() {
   if (isInitThemeEnd) {
+    m_Method->closeMainEntranceWindow();
+
     QTimer::singleShot(100, mw_one, []() { mw_one->execDeskShortcut(); });
 
   } else {
@@ -480,10 +482,20 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             m_Reader->clearReaderRecords(c_name);
           }
 
+          // 增加事件记录
+
           if (strType == "add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {
               if (mw_one && mw_one->m_EditRecord) {
                 mw_one->m_EditRecord->on_btnOk_clicked();
+              }
+            });
+          }
+
+          if (strType == "cancel_add_event_record") {
+            QTimer::singleShot(100, mw_one, [=]() {
+              if (mui->frameMain->isHidden()) {
+                // m_Method->openMainEntranceWindow();
               }
             });
           }

@@ -81,3 +81,10 @@ void Method::openMainEntranceWindow() {
                             "(Ljava/util/ArrayList;)V", jArrayList.object());
 #endif
 }
+
+void Method::closeMainEntranceWindow() {
+#ifdef Q_OS_ANDROID
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  activity.callMethod<void>("closeMainEntranceWindow", "()V");
+#endif
+}
