@@ -131,7 +131,11 @@ public class MainEntrance extends AppCompatActivity {
         //} else {
         // setContentView(R.layout.activity_main_entrance);
         //}
-        ImmersiveUtil.applyRealImmersive(this);
+        boolean isDark = ImmersiveUtil.applyRealImmersive(this);
+        if (!MyActivity.isDark && isDark) {
+            MyActivity.isDark = true;
+        }
+
         mSelfWeakRef = new WeakReference<>(this);
 
         // 网格初始化
@@ -376,6 +380,25 @@ public class MainEntrance extends AppCompatActivity {
         mInstance = null; // 清空，防止内存泄漏
 
         PublicJavaCallCpp("mainentrance_destroy");
+
+        // ✅ 新增：主动恢复 Qt Activity 焦点和渲染
+        if (
+            MyActivity.m_instance != null &&
+            !MyActivity.m_instance.isFinishing() &&
+            !MyActivity.m_instance.isDestroyed()
+        ) {
+            MyActivity.m_instance.runOnUiThread(() -> {
+                // 请求焦点 + 重绘，触发 Qt GL 恢复
+                MyActivity.m_instance.getWindow().getDecorView().requestFocus();
+                MyActivity.m_instance
+                    .getWindow()
+                    .getDecorView()
+                    .postInvalidate();
+
+                // 强制清除输入法焦点（避免键盘弹出干扰）
+                MyService.forceDisconnectInputMethod();
+            });
+        }
     }
 
     /**
@@ -697,6 +720,24 @@ public class MainEntrance extends AppCompatActivity {
             });
             AlertDialog dlg = builder.create();
             dlg.show();
+        });
+    }
+
+    /**
+     * 供 C++ JNI 调用：刷新卡片列表数据
+     * @param list 新的标签页数据列表（格式：title|==|flag）
+     */
+    public void refreshCardList(ArrayList<String> list) {
+        runOnUiThread(() -> {
+            if (mCatAdapter != null && !isFinishing() && !isDestroyed()) {
+                mCatAdapter.setStringListData(list);
+
+                // 恢复上次选中状态
+                int selPos = MyActivity.mainTabLastSelectedPos;
+                if (selPos >= 0 && selPos < mCatAdapter.getItemCount()) {
+                    mCatAdapter.setItemSelected(selPos, true);
+                }
+            }
         });
     }
 }

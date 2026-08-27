@@ -644,12 +644,16 @@ QScrollBar::sub-page:horizontal {
   int getCountFromQV(QQuickView* qv);
   void delItemFromQV(QQuickView* qv, int index);
 
-  int getCurrentIndexFromQV(QQuickView *qv);
-  QString getText3QV(QQuickView *qv, int index);
+  int getCurrentIndexFromQV(QQuickView* qv);
+  QString getText3QV(QQuickView* qv, int index);
   QString getTempSwapStr();
-  void setTempSwapStr(const QString &str);
+  void setTempSwapStr(const QString& str);
   void openMainEntranceWindow();
   void closeMainEntranceWindow();
+  void setMainTabLastSelectedPos(int index);
+
+  int getMainTabLastSelectedPos();
+  void refreshMainEntranceCards();
   protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 

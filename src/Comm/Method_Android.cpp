@@ -68,8 +68,10 @@ void Method::openMainEntranceWindow() {
     list1.append(tabText + "|==|" + QString::number(isFlagToday));
   }
 
+  int index = tabData->currentIndex();
+  setMainTabLastSelectedPos(index);
+
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  // 构造 Java ArrayList<String>
   QJniObject jArrayList("java/util/ArrayList", "()V");
 
   for (const QString& item : list1) {
@@ -86,5 +88,70 @@ void Method::closeMainEntranceWindow() {
 #ifdef Q_OS_ANDROID
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   activity.callMethod<void>("closeMainEntranceWindow", "()V");
+#endif
+}
+
+float Method::getSystemFontScale() {
+#ifdef Q_OS_ANDROID
+
+  QJniObject ctx = QNativeInterface::QAndroidApplication::context();
+  if (!ctx.isValid()) return 1.0f;
+
+  jfloat scale = QJniObject::callStaticMethod<jfloat>(
+      "com/x/MyActivity", "getSystemFontScale", "(Landroid/content/Context;)F",
+      ctx.object());
+  return static_cast<qreal>(scale);
+#else
+  // 桌面端固定缩放系数1.0
+  return 1.0f;
+#endif
+}
+
+void Method::setMainTabLastSelectedPos(int index) {
+#ifdef Q_OS_ANDROID
+  QJniObject::callStaticMethod<void>("com/x/MyActivity",
+                                     "setMainTabLastSelectedPos", "(I)V",
+                                     static_cast<jint>(index));
+#endif
+}
+
+int Method::getMainTabLastSelectedPos() {
+#ifdef Q_OS_ANDROID
+  return QJniObject::callStaticMethod<jint>("com/x/MyActivity",
+                                            "getMainTabLastSelectedPos", "()I");
+#else
+  return -1;
+#endif
+}
+
+void Method::refreshMainEntranceCards() {
+#ifdef Q_OS_ANDROID
+  // 1. 构建与打开时相同格式的数据列表
+  QStringList list1;
+  for (int i = 0; i < tabData->count(); i++) {
+    QString tabText = tabData->tabText(i);
+    QTreeWidget* tw = mw_one->get_tw(i);
+    int isFlagToday = m_Method->getFlagToday(tw);
+    list1.append(tabText + "|==|" + QString::number(isFlagToday));
+  }
+
+  int index = tabData->currentIndex();
+  setMainTabLastSelectedPos(index);
+
+  // 2. 构造 Java ArrayList<String>
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+  for (const QString& item : list1) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  // 3. 通过静态实例调用 refreshCardList
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/MainEntrance", "mInstance", "Lcom/x/MainEntrance;");
+
+  if (instance.isValid()) {
+    instance.callMethod<void>("refreshCardList", "(Ljava/util/ArrayList;)V",
+                              jArrayList.object());
+  }
 #endif
 }

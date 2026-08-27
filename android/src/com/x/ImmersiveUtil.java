@@ -22,19 +22,21 @@ public class ImmersiveUtil {
     /**
      * 【原生Java Activity调用】原版逻辑：读取页面背景色，content设置padding避让系统栏，内容不会顶状态栏
      */
-    public static void applyRealImmersive(Activity activity) {
+    public static boolean applyRealImmersive(Activity activity) {
         if (
             activity == null || activity.isFinishing() || activity.isDestroyed()
-        ) return;
+        ) return false;
         if (!Looper.getMainLooper().isCurrentThread()) {
             new Handler(Looper.getMainLooper()).post(() ->
                 applyRealImmersive(activity)
             );
-            return;
+            return false;
         }
 
         Window window = activity.getWindow();
-        if (window == null) return;
+        if (window == null) return false;
+
+        boolean isDark = false;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.addFlags(
@@ -58,7 +60,7 @@ public class ImmersiveUtil {
             window.setStatusBarColor(bgColor);
             window.setNavigationBarColor(bgColor);
 
-            boolean isDark = isDarkColor(bgColor);
+            isDark = isDarkColor(bgColor);
             WindowInsetsControllerCompat controller =
                 new WindowInsetsControllerCompat(window, window.getDecorView());
             controller.setAppearanceLightStatusBars(!isDark);
@@ -82,6 +84,8 @@ public class ImmersiveUtil {
                 });
             }
         }
+
+        return isDark;
     }
 
     /**

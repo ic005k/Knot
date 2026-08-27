@@ -73,6 +73,9 @@ MainWindow::MainWindow(QWidget* parent)
 
       QTimer::singleShot(2000, this, SLOT(on_ExecShortcut()));
     }
+
+    QTimer::singleShot(2500, this,
+                       [this]() { m_Method->refreshMainEntranceCards(); });
   }
 }
 

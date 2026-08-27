@@ -753,6 +753,21 @@ public class MyActivity
         ImmersiveUtil.applyRealImmersive(this, isDark);
 
         forceRestoreSystemBars();
+
+        // ✅ 新增：延迟触发 Qt 重绘，确保 GL 上下文恢复
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            View content = findViewById(android.R.id.content);
+            if (content != null) {
+                content.requestLayout();
+                content.invalidate();
+            }
+
+            // 强制 Qt SurfaceView 重绘（如果使用了 SurfaceView）
+            View qtSurface = findViewById(android.R.id.content);
+            if (qtSurface != null) {
+                qtSurface.postInvalidate();
+            }
+        }, 150); // 150ms 延迟，等待系统完成窗口切换
     }
 
     @Override
@@ -770,9 +785,10 @@ public class MyActivity
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        // 内存低级别清理时，主动拒绝销毁自身
-        if (level == TRIM_MEMORY_RUNNING_CRITICAL) {
-            moveTaskToBack(false);
+        if (level >= TRIM_MEMORY_RUNNING_LOW) {
+            Log.w(TAG, "内存警告 level=" + level + "，释放非必要缓存");
+            // 可以清除图片缓存、临时数据等
+            // 不要操作 Activity 可见性
         }
     }
 
@@ -2915,5 +2931,13 @@ public class MyActivity
 
     public void setTempSwapStr(String tempSwapStr) {
         this.tempSwapStr = tempSwapStr;
+    }
+
+    public static void setMainTabLastSelectedPos(int pos) {
+        mainTabLastSelectedPos = pos;
+    }
+
+    public static int getMainTabLastSelectedPos() {
+        return mainTabLastSelectedPos;
     }
 }
