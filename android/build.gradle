@@ -164,6 +164,9 @@ android {
     def sdkInt = (sdkVer =~ /\d+/).find() ? (sdkVer =~ /\d+/)[0].toInteger() : 34
     compileSdkVersion sdkInt
 
+    // ✅ 构建时会在控制台输出实际使用的版本
+    println ">>> [DEBUG] Actual compileSdkVersion = ${sdkInt} (raw: ${androidCompileSdkVersion})"
+
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'

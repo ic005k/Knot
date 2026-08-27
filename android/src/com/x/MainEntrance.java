@@ -1,13 +1,20 @@
 package com.x;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListPopupWindow;
 import android.widget.TextView;
+import android.widget.TextView;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -20,6 +27,8 @@ import java.util.ArrayList;
  * Java仅负责视图渲染、事件转发；业务逻辑全部在C++
  */
 public class MainEntrance extends AppCompatActivity {
+
+    private OnBackPressedCallback mBackCallback;
 
     private RecyclerView mRvMaintabGrid;
     private CategoryGridAdapter mCatAdapter;
@@ -84,6 +93,16 @@ public class MainEntrance extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 注册返回拦截回调
+        mBackCallback = new OnBackPressedCallback(true /* enabled */) {
+            @Override
+            public void handleOnBackPressed() {
+                MyActivity.m_instance.moveTaskToBack(true);
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, mBackCallback);
+
         // if (MyActivity.isDark) {
         setContentView(R.layout.activity_main_entrance_dark);
         //} else {
@@ -125,7 +144,7 @@ public class MainEntrance extends AppCompatActivity {
             mCatAdapter.setItemSelected(position, true);
             // JNI统一在这里调用，业务集中
             PublicJavaCallCpp("maintab_selected|==|" + position);
-            onBackPressed();
+            finish();
         });
 
         // ---------- 顶部按钮容器绑定 ----------
@@ -149,7 +168,7 @@ public class MainEntrance extends AppCompatActivity {
         mTopBtnAdd.setOnClickListener(v -> {
             // TODO
             PublicJavaCallCpp("topbtn_add");
-            onBackPressed();
+            finish();
         });
 
         mTopBtnSearch = findViewById(R.id.top_btn_search_layout);
@@ -157,7 +176,7 @@ public class MainEntrance extends AppCompatActivity {
         tvTopSearch = findViewById(R.id.tv_top_search);
         mTopBtnSearch.setOnClickListener(v -> {
             PublicJavaCallCpp("topbtn_search");
-            onBackPressed();
+            finish();
         });
 
         mTopBtnUpload = findViewById(R.id.top_btn_upload_layout);
@@ -165,7 +184,7 @@ public class MainEntrance extends AppCompatActivity {
         tvTopUpload = findViewById(R.id.tv_top_upload);
         mTopBtnUpload.setOnClickListener(v -> {
             PublicJavaCallCpp("topbtn_upload");
-            onBackPressed();
+            finish();
         });
 
         // ---------- 底部Tab容器绑定 ----------
@@ -174,7 +193,7 @@ public class MainEntrance extends AppCompatActivity {
         tvTabRead = findViewById(R.id.tv_tab_read);
         mTabRead.setOnClickListener(v -> {
             PublicJavaCallCpp("tab_reader");
-            onBackPressed();
+            finish();
         });
 
         mTabTodo = findViewById(R.id.tab_todo_layout);
@@ -182,7 +201,7 @@ public class MainEntrance extends AppCompatActivity {
         tvTabTodo = findViewById(R.id.tv_tab_todo);
         mTabTodo.setOnClickListener(v -> {
             PublicJavaCallCpp("tab_todo");
-            onBackPressed();
+            finish();
         });
 
         mTabNote = findViewById(R.id.tab_note_layout);
@@ -190,7 +209,7 @@ public class MainEntrance extends AppCompatActivity {
         tvTabNote = findViewById(R.id.tv_tab_note);
         mTabNote.setOnClickListener(v -> {
             PublicJavaCallCpp("tab_notes");
-            onBackPressed();
+            finish();
         });
 
         mTabSport = findViewById(R.id.tab_sport_layout);
@@ -198,7 +217,7 @@ public class MainEntrance extends AppCompatActivity {
         tvTabSport = findViewById(R.id.tv_tab_sport);
         mTabSport.setOnClickListener(v -> {
             PublicJavaCallCpp("tab_steps");
-            onBackPressed();
+            finish();
         });
 
         layoutRoot = findViewById(R.id.layout_root);
@@ -239,9 +258,6 @@ public class MainEntrance extends AppCompatActivity {
         }
     }
 
-    /**
-     * 更新全部图标着色、所有文字颜色，跟随全局明暗主题 MyActivity.isDark
-     */
     /**
      * 更新全部图标着色、所有文字颜色，跟随全局明暗主题 MyActivity.isDark
      */
@@ -324,6 +340,11 @@ public class MainEntrance extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mBackCallback != null) {
+            mBackCallback.remove();
+            mBackCallback = null;
+        }
+
         mSelfWeakRef.clear();
 
         PublicJavaCallCpp("mainentrance_destroy");
@@ -423,56 +444,223 @@ public class MainEntrance extends AppCompatActivity {
         switch (pos) {
             case MENU_ID_ADD_TAB:
                 // 增加标签页
-                PublicJavaCallCpp("menu_id_add_tab");
-                onBackPressed();
+                //PublicJavaCallCpp("menu_id_add_tab");
+                showAddTabDialog();
+
                 break;
             case MENU_ID_DELETE_TAB:
                 // 删除标签页
-                PublicJavaCallCpp("menu_id_delete_tab");
-                onBackPressed();
+                int selIdxDel = MyActivity.mainTabLastSelectedPos;
+                if (mCatAdapter != null) {
+                    String rawItem = mCatAdapter.getRawItemAt(selIdxDel);
+                    String displayTitle = mCatAdapter.getDisplayTitleAt(
+                        selIdxDel
+                    );
+                    if (rawItem != null && !displayTitle.isEmpty()) {
+                        showDeleteTabConfirmDialog(rawItem, displayTitle);
+                    }
+                }
+
                 break;
             case MENU_ID_RENAME_TAB:
                 // 重命名标签页
-                PublicJavaCallCpp("menu_id_rename_tab");
-                onBackPressed();
+                int selIdx = MyActivity.mainTabLastSelectedPos;
+                if (mCatAdapter != null) {
+                    String rawItem = mCatAdapter.getRawItemAt(selIdx);
+                    String displayTitle = mCatAdapter.getDisplayTitleAt(selIdx);
+                    if (rawItem != null && !displayTitle.isEmpty()) {
+                        showRenameTabDialog(rawItem, displayTitle);
+                    }
+                }
+
                 break;
             case MENU_ID_EXPORT_DATA:
                 // 导出数据
                 PublicJavaCallCpp("menu_id_export_data");
-                onBackPressed();
+                finish();
                 break;
             case MENU_ID_IMPORT_DATA:
                 // 导入数据
                 PublicJavaCallCpp("menu_id_import_data");
-                onBackPressed();
+                finish();
                 break;
             case MENU_ID_PREFERENCE:
                 // 偏好设置
                 PublicJavaCallCpp("menu_id_preference");
-                onBackPressed();
+                finish();
                 break;
             case MENU_ID_CLOUD_BACKUP_RESTORE:
                 // 云备份与恢复数据
                 PublicJavaCallCpp("menu_id_cloud_backup_restore");
-                onBackPressed();
+                finish();
                 break;
             case MENU_ID_BACKUP_FILE_LIST:
                 // 备份文件列表
                 PublicJavaCallCpp("menu_id_backup_file_list");
-                onBackPressed();
+                finish();
                 break;
             case MENU_ID_TAB_RECYCLE_BIN:
                 // 标签页回收箱
                 PublicJavaCallCpp("menu_id_tab_recycle_bin");
-                onBackPressed();
+                finish();
                 break;
             case MENU_ID_ABOUT:
                 // 关于
                 PublicJavaCallCpp("menu_id_about");
-                onBackPressed();
+                finish();
                 break;
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // 拦截，不调用super.onBackPressed()
+    }
+
+    //菜单对话框
+
+    /**
+     * 对话框1：新建标签页
+     */
+    public void showAddTabDialog() {
+        runOnUiThread(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(
+                MainEntrance.this
+            );
+            LinearLayout container = new LinearLayout(MainEntrance.this);
+            container.setOrientation(LinearLayout.VERTICAL);
+            int dp16 = dp2px(16);
+            container.setPadding(dp16, dp16, dp16, dp16);
+
+            TextView tvHint = new TextView(MainEntrance.this);
+            if (MyActivity.zh_cn) {
+                tvHint.setText("请输入标签页名称:");
+            } else {
+                tvHint.setText("Please input tab name:");
+            }
+            tvHint.setTextSize(18);
+            container.addView(tvHint);
+
+            EditText etInput = new EditText(MainEntrance.this);
+            if (MyActivity.zh_cn) {
+                etInput.setText("标签页");
+            } else {
+                etInput.setText("Tab");
+            }
+            etInput.selectAll(); // 默认全选文本，和截图行为一致
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            lp.topMargin = dp2px(12);
+            etInput.setLayoutParams(lp);
+            container.addView(etInput);
+
+            builder.setView(container);
+
+            // 按钮文本中英文
+            String textOk = MyActivity.zh_cn ? "完成" : "Done";
+            String textCancel = MyActivity.zh_cn ? "取消" : "Cancel";
+
+            builder.setPositiveButton(textOk, (dialog, which) -> {
+                String name = etInput.getText().toString().trim();
+                // ==========【确定事件，留空，你自己写业务】==========
+                // PublicJavaCallCpp("add_tab_confirm|==|" + name);
+            });
+            builder.setNegativeButton(textCancel, (dialog, which) -> {
+                dialog.dismiss();
+            });
+
+            AlertDialog dlg = builder.create();
+            dlg.show();
+        });
+    }
+
+    /**
+     * 对话框2：重命名标签页
+     * @param rawItem 完整原始记录 title|==|flag
+     * @param displayName UI展示用旧名称
+     */
+    public void showRenameTabDialog(
+        final String rawItem,
+        final String displayName
+    ) {
+        runOnUiThread(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(
+                MainEntrance.this
+            );
+            LinearLayout container = new LinearLayout(MainEntrance.this);
+            container.setOrientation(LinearLayout.VERTICAL);
+            int dp16 = dp2px(16);
+            container.setPadding(dp16, dp16, dp16, dp16);
+            TextView tvHint = new TextView(MainEntrance.this);
+            if (MyActivity.zh_cn) {
+                tvHint.setText("标签页名称:");
+            } else {
+                tvHint.setText("Tab name:");
+            }
+            tvHint.setTextSize(18);
+            container.addView(tvHint);
+            EditText etInput = new EditText(MainEntrance.this);
+            etInput.setText(displayName);
+            etInput.selectAll();
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            lp.topMargin = dp2px(12);
+            etInput.setLayoutParams(lp);
+            container.addView(etInput);
+            builder.setView(container);
+            String textOk = MyActivity.zh_cn ? "确定" : "OK";
+            String textCancel = MyActivity.zh_cn ? "取消" : "Cancel";
+            builder.setPositiveButton(textOk, (dialog, which) -> {
+                String newName = etInput.getText().toString().trim();
+                // TODO：业务，可使用 rawItem + newName
+                // PublicJavaCallCpp("rename_tab_confirm|==|" + rawItem + "|==|" + newName);
+            });
+            builder.setNegativeButton(textCancel, (dialog, which) -> {
+                dialog.dismiss();
+            });
+            AlertDialog dlg = builder.create();
+            dlg.show();
+        });
+    }
+
+    /**
+     * 对话框3：删除标签页确认弹窗
+     * @param rawItem 完整原始记录 title|==|flag
+     * @param displayName UI展示名称
+     */
+    public void showDeleteTabConfirmDialog(
+        final String rawItem,
+        final String displayName
+    ) {
+        runOnUiThread(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(
+                MainEntrance.this
+            );
+            String msg;
+            if (MyActivity.zh_cn) {
+                msg = "是否删除 " + displayName + " ?";
+            } else {
+                msg = "Delete " + displayName + " ?";
+            }
+            builder.setTitle("Knot");
+            builder.setMessage(msg);
+            String textOk = MyActivity.zh_cn ? "确定" : "OK";
+            String textCancel = MyActivity.zh_cn ? "取消" : "Cancel";
+            builder.setPositiveButton(textOk, (dialog, which) -> {
+                // TODO：业务，使用 rawItem
+                // PublicJavaCallCpp("delete_tab_confirm|==|" + rawItem);
+            });
+            builder.setNegativeButton(textCancel, (dialog, which) -> {
+                dialog.dismiss();
+            });
+            AlertDialog dlg = builder.create();
+            dlg.show();
+        });
     }
 }

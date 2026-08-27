@@ -157,4 +157,42 @@ public class CategoryGridAdapter
             }
         });
     }
+
+    /**
+     * 根据position获取UI展示的卡片标题，复用onBindViewHolder内部完全一样的解析逻辑
+     * @param position 列表下标
+     * @return 显示标题，越界返回空字符串
+     */
+    public String getDisplayTitleAt(int position) {
+        if (position < 0 || position >= mItemList.size()) {
+            return "";
+        }
+        String rawStr = mItemList.get(position);
+        String title;
+        boolean isTodayTab = false;
+        String[] parts = rawStr.split("\\|==\\|");
+        if (parts.length >= 2) {
+            title = parts[0];
+            try {
+                int flag = Integer.parseInt(parts[1]);
+                isTodayTab = flag == 1;
+            } catch (NumberFormatException e) {
+                isTodayTab = false;
+            }
+        } else {
+            title = rawStr;
+            isTodayTab = false;
+        }
+        return title;
+    }
+
+    /**
+     * 获取position对应的原始完整字符串 title|==|flag
+     */
+    public String getRawItemAt(int position) {
+        if (position < 0 || position >= mItemList.size()) {
+            return null;
+        }
+        return mItemList.get(position);
+    }
 }

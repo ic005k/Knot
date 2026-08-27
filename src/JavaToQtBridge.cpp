@@ -463,8 +463,16 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
         try {
           // 在这里写业务逻辑
           if (strType == "open_book_file") {
-            QString bookfile = m_Method->getTempSwapStr();
-            m_Reader->startOpenFile(bookfile);
+            QTimer::singleShot(100, mw_one, [=]() {
+              QString bookfile = m_Method->getTempSwapStr();
+              QFileInfo fi(bookfile);
+              QString suffix = fi.suffix().toLower();
+              if (suffix != "pdf" && suffix != "mobi") {
+                mui->frameMain->hide();
+                mui->frameReader->show();
+              }
+              m_Reader->startOpenFile(bookfile);
+            });
           }
 
           if (strType == "clear_reader_records") {
