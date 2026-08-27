@@ -293,10 +293,25 @@ public class MyService extends Service {
 
     @TargetApi(26)
     private void setForeground() {
-        Intent notificationIntent = new Intent(this, MyActivity.class);
+        /*Intent notificationIntent = new Intent(this, MainEntrance.class);
         notificationIntent.setFlags(
             Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP
-        );
+        );*/
+
+        // ========== 核心：使用 Launcher Intent ==========
+        Intent notificationIntent =
+            getPackageManager().getLaunchIntentForPackage(getPackageName());
+
+        if (notificationIntent == null) {
+            notificationIntent = new Intent(this, MyActivity.class);
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        } else {
+            notificationIntent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK |
+                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+            );
+        }
+        // ====================================================
 
         int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
