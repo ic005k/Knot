@@ -204,22 +204,6 @@ Rectangle {
             radius: 0
             color: view.currentIndex === index ? "lightblue" : getColor()
 
-            /*MouseArea {
-                anchors.fill: parent
-                onClicked: function (mouse) {
-                    if (!checkRenderContext())
-                        return;
-                    if (actionButtons.visible && mouse.x > actionButtons.x && mouse.x < actionButtons.x + actionButtons.width && mouse.y > actionButtons.y && mouse.y < actionButtons.y + actionButtons.height) {
-                        mouse.accepted = false;
-                        console.log("按钮被点击...");
-                    } else {
-                        view.currentIndex = index;
-                        m_Todo.stopPlayVoice();
-                        console.log("index=" + index + "  c_index=" + ListView.isCurrentItem);
-                    }
-                }
-            }*/
-
             TapHandler {
                 dragThreshold: 5
 

@@ -532,11 +532,11 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     return;
   }
 
-  if (m_Reader->isBookListWinVisible()) {
+  /*if (m_Reader->isBookListWinVisible()) {
     on_btnBackBookList_clicked();
     event->ignore();
     return;
-  }
+  }*/
 
   if (mui->qwMainChart->isVisible()) {
     on_btnChart();

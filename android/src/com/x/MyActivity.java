@@ -1574,6 +1574,16 @@ public class MyActivity
     }
 
     /**
+     * 打开Todo列表窗口
+     */
+    public void openTodoListWindow(ArrayList<String> todoItemList) {
+        Intent intent = new Intent(this, TodoActivity.class);
+        // 把ArrayList直接放入intent
+        intent.putStringArrayListExtra("todo_list", todoItemList);
+        startActivity(intent);
+    }
+
+    /**
      * 打开新增事件记录窗口 AddEventRecord
      */
     public void openAddEventRecord(

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_todo_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="8dp"
+>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+    >
+        <!-- 左侧彩色竖标记条 -->
+        <View
+            android:id="@+id/view_stripe"
+            android:layout_width="6dp"
+            android:layout_height="match_parent"
+        />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="10dp"
+        >
+            <!-- 头部标签：定时提醒 +时间 -->
+            <TextView
+                android:id="@+id/tv_todo_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:textStyle="bold"
+            />
+            <!-- Todo正文 -->
+            <TextView
+                android:id="@+id/tv_todo_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textSize="16sp"
+            />
+            <!-- 操作图标行：星、复制、编辑、闹钟、删除、完成 -->
+            <LinearLayout
+                android:id="@+id/layout_action_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+            >
+
+                <ImageView
+                    android:id="@+id/iv_action_star"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_todo_star"
+                />
+
+                <ImageView
+                    android:id="@+id/iv_action_copy"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_todo_copy"
+                />
+
+                <ImageView
+                    android:id="@+id/iv_action_edit"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_todo_edit"
+                />
+
+                <ImageView
+                    android:id="@+id/iv_action_alarm"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_todo_alarm"
+                />
+
+                <ImageView
+                    android:id="@+id/iv_action_delete"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_todo_delete"
+                />
+
+                <TextView
+                    android:id="@+id/tv_action_done"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/todo_done"
+                    android:textSize="15sp"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

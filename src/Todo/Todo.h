@@ -172,12 +172,14 @@ class Todo : public QDialog {
 
   void clearJavaNotify();
   void openClockActivity(const QString& content);
+  void openTodoListWindow(QStringList list);
  private slots:
   void on_ShowRecordTime();
 
   void on_ShowPlayProgress();
 
  private:
+  QStringList listTodo, listRecycle;
   QDate alarmDate;
   QTime alarmTime;
   QListWidgetItem* editItem;

@@ -115,6 +115,9 @@ void Todo::saveTodo() {
 void Todo::init_Todo() {
   clearAll();
 
+  listTodo.clear();
+  listRecycle.clear();
+
   QString filePath = iniDir + "todo.json";
   if (QFile::exists(filePath)) {
     QFile file(filePath);
@@ -142,7 +145,10 @@ void Todo::init_Todo() {
       int type = item["type"].toInt();
       QString strText = item["text"].toString();
 
-      addItem(strTime, type, strText);  // 你的添加函数
+      addItem(strTime, type, strText);
+
+      listTodo.append(strTime + "|==|" + QString::number(type) + "|==|" +
+                      strText);
     }
 
     // 读取回收站
@@ -153,30 +159,9 @@ void Todo::init_Todo() {
       QString doneTime = item["doneTime"].toString();
       QString strText = item["text"].toString();
 
-      addItemRecycle(doneTime, 0, strText);  // 你的添加函数
-    }
-  } else {
-    iniTodo = new QSettings(iniDir + "todo.ini", QSettings::IniFormat, this);
-    int count = iniTodo->value("/Todo/Count").toInt();
-    for (int i = 0; i < count; i++) {
-      QString str =
-          iniTodo->value("/Todo/Item" + QString::number(i)).toString();
-      QString strTime =
-          iniTodo->value("/Todo/Time" + QString::number(i)).toString();
-      int type = iniTodo->value("/Todo/Type" + QString::number(i)).toInt();
+      addItemRecycle(doneTime, 0, strText);
 
-      addItem(strTime, type, str);
-    }
-
-    clearAllRecycle();
-    int count1 = iniTodo->value("/Todo/Count1").toInt();
-    for (int i = 0; i < count1; i++) {
-      QString doneTime =
-          iniTodo->value("/Todo/ItemRecycleDoneTime" + QString::number(i))
-              .toString();
-      QString str =
-          iniTodo->value("/Todo/ItemRecycle" + QString::number(i)).toString();
-      addItemRecycle(doneTime, 0, str);
+      listRecycle.append(doneTime + "|==|" + strText);
     }
   }
 
@@ -229,12 +214,13 @@ void Todo::closeTodo() {
   stopPlayVoice();
   saveTodo();
 
-  if (!isAndroid) {
-    mui->frameMain->show();
-  } else
-    m_Method->openMainEntranceWindow();
-
   mui->frameTodo->hide();
+
+  if (isAndroid) {
+    m_Method->openMainEntranceWindow();
+  } else {
+    mui->frameMain->show();
+  }
 
   refreshTableLists();
   refreshAlarm();
@@ -1491,9 +1477,15 @@ void Todo::openTodoUI() {
   mw_one->execNeedSyncNotes();
 
   mui->qwTodo->rootContext()->setContextProperty("m_width", mw_one->width());
-  mui->frameMain->hide();
-  mui->frameTodo->show();
+
   init_Todo();
+
+  if (isAndroid) {
+    openTodoListWindow(listTodo);
+  } else {
+    mui->frameMain->hide();
+    mui->frameTodo->show();
+  }
 
   refreshAlarm();
   setCurrentIndex(0);
