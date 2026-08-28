@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,30 +23,12 @@ public class TodoActivity extends AppCompatActivity {
     private OnBackPressedCallback mBackCallback;
     public static TodoActivity mInstance = null;
     private WeakReference<TodoActivity> mSelfWeakRef;
-
     private RecyclerView mRvTodoList;
     private TodoCardAdapter mTodoAdapter;
-
     private EditText etTodoInput;
     private ImageView ivTodoAdd;
     private ImageView ivTodoClear;
-
-    //底部Tab控件
-    private View mTabRead;
-    private View mTabTodo;
-    private View mTabNote;
-    private View mTabSport;
-    private ImageView ivTabRead;
-    private ImageView ivTabTodo;
-    private ImageView ivTabNote;
-    private ImageView ivTabSport;
-    private TextView tvTabRead;
-    private TextView tvTabTodo;
-    private TextView tvTabNote;
-    private TextView tvTabSport;
-
     private View layoutTodoRoot;
-    private View bottomTabLayout;
 
     public static native void PublicJavaCallCpp(String type);
 
@@ -64,14 +44,11 @@ public class TodoActivity extends AppCompatActivity {
             }
         };
         getOnBackPressedDispatcher().addCallback(this, mBackCallback);
-
         setContentView(R.layout.activity_todo);
         isDark = ImmersiveUtil.applyRealImmersive(this);
         mSelfWeakRef = new WeakReference<>(this);
 
         layoutTodoRoot = findViewById(R.id.layout_todo_root);
-        bottomTabLayout = findViewById(R.id.bottom_tab_layout);
-
         //输入栏
         etTodoInput = findViewById(R.id.et_todo_input);
         ivTodoAdd = findViewById(R.id.iv_todo_add);
@@ -109,97 +86,32 @@ public class TodoActivity extends AppCompatActivity {
             );
         });
 
-        //绑定底部Tab
-        bindBottomTabViews();
         refreshUi();
-    }
-
-    private void bindBottomTabViews() {
-        mTabRead = findViewById(R.id.tab_read_layout);
-        ivTabRead = findViewById(R.id.iv_tab_read);
-        tvTabRead = findViewById(R.id.tv_tab_read);
-        mTabRead.setOnClickListener(v -> {
-            PublicJavaCallCpp("tab_reader");
-            finish();
-        });
-
-        mTabTodo = findViewById(R.id.tab_todo_layout);
-        ivTabTodo = findViewById(R.id.iv_tab_todo);
-        tvTabTodo = findViewById(R.id.tv_tab_todo);
-        mTabTodo.setOnClickListener(v -> {
-            //当前页面，不需要动作
-        });
-
-        mTabNote = findViewById(R.id.tab_note_layout);
-        ivTabNote = findViewById(R.id.iv_tab_note);
-        tvTabNote = findViewById(R.id.tv_tab_note);
-        mTabNote.setOnClickListener(v -> {
-            PublicJavaCallCpp("tab_notes");
-            finish();
-        });
-
-        mTabSport = findViewById(R.id.tab_sport_layout);
-        ivTabSport = findViewById(R.id.iv_tab_sport);
-        tvTabSport = findViewById(R.id.tv_tab_sport);
-        mTabSport.setOnClickListener(v -> {
-            PublicJavaCallCpp("tab_steps");
-            finish();
-        });
     }
 
     private void updateAllTexts() {
         boolean zh = MyActivity.zh_cn;
         if (zh) {
             etTodoInput.setHint("输入待办事项文本");
-            tvTabRead.setText("阅读");
-            tvTabTodo.setText("待办");
-            tvTabNote.setText("笔记");
-            tvTabSport.setText("运动");
         } else {
             etTodoInput.setHint("Input todo item");
-            tvTabRead.setText("Read");
-            tvTabTodo.setText("Todo");
-            tvTabNote.setText("Note");
-            tvTabSport.setText("Sport");
         }
     }
 
     private void updateAllColor() {
         int iconColor;
-        int textColor;
         int rootBgColor;
-        int bottomTabBgColor;
         if (isDark) {
             iconColor = 0xFFFFFFFF;
-            textColor = 0xFFFFFFFF;
             rootBgColor = 0xFF121212;
-            bottomTabBgColor = 0xFF1E1E1E;
         } else {
             iconColor = 0xFF000000;
-            textColor = 0xFF000000;
             rootBgColor = 0xFFF5F5F5;
-            bottomTabBgColor = 0xFFFFFFFF;
         }
-
         layoutTodoRoot.setBackgroundColor(rootBgColor);
-        bottomTabLayout.setBackgroundColor(bottomTabBgColor);
-
         //顶部图标着色
         ivTodoAdd.setColorFilter(iconColor);
         ivTodoClear.setColorFilter(iconColor);
-
-        //底部tab图标
-        ivTabRead.setColorFilter(iconColor);
-        ivTabTodo.setColorFilter(iconColor);
-        ivTabNote.setColorFilter(iconColor);
-        ivTabSport.setColorFilter(iconColor);
-
-        //文字颜色
-        tvTabRead.setTextColor(textColor);
-        tvTabTodo.setTextColor(textColor);
-        tvTabNote.setTextColor(textColor);
-        tvTabSport.setTextColor(textColor);
-
         //同步暗黑模式到适配器
         mTodoAdapter.setDarkMode(isDark);
     }
@@ -228,7 +140,6 @@ public class TodoActivity extends AppCompatActivity {
         mSelfWeakRef.clear();
         mInstance = null;
         PublicJavaCallCpp("todo_activity_destroy");
-
         if (
             MyActivity.m_instance != null &&
             !MyActivity.m_instance.isFinishing() &&

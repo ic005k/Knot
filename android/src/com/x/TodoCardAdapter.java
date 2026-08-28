@@ -16,10 +16,12 @@ public class TodoCardAdapter
     private ArrayList<String> mRawData = new ArrayList<>();
     private boolean mIsDark = false;
     private TodoActivity.OnTodoItemActionListener mListener;
+    private int mSelectedPos = -1;
 
     public void setStringListData(ArrayList<String> list) {
         mRawData.clear();
         mRawData.addAll(list);
+        mSelectedPos = -1;
         notifyDataSetChanged();
     }
 
@@ -32,6 +34,11 @@ public class TodoCardAdapter
         TodoActivity.OnTodoItemActionListener l
     ) {
         mListener = l;
+    }
+
+    public void clearSelection() {
+        mSelectedPos = -1;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -51,7 +58,6 @@ public class TodoCardAdapter
     @Override
     public void onBindViewHolder(@NonNull TodoViewHolder holder, int position) {
         String item = mRawData.get(position);
-        // C++约定格式： strTime |==| type(int) |==| strText
         String[] parts = item.split("\\|==\\|");
         if (parts.length >= 3) {
             String strTime = parts[0];
@@ -63,19 +69,18 @@ public class TodoCardAdapter
             }
             String strText = parts[2];
 
-            // type映射为Android颜色int
             int stripeColor;
             switch (nType) {
-                case 1: // red
+                case 1:
                     stripeColor = 0xFFFF4444;
                     break;
-                case 2: // orange
+                case 2:
                     stripeColor = 0xFFFF9800;
                     break;
-                case 3: // #3498DB blue
+                case 3:
                     stripeColor = 0xFF3498DB;
                     break;
-                default: // 0 gray
+                default:
                     stripeColor = 0xFF888888;
                     break;
             }
@@ -84,17 +89,26 @@ public class TodoCardAdapter
             holder.tvTodoContent.setText(strText);
         }
 
-        //明暗模式下卡片背景
+        boolean isSelected = position == mSelectedPos;
+        // 明暗模式 + 选中背景
         if (mIsDark) {
-            holder.cardView.setCardBackgroundColor(0xFF282828);
+            if (isSelected) {
+                holder.itemView.setBackgroundColor(0xFF3A3A3A);
+            } else {
+                holder.itemView.setBackgroundColor(0xFF282828);
+            }
             holder.tvTodoTag.setTextColor(0xFFFFFFFF);
             holder.tvTodoContent.setTextColor(0xFFEFEFEF);
         } else {
-            holder.cardView.setCardBackgroundColor(0xFFFFFFFF);
+            if (isSelected) {
+                holder.itemView.setBackgroundColor(0xFFE8F0FE);
+            } else {
+                holder.itemView.setBackgroundColor(0xFFFFFFFF);
+            }
             holder.tvTodoTag.setTextColor(0xFF000000);
             holder.tvTodoContent.setTextColor(0xFF222222);
         }
-        //图标着色
+
         int iconTint = mIsDark ? 0xFFFFFFFF : 0xFF000000;
         holder.ivStar.setColorFilter(iconTint);
         holder.ivCopy.setColorFilter(iconTint);
@@ -102,7 +116,6 @@ public class TodoCardAdapter
         holder.ivAlarm.setColorFilter(iconTint);
         holder.ivDelete.setColorFilter(iconTint);
 
-        //各个操作按钮转发事件
         final int pos = position;
         holder.ivStar.setOnClickListener(v -> {
             if (mListener != null) mListener.onAction(pos, "star");
@@ -122,6 +135,21 @@ public class TodoCardAdapter
         holder.tvDone.setOnClickListener(v -> {
             if (mListener != null) mListener.onAction(pos, "done");
         });
+
+        if (isSelected) {
+            holder.actionContainer.setVisibility(View.VISIBLE);
+        } else {
+            holder.actionContainer.setVisibility(View.GONE);
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (mSelectedPos == pos) {
+                mSelectedPos = -1;
+            } else {
+                mSelectedPos = pos;
+            }
+            notifyDataSetChanged();
+        });
     }
 
     @Override
@@ -131,7 +159,6 @@ public class TodoCardAdapter
 
     public static class TodoViewHolder extends RecyclerView.ViewHolder {
 
-        androidx.cardview.widget.CardView cardView;
         View viewStripe;
         TextView tvTodoTag;
         TextView tvTodoContent;
@@ -141,11 +168,11 @@ public class TodoCardAdapter
         ImageView ivAlarm;
         ImageView ivDelete;
         TextView tvDone;
+        View actionContainer;
 
         public TodoViewHolder(@NonNull View itemView) {
             super(itemView);
-            cardView = (androidx.cardview.widget.CardView) itemView;
-            viewStripe = itemView.findViewById(R.id.view_stripe);
+            viewStripe = itemView.findViewById(R.id.viewStripe);
             tvTodoTag = itemView.findViewById(R.id.tv_todo_tag);
             tvTodoContent = itemView.findViewById(R.id.tv_todo_content);
             ivStar = itemView.findViewById(R.id.iv_action_star);
@@ -154,6 +181,7 @@ public class TodoCardAdapter
             ivAlarm = itemView.findViewById(R.id.iv_action_alarm);
             ivDelete = itemView.findViewById(R.id.iv_action_delete);
             tvDone = itemView.findViewById(R.id.tv_action_done);
+            actionContainer = itemView.findViewById(R.id.action_container);
         }
     }
 }

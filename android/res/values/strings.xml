@@ -35,13 +35,4 @@
     >Android does not allow following file:// link: </string>
 
 
-    <string name="todo_input_hint">请输入待办事项</string>
-    <string name="tab_read">阅读</string>
-    <string name="tab_todo">待办</string>
-    <string name="tab_note">笔记</string>
-    <string name="tab_sport">运动</string>
-    <string name="todo_done">已完成</string>
-
-
-
 </resources>
