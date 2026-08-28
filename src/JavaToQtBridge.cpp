@@ -237,11 +237,7 @@ static void JavaNotify_11() {
   qDebug() << "C++ JavaNotify_11";
 }
 
-static void JavaNotify_12() {
-  if (isPDF && isAndroid) m_Reader->openMyPDF(fileName);
-
-  qDebug() << "C++ JavaNotify_12";
-}
+static void JavaNotify_12() { qDebug() << "C++ JavaNotify_12"; }
 
 static void JavaNotify_13() {
   m_Reader->openMyPDF(fileName);
@@ -463,7 +459,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
       mw_one,
       [strType]() {
         try {
-          // 在这里写业务逻辑
+          // 打开数据文件
           if (strType == "open_book_file") {
             QTimer::singleShot(100, mw_one, [=]() {
               QString bookfile = m_Method->getTempSwapStr();

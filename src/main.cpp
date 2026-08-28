@@ -202,7 +202,7 @@ int main(int argc, char* argv[]) {
   RegJniPublicJavaCallCpp("com/x/ReadListActivity");
   RegJniPublicJavaCallCpp("com/x/AddEventRecord");
   RegJniPublicJavaCallCpp("com/x/MainEntrance");
-  RegJniPublicJavaCallCpp("com/x/CategoryGridAdapter");
+  RegJniPublicJavaCallCpp("com/x/FilePicker");
 
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";

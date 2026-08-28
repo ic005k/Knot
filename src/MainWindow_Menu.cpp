@@ -229,6 +229,8 @@ void MainWindow::on_actionImport_Data_triggered() {
             tr("Import this data?") + "\n" + m_Reader->getUriRealPath(zipfile),
             2)) {
       isZipOK = false;
+
+      m_Method->openMainEntranceWindow();
       return;
     }
   }

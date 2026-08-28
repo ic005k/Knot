@@ -282,12 +282,15 @@ void MainWindow::importDataDone() {
                        tr("Or the operation is canceled by the user."),
                    1);
 
+      m_Method->openMainEntranceWindow();
       return;
     }
   }
 
   auto msg = std::make_unique<ShowMessage>(mw_one);
   msg->showMsg("Knot", tr("Data import was successful."), 1);
+
+  m_Method->openMainEntranceWindow();
 }
 
 BakDataThread::BakDataThread(QObject* parent) : QThread{parent} {

@@ -734,8 +734,6 @@ void MainWindow::on_btnSync_clicked() {
       !mui->btnWebDAVRestore->isEnabled())
     return;
 
-  mui->frameMain->hide();
-  mui->frameOne->show();
   mui->btnWebDAVBackup->click();
 }
 

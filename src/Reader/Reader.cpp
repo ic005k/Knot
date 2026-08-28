@@ -1959,7 +1959,7 @@ void Reader::readBookDone() {
 #ifdef Q_OS_ANDROID
 
     if (!mw_one->initMain) {
-      mui->frameMain->show();
+      mui->frameMain->hide();
       mui->frameReader->hide();
 
       QTimer::singleShot(100, this, [this]() { openMyPDF(fileName); });

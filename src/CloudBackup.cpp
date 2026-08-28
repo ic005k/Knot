@@ -194,7 +194,7 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
     return;
   }
 
-  mui->progBar->show();
+  // mui->progBar->show();
   mui->progBar->setValue(0);
   mui->progressBar->setValue(0);
 
@@ -219,8 +219,6 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
           1);
 
       mui->progBar->hide();
-
-      if (isAndroid) m_Method->openMainEntranceWindow();
 
     } else {
       qDebug() << "上传失败：" << reply->errorString();

@@ -77,6 +77,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.widget.Toast;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -124,6 +125,10 @@ public class FilePicker
     implements View.OnClickListener, Application.ActivityLifecycleCallbacks
 {
 
+    private OnBackPressedCallback mBackCallback;
+
+    public static native void PublicJavaCallCpp(String type);
+
     public static Context MyContex;
     private ContentResolver mContentResolver;
     private List<String> files;
@@ -169,104 +174,19 @@ public class FilePicker
 
     public static native void CallJavaNotify_14();
 
-    /*@Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // ========== 统一沉浸模式（和腾讯地图逻辑完全一样 · 全页面通用） ==========
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-
-            // 状态栏 + 导航栏 透明（和地图一样）
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.setNavigationBarColor(Color.TRANSPARENT);
-
-            // 布局延伸到系统栏（和地图一样）
-            window
-                .getDecorView()
-                .setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                );
-        }
-
-        // ========== 自动避让系统栏（和地图逻辑一样 · 通用不报错版） ==========
-        View decorView = getWindow().getDecorView();
-        decorView.setOnApplyWindowInsetsListener((v, insets) -> {
-            int statusBarHeight = insets.getSystemWindowInsetTop();
-            int navBarHeight = insets.getSystemWindowInsetBottom();
-
-            // --------------------------
-            // 通用方式：给 最外层布局 加 padding（所有页面都能用）
-            // --------------------------
-            View contentView = findViewById(android.R.id.content);
-            if (contentView != null) {
-                contentView.setPadding(0, statusBarHeight, 0, navBarHeight);
-            }
-
-            return insets;
-        });
-
-        MyContex = FilePicker.this;
-        MyFilepicker = this;
-        mContentResolver = MyContex.getContentResolver();
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        // ========== 统一状态栏、导航栏 ==========
-        updateSystemBars();
-
-        // ========== 布局不变 ==========
-        isDark = MyActivity.isDark;
-        if (isDark) {
-            setContentView(R.layout.myfilepicker_dark);
-        } else {
-            setContentView(R.layout.myfilepicker);
-        }
-
-        btn_clear = (ImageButton) findViewById(R.id.btn_clear);
-        btn_clear.setOnClickListener(this);
-
-        btnFind = (Button) findViewById(R.id.btnFind);
-        btnFind.setOnClickListener(this);
-
-        lblResult = (TextView) findViewById(R.id.lblResult);
-        editFind = (EditText) findViewById(R.id.editFind);
-
-        m_ListView = (ListView) findViewById(R.id.listView);
-
-        mProgressBar = (ProgressBar) findViewById(R.id.progBar);
-        mProgressBar.setVisibility(View.VISIBLE);
-
-        btnFind.setVisibility(View.GONE);
-
-        // 修复 Android 14 崩溃
-        IntentFilter filter = new IntentFilter(
-            Intent.ACTION_CLOSE_SYSTEM_DIALOGS
-        );
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            registerReceiver(
-                mHomeKeyEvent,
-                filter,
-                Context.RECEIVER_NOT_EXPORTED
-            );
-        } else {
-            registerReceiver(mHomeKeyEvent, filter);
-        }
-
-        initEditTextChangedListener();
-
-        MyAsyncTask myAsyncTask = new MyAsyncTask();
-        myAsyncTask.execute();
-    }*/
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 注册返回拦截回调
+        mBackCallback = new OnBackPressedCallback(true /* enabled */) {
+            @Override
+            public void handleOnBackPressed() {
+                PublicJavaCallCpp("cancel_add_event_record");
+                finish();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, mBackCallback);
 
         // ========== 隐藏标题栏 ==========
         if (getSupportActionBar() != null) {
@@ -319,7 +239,6 @@ public class FilePicker
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        CallJavaNotify_12();
     }
 
     @Override

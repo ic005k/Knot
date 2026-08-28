@@ -143,7 +143,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/TransparentSplashTheme"
             android:windowSoftInputMode="stateUnspecified"
-            android:persistent="true"
         >
 
             <intent-filter>
@@ -244,10 +243,13 @@
         </activity>
 
         <!-- 原生窗口 MainEntrance，普通内部窗口，无启动器filter -->
-            <activity
+        <activity
             android:name=".MainEntrance"
             android:exported="false"
             android:screenOrientation="portrait"
+            android:excludeFromRecents="false"
+            android:taskAffinity="com.x"
+            android:launchMode="standard"
         />
 
         <activity

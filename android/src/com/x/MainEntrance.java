@@ -216,6 +216,7 @@ public class MainEntrance extends AppCompatActivity {
             PublicJavaCallCpp("topbtn_upload");
             finish();
         });
+        mTopBtnUpload.setVisibility(View.GONE);
 
         // ---------- 底部Tab容器绑定 ----------
         mTabRead = findViewById(R.id.tab_read_layout);
