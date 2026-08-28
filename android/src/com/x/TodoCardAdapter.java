@@ -13,6 +13,8 @@ public class TodoCardAdapter
     extends RecyclerView.Adapter<TodoCardAdapter.TodoViewHolder>
 {
 
+    public static native void PublicJavaCallCpp(String type);
+
     private ArrayList<String> mRawData = new ArrayList<>();
     private boolean mIsDark = false;
     private TodoActivity.OnTodoItemActionListener mListener;
@@ -118,10 +120,10 @@ public class TodoCardAdapter
 
         final int pos = position;
         holder.ivStar.setOnClickListener(v -> {
-            if (mListener != null) mListener.onAction(pos, "star");
+            if (mListener != null) mListener.onAction(pos, "high");
         });
         holder.ivCopy.setOnClickListener(v -> {
-            if (mListener != null) mListener.onAction(pos, "copy");
+            if (mListener != null) mListener.onAction(pos, "low");
         });
         holder.ivEdit.setOnClickListener(v -> {
             if (mListener != null) mListener.onAction(pos, "edit");
@@ -130,7 +132,8 @@ public class TodoCardAdapter
             if (mListener != null) mListener.onAction(pos, "alarm");
         });
         holder.ivDelete.setOnClickListener(v -> {
-            if (mListener != null) mListener.onAction(pos, "delete");
+            if (mListener != null) mListener.onAction(pos, "recycle");
+            PublicJavaCallCpp("todo_recycle");
         });
         holder.tvDone.setOnClickListener(v -> {
             if (mListener != null) mListener.onAction(pos, "done");

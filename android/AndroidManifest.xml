@@ -238,6 +238,11 @@
         <activity android:name=".TodoActivity" android:exported="false" />
 
         <activity
+            android:name="com.x.TodoRecycleActivity"
+            android:exported="false"
+        />
+
+        <activity
             android:name="com.x.AddEventRecord"
             android:exported="false"
             android:screenOrientation="portrait"

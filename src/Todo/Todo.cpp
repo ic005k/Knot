@@ -597,8 +597,12 @@ void Todo::sendMsgAlarm(QString text) {
 }
 
 void Todo::on_btnRecycle() {
-  mui->frameTodo->hide();
-  mui->frameTodoRecycle->show();
+  if (isAndroid) {
+    openTodoRecycleWindow(listRecycle);
+  } else {
+    mui->frameTodo->hide();
+    mui->frameTodoRecycle->show();
+  }
 }
 
 void Todo::on_btnReturn_clicked() {

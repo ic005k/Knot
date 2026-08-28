@@ -1584,6 +1584,16 @@ public class MyActivity
     }
 
     /**
+     * 打开Todo回收站
+     */
+    public void openTodoRecycleWindow(ArrayList<String> todoItemList) {
+        Intent intent = new Intent(this, TodoRecycleActivity.class);
+        // 把ArrayList直接放入intent
+        intent.putStringArrayListExtra("todorecycle_list", todoItemList);
+        startActivity(intent);
+    }
+
+    /**
      * 打开新增事件记录窗口 AddEventRecord
      */
     public void openAddEventRecord(

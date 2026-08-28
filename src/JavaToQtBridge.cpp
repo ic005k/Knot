@@ -459,7 +459,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
       mw_one,
       [strType]() {
         try {
-          // 打开数据文件
+          // 打开书籍文件
           if (strType == "open_book_file") {
             QTimer::singleShot(100, mw_one, [=]() {
               QString bookfile = m_Method->getTempSwapStr();
@@ -599,6 +599,12 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           if (strType == "menu_id_about") {
             QTimer::singleShot(100, mw_one,
                                [=]() { mw_one->on_actionAbout(); });
+          }
+
+          // Todo
+          if (strType == "todo_recycle") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->m_Todo->on_btnRecycle(); });
           }
 
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;
