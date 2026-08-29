@@ -459,7 +459,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
       mw_one,
       [strType]() {
         try {
-          // 打开书籍文件
+          // 打开书籍文件 ===========================================
           if (strType == "open_book_file") {
             QTimer::singleShot(100, mw_one, [=]() {
               QString bookfile = m_Method->getTempSwapStr();
@@ -478,7 +478,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             m_Reader->clearReaderRecords(c_name);
           }
 
-          // 增加事件记录
+          // 增加事件记录 ==============================================
           if (strType == "add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {
               if (mw_one && mw_one->m_EditRecord) {
@@ -507,7 +507,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->m_MainHelper->selectTab(); });
           }
 
-          // 主入口销毁
+          // 主入口 ==============================================
           if (strType == "mainentrance_destroy") {
             QTimer::singleShot(100, mw_one, [=]() {
 
@@ -528,6 +528,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          // 主工具栏按钮=============================================
           if (strType == "topbtn_add") {
             QTimer::singleShot(100, mw_one, [=]() { mui->btnAdd->click(); });
           }
@@ -556,7 +557,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QTimer::singleShot(100, mw_one, [=]() { mui->btnSteps->click(); });
           }
 
-          // 菜单
+          // 菜单==========================================================
           if (strType == "menu_id_add_tab") {
             QTimer::singleShot(100, mw_one,
                                [=]() { mw_one->on_actionAdd_Tab_triggered(); });
@@ -601,11 +602,32 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->on_actionAbout(); });
           }
 
-          // Todo
+          // Todo ===================================================
           if (strType == "todo_recycle") {
             QTimer::singleShot(100, mw_one,
                                [=]() { mw_one->m_Todo->on_btnRecycle(); });
           }
+
+          if (strType.startsWith("todo_recycle_restore|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              QString todoContent = list.at(1);
+              QTimer::singleShot(0, mw_one, [todoContent]() {
+                // mw_one->m_Todo->addToList(todoContent);
+              });
+            }
+          }
+
+          if (strType.startsWith("todo_alarm|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              int index = list.at(1).toInt();
+              QTimer::singleShot(
+                  0, mw_one, [index]() { mw_one->m_Todo->on_btnSetTime(); });
+            }
+          }
+
+          //=============================================================
 
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;
         } catch (const std::exception& ex) {

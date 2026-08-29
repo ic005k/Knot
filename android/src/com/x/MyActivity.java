@@ -1593,6 +1593,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openTodoAlarmWindow(ArrayList<String> todoItemList) {
+        Intent intent = new Intent(this, TodoAlarmActivity.class);
+        intent.putStringArrayListExtra("todo_alarm_list", todoItemList);
+        startActivity(intent);
+    }
+
     /**
      * 打开新增事件记录窗口 AddEventRecord
      */

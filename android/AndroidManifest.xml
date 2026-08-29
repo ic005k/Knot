@@ -243,6 +243,13 @@
         />
 
         <activity
+            android:name=".TodoAlarmActivity"
+            android:exported="false"
+            android:windowSoftInputMode="stateHidden"
+        />
+
+
+        <activity
             android:name="com.x.AddEventRecord"
             android:exported="false"
             android:screenOrientation="portrait"

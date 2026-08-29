@@ -252,3 +252,19 @@ void Todo::openTodoRecycleWindow(QStringList list) {
                             jArrayList.object());
 #endif
 }
+
+void Todo::openTodoAlarmWindow(QStringList list) {
+#ifdef Q_OS_ANDROID
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+
+  for (const QString& item : list) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  activity.callMethod<void>("openTodoAlarmWindow", "(Ljava/util/ArrayList;)V",
+                            jArrayList.object());
+#endif
+}

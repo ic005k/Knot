@@ -411,6 +411,32 @@ qlonglong Todo::getSecond(QString strDateTime) {
 }
 
 void Todo::on_btnSetTime() {
+  QStringList list;
+  QString str1, str2, str3, str4, str5, str6, str7;
+  QString strDate, strTime;
+  str1 = "0";
+  str2 = "0";
+  str3 = "0";
+  str4 = "0";
+  str5 = "0";
+  str6 = "0";
+  str7 = "1";
+  strDate = QDate::currentDate().toString();
+  strTime = QTime::currentTime().toString();
+  list.append(str1);
+  list.append(str2);
+  list.append(str3);
+  list.append(str4);
+  list.append(str5);
+  list.append(str6);
+  list.append(str7);
+  list.append(strDate);
+  list.append(strTime);
+
+  openTodoAlarmWindow(list);
+
+  return;
+
   int count = getCount();
   if (count == 0) return;
 

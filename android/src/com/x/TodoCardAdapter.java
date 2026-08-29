@@ -130,6 +130,7 @@ public class TodoCardAdapter
         });
         holder.ivAlarm.setOnClickListener(v -> {
             if (mListener != null) mListener.onAction(pos, "alarm");
+            PublicJavaCallCpp("todo_alarm|==|" + pos);
         });
         holder.ivDelete.setOnClickListener(v -> {
             if (mListener != null) mListener.onAction(pos, "recycle");

@@ -10,11 +10,7 @@ import java.util.ArrayList;
 
 public class TodoRecycleActivity extends Activity {
 
-    public interface OnTodoRecycleActionListener {
-        void onRecycleClearAll();
-        void onRecycleDeleteItem(int index);
-        void onRecycleRestoreItem(int index);
-    }
+    public static native void PublicJavaCallCpp(String type);
 
     private RecyclerView mRecyclerView;
     private TodoRecycleAdapter mAdapter;
@@ -22,14 +18,16 @@ public class TodoRecycleActivity extends Activity {
     private Button mBtnClearAll;
     private Button mBtnDelete;
     private Button mBtnRestore;
-    public OnTodoRecycleActionListener mListener;
-    private static boolean isDark = false;
+
+    // Activity本地持有回收站数据源
+    private ArrayList<String> mRecycleData = new ArrayList<>();
+    private boolean mIsDark = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todo_recycle);
-        isDark = ImmersiveUtil.applyRealImmersive(this);
+        mIsDark = ImmersiveUtil.applyRealImmersive(this);
 
         mRecyclerView = findViewById(R.id.recycler_view);
         mTvTitle = findViewById(R.id.tv_title);
@@ -41,41 +39,72 @@ public class TodoRecycleActivity extends Activity {
         mAdapter = new TodoRecycleAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
-        // 初始化标题+按钮中英文
         updateButtonLanguage();
+        applyWindowDarkStyle();
 
-        // ========== 读取Intent传入的回收站列表 ==========
+        // 读取Intent初始化本地数据源
         ArrayList<String> initList = getIntent().getStringArrayListExtra(
             "todorecycle_list"
         );
         if (initList != null) {
-            mAdapter.setData(initList);
+            mRecycleData.clear();
+            mRecycleData.addAll(initList);
+            mAdapter.setData(mRecycleData);
         }
 
+        // ========== 按钮事件：全部业务逻辑在Java ==========
+        // 清除所有
         mBtnClearAll.setOnClickListener(v -> {
-            if (mListener != null) {
-                mListener.onRecycleClearAll();
-            }
+            mRecycleData.clear();
+            mAdapter.setData(mRecycleData);
         });
 
+        // 删除选中卡片
         mBtnDelete.setOnClickListener(v -> {
             int sel = mAdapter.mSelectedPos;
-            if (sel != -1 && mListener != null) {
-                mListener.onRecycleDeleteItem(sel);
+            if (sel >= 0 && sel < mRecycleData.size()) {
+                mRecycleData.remove(sel);
+                mAdapter.setData(mRecycleData);
             }
         });
 
+        // 恢复选中：提取todo文本抛给C++，本地删掉这条
         mBtnRestore.setOnClickListener(v -> {
             int sel = mAdapter.mSelectedPos;
-            if (sel != -1 && mListener != null) {
-                mListener.onRecycleRestoreItem(sel);
+            if (sel < 0 || sel >= mRecycleData.size()) return;
+
+            String rawLine = mRecycleData.get(sel);
+            String[] parts = rawLine.split("\\|==\\|");
+            String todoText = "";
+            if (parts.length >= 2) {
+                todoText = parts[1];
             }
+            if (todoText.isEmpty()) return;
+
+            // Java本地移除这条
+            mRecycleData.remove(sel);
+            mAdapter.setData(mRecycleData);
+
+            PublicJavaCallCpp("todo_recycle_restore|==|" + todoText);
         });
     }
 
-    /**
-     * 根据全局 MyActivity.zh_cn 变量更新标题以及三个按钮文本
-     */
+    private void applyWindowDarkStyle() {
+        if (mIsDark) {
+            getWindow()
+                .getDecorView()
+                .findViewById(android.R.id.content)
+                .setBackgroundColor(0xFF1E1E1E);
+            mTvTitle.setTextColor(0xFFFFFFFF);
+        } else {
+            getWindow()
+                .getDecorView()
+                .findViewById(android.R.id.content)
+                .setBackgroundColor(0xFFFFFFFF);
+            mTvTitle.setTextColor(0xFF000000);
+        }
+    }
+
     public void updateButtonLanguage() {
         if (MyActivity.zh_cn) {
             mTvTitle.setText("待办事项回收站:");
@@ -91,15 +120,15 @@ public class TodoRecycleActivity extends Activity {
     }
 
     public void setRecycleData(ArrayList<String> list) {
-        mAdapter.setData(list);
+        mRecycleData.clear();
+        mRecycleData.addAll(list);
+        mAdapter.setData(mRecycleData);
     }
 
     public void setDarkMode(boolean dark) {
+        mIsDark = dark;
         mAdapter.setDarkMode(dark);
-    }
-
-    public void setActionListener(OnTodoRecycleActionListener listener) {
-        mListener = listener;
+        applyWindowDarkStyle();
     }
 
     public void clearSelect() {

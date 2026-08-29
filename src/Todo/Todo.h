@@ -174,6 +174,8 @@ class Todo : public QDialog {
   void openClockActivity(const QString& content);
   void openTodoListWindow(QStringList list);
   void openTodoRecycleWindow(QStringList list);
+
+  void openTodoAlarmWindow(QStringList list);
   private slots:
   void on_ShowRecordTime();
 
