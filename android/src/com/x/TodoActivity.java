@@ -24,7 +24,7 @@ public class TodoActivity extends AppCompatActivity {
     public static TodoActivity mInstance = null;
     private WeakReference<TodoActivity> mSelfWeakRef;
     private RecyclerView mRvTodoList;
-    private TodoCardAdapter mTodoAdapter;
+    public TodoCardAdapter mTodoAdapter;
     private EditText etTodoInput;
     private ImageView ivTodoAdd;
     private ImageView ivTodoClear;

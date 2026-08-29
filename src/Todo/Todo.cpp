@@ -152,7 +152,7 @@ void Todo::init_Todo() {
   refreshAlarm();
 }
 
-void Todo::addToList(QString str) {
+void Todo::addToList(QString str, bool isInsert) {
   if (str == "") return;
 
   int count = getCount();
@@ -166,10 +166,17 @@ void Todo::addToList(QString str) {
   }
 
   QString strTime = m_Method->setCurrentDateTimeValue();
-  insertItem(strTime, 0, str, 0);
+
+  if (isInsert)
+    insertItem(strTime, 0, str, 0);
+  else
+    addItem(strTime, 0, str);
 
   setCurrentIndex(0);
   refreshTableLists();
+
+  cppRefreshTodoCardList();
+
   isNeedSave = true;
   saveTodo();
 }
@@ -177,7 +184,7 @@ void Todo::addToList(QString str) {
 void Todo::AddTodoText() {
   QString str = "todo txt";
   if (str == "") return;
-  addToList(str);
+  addToList(str, true);
 }
 
 int Todo::getEditTextHeight(QTextEdit* edit) {
@@ -266,11 +273,16 @@ void Todo::setCurrentIndex(int) {}
 
 void Todo::setHighPriority(bool) {}
 
-void Todo::addItem(class QString, int, class QString) {}
+void Todo::addItem(QString strTime, int type, QString strText) {
+  listTodo.append(strTime + "|==|" + QString::number(type) + "|==|" + strText);
+}
 
-void Todo::addItemRecycle(class QString, int, class QString) {}
+void Todo::addItemRecycle(QString strTime, int type, QString strText) {
+  Q_UNUSED(type);
+  listRecycle.append(strTime + "|==|" + QString::number(0) + "|==|" + strText);
+}
 
-void Todo::delItemRecycle(int) {}
+void Todo::delItemRecycle(int index) { listRecycle.remove(index); }
 
 QString Todo::getItemTodoTextRecycle(int index) {
   QString str = listRecycle.at(index);
@@ -918,7 +930,9 @@ void Todo::insertItem(QString strTime, int type, QString strText,
 }
 
 void Todo::insertRecycle(QString strTime, int type, QString strText,
-                         int curIndex) {}
+                         int curIndex) {
+  listRecycle.insert(curIndex, strTime + "|==|" + strText);
+}
 
 int Todo::getCurrentIndex() { return 0; }
 
@@ -1190,12 +1204,13 @@ void Todo::reeditText() {
   m_ReeditTodo->show();
 }
 
-void Todo::addToRecycle() {
-  int row = getCurrentIndex();
-  QString strTodoText = getItemTodoText(row);
+void Todo::addToRecycle(int index) {
+  QString strTodoText = getItemTodoText(index);
   QString doneTime = m_Method->setCurrentDateTimeValue() + "  " + tr("Done");
 
   insertRecycle(doneTime, 0, strTodoText, 0);
+  delItem(index);
+  cppRefreshTodoCardList();
 
   isNeedSave = true;
 }
@@ -1652,17 +1667,3 @@ void Todo::on_btnTestSpeech() {
 void Todo::setAlarmShowValue(bool value) { isTodoAlarmShow = value; }
 
 void Todo::showInputPanel() {}
-
-void Todo::openClockActivity(const QString& content) {
-  Q_UNUSED(content);
-#ifdef Q_OS_ANDROID
-  QJniObject activity =
-      QJniObject(QNativeInterface::QAndroidApplication::context());
-  if (activity.isValid()) {
-    QJniObject jContent = QJniObject::fromString(content);
-    activity.callMethod<void>("openClockActivityWithContent",
-                              "(Ljava/lang/String;)V",
-                              jContent.object<jstring>());
-  }
-#endif
-}

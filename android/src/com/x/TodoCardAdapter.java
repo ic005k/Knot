@@ -138,6 +138,7 @@ public class TodoCardAdapter
         });
         holder.tvDone.setOnClickListener(v -> {
             if (mListener != null) mListener.onAction(pos, "done");
+            PublicJavaCallCpp("todo_done|==|" + pos);
         });
 
         if (isSelected) {

@@ -90,7 +90,7 @@ class Todo : public QDialog {
   void refreshTableLists();
   void refreshAlarm();
   void reeditText();
-  void addToRecycle();
+  void addToRecycle(int index);
   void isAlarm(int index);
   void insertRecycle(QString strTime, int type, QString strText, int curIndex);
 
@@ -160,7 +160,7 @@ class Todo : public QDialog {
   QString getVoiceFile(int row);
 
   void goCurrentTodoItem(QString curItem);
-  void addToList(QString str);
+  void addToList(QString str, bool isInsert);
   void closeTodo();
   void openTodoUI();
   void openTodo();
@@ -176,6 +176,7 @@ class Todo : public QDialog {
   void openTodoRecycleWindow(QStringList list);
 
   void openTodoAlarmWindow(QStringList list);
+  void cppRefreshTodoCardList();
  private slots:
   void on_ShowRecordTime();
 

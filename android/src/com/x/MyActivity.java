@@ -1584,6 +1584,19 @@ public class MyActivity
     }
 
     /**
+     * C++ JNI调用此方法，刷新待办卡片列表
+     * @param newList C++传过来的完整待办字符串列表
+     */
+    public void cppRefreshTodoCardList(ArrayList<String> newList) {
+        // JNI线程，必须切UI线程
+        runOnUiThread(() -> {
+            if (TodoActivity.mInstance != null) {
+                TodoActivity.mInstance.mTodoAdapter.setStringListData(newList);
+            }
+        });
+    }
+
+    /**
      * 打开Todo回收站
      */
     public void openTodoRecycleWindow(ArrayList<String> todoItemList) {

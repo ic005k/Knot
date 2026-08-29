@@ -613,7 +613,27 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             if (list.size() == 2) {
               QString todoContent = list.at(1);
               QTimer::singleShot(0, mw_one, [todoContent]() {
-                // mw_one->m_Todo->addToList(todoContent);
+                mw_one->m_Todo->addToList(todoContent, false);
+              });
+            }
+          }
+
+          if (strType.startsWith("todo_add|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              QString todoContent = list.at(1);
+              QTimer::singleShot(0, mw_one, [todoContent]() {
+                mw_one->m_Todo->addToList(todoContent, true);
+              });
+            }
+          }
+
+          if (strType.startsWith("todo_done|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              int index = list.at(1).toInt();
+              QTimer::singleShot(0, mw_one, [index]() {
+                mw_one->m_Todo->addToRecycle(index);
               });
             }
           }

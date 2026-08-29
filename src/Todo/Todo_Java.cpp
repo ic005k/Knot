@@ -221,6 +221,24 @@ void Todo::openTodoListWindow(QStringList list) {
 #endif
 }
 
+void Todo::cppRefreshTodoCardList() {
+#ifdef Q_OS_ANDROID
+  QStringList list = listTodo;
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+
+  for (const QString& item : list) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  activity.callMethod<void>("cppRefreshTodoCardList",
+                            "(Ljava/util/ArrayList;)V", jArrayList.object());
+#endif
+}
+
 void Todo::openTodoRecycleWindow(QStringList list) {
 #ifdef Q_OS_ANDROID
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
@@ -250,5 +268,19 @@ void Todo::openTodoAlarmWindow(QStringList list) {
 
   activity.callMethod<void>("openTodoAlarmWindow", "(Ljava/util/ArrayList;)V",
                             jArrayList.object());
+#endif
+}
+
+void Todo::openClockActivity(const QString& content) {
+  Q_UNUSED(content);
+#ifdef Q_OS_ANDROID
+  QJniObject activity =
+      QJniObject(QNativeInterface::QAndroidApplication::context());
+  if (activity.isValid()) {
+    QJniObject jContent = QJniObject::fromString(content);
+    activity.callMethod<void>("openClockActivityWithContent",
+                              "(Ljava/lang/String;)V",
+                              jContent.object<jstring>());
+  }
 #endif
 }
