@@ -108,7 +108,7 @@ class Todo : public QDialog {
 
   void on_btnHigh(int index);
   void on_btnLow(int index);
-  void on_btnSetTime();
+  void on_btnSetTime(int index);
   void on_btnRecycle();
 
   void setAlarmShowValue(bool value);
@@ -183,6 +183,7 @@ class Todo : public QDialog {
   void on_ShowPlayProgress();
 
  private:
+  int curTodoListIndex = -1;
   QStringList listTodo, listRecycle;
   QDate alarmDate;
   QTime alarmTime;

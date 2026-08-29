@@ -178,20 +178,27 @@ public class TodoActivity extends AppCompatActivity {
             // 标准多行：允许自动换行，初始1行，内容变多自动增高
             et.setInputType(android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);
             et.setSingleLine(false);
-            et.setMinHeight(80); // 最小像素高度，避免输入框挤得太小，不再强制minLines
-            et.setMaxLines(8); // 最多8行，超过后滚动，不再继续长高
+            et.setMinHeight(80);
+            et.setMaxLines(8);
 
             android.widget.LinearLayout ll = new android.widget.LinearLayout(
                 this
             );
-            android.widget.LinearLayout.LayoutParams lp =
+            android.widget.LinearLayout.LayoutParams lpLl =
                 new android.widget.LinearLayout.LayoutParams(
                     android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
                 );
-            lp.setMargins(48, 24, 48, 24);
-            ll.setLayoutParams(lp);
-            ll.addView(et);
+            lpLl.setMargins(48, 24, 48, 24);
+            ll.setLayoutParams(lpLl);
+
+            // 关键：给EditText设置布局参数，强制占满父控件全部宽度
+            android.widget.LinearLayout.LayoutParams lpEt =
+                new android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+            ll.addView(et, lpEt);
 
             android.app.AlertDialog.Builder b =
                 new android.app.AlertDialog.Builder(this);
@@ -215,7 +222,6 @@ public class TodoActivity extends AppCompatActivity {
 
             String strOk = zh ? "确定" : "OK";
             String strCancel = zh ? "取消" : "Cancel";
-
             b.setPositiveButton(strOk, (dialog, which) -> {
                 String newText = et.getText().toString();
                 PublicJavaCallCpp(
@@ -224,7 +230,6 @@ public class TodoActivity extends AppCompatActivity {
                 dialog.dismiss();
             });
             b.setNegativeButton(strCancel, (dialog, which) -> dialog.dismiss());
-
             b.create().show();
         });
     }

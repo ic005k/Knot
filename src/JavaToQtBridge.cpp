@@ -643,7 +643,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             }
           }
 
-          if (strType.startsWith("todo_hith|==|")) {
+          if (strType.startsWith("todo_high|==|")) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               int index = list.at(1).toInt();
@@ -686,9 +686,42 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               int index = list.at(1).toInt();
-              QTimer::singleShot(
-                  0, mw_one, [index]() { mw_one->m_Todo->on_btnSetTime(); });
+              QTimer::singleShot(0, mw_one, [index]() {
+                mw_one->m_Todo->on_btnSetTime(index);
+              });
             }
+          }
+
+          if (strType.startsWith("todo_alarm_set|==|")) {
+            QStringList parts = strType.split("|==|");
+            // 校验参数数量：todo_alarm_set + w1~w7(7个) + y mon d h m(5个)
+            // 一共13项
+            if (parts.size() == 13) {
+              bool w1 = parts[1].toInt() != 0;
+              bool w2 = parts[2].toInt() != 0;
+              bool w3 = parts[3].toInt() != 0;
+              bool w4 = parts[4].toInt() != 0;
+              bool w5 = parts[5].toInt() != 0;
+              bool w6 = parts[6].toInt() != 0;
+              bool w7 = parts[7].toInt() != 0;
+
+              int y = parts[8].toInt();
+              int mon = parts[9].toInt();
+              int d = parts[10].toInt();
+              int h = parts[11].toInt();
+              int m = parts[12].toInt();
+
+              // 切到UI线程执行业务接口
+              QTimer::singleShot(0, mw_one, [=]() {
+                mw_one->m_Todo->on_SetAlarm(w1, w2, w3, w4, w5, w6, w7, y, mon,
+                                            d, h, m);
+              });
+            }
+          }
+
+          if (strType == "todo_alarm_delete") {
+            QTimer::singleShot(0, mw_one,
+                               []() { mw_one->m_Todo->on_DelAlarm(); });
           }
 
           //=============================================================

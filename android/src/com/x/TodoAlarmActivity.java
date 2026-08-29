@@ -231,6 +231,7 @@ public class TodoAlarmActivity extends AppCompatActivity {
 
     private void onDeleteAlarmClicked() {
         PublicJavaCallCpp("todo_alarm_delete");
+        finish();
     }
 
     private void onSetAlarmClicked() {
@@ -239,11 +240,32 @@ public class TodoAlarmActivity extends AppCompatActivity {
         int day = npDay.getValue();
         int hour = npHour.getValue();
         int minute = npMinute.getValue();
-        int weekBits = getWeekBits();
-        int ttsEnable = swTts.isChecked() ? 1 : 0;
-        // 直接转发全部控件状态给C++，业务逻辑在C++处理
+
+        // 7个周bool，1=选中 true；0=未选中 false，严格匹配C++参数顺序 w1 w2 w3 w4 w5 w6 w7
+        int w1 = swWeek1.isChecked() ? 1 : 0;
+        int w2 = swWeek2.isChecked() ? 1 : 0;
+        int w3 = swWeek3.isChecked() ? 1 : 0;
+        int w4 = swWeek4.isChecked() ? 1 : 0;
+        int w5 = swWeek5.isChecked() ? 1 : 0;
+        int w6 = swWeek6.isChecked() ? 1 : 0;
+        int w7 = swWeek7.isChecked() ? 1 : 0;
+
         PublicJavaCallCpp(
             "todo_alarm_set|==|" +
+                w1 +
+                "|==|" +
+                w2 +
+                "|==|" +
+                w3 +
+                "|==|" +
+                w4 +
+                "|==|" +
+                w5 +
+                "|==|" +
+                w6 +
+                "|==|" +
+                w7 +
+                "|==|" +
                 year +
                 "|==|" +
                 month +
@@ -252,12 +274,10 @@ public class TodoAlarmActivity extends AppCompatActivity {
                 "|==|" +
                 hour +
                 "|==|" +
-                minute +
-                "|==|" +
-                weekBits +
-                "|==|" +
-                ttsEnable
+                minute
         );
+
+        finish();
     }
 
     /**

@@ -896,7 +896,7 @@ void MainWindow::on_btnHigh() {}
 
 void MainWindow::on_btnLow() {}
 
-void MainWindow::on_btnSetTime() { m_Todo->on_btnSetTime(); }
+void MainWindow::on_btnSetTime() {}
 
 void MainWindow::on_btnRecycle() { m_Todo->on_btnRecycle(); }
 

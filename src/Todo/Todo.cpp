@@ -312,7 +312,7 @@ void Todo::on_btnLow(int index) {
 
 void Todo::on_SetAlarm(bool w1, bool w2, bool w3, bool w4, bool w5, bool w6,
                        bool w7, int y, int mon, int d, int h, int m) {
-  int row = getCurrentIndex();
+  int row = curTodoListIndex;
   if (row < 0) return;
 
   QString strTodoText = getItemTodoText(row);
@@ -342,6 +342,8 @@ void Todo::on_SetAlarm(bool w1, bool w2, bool w3, bool w4, bool w5, bool w6,
 
   refreshTableLists();
   refreshAlarm();
+
+  cppRefreshTodoCardList();
 
   saveTodo();
 
@@ -416,7 +418,12 @@ qlonglong Todo::getSecond(QString strDateTime) {
   return seconds;
 }
 
-void Todo::on_btnSetTime() {
+void Todo::on_btnSetTime(int index) {
+  int count = getCount();
+  if (count == 0) return;
+
+  curTodoListIndex = index;
+
   QStringList list;
   QString str1, str2, str3, str4, str5, str6, str7;
   QString strDate, strTime;
@@ -426,50 +433,12 @@ void Todo::on_btnSetTime() {
   str4 = "0";
   str5 = "0";
   str6 = "0";
-  str7 = "1";
-  strDate = QDate::currentDate().toString();
-  strTime = QTime::currentTime().toString();
-  list.append(str1);
-  list.append(str2);
-  list.append(str3);
-  list.append(str4);
-  list.append(str5);
-  list.append(str6);
-  list.append(str7);
-  list.append(strDate);
-  list.append(strTime);
+  str7 = "0";
 
-  openTodoAlarmWindow(list);
-
-  return;
-
-  int count = getCount();
-  if (count == 0) return;
-
-  int row = getCurrentIndex();
-  currentTodoItem = getItemTodoText(row);
-
-  showTodoAlarm();
-
-  return;
-
-  ////////////////////////////////////////////////////////
-
-  delete mw_one->m_TodoAlarm;
-  mw_one->m_TodoAlarm = new TodoAlarm(this);
-
-  row = getCurrentIndex();
+  int row = index;
   QString str = getItemTime(row);
   QDate date;
   QTime time;
-  mw_one->m_TodoAlarm->ui->chk1->setChecked(false);
-  mw_one->m_TodoAlarm->ui->chk2->setChecked(false);
-  mw_one->m_TodoAlarm->ui->chk3->setChecked(false);
-  mw_one->m_TodoAlarm->ui->chk4->setChecked(false);
-  mw_one->m_TodoAlarm->ui->chk5->setChecked(false);
-  mw_one->m_TodoAlarm->ui->chk6->setChecked(false);
-  mw_one->m_TodoAlarm->ui->chk7->setChecked(false);
-  mw_one->m_TodoAlarm->ui->chkDaily->setChecked(false);
 
   str = getTimeStr(str);
 
@@ -482,13 +451,13 @@ void Todo::on_btnSetTime() {
       QString s1 = list.at(0);
       for (int i = 0; i < s1.length(); i++) {
         QString s2 = s1.mid(i, 1);
-        if (s2 == "1") mw_one->m_TodoAlarm->ui->chk1->setChecked(true);
-        if (s2 == "2") mw_one->m_TodoAlarm->ui->chk2->setChecked(true);
-        if (s2 == "3") mw_one->m_TodoAlarm->ui->chk3->setChecked(true);
-        if (s2 == "4") mw_one->m_TodoAlarm->ui->chk4->setChecked(true);
-        if (s2 == "5") mw_one->m_TodoAlarm->ui->chk5->setChecked(true);
-        if (s2 == "6") mw_one->m_TodoAlarm->ui->chk6->setChecked(true);
-        if (s2 == "7") mw_one->m_TodoAlarm->ui->chk7->setChecked(true);
+        if (s2 == "1") str1 = "1";
+        if (s2 == "2") str2 = "1";
+        if (s2 == "3") str3 = "1";
+        if (s2 == "4") str4 = "1";
+        if (s2 == "5") str5 = "1";
+        if (s2 == "6") str6 = "1";
+        if (s2 == "7") str7 = "1";
       }
       date = QDate::currentDate();
 
@@ -498,12 +467,7 @@ void Todo::on_btnSetTime() {
           break;
         }
       }
-
-      mw_one->m_TodoAlarm->ui->chkDaily->setChecked(true);
     }
-
-    mw_one->m_TodoAlarm->ui->dateTimeEdit->setDate(date);
-    mw_one->m_TodoAlarm->ui->dateTimeEdit->setTime(time);
 
   } else {
     str = getItemTime(row);
@@ -525,13 +489,13 @@ void Todo::on_btnSetTime() {
       QString s1 = list.at(0);
       for (int i = 0; i < s1.length(); i++) {
         QString s2 = s1.mid(i, 1);
-        if (s2 == "1") mw_one->m_TodoAlarm->ui->chk1->setChecked(true);
-        if (s2 == "2") mw_one->m_TodoAlarm->ui->chk2->setChecked(true);
-        if (s2 == "3") mw_one->m_TodoAlarm->ui->chk3->setChecked(true);
-        if (s2 == "4") mw_one->m_TodoAlarm->ui->chk4->setChecked(true);
-        if (s2 == "5") mw_one->m_TodoAlarm->ui->chk5->setChecked(true);
-        if (s2 == "6") mw_one->m_TodoAlarm->ui->chk6->setChecked(true);
-        if (s2 == "7") mw_one->m_TodoAlarm->ui->chk7->setChecked(true);
+        if (s2 == "1") str1 = "1";
+        if (s2 == "2") str2 = "1";
+        if (s2 == "3") str3 = "1";
+        if (s2 == "4") str4 = "1";
+        if (s2 == "5") str5 = "1";
+        if (s2 == "6") str6 = "1";
+        if (s2 == "7") str7 = "1";
       }
       date = QDate::currentDate();
       for (int i = 0; i < list.count(); i++) {
@@ -540,29 +504,26 @@ void Todo::on_btnSetTime() {
           break;
         }
       }
-
-      mw_one->m_TodoAlarm->ui->chkDaily->setChecked(true);
     }
-
-    mw_one->m_TodoAlarm->ui->dateTimeEdit->setDate(date);
-    mw_one->m_TodoAlarm->ui->dateTimeEdit->setTime(time);
   }
 
-  mw_one->m_TodoAlarm->initDlg();
-  currentTodoItem = getItemTodoText(row);
-  QString txt = tr("Todo") + " : " + currentTodoItem;
-  txt = txt.replace("\n", " ");
-  QFontMetrics fm(this->font());
-  QString qsLine = fm.elidedText(txt, Qt::ElideRight, mw_one->width() - 10);
-  mw_one->m_TodoAlarm->ui->lblTodoText->setText(qsLine);
+  strDate = date.toString("yyyy-M-d");
+  strTime = time.toString("HH:mm");
+  list.append(str1);
+  list.append(str2);
+  list.append(str3);
+  list.append(str4);
+  list.append(str5);
+  list.append(str6);
+  list.append(str7);
+  list.append(strDate);
+  list.append(strTime);
 
-  mw_one->m_TodoAlarm->m_datePicker->setDate(date);
-  mw_one->m_TodoAlarm->m_timePicker->setTime(time);
-  mw_one->m_TodoAlarm->show();
+  openTodoAlarmWindow(list);
 }
 
 void Todo::on_DelAlarm() {
-  int row = getCurrentIndex();
+  int row = curTodoListIndex;
   if (row < 0) return;
 
   QString str = getItemTime(row);
@@ -574,6 +535,8 @@ void Todo::on_DelAlarm() {
 
   refreshTableLists();
   refreshAlarm();
+
+  cppRefreshTodoCardList();
 
   saveTodo();
 
