@@ -170,23 +170,7 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
   });
 }
 
-void Todo::playAlarmVoice() {
-  QQuickItem* root;
-  root = mui->qwTodo->rootObject();
-
-  bool invokeSuccess = QMetaObject::invokeMethod(
-      root,                 // 要调用的QML对象
-      "playTumblerSound",   // QML无参函数名（和QML完全一致）
-      Qt::QueuedConnection  // 队列连接：跨线程安全
-
-  );
-
-  if (invokeSuccess) {
-    qDebug() << "[Todo] Alarm voice play function called successfully";
-  } else {
-    qWarning() << "[Todo] Failed to invoke playTumblerSound function in QML";
-  }
-}
+void Todo::playAlarmVoice() {}
 
 void Todo::clearJavaNotify() {
 #ifdef Q_OS_ANDROID

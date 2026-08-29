@@ -45,8 +45,6 @@ void MainWindow::on_btnClearAllRecords_clicked() {
 
 void MainWindow::on_btnAnd_clicked() { mui->editSearchText->insert("&"); }
 
-void MainWindow::on_btnClear_clicked() { mui->editTodo->clear(); }
-
 void MainWindow::on_btnModify_clicked() { m_Todo->reeditText(); }
 
 void MainWindow::on_btnTabMoveUp_clicked() {
@@ -737,8 +735,6 @@ void MainWindow::on_btnSync_clicked() {
   mui->btnWebDAVBackup->click();
 }
 
-void MainWindow::on_btnPasteTodo_clicked() { mui->editTodo->paste(); }
-
 void MainWindow::on_btnBackDir_clicked() { m_Reader->backDir(); }
 
 void MainWindow::on_btnWebDAVBackup_clicked() {
@@ -881,17 +877,12 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
 
   mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
-  mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
-                                                 QVariant(false));
+
   mui->qwSteps->rootContext()->setContextProperty("myW", this->width());
 
 #ifdef Q_OS_ANDROID
 
 #else
-  if (!mui->frameTodo->isHidden()) {
-    mui->qwTodo->rootContext()->setContextProperty("m_width", mw_one->width());
-    m_Todo->init_Todo();
-  }
 
   if (!mui->frameNoteList->isHidden()) {
     m_NotesList->clickNoteBook();
@@ -1459,16 +1450,6 @@ void MainWindow::onAndroidBackHandle() {
 
   if (mw_one->m_Todo->isTodoAlarmShow) {
     QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
-    return;
-  }
-
-  if (!mui->frameTodoRecycle->isHidden()) {
-    on_btnReturnRecycle_clicked();
-    return;
-  }
-
-  if (!mui->frameTodo->isHidden()) {
-    on_btnBackTodo_clicked();
     return;
   }
 

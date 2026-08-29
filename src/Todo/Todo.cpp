@@ -21,29 +21,6 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   QString strTar = "/data/data/com.x/files/msg.mp3";
   QFile::copy(":/res/msg.mp3", strTar);
 
-  mui->editTodo->setContentsMargins(12, 0, 12, 0);
-
-  QFont f = this->font();
-  f.setPointSize(12);
-  mui->btnAddTodo->setFont(f);
-  mui->btnBackTodo->setFont(f);
-  mui->btnHigh->setFont(f);
-  mui->btnLow->setFont(f);
-  mui->btnModify->setFont(f);
-  mui->btnSetTime->setFont(f);
-  mui->btnRecycle->setFont(f);
-
-  mui->btnPasteTodo->hide();
-  mui->progAudioBar->hide();
-  mui->sliderPlayAudio->hide();
-  mui->f_ToolBar->hide();
-
-  mui->sliderPlayAudio->setStyleSheet(mui->hsH->styleSheet());
-
-  f.setPointSize(fontSize);
-  mui->editTodo->setFont(f);
-  mui->editTodo->setFixedHeight(getEditTextHeight(mui->editTodo) + 4);
-
   tmeRecordTime = new QTimer(this);
   connect(tmeRecordTime, SIGNAL(timeout()), this, SLOT(on_ShowRecordTime()));
 
@@ -69,8 +46,8 @@ void Todo::saveTodo() {
   highCount = 0;
 
   // 获取数据
-  int count_items = getCount();
-  int count1 = getCountRecycle();
+  int count_items = listTodo.count();
+  int count1 = listRecycle.count();
 
   // 构建 JSON 对象
   QJsonObject rootObj;
@@ -112,9 +89,15 @@ void Todo::saveTodo() {
   isNeedSync = true;
 }
 
-void Todo::init_Todo() {
-  clearAll();
+QString Todo::getItemTodoText(int index) {
+  QString str = listTodo.at(index);
+  QStringList list = str.split("|==|");
+  if (list.count() == 3) return list.at(2);
 
+  return "";
+}
+
+void Todo::init_Todo() {
   listTodo.clear();
   listRecycle.clear();
 
@@ -192,10 +175,9 @@ void Todo::addToList(QString str) {
 }
 
 void Todo::AddTodoText() {
-  QString str = mui->editTodo->toPlainText().trimmed();
+  QString str = "todo txt";
   if (str == "") return;
   addToList(str);
-  mui->editTodo->setText("");
 }
 
 int Todo::getEditTextHeight(QTextEdit* edit) {
@@ -214,8 +196,6 @@ void Todo::closeTodo() {
   stopPlayVoice();
   saveTodo();
 
-  mui->frameTodo->hide();
-
   if (isAndroid) {
     m_Method->openMainEntranceWindow();
   } else {
@@ -224,8 +204,6 @@ void Todo::closeTodo() {
 
   refreshTableLists();
   refreshAlarm();
-  mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
-                                                 QVariant(false));
 
   if (isNeedSync && mui->chkAutoSync->isChecked() &&
       mui->chkWebDAV->isChecked()) {
@@ -280,6 +258,26 @@ void Todo::on_btnHigh() {
   refreshAlarm();
   isNeedSave = true;
   saveTodo();
+}
+
+void Todo::delItem(int index) { listTodo.removeAt(index); }
+
+void Todo::setCurrentIndex(int) {}
+
+void Todo::setHighPriority(bool) {}
+
+void Todo::addItem(class QString, int, class QString) {}
+
+void Todo::addItemRecycle(class QString, int, class QString) {}
+
+void Todo::delItemRecycle(int) {}
+
+QString Todo::getItemTodoTextRecycle(int index) {
+  QString str = listRecycle.at(index);
+  QStringList list = str.split("|==|");
+  if (list.count() == 2) return list.at(1);
+
+  return "";
 }
 
 void Todo::on_btnLow() {
@@ -440,17 +438,8 @@ void Todo::on_btnSetTime() {
   int count = getCount();
   if (count == 0) return;
 
-  mui->btnAddTodo->hide();
-  mui->editTodo->hide();
-  mui->btnClear->hide();
-
   int row = getCurrentIndex();
   currentTodoItem = getItemTodoText(row);
-
-  mui->qwTodo->rootContext()->setContextProperty("mainW",
-                                                 mw_one->geometry().width());
-  mui->qwTodo->rootContext()->setContextProperty("mainH",
-                                                 mw_one->geometry().height());
 
   showTodoAlarm();
 
@@ -626,15 +615,10 @@ void Todo::on_btnRecycle() {
   if (isAndroid) {
     openTodoRecycleWindow(listRecycle);
   } else {
-    mui->frameTodo->hide();
-    mui->frameTodoRecycle->show();
   }
 }
 
-void Todo::on_btnReturn_clicked() {
-  mui->frameTodoRecycle->hide();
-  mui->frameTodo->show();
-}
+void Todo::on_btnReturn_clicked() {}
 
 void Todo::on_btnClear_clicked() {
   clearAllRecycle();
@@ -925,134 +909,43 @@ void Todo::changeTodoIcon(bool isToday) {
   }
 }
 
-void Todo::on_editTodo_textChanged() {
-  int h = getEditTextHeight(mui->editTodo) + 4;
-  int ui_h = mui->frameTodo->height();
-  if (h > ui_h / 2) h = ui_h / 2;
-  mui->editTodo->setFixedHeight(h);
-}
+void Todo::on_editTodo_textChanged() {}
 
 void Todo::insertItem(QString strTime, int type, QString strText,
                       int curIndex) {
-  int itemheight = setItemHeight(strText);
-
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QMetaObject::invokeMethod(
-      (QObject*)root, "insertItem", Q_ARG(QVariant, strTime),
-      Q_ARG(QVariant, type), Q_ARG(QVariant, strText),
-      Q_ARG(QVariant, itemheight), Q_ARG(QVariant, curIndex));
+  listTodo.insert(curIndex,
+                  strTime + "|==|" + QString::number(type) + "|==|" + strText);
 }
 
 void Todo::insertRecycle(QString strTime, int type, QString strText,
-                         int curIndex) {
-  int itemheight = setItemHeight(strText);
+                         int curIndex) {}
 
-  QQuickItem* root = mui->qwRecycle->rootObject();
-  QMetaObject::invokeMethod(
-      (QObject*)root, "insertRecycle", Q_ARG(QVariant, strTime),
-      Q_ARG(QVariant, type), Q_ARG(QVariant, strText),
-      Q_ARG(QVariant, itemheight), Q_ARG(QVariant, curIndex));
-}
+int Todo::getCurrentIndex() { return 0; }
 
-int Todo::getCurrentIndex() {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QVariant itemIndex;
-  QMetaObject::invokeMethod((QObject*)root, "getCurrentIndex",
-                            Q_RETURN_ARG(QVariant, itemIndex));
-  return itemIndex.toInt();
-}
-
-int Todo::getCurrentIndexRecycle() {
-  QQuickItem* root = mui->qwRecycle->rootObject();
-  QVariant itemIndex;
-  QMetaObject::invokeMethod((QObject*)root, "getCurrentIndex",
-                            Q_RETURN_ARG(QVariant, itemIndex));
-  return itemIndex.toInt();
-}
+int Todo::getCurrentIndexRecycle() { return 0; }
 
 QString Todo::getItemTime(int index) {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QVariant itemTime;
-  QMetaObject::invokeMethod((QObject*)root, "getTime",
-                            Q_RETURN_ARG(QVariant, itemTime),
-                            Q_ARG(QVariant, index));
-  return itemTime.toString();
+  QString str = listTodo.at(index);
+  QStringList list = str.split("|==|");
+  if (list.count() == 3) return list.at(0);
+
+  return "00:00:00";
 }
 
 QString Todo::getItemTimeRecycle(int index) {
-  QQuickItem* root = mui->qwRecycle->rootObject();
-  QVariant itemTime;
-  QMetaObject::invokeMethod((QObject*)root, "getTime",
-                            Q_RETURN_ARG(QVariant, itemTime),
-                            Q_ARG(QVariant, index));
-  return itemTime.toString();
+  QString str = listRecycle.at(index);
+  QStringList list = str.split("|==|");
+  if (list.count() == 2) return list.at(0);
+
+  return "11:11:11";
 }
 
 int Todo::getItemType(int index) {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QVariant itemType;
-  QMetaObject::invokeMethod((QObject*)root, "getType",
-                            Q_RETURN_ARG(QVariant, itemType),
-                            Q_ARG(QVariant, index));
-  return itemType.toInt();
-}
+  QString str = listTodo.at(index);
+  QStringList list = str.split("|==|");
+  if (list.count() == 3) return list.at(1).toInt();
 
-QString Todo::getItemTodoText(int index) {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QVariant itemTodoText;
-  QMetaObject::invokeMethod((QObject*)root, "getTodoText",
-                            Q_RETURN_ARG(QVariant, itemTodoText),
-                            Q_ARG(QVariant, index));
-  return itemTodoText.toString();
-}
-
-QString Todo::getItemTodoTextRecycle(int index) {
-  QQuickItem* root = mui->qwRecycle->rootObject();
-  QVariant itemTodoText;
-  QMetaObject::invokeMethod((QObject*)root, "getTodoText",
-                            Q_RETURN_ARG(QVariant, itemTodoText),
-                            Q_ARG(QVariant, index));
-  return itemTodoText.toString();
-}
-
-void Todo::delItem(int index) {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
-}
-
-void Todo::delItemRecycle(int index) {
-  QQuickItem* root = mui->qwRecycle->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
-}
-
-void Todo::addItem(QString strTime, int type, QString strText) {
-  int itemheight = setItemHeight(strText);
-
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, strTime),
-                            Q_ARG(QVariant, type), Q_ARG(QVariant, strText),
-                            Q_ARG(QVariant, itemheight));
-}
-
-void Todo::addItemRecycle(QString strTime, int type, QString strText) {
-  int itemheight = setItemHeight(strText);
-
-  QQuickItem* root = mui->qwRecycle->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, strTime),
-                            Q_ARG(QVariant, type), Q_ARG(QVariant, strText),
-                            Q_ARG(QVariant, itemheight));
-}
-
-void Todo::setCurrentIndex(int index) {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setCurrentItem",
-                            Q_ARG(QVariant, index));
-}
-
-void Todo::setHighPriority(bool isBool) {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setHighPriority",
-                            Q_ARG(QVariant, isBool));
+  return 0;
 }
 
 int Todo::setItemHeight(QString strTodoText) {
@@ -1071,45 +964,46 @@ int Todo::setItemHeight(QString strTodoText) {
   return itemHeight;
 }
 
-int Todo::getCount() {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QVariant itemCount;
-  QMetaObject::invokeMethod((QObject*)root, "getItemCount",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toInt();
-}
+int Todo::getCount() { return listTodo.count(); }
 
-int Todo::getCountRecycle() {
-  QQuickItem* root = mui->qwRecycle->rootObject();
-  QVariant itemCount;
-  QMetaObject::invokeMethod((QObject*)root, "getItemCount",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toInt();
-}
+int Todo::getCountRecycle() { return listRecycle.count(); }
 
 void Todo::modifyTime(int index, QString strTime) {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "modifyItemTime",
-                            Q_ARG(QVariant, index), Q_ARG(QVariant, strTime));
+  QString str = listTodo.at(index);
+  QStringList list = str.split("|==|");
+  if (list.count() == 3) {
+    QString str1, str2, str3, str4;
+    str1 = strTime;
+    str2 = list.at(1);
+    str3 = list.at(2);
+    str4 = str1 + "|==|" + str2 + "|==|" + str3;
+    listTodo.replace(index, str4);
+  }
 }
 
 void Todo::modifyType(int index, int type) {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "modifyItemType",
-                            Q_ARG(QVariant, index), Q_ARG(QVariant, type));
+  QString str = listTodo.at(index);
+  QStringList list = str.split("|==|");
+  if (list.count() == 3) {
+    QString str1, str2, str3, str4;
+    str1 = list.at(0);
+    str2 = QString::number(type);
+    str3 = list.at(2);
+    str4 = str1 + "|==|" + str2 + "|==|" + str3;
+    listTodo.replace(index, str4);
+  }
 }
 
 void Todo::modifyTodoText(int index, QString strTodoText) {
-  QQuickItem* root = mui->qwTodo->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "modifyItemText",
-                            Q_ARG(QVariant, index),
-                            Q_ARG(QVariant, strTodoText));
-}
-
-void Todo::clearAll() {
-  int count = getCount();
-  for (int i = 0; i < count; i++) {
-    delItem(0);
+  QString str = listTodo.at(index);
+  QStringList list = str.split("|==|");
+  if (list.count() == 3) {
+    QString str1, str2, str3, str4;
+    str1 = list.at(0);
+    str2 = list.at(1);
+    str3 = strTodoText;
+    str4 = str1 + "|==|" + str2 + "|==|" + str3;
+    listTodo.replace(index, str4);
   }
 }
 
@@ -1141,14 +1035,6 @@ void Todo::reeditText() {
   if (list0.count() > 0) {
     QString str = list0.at(0);
     if (str == tr("Voice")) {
-      m_Method->playRecord(getVoiceFile(row));
-      mui->progAudioBar->setStyleSheet(
-          "QProgressBar{background:white;} "
-          "QProgressBar::chunk{background:#1E90FF}");
-
-      mui->sliderPlayAudio->setValue(0);
-      mui->sliderPlayAudio->setMaximum(m_Method->getPlayDuration());
-      mui->sliderPlayAudio->show();
       tmePlayProgress->start(nInterval);
       return;
     }
@@ -1316,95 +1202,13 @@ void Todo::addToRecycle() {
 
 void Todo::NewTodo() { mui->btnTodo->click(); }
 
-void Todo::startRecordVoice() {
-  if (mui->editTodo->toPlainText().trimmed().length() == 0) {
-    if (isAudioRecordOne) return;
-    isAudioRecordOne = true;
-    stopPlayVoice();
-    QString dir = iniDir + "memo/voice/";
-    QDir mdir;
-    mdir.mkpath(dir);
-    audioFileName = tr("Voice") + " " + QDateTime::currentDateTime().toString();
-    QString str = audioFileName;
-    audioFilePath = dir + getNumber(str) + ".aac";
-    m_Method->startRecord(audioFilePath);
+void Todo::startRecordVoice() {}
 
-    editStyle = mui->editTodo->styleSheet();
-    mui->editTodo->setStyleSheet(
-        "QTextEdit{background-color: #FF0000; color: white; border:1px solid "
-        "#FFFFFF;}");
+void Todo::on_ShowRecordTime() {}
 
-    mui->editTodo->setText(tr("Recording audio in progress..."));
-    nRecordSec = 0;
-    tmeRecordTime->start(250);
-    mui->progAudioBar->setStyleSheet(
-        "QProgressBar{background:white;} "
-        "QProgressBar::chunk{background:#00FF7F}");
-    mui->progAudioBar->setMaximum(100);
-    mui->progAudioBar->show();
-    isRecordVoice = true;
-  }
-}
+void Todo::stopRecordVoice() {}
 
-void Todo::on_ShowRecordTime() {
-  double db = m_Method->updateMicStatus();
-  // qDebug() << "db=" << db;
-  mui->progAudioBar->setValue(db);
-
-  nMSec = nMSec + 1;
-  if (nMSec == 4) {
-    nRecordSec = nRecordSec + 1;
-    nMSec = 0;
-  }
-  strVoiceTime = m_Method->FormatHHMMSS(nRecordSec);
-  mui->editTodo->setText(tr("Recording audio in progress...") + " " +
-                         strVoiceTime);
-}
-
-void Todo::stopRecordVoice() {
-  if (isRecordVoice) {
-    mui->editTodo->setText("");
-    tmeRecordTime->stop();
-    nRecordSec = 0;
-
-    m_Method->stopRecord();
-    QFile file(audioFilePath);
-    if (file.exists()) {
-      if (file.size() > 0) {
-        mui->editTodo->setText(tr("Voice") + " " + strVoiceTime + "\n" +
-                               QFileInfo(audioFilePath).fileName());
-        mw_one->on_btnAddTodo_clicked();
-      } else {
-        file.remove();
-      }
-    }
-    isAudioRecordOne = false;
-    mui->editTodo->setStyleSheet(editStyle);
-  }
-
-  mui->progAudioBar->hide();
-}
-
-void Todo::stopPlayVoice() {
-  m_Method->stopPlayRecord();
-  tmePlayProgress->stop();
-  mui->sliderPlayAudio->hide();
-
-  int row = getCurrentIndex();
-  if (row >= 0) {
-    if (isVoice(row)) {
-      if (isDark)
-        mui->btnModify->setIcon(QIcon(":/res/voice_l.svg"));
-      else
-        mui->btnModify->setIcon(QIcon(":/res/voice.svg"));
-    } else {
-      if (isDark)
-        mui->btnModify->setIcon(QIcon(":/res/edit_l.svg"));
-      else
-        mui->btnModify->setIcon(QIcon(":/res/edit.svg"));
-    }
-  }
-}
+void Todo::stopPlayVoice() {}
 
 bool Todo::isVoice(int row) {
   QString strItem = getItemTodoText(row).trimmed();
@@ -1494,27 +1298,15 @@ void Todo::goCurrentTodoItem(QString curItem) {
   }
 }
 
-void Todo::on_ShowPlayProgress() {
-  int prog = m_Method->getPlayPosition();
-  mui->sliderPlayAudio->setValue(prog);
-
-  if (!m_Method->getPlaying()) {
-    stopPlayVoice();
-  }
-}
+void Todo::on_ShowPlayProgress() {}
 
 void Todo::openTodoUI() {
   mw_one->execNeedSyncNotes();
-
-  mui->qwTodo->rootContext()->setContextProperty("m_width", mw_one->width());
 
   init_Todo();
 
   if (isAndroid) {
     openTodoListWindow(listTodo);
-  } else {
-    mui->frameMain->hide();
-    mui->frameTodo->show();
   }
 
   refreshAlarm();
@@ -1525,8 +1317,6 @@ void Todo::openTodoUI() {
 
   if (isNeedAddToTodoList) {
     isNeedAddToTodoList = false;
-    mui->editTodo->setText(strNeedAddToTodoText);
-    mui->btnAddTodo->click();
   }
 }
 
@@ -1684,29 +1474,11 @@ void Todo::openTodo() {
     QTimer::singleShot(100, mw_one, [this]() { openTodoUI(); });
 }
 
-void Todo::closeTodoAlarm() {
-  // 1. 获取Popup根对象
-  QQuickItem* popupRoot = mui->qwTodo->rootObject();
-  if (!popupRoot) {
-    qWarning() << "Failed to get Popup root object!";
-    return;
-  }
-
-  bool success = QMetaObject::invokeMethod(
-      popupRoot, "closeTodoAlarm",
-      Qt::QueuedConnection  // 队列连接，确保UI在主线程更新
-  );
-
-  if (!success) {
-    qWarning() << "Failed to call closeTodoAlarm() in QML!";
-  }
-
-  isTodoAlarmShow = false;
-}
+void Todo::closeTodoAlarm() {}
 
 void Todo::showTodoAlarm() {
   // 1. 获取Popup根对象
-  QQuickItem* popupRoot = mui->qwTodo->rootObject();
+  QQuickItem* popupRoot = NULL;
   if (!popupRoot) {
     qWarning() << "Failed to get Popup root object!";
     return;
@@ -1879,11 +1651,7 @@ void Todo::on_btnTestSpeech() {
 
 void Todo::setAlarmShowValue(bool value) { isTodoAlarmShow = value; }
 
-void Todo::showInputPanel() {
-  mui->btnAddTodo->show();
-  mui->editTodo->show();
-  mui->btnClear->show();
-}
+void Todo::showInputPanel() {}
 
 void Todo::openClockActivity(const QString& content) {
   Q_UNUSED(content);

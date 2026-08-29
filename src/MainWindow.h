@@ -738,8 +738,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnSync_clicked();
 
-  void on_btnPasteTodo_clicked();
-
   void on_btnClearSearchText_clicked();
 
   void on_btnImportBakList_clicked();
@@ -817,8 +815,6 @@ class MainWindow : public QMainWindow {
   void on_btnClearAllRecords_clicked();
 
   void on_btnAnd_clicked();
-
-  void on_btnClear_clicked();
 
   void on_btnModify_clicked();
 

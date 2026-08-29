@@ -78,7 +78,7 @@ class Todo : public QDialog {
 
   void modifyTime(int index, QString strTime);
   void modifyTodoText(int index, QString strTodoText);
-  void clearAll();
+
   void addItem(QString strTime, int type, QString strText);
   int getItemType(int index);
   void modifyType(int index, int type);
@@ -176,7 +176,7 @@ class Todo : public QDialog {
   void openTodoRecycleWindow(QStringList list);
 
   void openTodoAlarmWindow(QStringList list);
-  private slots:
+ private slots:
   void on_ShowRecordTime();
 
   void on_ShowPlayProgress();

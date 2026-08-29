@@ -200,18 +200,10 @@ void MainWindow::init_ButtonStyle() {
   setToolButtonAnimation(mui->btnNotes, true);
   setToolButtonAnimation(mui->btnAdd, true);
   setToolButtonAnimation(mui->btnDel, true);
-  setToolButtonAnimation(mui->btnPasteTodo, true);
+
   setToolButtonAnimation(mui->btnSync, true);
   setToolButtonAnimation(mui->btnFind, true);
   setToolButtonAnimation(mui->btnSelTab, true);
-
-  // Todo
-  setToolButtonAnimation(mui->btnBackTodo, true);
-  setToolButtonAnimation(mui->btnHigh, true);
-  setToolButtonAnimation(mui->btnLow, true);
-  setToolButtonAnimation(mui->btnModify, true);
-  setToolButtonAnimation(mui->btnSetTime, true);
-  setToolButtonAnimation(mui->btnRecycle, true);
 
   // Reader
   setToolButtonAnimation(mui->btnBackReader, true);
@@ -247,14 +239,6 @@ void MainWindow::init_ButtonStyle() {
     mui->btnSpeak->setIcon(QIcon(":/res/reader/speak_l.svg"));
     mui->btnStopSpeak->setIcon(QIcon(":/res/reader/stopspeak_l.svg"));
 
-    // Todo
-    mui->btnBackTodo->setIcon(QIcon(":/res/back_l.svg"));
-    mui->btnHigh->setIcon(QIcon(":/res/high_l.svg"));
-    mui->btnLow->setIcon(QIcon(":/res/low_l.svg"));
-    mui->btnModify->setIcon(QIcon(":/res/edit_l.svg"));
-    mui->btnSetTime->setIcon(QIcon(":/res/alarm_l.svg"));
-    mui->btnRecycle->setIcon(QIcon(":/res/recycle_l.svg"));
-
     // Notes
     mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb_l.svg"));
     mui->btnNewNote->setIcon(QIcon(":/res/newnote_l.svg"));
@@ -275,14 +259,6 @@ void MainWindow::init_ButtonStyle() {
     mui->btnPages->setIcon(QIcon(":/res/set.svg"));
     mui->btnSpeak->setIcon(QIcon(":/res/reader/speak.svg"));
     mui->btnStopSpeak->setIcon(QIcon(":/res/reader/stopspeak.svg"));
-
-    // Todo
-    mui->btnBackTodo->setIcon(QIcon(":/res/back.svg"));
-    mui->btnHigh->setIcon(QIcon(":/res/high.svg"));
-    mui->btnLow->setIcon(QIcon(":/res/low.svg"));
-    mui->btnModify->setIcon(QIcon(":/res/edit.svg"));
-    mui->btnSetTime->setIcon(QIcon(":/res/alarm.svg"));
-    mui->btnRecycle->setIcon(QIcon(":/res/recycle.svg"));
 
     // Notes
     mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb.svg"));
@@ -422,28 +398,6 @@ void MainWindow::initMainQW() {
     mui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
     mui->qwSearch->setSource(
         QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
-  }
-
-  if (mui->qwTodo->source().isEmpty()) {
-    int f_size = 19;
-    if (fontSize <= f_size) f_size = fontSize;
-
-    mui->qwTodo->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwTodo->rootContext()->setContextProperty("maxFontSize", f_size);
-    mui->qwTodo->rootContext()->setContextProperty("isBtnVisible",
-                                                   QVariant(false));
-    mui->qwTodo->rootContext()->setContextProperty("m_Todo", mw_one->m_Todo);
-    mui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
-    mui->qwTodo->rootContext()->setContextProperty("mainW",
-                                                   mw_one->geometry().width());
-    mui->qwTodo->rootContext()->setContextProperty("mainH",
-                                                   mw_one->geometry().height());
-    mui->qwTodo->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/todo.qml")));
-
-    mui->qwRecycle->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwRecycle->rootContext()->setContextProperty("FontSize", fontSize);
-    mui->qwRecycle->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/todorecycle.qml")));
   }
 
   if (mui->qwSteps->source().isEmpty()) {
@@ -639,8 +593,6 @@ void MainWindow::init_Theme() {
   mui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
   mui->qwMainChart->rootContext()->setContextProperty("isDark", isDark);
 
-  mui->qwTodo->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwRecycle->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteVersion->rootContext()->setContextProperty("isDark", isDark);
@@ -668,9 +620,6 @@ void MainWindow::init_Theme() {
   m_Reader->qvBookList->rootContext()->setContextProperty("isDark", isDark);
 
   if (!isDark) {
-    mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
-    mui->btnClear->setIcon(QIcon(":/res/clear.png"));
-
     mui->btnReader->setIcon(QIcon(":/res/reader.svg"));
     mui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
     mui->btnSteps->setIcon(QIcon(":/res/steps.svg"));
@@ -692,9 +641,6 @@ void MainWindow::init_Theme() {
     mui->qwNoteGraphView->setClearColor(Qt::white);
 
   } else {
-    mui->btnAddTodo->setIcon(QIcon(":/res/plus_l.svg"));
-    mui->btnClear->setIcon(QIcon(":/res/clear.png"));
-
     mui->btnFind->setIcon(QIcon(":/res/find_l.png"));
 
     mui->btnReader->setIcon(QIcon(":/res/reader_l.svg"));
@@ -716,7 +662,6 @@ void MainWindow::init_Theme() {
     mui->qwNoteGraphView->setClearColor(Qt::black);
   }
 
-  mui->editTodo->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
   mui->editDetails->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
 
   // Edit Record UI
@@ -804,8 +749,7 @@ void MainWindow::init_UIWidget() {
   mui->menubar->hide();
   mui->statusbar->hide();
   mui->frameReader->hide();
-  mui->frameTodo->hide();
-  mui->frameTodoRecycle->hide();
+
   mui->frameSteps->hide();
   mui->frameReport->hide();
   mui->frameSearch->hide();

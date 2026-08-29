@@ -580,20 +580,8 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     return;
   }
 
-  if (!mui->frameTodoRecycle->isHidden()) {
-    on_btnReturnRecycle_clicked();
-    event->ignore();
-    return;
-  }
-
   if (m_Todo->isTodoAlarmShow) {
     m_Todo->closeTodoAlarm();
-    event->ignore();
-    return;
-  }
-
-  if (!mui->frameTodo->isHidden()) {
-    on_btnBackTodo_clicked();
     event->ignore();
     return;
   }
@@ -1467,7 +1455,7 @@ void MainWindow::on_sliderPlayAudio_sliderPressed() {
 }
 
 void MainWindow::on_sliderPlayAudio_sliderReleased() {
-  QString strPos = QString::number(mui->sliderPlayAudio->value());
+  QString strPos = QString::number(90);
   m_Method->seekTo(strPos);
   m_Method->startPlay();
   m_Todo->tmePlayProgress->start(m_Todo->nInterval);

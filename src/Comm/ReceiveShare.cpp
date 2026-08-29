@@ -206,16 +206,6 @@ QObjectList ReceiveShare::getAllFrame(QObjectList lstUIControls) {
 }
 
 void ReceiveShare::closeAllChildWindows() {
-  if (mw_one->m_Todo->isTodoAlarmShow) {
-    QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
-
-    while (!mw_one->m_Todo->isTodoAlarmShow) {
-      QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-      QThread::msleep(1);
-    }
-    mui->btnBackTodo->click();
-  }
-
   if (mw_one->m_AboutThis->isVisible()) {
     mw_one->m_AboutThis->ui->btnBack_About->click();
   }
@@ -250,13 +240,6 @@ void ReceiveShare::closeAllChildWindows() {
     mui->btnBackNotesGraph->click();
     mui->btnBackNoteList->click();
   }
-
-  if (mui->frameTodoRecycle->isVisible()) {
-    mui->btnReturnRecycle->click();
-    mui->btnBackTodo->click();
-  }
-
-  if (mui->frameTodo->isVisible()) mui->btnBackTodo->click();
 
   if (m_StepsOptions->isVisible()) {
     m_StepsOptions->ui->btnBack->click();
@@ -404,12 +387,9 @@ void ReceiveShare::goReceiveShare() {
     mw_one->m_Todo->isNeedAddToTodoList = true;
     mw_one->m_Todo->strNeedAddToTodoText = strReceiveShareData;
 
-    if (mui->frameTodo->isHidden() && mui->frameMain->isHidden())
-      closeAllChildWindows();
+    closeAllChildWindows();
 
-    if (mui->frameTodo->isHidden()) {
-      mui->btnTodo->click();
-    }
+    mui->btnTodo->click();
   }
 
   if (method == "appendNote") {

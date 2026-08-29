@@ -416,9 +416,6 @@ void loadTheme(bool isDark) {
   font.setPointSize(fontSize);
   qApp->setFont(font);
 
-  mui->qwTodo->rootContext()->setContextProperty("FontSize", fontSize);
-  mui->qwRecycle->rootContext()->setContextProperty("FontSize", fontSize);
-
   // 遍历控件刷新字体（仅字体大小变化时执行）
   if (qApp) {
     SliderButton* m_sliderButton;

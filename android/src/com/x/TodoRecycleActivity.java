@@ -38,6 +38,7 @@ public class TodoRecycleActivity extends Activity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new TodoRecycleAdapter();
         mRecyclerView.setAdapter(mAdapter);
+        mAdapter.setDarkMode(mIsDark);
 
         updateButtonLanguage();
         applyWindowDarkStyle();
