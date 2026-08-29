@@ -120,25 +120,24 @@ public class TodoCardAdapter
 
         final int pos = position;
         holder.ivStar.setOnClickListener(v -> {
-            if (mListener != null) mListener.onAction(pos, "high");
+            if (mListener != null) PublicJavaCallCpp("todo_high|==|" + pos);
         });
         holder.ivCopy.setOnClickListener(v -> {
-            if (mListener != null) mListener.onAction(pos, "low");
+            if (mListener != null) PublicJavaCallCpp("todo_low|==|" + pos);
         });
         holder.ivEdit.setOnClickListener(v -> {
-            if (mListener != null) mListener.onAction(pos, "edit");
+            if (mListener != null) {
+                mListener.onRequestEdit(pos);
+            }
         });
         holder.ivAlarm.setOnClickListener(v -> {
-            if (mListener != null) mListener.onAction(pos, "alarm");
-            PublicJavaCallCpp("todo_alarm|==|" + pos);
+            if (mListener != null) PublicJavaCallCpp("todo_alarm|==|" + pos);
         });
         holder.ivDelete.setOnClickListener(v -> {
-            if (mListener != null) mListener.onAction(pos, "recycle");
-            PublicJavaCallCpp("todo_recycle");
+            if (mListener != null) PublicJavaCallCpp("todo_recycle");
         });
         holder.tvDone.setOnClickListener(v -> {
-            if (mListener != null) mListener.onAction(pos, "done");
-            PublicJavaCallCpp("todo_done|==|" + pos);
+            if (mListener != null) PublicJavaCallCpp("todo_done|==|" + pos);
         });
 
         if (isSelected) {
@@ -188,5 +187,12 @@ public class TodoCardAdapter
             tvDone = itemView.findViewById(R.id.tv_action_done);
             actionContainer = itemView.findViewById(R.id.action_container);
         }
+    }
+
+    public String getItemAt(int position) {
+        if (position < 0 || position >= mRawData.size()) {
+            return null;
+        }
+        return mRawData.get(position);
     }
 }

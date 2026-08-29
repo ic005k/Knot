@@ -608,6 +608,21 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->m_Todo->on_btnRecycle(); });
           }
 
+          if (strType == "todo_recycle_clearall") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->m_Todo->clearAllRecycle(); });
+          }
+
+          if (strType.startsWith("todo_recycle_del|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              int index = list.at(1).toInt();
+              QTimer::singleShot(0, mw_one, [index]() {
+                mw_one->m_Todo->delItemRecycle(index);
+              });
+            }
+          }
+
           if (strType.startsWith("todo_recycle_restore|==|")) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
@@ -624,6 +639,35 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               QString todoContent = list.at(1);
               QTimer::singleShot(0, mw_one, [todoContent]() {
                 mw_one->m_Todo->addToList(todoContent, true);
+              });
+            }
+          }
+
+          if (strType.startsWith("todo_hith|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              int index = list.at(1).toInt();
+              QTimer::singleShot(
+                  0, mw_one, [index]() { mw_one->m_Todo->on_btnHigh(index); });
+            }
+          }
+
+          if (strType.startsWith("todo_low|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              int index = list.at(1).toInt();
+              QTimer::singleShot(
+                  0, mw_one, [index]() { mw_one->m_Todo->on_btnLow(index); });
+            }
+          }
+
+          if (strType.startsWith("todo_confirm_edit|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 3) {
+              int index = list.at(1).toInt();
+              QString strText = list.at(2);
+              QTimer::singleShot(0, mw_one, [index, strText]() {
+                mw_one->m_Todo->modifyTodoText(index, strText);
               });
             }
           }

@@ -37,10 +37,6 @@ Todo::~Todo() { delete ui; }
 void Todo::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
 
 void Todo::saveTodo() {
-  if (!isNeedSave) return;
-
-  isNeedSave = false;
-
   mw_one->strLatestModify = tr("Modi Todo");
 
   highCount = 0;
@@ -129,9 +125,6 @@ void Todo::init_Todo() {
       QString strText = item["text"].toString();
 
       addItem(strTime, type, strText);
-
-      listTodo.append(strTime + "|==|" + QString::number(type) + "|==|" +
-                      strText);
     }
 
     // 读取回收站
@@ -143,8 +136,6 @@ void Todo::init_Todo() {
       QString strText = item["text"].toString();
 
       addItemRecycle(doneTime, 0, strText);
-
-      listRecycle.append(doneTime + "|==|" + strText);
     }
   }
 
@@ -177,7 +168,6 @@ void Todo::addToList(QString str, bool isInsert) {
 
   cppRefreshTodoCardList();
 
-  isNeedSave = true;
   saveTodo();
 }
 
@@ -246,11 +236,11 @@ bool Todo::eventFilter(QObject* watch, QEvent* evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-void Todo::on_btnHigh() {
+void Todo::on_btnHigh(int index) {
   int count = getCount();
   if (count == 0) return;
 
-  int row = getCurrentIndex();
+  int row = index;
 
   QString strTime = getItemTime(row);
 
@@ -262,8 +252,10 @@ void Todo::on_btnHigh() {
   insertItem(strTime, 1, strText, 0);
   setCurrentIndex(0);
 
+  cppRefreshTodoCardList();
+
   refreshAlarm();
-  isNeedSave = true;
+
   saveTodo();
 }
 
@@ -279,10 +271,13 @@ void Todo::addItem(QString strTime, int type, QString strText) {
 
 void Todo::addItemRecycle(QString strTime, int type, QString strText) {
   Q_UNUSED(type);
-  listRecycle.append(strTime + "|==|" + QString::number(0) + "|==|" + strText);
+  listRecycle.append(strTime + "|==|" + strText);
 }
 
-void Todo::delItemRecycle(int index) { listRecycle.remove(index); }
+void Todo::delItemRecycle(int index) {
+  listRecycle.remove(index);
+  saveTodo();
+}
 
 QString Todo::getItemTodoTextRecycle(int index) {
   QString str = listRecycle.at(index);
@@ -292,11 +287,11 @@ QString Todo::getItemTodoTextRecycle(int index) {
   return "";
 }
 
-void Todo::on_btnLow() {
+void Todo::on_btnLow(int index) {
   int count = getCount();
   if (count == 0) return;
 
-  int row = getCurrentIndex();
+  int row = index;
 
   QString strTime = getItemTime(row);
 
@@ -306,11 +301,12 @@ void Todo::on_btnLow() {
   delItem(row);
   addItem(strTime, 0, strTodoText);
 
+  cppRefreshTodoCardList();
+
   refreshAlarm();
 
   setCurrentIndex(getCount() - 1);
 
-  isNeedSave = true;
   saveTodo();
 }
 
@@ -346,7 +342,7 @@ void Todo::on_SetAlarm(bool w1, bool w2, bool w3, bool w4, bool w5, bool w6,
 
   refreshTableLists();
   refreshAlarm();
-  isNeedSave = true;
+
   saveTodo();
 
   goCurrentTodoItem(currentTodoItem);
@@ -578,7 +574,7 @@ void Todo::on_DelAlarm() {
 
   refreshTableLists();
   refreshAlarm();
-  isNeedSave = true;
+
   saveTodo();
 
   goCurrentTodoItem(currentTodoItem);
@@ -635,7 +631,6 @@ void Todo::on_btnReturn_clicked() {}
 void Todo::on_btnClear_clicked() {
   clearAllRecycle();
 
-  isNeedSave = true;
   saveTodo();
 }
 
@@ -652,7 +647,6 @@ void Todo::on_btnRestore_clicked() {
 
   setCurrentIndex(getCount() - 1);
 
-  isNeedSave = true;
   saveTodo();
 }
 
@@ -667,7 +661,6 @@ void Todo::on_btnDel_clicked() {
 
   delItemRecycle(row);
 
-  isNeedSave = true;
   saveTodo();
 }
 
@@ -1018,15 +1011,23 @@ void Todo::modifyTodoText(int index, QString strTodoText) {
     str3 = strTodoText;
     str4 = str1 + "|==|" + str2 + "|==|" + str3;
     listTodo.replace(index, str4);
+
+    cppRefreshTodoCardList();
+
+    saveTodo();
   }
 }
 
 void Todo::clearAllRecycle() {
   int count = getCountRecycle();
+  if (count == 0) return;
   for (int i = 0; i < count; i++) {
     delVoiceFile(0);
-    delItemRecycle(0);
   }
+
+  listRecycle.clear();
+
+  saveTodo();
 }
 
 void Todo::isAlarm(int index) {
@@ -1178,7 +1179,7 @@ void Todo::reeditText() {
     delItem(row);
     insertItem(strTime, type, edit->toPlainText().trimmed(), row);
     setCurrentIndex(row);
-    isNeedSave = true;
+
     saveTodo();
     m_ReeditTodo->close();
   });
@@ -1212,7 +1213,7 @@ void Todo::addToRecycle(int index) {
   delItem(index);
   cppRefreshTodoCardList();
 
-  isNeedSave = true;
+  saveTodo();
 }
 
 void Todo::NewTodo() { mui->btnTodo->click(); }

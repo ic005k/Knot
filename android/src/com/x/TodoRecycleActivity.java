@@ -58,6 +58,7 @@ public class TodoRecycleActivity extends Activity {
         mBtnClearAll.setOnClickListener(v -> {
             mRecycleData.clear();
             mAdapter.setData(mRecycleData);
+            PublicJavaCallCpp("todo_recycle_clearall");
         });
 
         // 删除选中卡片
@@ -66,6 +67,7 @@ public class TodoRecycleActivity extends Activity {
             if (sel >= 0 && sel < mRecycleData.size()) {
                 mRecycleData.remove(sel);
                 mAdapter.setData(mRecycleData);
+                PublicJavaCallCpp("todo_recycle_del|==|" + sel);
             }
         });
 

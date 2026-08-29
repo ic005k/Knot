@@ -79,14 +79,16 @@ public class TodoActivity extends AppCompatActivity {
         }
         mTodoAdapter.setStringListData(todoDataList);
 
-        //条目点击事件全部转发给C++
-        mTodoAdapter.setOnItemActionListener((pos, actionCode) -> {
-            PublicJavaCallCpp(
-                "todo_item_action|==|" + pos + "|==|" + actionCode
-            );
-        });
-
         refreshUi();
+
+        mTodoAdapter.setOnItemActionListener(pos -> {
+            String rawItem = mTodoAdapter.getItemAt(pos);
+            if (rawItem == null) return;
+            String[] parts = rawItem.split("\\|==\\|");
+            if (parts.length < 3) return;
+            String oldText = parts[2];
+            showTodoEditDialog(pos, oldText);
+        });
     }
 
     private void updateAllTexts() {
@@ -160,10 +162,70 @@ public class TodoActivity extends AppCompatActivity {
     public void onBackPressed() {}
 
     public interface OnTodoItemActionListener {
-        /**
-         * @param pos 条目下标
-         * @param actionCode 动作码：star/copy/edit/alarm/delete/done
-         */
-        void onAction(int pos, String actionCode);
+        /** 请求编辑，直接触发弹窗 */
+        void onRequestEdit(int pos);
+    }
+
+    /**
+     * 弹出todo编辑框，直接依附当前Activity，明暗跟随isDark
+     * @param pos 待编辑条目下标
+     * @param oldText 原始文本
+     */
+    private void showTodoEditDialog(final int pos, String oldText) {
+        runOnUiThread(() -> {
+            android.widget.EditText et = new android.widget.EditText(this);
+            et.setText(oldText);
+            // 标准多行：允许自动换行，初始1行，内容变多自动增高
+            et.setInputType(android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+            et.setSingleLine(false);
+            et.setMinHeight(80); // 最小像素高度，避免输入框挤得太小，不再强制minLines
+            et.setMaxLines(8); // 最多8行，超过后滚动，不再继续长高
+
+            android.widget.LinearLayout ll = new android.widget.LinearLayout(
+                this
+            );
+            android.widget.LinearLayout.LayoutParams lp =
+                new android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+            lp.setMargins(48, 24, 48, 24);
+            ll.setLayoutParams(lp);
+            ll.addView(et);
+
+            android.app.AlertDialog.Builder b =
+                new android.app.AlertDialog.Builder(this);
+            boolean zh = MyActivity.zh_cn;
+            if (zh) {
+                b.setTitle("编辑待办");
+            } else {
+                b.setTitle("Edit Todo");
+            }
+            b.setView(ll);
+
+            if (isDark) {
+                ll.setBackgroundColor(0xFF282828);
+                et.setTextColor(0xFFEFEFEF);
+                et.setHintTextColor(0xFFAAAAAA);
+            } else {
+                ll.setBackgroundColor(0xFFFFFFFF);
+                et.setTextColor(0xFF222222);
+                et.setHintTextColor(0xFF888888);
+            }
+
+            String strOk = zh ? "确定" : "OK";
+            String strCancel = zh ? "取消" : "Cancel";
+
+            b.setPositiveButton(strOk, (dialog, which) -> {
+                String newText = et.getText().toString();
+                PublicJavaCallCpp(
+                    "todo_confirm_edit|==|" + pos + "|==|" + newText
+                );
+                dialog.dismiss();
+            });
+            b.setNegativeButton(strCancel, (dialog, which) -> dialog.dismiss());
+
+            b.create().show();
+        });
     }
 }

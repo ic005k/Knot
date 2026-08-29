@@ -37,7 +37,7 @@ class Todo : public QDialog {
   QString strNeedAddToTodoText;
   int nInterval = 500;
   QTimer* tmePlayProgress;
-  bool isNeedSave = false;
+
   bool isToday = false;
   QStringList tableLists;
   void init_Todo();
@@ -106,8 +106,8 @@ class Todo : public QDialog {
 
   void on_btnTestSpeech();
 
-  void on_btnHigh();
-  void on_btnLow();
+  void on_btnHigh(int index);
+  void on_btnLow(int index);
   void on_btnSetTime();
   void on_btnRecycle();
 
