@@ -272,7 +272,6 @@ void MainWindow::on_actionRename_triggered() {
     mui->tabWidget->setTabText(index, text);
 
     m_Method->modifyItemText0(mui->qwMainTab, index, text);
-    mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
 
     updateMainTab();
 

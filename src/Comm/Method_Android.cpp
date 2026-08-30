@@ -200,8 +200,6 @@ void Method::refreshMainDate() {
                               "(Ljava/util/ArrayList;)V", jArrayList.object());
   }
 
-  qInfo() << "listMainDate=" << mw_one->listMainDate;
-
 #endif
 }
 
@@ -223,8 +221,6 @@ void Method::refreshMainDateDetail() {
     instance.callMethod<void>("refreshRightDetailList",
                               "(Ljava/util/ArrayList;)V", jArrayList.object());
   }
-
-  qInfo() << "listMainDateDetail=" << mw_one->listMainDateDetail;
 
 #endif
 }

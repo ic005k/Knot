@@ -448,7 +448,7 @@ void loadTheme(bool isDark) {
 
         font.setBold(true);
         mui->lblViewCate1->setFont(font);
-        mui->lblTabTitle->setFont(font);
+
         mui->lblTitleEditRecord->setFont(font);
         if (mui && mui->lblSyncNote) {
           QFont mFont = font;

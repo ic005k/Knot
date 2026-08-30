@@ -838,7 +838,7 @@ void Report::genReportMenu() {
 
 void Report::aiAnalysis() {
   QString text = mainDataString;
-  QString newEvent = mui->lblTabTitle->text();
+  QString newEvent = mw_one->listMyEventTitle.at(0);
   int pos = text.indexOf('\n');
   QString trimText =
       QString("Event: %1").arg(newEvent) + (pos >= 0 ? text.mid(pos) : "");

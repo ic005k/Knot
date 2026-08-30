@@ -1123,10 +1123,7 @@ void MainWindow::on_btnHome_clicked() {
     mui->qwMainTab->show();
   }
 
-  mui->qwMainDate->hide();
-  mui->qwMainEvent->hide();
   mui->lblStats->hide();
-  mui->lblTabTitle->hide();
 }
 
 void MainWindow::on_btnReadList_clicked() {
@@ -1397,11 +1394,6 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mui->qwMainChart->isHidden()) {
-    QTimer::singleShot(100, mw_one, []() { mw_one->on_btnChart(); });
-    return;
-  }
-
   if (!mui->frameOne->isHidden()) {
     on_btnBack_One_clicked();
     return;
@@ -1614,11 +1606,3 @@ void MainWindow::on_btnAIAPIListOk_clicked(int index) {
   mw_one->m_Preferences->openPreferences();
   mw_one->m_Preferences->ui->cboxEndpoint->setCurrentIndex(index);
 }
-
-void MainWindow::on_btnNewTab_clicked() { on_actionAdd_Tab_triggered(); }
-
-void MainWindow::on_btnDelTab_clicked() { on_actionDel_Tab_triggered(); }
-
-void MainWindow::on_btnRenameTab_clicked() { on_actionRename_triggered(); }
-
-void MainWindow::on_btnAddTabItem_clicked() { on_btnAdd_clicked(); }

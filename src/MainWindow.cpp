@@ -538,12 +538,6 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     return;
   }*/
 
-  if (mui->qwMainChart->isVisible()) {
-    on_btnChart();
-    event->ignore();
-    return;
-  }
-
   if (!mui->frameImgView->isHidden()) {
     on_btnBackImg_clicked();
     event->ignore();
@@ -754,6 +748,8 @@ void MainWindow::on_twItemClicked() {
 }
 
 void MainWindow::modify_Data() {
+  return;
+
   QTreeWidget* tw = (QTreeWidget*)mui->tabWidget->currentWidget();
   QTreeWidgetItem* item = tw->currentItem();
   QTreeWidgetItem* topItem = item->parent();
@@ -799,21 +795,21 @@ void MainWindow::modify_Data() {
     }
 
     int newrow;
-    int row = m_Method->getCurrentIndexFromQW(mui->qwMainEvent);
+    int row = 0;  // m_Method->getCurrentIndexFromQW(mui->qwMainEvent);
     if (childRow0 - childRow1 == 0) newrow = row;
     if (childRow0 - childRow1 < 0) newrow = row + childRow1 - childRow0;
     if (childRow0 - childRow1 > 0) newrow = row - (childRow0 - childRow1);
 
-    int maindateIndex = m_Method->getCurrentIndexFromQW(mui->qwMainDate);
+    int maindateIndex = 0;  // m_Method->getCurrentIndexFromQW(mui->qwMainDate);
 
     isEditItem = true;
     reloadMain();
 
     QTimer::singleShot(100, mw_one, [this, maindateIndex, newrow]() {
-      m_Method->setCurrentIndexFromQW(mui->qwMainDate, maindateIndex);
+      // m_Method->setCurrentIndexFromQW(mui->qwMainDate, maindateIndex);
       isEditItem = true;
       m_Method->clickMainDate(maindateIndex);
-      m_Method->setCurrentIndexFromQW(mui->qwMainEvent, newrow);
+      // m_Method->setCurrentIndexFromQW(mui->qwMainEvent, newrow);
     });
   }
 }
@@ -879,17 +875,10 @@ void MainWindow::on_twItemDoubleClicked() {
 }
 
 void MainWindow::clickMainTab() {
-  mui->qwMainDate->rootContext()->setContextProperty("isChkAI", isChkAI);
-
   int index = getCurrentIndex();
   tabData->setCurrentIndex(index);
 
-  mui->qwMainDate->show();
-  mui->qwMainEvent->show();
   mui->lblStats->show();
-
-  mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
-  mui->lblTabTitle->show();
 
   mui->qwMainTab->hide();
 
@@ -900,18 +889,9 @@ void MainWindow::clickMainTab() {
 }
 
 void MainWindow::clickMainTab(int index) {
-  mui->qwMainDate->rootContext()->setContextProperty("isChkAI", isChkAI);
-
   tabData->setCurrentIndex(index);
 
-  // mui->qwMainDate->show();
-  // mui->qwMainEvent->show();
-  // mui->lblStats->show();
-
   QString eventName = mui->tabWidget->tabBar()->tabText(index);
-
-  // mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
-  // mui->lblTabTitle->show();
 
   mui->qwMainTab->hide();
   mui->frameMain->hide();
@@ -942,8 +922,6 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 
     Reg.setValue("CurrentIndex", index);
   }
-
-  mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
 
   reloadMain();
 

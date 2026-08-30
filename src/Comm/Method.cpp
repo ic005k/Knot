@@ -827,24 +827,12 @@ void Method::clickMainDate(int index) {
   mw_one->isDelItem = false;
   mw_one->isEditItem = false;
 
-  mui->qwMainEvent->rootContext()->setContextProperty("isAniEffects",
-                                                      isAniEffects);
-
-  mui->qwMainEvent->rootContext()->setContextProperty(
-      "maineventWidth", mui->qwMainEvent->width());
-
   QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
   int maindateIndex = index;  // getCurrentIndexFromQW(mui->qwMainDate);
-  // int maindateCount =
-  //     mw_one->listMainDate.count();  // getCountFromQW(mui->qwMainDate);
+
   int topIndex = tw->topLevelItemCount() - maindateIndex - 1;
 
   if (topIndex < 0) return;
-
-  // QString mainDate = getText0(mui->qwMainDate, maindateIndex);
-  // mui->qwMainEvent->rootContext()->setContextProperty("main_date", mainDate);
-
-  // clearAllBakList(mui->qwMainEvent);
 
   QTreeWidgetItem* topItem = tw->topLevelItem(topIndex);
   int childCount = topItem->childCount();
@@ -859,16 +847,11 @@ void Method::clickMainDate(int index) {
     text2 = childItem->text(2);
     text3 = childItem->text(3);
 
-    addItemToQW(mui->qwMainEvent, text0, text1, text2, text3, 0);
+    // addItemToQW(mui->qwMainEvent, text0, text1, text2, text3, 0);
 
     mw_one->listMainDateDetail.append(text0 + "|==|" + text1 + "|==|" + text2 +
                                       "|==|" + text3);
   }
-
-  gotoEnd(mui->qwMainEvent);
-  int count = getCountFromQW(mui->qwMainEvent);
-  setCurrentIndexFromQW(mui->qwMainEvent, count - 1);
-  setScrollBarPos(mui->qwMainEvent, 1.0);
 
   setMainTabCurrentIndex();
 
@@ -903,10 +886,11 @@ void Method::clickMainDateData(int index) {
 
 void Method::clickMainEventData() {
   QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
-  int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
-  int maindateCount = getCountFromQW(mui->qwMainDate);
+  int maindateIndex = 0;  // getCurrentIndexFromQW(mui->qwMainDate);
+  int maindateCount =
+      mw_one->listMainDate.count();  // getCountFromQW(mui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
-  int childIndex = getCurrentIndexFromQW(mui->qwMainEvent);
+  int childIndex = 0;  // getCurrentIndexFromQW(mui->qwMainEvent);
   tw->setCurrentItem(tw->topLevelItem(topIndex)->child(childIndex));
 
   if (topIndex < 0) return;

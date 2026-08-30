@@ -439,42 +439,6 @@ void MainWindow::initMainQW() {
   mui->qwMainTab->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
 
-  mui->qwMainDate->rootContext()->setContextProperty("FontSize", fontSize);
-  mui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwMainDate->rootContext()->setContextProperty("isAniEffects", true);
-  mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
-                                                     mui->qwMainDate->width());
-  mui->qwMainDate->rootContext()->setContextProperty("m_Method", m_Method);
-  mui->qwMainDate->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwMainDate->rootContext()->setContextProperty("m_Report", m_Report);
-  mui->qwMainDate->rootContext()->setContextProperty("isChkAI", isChkAI);
-  mui->qwMainDate->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/maindate.qml")));
-
-  mui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwMainEvent->rootContext()->setContextProperty("fontSize", fontSize);
-  mui->qwMainEvent->rootContext()->setContextProperty("isAniEffects", true);
-  mui->qwMainEvent->rootContext()->setContextProperty(
-      "maineventWidth", mui->qwMainEvent->width());
-  mui->qwMainEvent->rootContext()->setContextProperty("m_Method", m_Method);
-  mui->qwMainEvent->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwMainEvent->rootContext()->setContextProperty("main_date", "");
-  mui->qwMainEvent->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/mainevent.qml")));
-
-  // MainChart
-  mui->qwMainChart->hide();
-  mui->qwMainChart->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwMainChart->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwMainChart->rootContext()->setContextProperty("chartCategories",
-                                                      mw_one->chartCategories);
-  mui->qwMainChart->rootContext()->setContextProperty("chartFreqValues",
-                                                      mw_one->qmlFreqValues);
-  mui->qwMainChart->rootContext()->setContextProperty("chartAmountValues",
-                                                      mw_one->qmlAmountValues);
-  mui->qwMainChart->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/mainchart.qml")));
-
   mui->qwNotesTree->rootContext()->setContextProperty("fontSize", fontSize);
   mui->qwNotesTree->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/tree_main.qml")));
@@ -589,9 +553,6 @@ void MainWindow::init_Theme() {
   mui->qwAIAPIList->rootContext()->setContextProperty("isDark", isDark);
 
   mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwMainDate->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwMainEvent->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwMainChart->rootContext()->setContextProperty("isDark", isDark);
 
   mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
@@ -744,10 +705,8 @@ void MainWindow::init_UIWidget() {
   mui->lblVectorStatus->setText("");
   mui->lblVectorStatus->hide();
 
-  mui->qwMainDate->hide();
-  mui->qwMainEvent->hide();
   mui->lblStats->hide();
-  mui->lblTabTitle->hide();
+
   mui->btnSelTab->hide();
 
   mui->menubar->hide();

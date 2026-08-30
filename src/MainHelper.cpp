@@ -67,18 +67,7 @@ void MainHelper::selectTab() {
   isSelectTab = true;
 }
 
-void MainHelper::clickBtnChart() {
-  if (mui->qwMainChart->isHidden()) {
-    mui->qwMainDate->hide();
-    mui->qwMainEvent->hide();
-    mui->qwMainChart->show();
-
-  } else {
-    mui->qwMainChart->hide();
-    mui->qwMainDate->show();
-    mui->qwMainEvent->show();
-  }
-}
+void MainHelper::clickBtnChart() {}
 
 void MainHelper::clickBtnRestoreTab() {
   if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
@@ -573,18 +562,12 @@ void MainWindow::reloadMain() {
   else
     isAniEffects = true;
 
-  mui->qwMainDate->rootContext()->setContextProperty("isAniEffects",
-                                                     isAniEffects);
-  mui->qwMainDate->rootContext()->setContextProperty("maindateWidth",
-                                                     mui->qwMainDate->width());
-  m_Method->clearAllBakList(mui->qwMainDate);
-
   QTreeWidget* tw = get_tw(tabData->currentIndex());
 
   int total = tw->topLevelItemCount();
 
   if (total == 0) {
-    m_Method->clearAllBakList(mui->qwMainEvent);
+    // m_Method->clearAllBakList(mui->qwMainEvent);
     return;
   }
 
@@ -609,7 +592,7 @@ void MainWindow::reloadMain() {
 
     topitem = text0;
 
-    m_Method->insertItem(mui->qwMainDate, text0, text1, text2, text3, 0);
+    // m_Method->insertItem(mui->qwMainDate, text0, text1, text2, text3, 0);
 
     listMainDate.insert(0, text0 + "|==|" + text1 + "|==|" + text2);
 
@@ -625,13 +608,6 @@ void MainWindow::reloadMain() {
 
   m_Report->mainDataString = mainString;
   // qInfo() << "MainDataString=" << mainString;
-
-  m_Method->setCurrentIndexFromQW(mui->qwMainDate, 0);
-
-  /*m_Method->gotoEnd(mui->qwMainDate);
-  int count = m_Method->getCountFromQW(mui->qwMainDate);
-  m_Method->setCurrentIndexFromQW(mui->qwMainDate, count - 1);
-  m_Method->setScrollBarPos(mui->qwMainDate, 1.0);*/
 
   m_Method->clickMainDate(0);
 }

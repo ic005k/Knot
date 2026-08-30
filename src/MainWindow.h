@@ -997,14 +997,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnOpenBookFile_clicked();
 
-  void on_btnNewTab_clicked();
-
-  void on_btnDelTab_clicked();
-
-  void on_btnRenameTab_clicked();
-
-  void on_btnAddTabItem_clicked();
-
  private:
   QNetworkAccessManager* m_ainetMgr;
   QUrl buildAiApiUrl(const QString& rawEndpoint);

@@ -87,18 +87,6 @@ void MainWindow::readChartDone() {
   qmlAmountValues.clear();
   qmlFreqValues = QVariant::fromValue(freqValues).toList();
   qmlAmountValues = QVariant::fromValue(amountValues).toList();
-
-  // 6. 直接暴露给QML
-  mui->qwMainChart->rootContext()->setContextProperty("chartCategories",
-                                                      chartCategories);
-  mui->qwMainChart->rootContext()->setContextProperty("chartFreqValues",
-                                                      qmlFreqValues);
-  mui->qwMainChart->rootContext()->setContextProperty("chartAmountValues",
-                                                      qmlAmountValues);
-
-  // qDebug() << "chartCategories=" << chartCategories
-  //          << "qmlFreqValues=" << qmlFreqValues
-  //          << "qmlAmountValues=" << qmlAmountValues;
 }
 
 SaveThread::SaveThread(QObject* parent) : QThread{parent} {
