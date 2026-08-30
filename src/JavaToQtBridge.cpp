@@ -548,6 +548,25 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.contains("edit_datadetail|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 3) {
+                int index0 = 0;
+                int index1 = 0;
+                index0 = list.at(1).toInt();
+                index1 = list.at(2).toInt();
+                m_Method->reeditMainEventData(index0, index1);
+              }
+            });
+          }
+
+          if (strType.contains("add_datadetail")) {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_btnAdd_clicked(); });
+          }
+
           // 主工具栏按钮=============================================
           if (strType == "topbtn_add") {
             QTimer::singleShot(100, mw_one, [=]() { mui->btnAdd->click(); });

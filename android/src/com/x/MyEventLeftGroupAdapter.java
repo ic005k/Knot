@@ -67,9 +67,30 @@ public class MyEventLeftGroupAdapter
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MyEventDateGroup item = mDataList.get(position);
-        holder.tvDate.setText(item.dateStr);
-        holder.tvCount.setText(String.valueOf(item.dayItemCount));
-        holder.tvSum.setText(String.valueOf(item.dayTotalValue));
+
+        // dateStr 判空隐藏
+        if (item.dateStr == null || item.dateStr.trim().isEmpty()) {
+            holder.tvDate.setVisibility(View.GONE);
+        } else {
+            holder.tvDate.setVisibility(View.VISIBLE);
+            holder.tvDate.setText(item.dateStr);
+        }
+
+        // dayItemCount 字符串判空隐藏
+        if (item.dayItemCount == null || item.dayItemCount.trim().isEmpty()) {
+            holder.tvCount.setVisibility(View.GONE);
+        } else {
+            holder.tvCount.setVisibility(View.VISIBLE);
+            holder.tvCount.setText(item.dayItemCount);
+        }
+
+        // dayTotalValue 字符串判空隐藏
+        if (item.dayTotalValue == null || item.dayTotalValue.trim().isEmpty()) {
+            holder.tvSum.setVisibility(View.GONE);
+        } else {
+            holder.tvSum.setVisibility(View.VISIBLE);
+            holder.tvSum.setText(item.dayTotalValue);
+        }
 
         boolean isSelected = position == mSelectedPosition;
         // 明暗+选中状态组合背景
@@ -101,7 +122,6 @@ public class MyEventLeftGroupAdapter
             // 局部刷新旧、新位置，避免全量刷新
             notifyItemChanged(oldSel);
             notifyItemChanged(mSelectedPosition);
-
             if (mClickListener != null) {
                 mClickListener.onDateGroupItemClick(pos, dataItem);
             }
@@ -125,5 +145,9 @@ public class MyEventLeftGroupAdapter
             tvCount = itemView.findViewById(R.id.myevent_tv_day_item_count);
             tvSum = itemView.findViewById(R.id.myevent_tv_day_sum_value);
         }
+    }
+
+    public int getSelectedPosition() {
+        return mSelectedPosition;
     }
 }

@@ -658,7 +658,8 @@ QScrollBar::sub-page:horizontal {
   void refreshMainDateDetail();
 
   void openMyEventWindow();
-  protected:
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:
@@ -671,7 +672,7 @@ QScrollBar::sub-page:horizontal {
 
   void clickMainDateData(int index);
   void clickMainEventData();
-  void reeditMainEventData();
+  void reeditMainEventData(int index0, int index1);
 
  private slots:
 

@@ -66,10 +66,38 @@ public class MyEventRightDetailAdapter
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MyEventDetailItem item = mDetailList.get(position);
-        holder.tvTime.setText(item.timeStr);
-        holder.tvValue.setText(String.valueOf(item.eventValue));
-        holder.tvCategory.setText(item.category);
-        holder.tvNote.setText(item.note);
+
+        // tvTime 日期 📅
+        if (item.timeStr == null || item.timeStr.trim().isEmpty()) {
+            holder.tvTime.setVisibility(View.GONE);
+        } else {
+            holder.tvTime.setVisibility(View.VISIBLE);
+            holder.tvTime.setText(item.timeStr);
+        }
+
+        // tvValue 金额 💰
+        if (item.eventValue == null || item.eventValue.trim().isEmpty()) {
+            holder.tvValue.setVisibility(View.GONE);
+        } else {
+            holder.tvValue.setVisibility(View.VISIBLE);
+            holder.tvValue.setText("💰 " + item.eventValue);
+        }
+
+        // tvCategory 类型 🛒
+        if (item.category == null || item.category.trim().isEmpty()) {
+            holder.tvCategory.setVisibility(View.GONE);
+        } else {
+            holder.tvCategory.setVisibility(View.VISIBLE);
+            holder.tvCategory.setText("🛒 " + item.category);
+        }
+
+        // tvNote 备注 📝
+        if (item.note == null || item.note.trim().isEmpty()) {
+            holder.tvNote.setVisibility(View.GONE);
+        } else {
+            holder.tvNote.setVisibility(View.VISIBLE);
+            holder.tvNote.setText("📝 " + item.note);
+        }
 
         boolean isSelected = position == mSelectedPosition;
         if (mIsDark) {
@@ -126,5 +154,12 @@ public class MyEventRightDetailAdapter
             tvCategory = itemView.findViewById(R.id.myevent_tv_detail_category);
             tvNote = itemView.findViewById(R.id.myevent_tv_detail_note);
         }
+    }
+
+    /**
+     * 获取当前选中下标，-1：无选中
+     */
+    public int getSelectedPosition() {
+        return mSelectedPosition;
     }
 }

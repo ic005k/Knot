@@ -106,12 +106,25 @@ public class MyEventActivity extends AppCompatActivity {
         });
         myevent_btn_edit.setOnClickListener(v -> {
             // 修改事件
+            int selectPos0 = mLeftAdapter.getSelectedPosition();
+            if (selectPos0 < 0) {
+                return;
+            }
+
+            int selectPos1 = mRightAdapter.getSelectedPosition();
+            if (selectPos1 < 0) {
+                return;
+            }
+            PublicJavaCallCpp(
+                "edit_datadetail|==|" + selectPos0 + "|==|" + selectPos1
+            );
         });
         myevent_btn_delete.setOnClickListener(v -> {
             // 删除事件
         });
         myevent_btn_add.setOnClickListener(v -> {
             // 新增事件
+            PublicJavaCallCpp("add_datadetail");
         });
 
         // 初始化UI颜色
@@ -175,7 +188,7 @@ public class MyEventActivity extends AppCompatActivity {
         ArrayList<MyEventDateGroup> outList = new ArrayList<>();
         for (String line : rawStrList) {
             if (line == null || line.isEmpty()) continue;
-            String[] parts = line.split("\\|==|");
+            String[] parts = line.split("\\|==\\|");
             MyEventDateGroup obj = new MyEventDateGroup();
             if (parts.length >= 1) obj.dateStr = parts[0];
             if (parts.length >= 2) obj.dayItemCount = parts[1];
@@ -203,7 +216,7 @@ public class MyEventActivity extends AppCompatActivity {
         ArrayList<MyEventDetailItem> outList = new ArrayList<>();
         for (String line : rawStrList) {
             if (line == null || line.isEmpty()) continue;
-            String[] parts = line.split("\\|==|");
+            String[] parts = line.split("\\|==\\|");
             MyEventDetailItem obj = new MyEventDetailItem();
             if (parts.length >= 1) obj.timeStr = parts[0];
             if (parts.length >= 2) obj.eventValue = parts[1];

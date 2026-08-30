@@ -1181,7 +1181,7 @@ void MainWindow::on_btnMenu_clicked() {
   mainMenu = nullptr;
 }
 
-void MainWindow::on_btnModifyRecord() { m_Method->reeditMainEventData(); }
+void MainWindow::on_btnModifyRecord() {}
 
 void MainWindow::on_btnSelTab_clicked() {
   mui->frameMain->hide();

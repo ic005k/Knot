@@ -872,7 +872,7 @@ void Method::clickMainDate(int index) {
 
   setMainTabCurrentIndex();
 
-  // openMyEventWindow();
+  refreshMainDateDetail();
 }
 
 void Method::setMainTabCurrentIndex() {
@@ -917,17 +917,17 @@ void Method::clickMainEventData() {
   setMainTabCurrentIndex();
 }
 
-void Method::reeditMainEventData() {
+void Method::reeditMainEventData(int index0, int index1) {
   QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
-  int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
-  int maineventIndex = getCurrentIndexFromQW(mui->qwMainEvent);
+  int maindateIndex = index0;   // getCurrentIndexFromQW(mui->qwMainDate);
+  int maineventIndex = index1;  // getCurrentIndexFromQW(mui->qwMainEvent);
 
   if (maindateIndex < 0) return;
   if (maineventIndex < 0) return;
 
   // int maindateCount = getCountFromQW(mui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - 1 - maindateIndex;
-  int childIndex = getCurrentIndexFromQW(mui->qwMainEvent);
+  int childIndex = index1;  // getCurrentIndexFromQW(mui->qwMainEvent);
 
   if (topIndex < 0) return;
   if (childIndex < 0) return;
