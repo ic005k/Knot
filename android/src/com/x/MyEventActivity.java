@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public class MyEventActivity extends AppCompatActivity {
 
+    public static MyEventActivity mInstance = null;
+
     private boolean isDark;
     private View layout_myevent_root;
     private ImageView myevent_btn_report;
@@ -26,9 +28,12 @@ public class MyEventActivity extends AppCompatActivity {
     private MyEventLeftGroupAdapter mLeftAdapter;
     private MyEventRightDetailAdapter mRightAdapter;
 
+    public static native void PublicJavaCallCpp(String type);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mInstance = this;
         setContentView(R.layout.activity_myevent);
         isDark = ImmersiveUtil.applyRealImmersive(this);
 
@@ -71,6 +76,8 @@ public class MyEventActivity extends AppCompatActivity {
 
         mLeftAdapter.setClickListener((pos, data) -> {
             // TODO: QtNative.runOnQtThread() 调用C++，按dateStr获取事件明细，回调后更新mRightAdapter
+            // 调用C++获取事件明细
+            PublicJavaCallCpp("get_maindatedetail|==|" + pos);
         });
 
         myevent_btn_report.setOnClickListener(v -> {
@@ -120,5 +127,48 @@ public class MyEventActivity extends AppCompatActivity {
     private void refreshUi() {
         // 这里后续可以放文本更新逻辑 updateAllTexts();
         updateAllColor();
+    }
+
+    /**
+     * JNI回调：刷新左侧全部日期分组列表，主线程调用
+     * @param rawStrList C++返回，每条字符串以 |==| 分隔
+     */
+    public void refreshLeftGroupList(ArrayList<String> rawStrList) {
+        if (mLeftAdapter == null) return;
+
+        ArrayList<MyEventDateGroup> outList = new ArrayList<>();
+        for (String line : rawStrList) {
+            if (line == null || line.isEmpty()) continue;
+            String[] parts = line.split("\\|==|");
+            // 根据你的协议顺序解析字段，示例：dateStr | dayItemCount | dayTotalValue
+            MyEventDateGroup obj = new MyEventDateGroup();
+            obj.dateStr = parts[0];
+            obj.dayItemCount = Integer.parseInt(parts[1]);
+            obj.dayTotalValue = Long.parseLong(parts[2]);
+            outList.add(obj);
+        }
+        mLeftAdapter.setData(outList);
+    }
+
+    /**
+     * JNI回调：刷新右侧当日明细列表，主线程调用
+     * @param rawStrList C++返回，每条字符串以 |==| 分隔
+     */
+    public void refreshRightDetailList(ArrayList<String> rawStrList) {
+        if (mRightAdapter == null) return;
+
+        ArrayList<MyEventDetailItem> outList = new ArrayList<>();
+        for (String line : rawStrList) {
+            if (line == null || line.isEmpty()) continue;
+            String[] parts = line.split("\\|==|");
+            // 按照你约定的字段顺序：timeStr | eventValue | category | note
+            MyEventDetailItem obj = new MyEventDetailItem();
+            obj.timeStr = parts[0];
+            obj.eventValue = Long.parseLong(parts[1]);
+            obj.category = parts[2];
+            obj.note = parts[3];
+            outList.add(obj);
+        }
+        mRightAdapter.setDetailData(outList);
     }
 }

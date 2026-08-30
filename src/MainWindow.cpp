@@ -812,7 +812,7 @@ void MainWindow::modify_Data() {
     QTimer::singleShot(100, mw_one, [this, maindateIndex, newrow]() {
       m_Method->setCurrentIndexFromQW(mui->qwMainDate, maindateIndex);
       isEditItem = true;
-      m_Method->clickMainDate();
+      m_Method->clickMainDate(maindateIndex);
       m_Method->setCurrentIndexFromQW(mui->qwMainEvent, newrow);
     });
   }
@@ -949,7 +949,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 
   isTabChanged = true;
 
-  m_Method->clickMainDateData();
+  m_Method->clickMainDateData(0);
 }
 
 bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {

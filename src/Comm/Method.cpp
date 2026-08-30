@@ -818,7 +818,7 @@ QString Method::getLastModified(QString file) {
   return item1;
 }
 
-void Method::clickMainDate() {
+void Method::clickMainDate(int index) {
   bool isAniEffects;
   if (mw_one->isDelItem || mw_one->isEditItem)
     isAniEffects = false;
@@ -834,19 +834,23 @@ void Method::clickMainDate() {
       "maineventWidth", mui->qwMainEvent->width());
 
   QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
-  int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
-  // int maindateCount = getCountFromQW(mui->qwMainDate);
+  int maindateIndex = index;  // getCurrentIndexFromQW(mui->qwMainDate);
+  // int maindateCount =
+  //     mw_one->listMainDate.count();  // getCountFromQW(mui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateIndex - 1;
 
   if (topIndex < 0) return;
 
-  QString mainDate = getText0(mui->qwMainDate, maindateIndex);
-  mui->qwMainEvent->rootContext()->setContextProperty("main_date", mainDate);
+  // QString mainDate = getText0(mui->qwMainDate, maindateIndex);
+  // mui->qwMainEvent->rootContext()->setContextProperty("main_date", mainDate);
 
-  clearAllBakList(mui->qwMainEvent);
+  // clearAllBakList(mui->qwMainEvent);
+
   QTreeWidgetItem* topItem = tw->topLevelItem(topIndex);
   int childCount = topItem->childCount();
   QString text0, text1, text2, text3;
+
+  mw_one->listMainDateDetail.clear();
 
   for (int j = 0; j < childCount; j++) {
     QTreeWidgetItem* childItem = topItem->child(j);
@@ -856,7 +860,12 @@ void Method::clickMainDate() {
     text3 = childItem->text(3);
 
     addItemToQW(mui->qwMainEvent, text0, text1, text2, text3, 0);
+
+    mw_one->listMainDateDetail.append(text0 + "|==|" + text1 + "|==|" + text2 +
+                                      "|==|" + text3);
   }
+
+  refreshMainDateDetail();
 
   gotoEnd(mui->qwMainEvent);
   int count = getCountFromQW(mui->qwMainEvent);
@@ -878,10 +887,11 @@ void Method::setMainTabCurrentIndex() {
   }
 }
 
-void Method::clickMainDateData() {
+void Method::clickMainDateData(int index) {
   QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
-  int maindateIndex = getCurrentIndexFromQW(mui->qwMainDate);
-  int maindateCount = getCountFromQW(mui->qwMainDate);
+  int maindateIndex = index;  // getCurrentIndexFromQW(mui->qwMainDate);
+  int maindateCount =
+      mw_one->listMainDate.count();  // getCountFromQW(mui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
 
   if (topIndex < 0) return;

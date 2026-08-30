@@ -654,7 +654,10 @@ QScrollBar::sub-page:horizontal {
 
   int getMainTabLastSelectedPos();
   void refreshMainEntranceCards();
-  protected:
+  void refreshMainDate();
+  void refreshMainDateDetail();
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:
@@ -663,9 +666,9 @@ QScrollBar::sub-page:horizontal {
 
  public slots:
 
-  void clickMainDate();
+  void clickMainDate(int index);
 
-  void clickMainDateData();
+  void clickMainDateData(int index);
   void clickMainEventData();
   void reeditMainEventData();
 

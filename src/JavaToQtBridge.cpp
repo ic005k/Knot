@@ -528,6 +528,19 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.contains("get_maindatedetail|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int index = 0;
+                index = list.at(1).toInt();
+                m_Method->clickMainDate(index);
+                m_Method->clickMainDateData(index);
+              }
+            });
+          }
+
           // 主工具栏按钮=============================================
           if (strType == "topbtn_add") {
             QTimer::singleShot(100, mw_one, [=]() { mui->btnAdd->click(); });

@@ -157,3 +157,49 @@ void Method::refreshMainEntranceCards() {
   qInfo() << "Tab Text List=" << list1 << index;
 #endif
 }
+
+void Method::refreshMainDate() {
+#ifdef Q_OS_ANDROID
+  // 1. 构建与打开时相同格式的数据列表
+  QStringList list1 = mw_one->listMainDate;
+
+  // 2. 构造 Java ArrayList<String>
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+  for (const QString& item : list1) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  // 3. 通过静态实例调用
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/MyEventActivity", "mInstance", "Lcom/x/MyEventActivity;");
+
+  if (instance.isValid()) {
+    instance.callMethod<void>("refreshLeftGroupList",
+                              "(Ljava/util/ArrayList;)V", jArrayList.object());
+  }
+
+#endif
+}
+
+void Method::refreshMainDateDetail() {
+#ifdef Q_OS_ANDROID
+
+  QStringList list1 = mw_one->listMainDateDetail;
+
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+  for (const QString& item : list1) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/MyEventActivity", "mInstance", "Lcom/x/MyEventActivity;");
+
+  if (instance.isValid()) {
+    instance.callMethod<void>("refreshRightDetailList",
+                              "(Ljava/util/ArrayList;)V", jArrayList.object());
+  }
+
+#endif
+}

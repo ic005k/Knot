@@ -595,6 +595,8 @@ void MainWindow::reloadMain() {
   else
     a = 0;
 
+  listMainDate.clear();
+
   QString text0, text1, text2, text3, topitem;
   QString mainString =
       "Event:" + tabData->tabText(tabData->currentIndex()) + "\n";
@@ -608,6 +610,8 @@ void MainWindow::reloadMain() {
     topitem = text0;
 
     m_Method->insertItem(mui->qwMainDate, text0, text1, text2, text3, 0);
+
+    listMainDate.insert(0, text0 + "|==|" + text1 + "|==|" + text2);
 
     mainString = mainString + "Date:" + text0 + "\n";
     int count = topItem->childCount();
@@ -629,7 +633,9 @@ void MainWindow::reloadMain() {
   m_Method->setCurrentIndexFromQW(mui->qwMainDate, count - 1);
   m_Method->setScrollBarPos(mui->qwMainDate, 1.0);*/
 
-  m_Method->clickMainDate();
+  m_Method->refreshMainDate();
+
+  m_Method->clickMainDate(0);
 }
 
 QStringList MainWindow::get_MonthList(QString strY, QString strM) {

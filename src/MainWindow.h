@@ -252,6 +252,8 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   Ui::MainWindow* ui;
 
+  QStringList listMainDate, listMainDateDetail;
+
   void emitAndroidBackSignal() { emit androidBackSignal(); }
 
   QMenu* mainMenu = nullptr;
@@ -495,7 +497,8 @@ class MainWindow : public QMainWindow {
   void clickMainTab(int index);
 
   void openMyEventWindow(QStringList list);
-  protected:
+
+ protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;
