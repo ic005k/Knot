@@ -494,7 +494,8 @@ class MainWindow : public QMainWindow {
 
   void clickMainTab(int index);
 
- protected:
+  void openMyEventWindow(QStringList list);
+  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void paintEvent(QPaintEvent* event) override;

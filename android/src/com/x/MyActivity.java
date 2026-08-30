@@ -430,13 +430,13 @@ public class MyActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 原有配置变更标记逻辑保留（完全不动你的原始逻辑）
+        // 原有配置变更标记逻辑保留
         if (savedInstanceState != null) {
             isConfigChangeRecreate = true;
             Log.d(TAG, "检测到配置变更导致的Activity重构，跳过非必要初始化");
         }
 
-        // 1. 轻量初始化（必须同步执行，确保JNI环境基础就绪）
+        // 轻量初始化（必须同步执行，确保JNI环境基础就绪）
         isZh(this);
         m_instance = this;
         sAppContext = getApplication();
@@ -447,13 +447,8 @@ public class MyActivity
                 ")"
         );
 
-        // 2. 静态实例校验（保留原始逻辑）
-        if (checkDuplicateInstance()) {
-            return;
-        }
-
-        // 3. 放弃HandlerThread异步，改用延迟post（避免JNI环境未就绪）
-        // 核心：等待Qt层初始化完成（延迟500ms，适配你的mw_one创建时机）
+        // 放弃HandlerThread异步，改用延迟post（避免JNI环境未就绪）
+        // 核心：等待Qt层初始化完成（延迟500ms，适配的mw_one创建时机）
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             // 仅在主线程执行初始化（避免JNI跨线程问题）
             try {
@@ -495,8 +490,6 @@ public class MyActivity
                     // 确保mw_one已创建完成后再调用
 
                     Log.d(TAG, "配置变更初始化完成，Qt已就绪，可以调用C++");
-
-                    //hideQtSplashScreen(); // 主动隐藏闪屏
                 }
 
                 // updateSystemBars();
@@ -505,27 +498,6 @@ public class MyActivity
                 Log.e(TAG, "初始化异常", e);
             }
         }, 500); // 延迟500ms：适配你的Qt层mw_one实例创建时间（可根据实际调整）
-
-        // 页面刚打开 / 被唤醒 / 从后台回来时，不自动弹出输入法
-        getWindow().setSoftInputMode(
-            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-        );
-
-        // ================== 尝试解决 Qt Android 第一次点击失效 ==================
-        getWindow().getDecorView().setFocusableInTouchMode(true);
-        getWindow().getDecorView().requestFocus();
-
-        // Android 12+ 明确声明：这个窗口可以接收触摸
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-            );
-            getWindow().clearFlags(
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-            );
-        }
-        // ================================================================
 
         // 拦截手势返回回调
         if (
@@ -554,26 +526,6 @@ public class MyActivity
                 mBackCallback
             );
         }
-
-        //确保 Qt 的 QQuickWindow 已 attach 不依赖 timing race,尝试解决第一次点击失效
-        new Handler(Looper.getMainLooper()).post(() -> {
-            getWindow().getDecorView().requestFocus();
-        });
-    }
-
-    // ===== 新增：简化的实例重复校验方法 =====
-    private boolean checkDuplicateInstance() {
-        if (m_instance != null && m_instance != this) {
-            Log.d(TAG, "App is already running... this won't work");
-            // 处理Intent（简化逻辑）
-            Intent intent = getIntent();
-            if (intent != null && intent.getDataString() != null) {
-                handleSharedIntent(intent);
-            }
-            finish();
-            return true;
-        }
-        return false;
     }
 
     // ===== 新增：处理共享Intent的简化方法 =====
@@ -1612,6 +1564,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openMyEventWindow(ArrayList<String> eventItemList) {
+        Intent intent = new Intent(this, MyEventActivity.class);
+        intent.putStringArrayListExtra("event_item_list", eventItemList);
+        startActivity(intent);
+    }
+
     /**
      * 打开新增事件记录窗口 AddEventRecord
      */
@@ -1677,7 +1635,7 @@ public class MyActivity
     public void forwardClearTrack() {
         // 先判断MapActivity是否已创建
         if (mapActivityInstance != null) {
-            mapActivityInstance.clearTrack(); // 调用MapActivity的清除方法
+            mapActivityInstance.clearTrack();
         } else {
             // 可选：日志或提示地图窗口未打开
             android.util.Log.w("MyActivity", "MapActivity未启动，无法清除轨迹");
@@ -2712,52 +2670,6 @@ public class MyActivity
                 );
             }
         }
-    }
-
-    private void hideQtSplashScreen() {
-        try {
-            // 方案1：尝试调用带参数的新版方法
-            Method hideMethod = getClass().getMethod(
-                "hideSplashScreen",
-                boolean.class
-            );
-            hideMethod.invoke(this, false); // false = 不保持在顶部
-            Log.d("QtKnot", "新版Qt hideSplashScreen(boolean)调用成功");
-        } catch (NoSuchMethodException e) {
-            try {
-                // 方案2：降级调用无参的旧版方法
-                Method hideMethod = getClass().getMethod("hideSplashScreen");
-                hideMethod.invoke(this);
-                Log.d("QtKnot", "旧版Qt hideSplashScreen()调用成功");
-            } catch (Exception ex) {
-                // 方案3：终极备用方案 - 直接隐藏闪屏View
-                View splashView = getWindow()
-                    .getDecorView()
-                    .findViewById(android.R.id.content)
-                    .findViewWithTag("qt_splash_view");
-                if (splashView != null) {
-                    splashView.setVisibility(View.GONE);
-                    Log.d("QtKnot", "备用方案：直接隐藏闪屏View成功");
-                } else {
-                    Log.e("QtKnot", "所有隐藏闪屏方案均失败");
-                }
-                ex.printStackTrace();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        runOnUiThread(() -> {
-            // 强制整个窗口重绘
-            getWindow().getDecorView().invalidate();
-            // 请求布局
-            getWindow().getDecorView().requestLayout();
-            // 如果 Qt 使用了 SurfaceView，可以尝试显式请求
-            View content = findViewById(android.R.id.content);
-            if (content != null) {
-                content.invalidate();
-            }
-        });
     }
 
     public static float getSystemFontScale(Context context) {

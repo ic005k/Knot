@@ -904,14 +904,22 @@ void MainWindow::clickMainTab(int index) {
 
   tabData->setCurrentIndex(index);
 
-  mui->qwMainDate->show();
-  mui->qwMainEvent->show();
-  mui->lblStats->show();
+  // mui->qwMainDate->show();
+  // mui->qwMainEvent->show();
+  // mui->lblStats->show();
 
-  mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
-  mui->lblTabTitle->show();
+  QString eventName = mui->tabWidget->tabBar()->tabText(index);
+
+  // mui->lblTabTitle->setText(mui->tabWidget->tabBar()->tabText(index));
+  // mui->lblTabTitle->show();
 
   mui->qwMainTab->hide();
+  mui->frameMain->hide();
+
+  QStringList list;
+  list.append(eventName);
+
+  openMyEventWindow(list);
 
   if (isSelectTab) {
     on_btnAdd_clicked();

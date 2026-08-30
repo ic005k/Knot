@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_myevent_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+>
+
+    <!-- 顶部5个图标按钮：报表、AI、修改、删除、增加 -->
+    <LinearLayout
+        android:id="@+id/myevent_top_btn_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingVertical="8dp"
+        android:layout_marginHorizontal="4dp"
+        app:layout_constraintTop_toTopOf="@id/layout_myevent_root"
+    >
+
+        <ImageView
+            android:id="@+id/myevent_btn_report"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_myevent_report"
+            android:contentDescription="报表"
+        />
+
+        <ImageView
+            android:id="@+id/myevent_btn_ai"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_myevent_ai"
+            android:contentDescription="AI"
+        />
+
+        <ImageView
+            android:id="@+id/myevent_btn_edit"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_todo_edit"
+            android:contentDescription="修改"
+        />
+
+        <ImageView
+            android:id="@+id/myevent_btn_delete"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_todo_delete"
+            android:contentDescription="删除"
+        />
+
+        <ImageView
+            android:id="@+id/myevent_btn_add"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_todo_add"
+            android:contentDescription="增加"
+        />
+    </LinearLayout>
+
+    <!-- 标题栏 -->
+    <TextView
+        android:id="@+id/myevent_tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="我的事件"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingVertical="12dp"
+        app:layout_constraintTop_toBottomOf="@id/myevent_top_btn_bar"
+    />
+
+    <!-- 左侧：日期分组列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/myevent_rv_left_date_group"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="6dp"
+        app:layout_constraintTop_toBottomOf="@id/myevent_tv_title"
+        app:layout_constraintBottom_toTopOf="@id/myevent_tv_total"
+        app:layout_constraintStart_toStartOf="@id/layout_myevent_root"
+        app:layout_constraintEnd_toStartOf="@id/myevent_rv_right_detail"
+        app:layout_constraintHorizontal_weight="1"
+    />
+
+    <!-- 右侧：当日事件明细列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/myevent_rv_right_detail"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="6dp"
+        app:layout_constraintTop_toBottomOf="@id/myevent_tv_title"
+        app:layout_constraintBottom_toTopOf="@id/myevent_tv_total"
+        app:layout_constraintStart_toEndOf="@id/myevent_rv_left_date_group"
+        app:layout_constraintEnd_toEndOf="@id/layout_myevent_root"
+        app:layout_constraintHorizontal_weight="1"
+    />
+
+    <!-- 底部统计栏 -->
+    <TextView
+        android:id="@+id/myevent_tv_total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="总计：0  $0.00"
+        android:textSize="18sp"
+        android:padding="12dp"
+        app:layout_constraintBottom_toBottomOf="@id/layout_myevent_root"
+    />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

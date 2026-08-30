@@ -708,16 +708,20 @@ void MainWindow::init_Theme() {
 }
 
 void MainWindow::init_UIWidget() {
-  QFontMetrics fontMetrics(font());
-  int nFontHeight = fontMetrics.height();
-  int nHeight = nFontHeight * 1.5;
-  mui->tabWidget->tabBar()->setFixedHeight(nHeight);
+  // QFontMetrics fontMetrics(font());
+  // int nFontHeight = fontMetrics.height();
+  // int nHeight = nFontHeight * 1.5;
+  //  mui->tabWidget->tabBar()->setFixedHeight(nHeight);
 
-  mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
+  // mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
 
   mui->qwMainTab->installEventFilter(mw_one);
 
-  mui->tabWidget->hide();
+  if (isAndroid) {
+    mui->tabWidget->hide();
+  }
+
+  mui->qwMainTab->hide();
 
   mw_one->loginTime = m_Method->setCurrentDateTimeValue();
   strDate = m_Method->setCurrentDateValue();
@@ -938,7 +942,7 @@ void MainWindow::init_UIWidget() {
 
 QTreeWidget* MainWindow::init_TreeWidget(QString name) {
   QTreeWidget* tw = new QTreeWidget(mw_one);
-  tw->setFixedHeight(0);
+  // tw->setFixedHeight(0);
   tw->setObjectName(name);
 
   QFont font;
