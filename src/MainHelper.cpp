@@ -633,8 +633,6 @@ void MainWindow::reloadMain() {
   m_Method->setCurrentIndexFromQW(mui->qwMainDate, count - 1);
   m_Method->setScrollBarPos(mui->qwMainDate, 1.0);*/
 
-  m_Method->refreshMainDate();
-
   m_Method->clickMainDate(0);
 }
 

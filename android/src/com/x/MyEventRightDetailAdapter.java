@@ -14,6 +14,17 @@ public class MyEventRightDetailAdapter
 
     private ArrayList<MyEventDetailItem> mDetailList = new ArrayList<>();
     private boolean mIsDark = false;
+    // -1 代表无选中
+    private int mSelectedPosition = -1;
+    private OnDetailItemClickListener mClickListener;
+
+    public interface OnDetailItemClickListener {
+        void onDetailItemClick(int position, MyEventDetailItem item);
+    }
+
+    public void setClickListener(OnDetailItemClickListener listener) {
+        mClickListener = listener;
+    }
 
     public void setDarkMode(boolean dark) {
         mIsDark = dark;
@@ -23,7 +34,19 @@ public class MyEventRightDetailAdapter
     public void setDetailData(ArrayList<MyEventDetailItem> list) {
         mDetailList.clear();
         mDetailList.addAll(list);
+        // 切换数据源清空选中
+        mSelectedPosition = -1;
         notifyDataSetChanged();
+    }
+
+    /**
+     * 外部主动设置选中下标，-1取消选中
+     */
+    public void setSelectedPosition(int index) {
+        int old = mSelectedPosition;
+        mSelectedPosition = index;
+        notifyItemChanged(old);
+        notifyItemChanged(mSelectedPosition);
     }
 
     @NonNull
@@ -48,19 +71,40 @@ public class MyEventRightDetailAdapter
         holder.tvCategory.setText(item.category);
         holder.tvNote.setText(item.note);
 
+        boolean isSelected = position == mSelectedPosition;
         if (mIsDark) {
-            holder.itemView.setBackgroundColor(0xFF1E1E1E);
+            if (isSelected) {
+                holder.itemView.setBackgroundColor(0xFF3A3A3A);
+            } else {
+                holder.itemView.setBackgroundColor(0xFF1E1E1E);
+            }
             holder.tvTime.setTextColor(0xFFFFFFFF);
             holder.tvValue.setTextColor(0xFFFFFFFF);
             holder.tvCategory.setTextColor(0xFFFFFFFF);
             holder.tvNote.setTextColor(0xFFFFFFFF);
         } else {
-            holder.itemView.setBackgroundColor(0xFFFFFFFF);
+            if (isSelected) {
+                holder.itemView.setBackgroundColor(0xFFE7F1FF);
+            } else {
+                holder.itemView.setBackgroundColor(0xFFFFFFFF);
+            }
             holder.tvTime.setTextColor(0xFF000000);
             holder.tvValue.setTextColor(0xFF000000);
             holder.tvCategory.setTextColor(0xFF000000);
             holder.tvNote.setTextColor(0xFF000000);
         }
+
+        final int pos = position;
+        final MyEventDetailItem dataItem = item;
+        holder.itemView.setOnClickListener(v -> {
+            int oldSel = mSelectedPosition;
+            mSelectedPosition = pos;
+            notifyItemChanged(oldSel);
+            notifyItemChanged(mSelectedPosition);
+            if (mClickListener != null) {
+                mClickListener.onDetailItemClick(pos, dataItem);
+            }
+        });
     }
 
     @Override

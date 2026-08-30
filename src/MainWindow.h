@@ -252,7 +252,7 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   Ui::MainWindow* ui;
 
-  QStringList listMainDate, listMainDateDetail;
+  QStringList listMyEventTitle, listMainDate, listMainDateDetail;
 
   void emitAndroidBackSignal() { emit androidBackSignal(); }
 
@@ -495,8 +495,6 @@ class MainWindow : public QMainWindow {
   QVariantList buildRecentList();
 
   void clickMainTab(int index);
-
-  void openMyEventWindow(QStringList list);
 
  protected:
   void closeEvent(QCloseEvent* event) override;

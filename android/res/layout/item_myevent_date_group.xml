@@ -8,29 +8,37 @@
     android:layout_marginVertical="4dp"
     app:cardCornerRadius="8dp"
 >
-
-    <LinearLayout
+    <!-- 替换原LinearLayout为ConstraintLayout，id保留原容器id -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/myevent_ll_date_group_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="12dp"
     >
 
         <TextView
             android:id="@+id/myevent_tv_date_text"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
         />
 
         <LinearLayout
             android:id="@+id/myevent_ll_date_stat"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toBottomOf="@id/myevent_tv_date_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
         >
 
             <TextView
@@ -39,6 +47,8 @@
                 android:layout_height="wrap_content"
                 android:text="0"
                 android:textSize="16sp"
+                android:maxLines="1"
+                android:ellipsize="end"
             />
 
             <TextView
@@ -48,7 +58,10 @@
                 android:text="0.00"
                 android:layout_marginStart="24dp"
                 android:textSize="16sp"
+                android:maxLines="1"
+                android:ellipsize="end"
             />
         </LinearLayout>
-    </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

@@ -15,6 +15,8 @@ public class MyEventLeftGroupAdapter
     private ArrayList<MyEventDateGroup> mDataList = new ArrayList<>();
     private OnMyEventDateGroupClickListener mClickListener;
     private boolean mIsDark = false;
+    // -1 代表无选中
+    private int mSelectedPosition = -1;
 
     public interface OnMyEventDateGroupClickListener {
         void onDateGroupItemClick(int position, MyEventDateGroup data);
@@ -32,7 +34,20 @@ public class MyEventLeftGroupAdapter
     public void setData(ArrayList<MyEventDateGroup> list) {
         mDataList.clear();
         mDataList.addAll(list);
+        // 更新数据源清空选中状态
+        mSelectedPosition = -1;
         notifyDataSetChanged();
+    }
+
+    /**
+     * 外部可调用：主动设置选中项
+     * @param index 下标，传‑1取消选中
+     */
+    public void setSelectedPosition(int index) {
+        int old = mSelectedPosition;
+        mSelectedPosition = index;
+        notifyItemChanged(old);
+        notifyItemChanged(mSelectedPosition);
     }
 
     @NonNull
@@ -56,22 +71,39 @@ public class MyEventLeftGroupAdapter
         holder.tvCount.setText(String.valueOf(item.dayItemCount));
         holder.tvSum.setText(String.valueOf(item.dayTotalValue));
 
-        // 明暗模式：背景、文字颜色
+        boolean isSelected = position == mSelectedPosition;
+        // 明暗+选中状态组合背景
         if (mIsDark) {
-            holder.itemView.setBackgroundColor(0xFF1E1E1E);
+            if (isSelected) {
+                holder.itemView.setBackgroundColor(0xFF3A3A3A);
+            } else {
+                holder.itemView.setBackgroundColor(0xFF1E1E1E);
+            }
             holder.tvDate.setTextColor(0xFFFFFFFF);
             holder.tvCount.setTextColor(0xFFFFFFFF);
             holder.tvSum.setTextColor(0xFFFFFFFF);
         } else {
-            holder.itemView.setBackgroundColor(0xFFFFFFFF);
+            if (isSelected) {
+                holder.itemView.setBackgroundColor(0xFFE7F1FF);
+            } else {
+                holder.itemView.setBackgroundColor(0xFFFFFFFF);
+            }
             holder.tvDate.setTextColor(0xFF000000);
             holder.tvCount.setTextColor(0xFF000000);
             holder.tvSum.setTextColor(0xFF000000);
         }
 
+        final int pos = position;
+        final MyEventDateGroup dataItem = item;
         holder.itemView.setOnClickListener(v -> {
+            int oldSel = mSelectedPosition;
+            mSelectedPosition = pos;
+            // 局部刷新旧、新位置，避免全量刷新
+            notifyItemChanged(oldSel);
+            notifyItemChanged(mSelectedPosition);
+
             if (mClickListener != null) {
-                mClickListener.onDateGroupItemClick(position, item);
+                mClickListener.onDateGroupItemClick(pos, dataItem);
             }
         });
     }

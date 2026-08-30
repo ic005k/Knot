@@ -1622,19 +1622,3 @@ void MainWindow::on_btnDelTab_clicked() { on_actionDel_Tab_triggered(); }
 void MainWindow::on_btnRenameTab_clicked() { on_actionRename_triggered(); }
 
 void MainWindow::on_btnAddTabItem_clicked() { on_btnAdd_clicked(); }
-
-void MainWindow::openMyEventWindow(QStringList list) {
-#ifdef Q_OS_ANDROID
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-
-  QJniObject jArrayList("java/util/ArrayList", "()V");
-
-  for (const QString& item : list) {
-    QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
-  }
-
-  activity.callMethod<void>("openMyEventWindow", "(Ljava/util/ArrayList;)V",
-                            jArrayList.object());
-#endif
-}

@@ -158,6 +158,27 @@ void Method::refreshMainEntranceCards() {
 #endif
 }
 
+void Method::openMyEventWindow() {
+#ifdef Q_OS_ANDROID
+  QStringList list1, list2, list3;
+  list1 = mw_one->listMyEventTitle;
+  list2 = mw_one->listMainDate;
+  list3 = mw_one->listMainDateDetail;
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+
+  for (const QString& item : list1) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  activity.callMethod<void>("openMyEventWindow", "(Ljava/util/ArrayList;)V",
+                            jArrayList.object());
+#endif
+}
+
 void Method::refreshMainDate() {
 #ifdef Q_OS_ANDROID
   // 1. 构建与打开时相同格式的数据列表
@@ -178,6 +199,8 @@ void Method::refreshMainDate() {
     instance.callMethod<void>("refreshLeftGroupList",
                               "(Ljava/util/ArrayList;)V", jArrayList.object());
   }
+
+  qInfo() << "listMainDate=" << mw_one->listMainDate;
 
 #endif
 }
@@ -200,6 +223,8 @@ void Method::refreshMainDateDetail() {
     instance.callMethod<void>("refreshRightDetailList",
                               "(Ljava/util/ArrayList;)V", jArrayList.object());
   }
+
+  qInfo() << "listMainDateDetail=" << mw_one->listMainDateDetail;
 
 #endif
 }

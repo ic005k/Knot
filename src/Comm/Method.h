@@ -657,7 +657,8 @@ QScrollBar::sub-page:horizontal {
   void refreshMainDate();
   void refreshMainDateDetail();
 
- protected:
+  void openMyEventWindow();
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

@@ -2,9 +2,12 @@ package com.x;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,10 +33,22 @@ public class MyEventActivity extends AppCompatActivity {
 
     public static native void PublicJavaCallCpp(String type);
 
+    private OnBackPressedCallback mBackCallback;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInstance = this;
+
+        mBackCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                PublicJavaCallCpp("cancel_add_event_record");
+                finish();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, mBackCallback);
+
         setContentView(R.layout.activity_myevent);
         isDark = ImmersiveUtil.applyRealImmersive(this);
 
@@ -64,13 +79,16 @@ public class MyEventActivity extends AppCompatActivity {
         }
 
         // 左侧列表初始化
-        myevent_rv_left_date_group.setLayoutManager(
-            new LinearLayoutManager(this)
-        );
+        LinearLayoutManager leftLayoutManager = new LinearLayoutManager(this);
+        leftLayoutManager.setMeasurementCacheEnabled(false);
+        myevent_rv_left_date_group.setLayoutManager(leftLayoutManager);
         mLeftAdapter = new MyEventLeftGroupAdapter();
         myevent_rv_left_date_group.setAdapter(mLeftAdapter);
+
         // 右侧列表初始化
-        myevent_rv_right_detail.setLayoutManager(new LinearLayoutManager(this));
+        LinearLayoutManager rightLayoutManager = new LinearLayoutManager(this);
+        rightLayoutManager.setMeasurementCacheEnabled(false);
+        myevent_rv_right_detail.setLayoutManager(rightLayoutManager);
         mRightAdapter = new MyEventRightDetailAdapter();
         myevent_rv_right_detail.setAdapter(mRightAdapter);
 
@@ -98,6 +116,15 @@ public class MyEventActivity extends AppCompatActivity {
 
         // 初始化UI颜色
         refreshUi();
+
+        View root = findViewById(android.R.id.content);
+        if (root != null) {
+            root.post(() -> {
+                if (isFinishing()) return;
+                // 放到Android主线下一轮事件循环，视图inflate/layout完成后再通知C++刷新
+                PublicJavaCallCpp("refresh_alldata");
+            });
+        }
     }
 
     private void updateAllColor() {
@@ -134,17 +161,25 @@ public class MyEventActivity extends AppCompatActivity {
      * @param rawStrList C++返回，每条字符串以 |==| 分隔
      */
     public void refreshLeftGroupList(ArrayList<String> rawStrList) {
-        if (mLeftAdapter == null) return;
+        // 如果不在主线程，post到主线程再执行
+        if (
+            !Thread.currentThread().equals(Looper.getMainLooper().getThread())
+        ) {
+            new Handler(Looper.getMainLooper()).post(() ->
+                refreshLeftGroupList(rawStrList)
+            );
+            return;
+        }
+        if (mLeftAdapter == null || isFinishing()) return;
 
         ArrayList<MyEventDateGroup> outList = new ArrayList<>();
         for (String line : rawStrList) {
             if (line == null || line.isEmpty()) continue;
             String[] parts = line.split("\\|==|");
-            // 根据你的协议顺序解析字段，示例：dateStr | dayItemCount | dayTotalValue
             MyEventDateGroup obj = new MyEventDateGroup();
-            obj.dateStr = parts[0];
-            obj.dayItemCount = Integer.parseInt(parts[1]);
-            obj.dayTotalValue = Long.parseLong(parts[2]);
+            if (parts.length >= 1) obj.dateStr = parts[0];
+            if (parts.length >= 2) obj.dayItemCount = parts[1];
+            if (parts.length >= 3) obj.dayTotalValue = parts[2];
             outList.add(obj);
         }
         mLeftAdapter.setData(outList);
@@ -155,18 +190,25 @@ public class MyEventActivity extends AppCompatActivity {
      * @param rawStrList C++返回，每条字符串以 |==| 分隔
      */
     public void refreshRightDetailList(ArrayList<String> rawStrList) {
-        if (mRightAdapter == null) return;
+        if (
+            !Thread.currentThread().equals(Looper.getMainLooper().getThread())
+        ) {
+            new Handler(Looper.getMainLooper()).post(() ->
+                refreshRightDetailList(rawStrList)
+            );
+            return;
+        }
+        if (mRightAdapter == null || isFinishing()) return;
 
         ArrayList<MyEventDetailItem> outList = new ArrayList<>();
         for (String line : rawStrList) {
             if (line == null || line.isEmpty()) continue;
             String[] parts = line.split("\\|==|");
-            // 按照你约定的字段顺序：timeStr | eventValue | category | note
             MyEventDetailItem obj = new MyEventDetailItem();
-            obj.timeStr = parts[0];
-            obj.eventValue = Long.parseLong(parts[1]);
-            obj.category = parts[2];
-            obj.note = parts[3];
+            if (parts.length >= 1) obj.timeStr = parts[0];
+            if (parts.length >= 2) obj.eventValue = parts[1];
+            if (parts.length >= 3) obj.category = parts[2];
+            if (parts.length >= 4) obj.note = parts[3];
             outList.add(obj);
         }
         mRightAdapter.setDetailData(outList);

@@ -916,10 +916,10 @@ void MainWindow::clickMainTab(int index) {
   mui->qwMainTab->hide();
   mui->frameMain->hide();
 
-  QStringList list;
-  list.append(eventName);
+  listMyEventTitle.clear();
+  listMyEventTitle.append(eventName);
 
-  openMyEventWindow(list);
+  m_Method->openMyEventWindow();
 
   if (isSelectTab) {
     on_btnAdd_clicked();

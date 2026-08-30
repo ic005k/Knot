@@ -522,7 +522,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                 int index = 0;
                 index = list.at(1).toInt();
                 mw_one->clickMainTab(index);
-                mui->frameMain->show();
+
                 qInfo() << "当前被点击的卡片：" << index;
               }
             });
@@ -538,6 +538,13 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                 m_Method->clickMainDate(index);
                 m_Method->clickMainDateData(index);
               }
+            });
+          }
+
+          if (strType.contains("refresh_alldata")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              m_Method->refreshMainDate();
+              m_Method->refreshMainDateDetail();
             });
           }
 

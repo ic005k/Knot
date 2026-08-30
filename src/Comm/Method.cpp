@@ -865,14 +865,14 @@ void Method::clickMainDate(int index) {
                                       "|==|" + text3);
   }
 
-  refreshMainDateDetail();
-
   gotoEnd(mui->qwMainEvent);
   int count = getCountFromQW(mui->qwMainEvent);
   setCurrentIndexFromQW(mui->qwMainEvent, count - 1);
   setScrollBarPos(mui->qwMainEvent, 1.0);
 
   setMainTabCurrentIndex();
+
+  // openMyEventWindow();
 }
 
 void Method::setMainTabCurrentIndex() {
