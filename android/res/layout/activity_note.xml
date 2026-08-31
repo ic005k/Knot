@@ -6,58 +6,49 @@
     android:id="@+id/note_layout_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingHorizontal="12dp"
 >
 
-    <!-- 顶部图标按钮栏 -->
-    <HorizontalScrollView
-        android:id="@+id/note_top_scroll_view"
+    <!-- 顶部图标按钮栏，移除HorizontalScrollView，整体居中，和MyEvent保持一致 -->
+    <LinearLayout
+        android:id="@+id/note_top_btn_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingVertical="12dp"
         app:layout_constraintTop_toTopOf="@id/note_layout_root"
     >
 
-        <LinearLayout
-            android:id="@+id/note_top_btn_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingVertical="10dp"
-        >
-
-            <ImageView
-                android:id="@+id/note_btn_book_menu"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:src="@drawable/ic_note_book_menu"
-            />
-
-            <ImageView
-                android:id="@+id/note_btn_favorite"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:src="@drawable/ic_note_favorite"
-            />
-
-            <ImageView
-                android:id="@+id/note_btn_note_menu"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:src="@drawable/ic_note_menu"
-            />
-
-            <ImageView
-                android:id="@+id/note_btn_new_note"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:src="@drawable/ic_note_add"
-            />
-        </LinearLayout>
-    </HorizontalScrollView>
+        <ImageView
+            android:id="@+id/note_btn_book_menu"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_note_book_menu"
+        />
+        <ImageView
+            android:id="@+id/note_btn_favorite"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_note_favorite"
+        />
+        <ImageView
+            android:id="@+id/note_btn_note_menu"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_note_menu"
+        />
+        <ImageView
+            android:id="@+id/note_btn_new_note"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_note_add"
+        />
+    </LinearLayout>
 
     <!-- 中间双列表区域 -->
     <LinearLayout
@@ -65,8 +56,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/note_top_scroll_view"
-        app:layout_constraintBottom_toTopOf="@id/note_bottom_scroll_view"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/note_top_btn_container"
+        app:layout_constraintBottom_toTopOf="@id/note_bottom_btn_container"
     >
 
         <!-- 左侧：笔记本列表 -->
@@ -75,6 +67,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingVertical="4dp"
         />
 
         <!-- 分割线 -->
@@ -82,6 +76,7 @@
             android:id="@+id/note_view_divider_center"
             android:layout_width="1dp"
             android:layout_height="match_parent"
+            android:layout_marginVertical="4dp"
         />
 
         <!-- 右侧：笔记列表 -->
@@ -90,58 +85,50 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"
+            android:clipToPadding="false"
+            android:paddingVertical="4dp"
         />
     </LinearLayout>
 
-    <!-- 底部可横向滑动按钮栏 -->
-    <HorizontalScrollView
-        android:id="@+id/note_bottom_scroll_view"
+    <!-- 底部按钮栏，移除HorizontalScrollView，整体居中 -->
+    <LinearLayout
+        android:id="@+id/note_bottom_btn_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingVertical="12dp"
         app:layout_constraintBottom_toBottomOf="@id/note_layout_root"
     >
 
-        <LinearLayout
-            android:id="@+id/note_bottom_btn_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingVertical="10dp"
-        >
-
-            <ImageView
-                android:id="@+id/note_btn_search"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:src="@drawable/ic_note_search"
-            />
-
-            <ImageView
-                android:id="@+id/note_btn_view"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:src="@drawable/ic_note_view"
-            />
-
-            <ImageView
-                android:id="@+id/note_btn_edit"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:src="@drawable/ic_note_edit"
-            />
-
-            <ImageView
-                android:id="@+id/note_btn_recycle"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:src="@drawable/ic_note_recycle"
-            />
-        </LinearLayout>
-    </HorizontalScrollView>
+        <ImageView
+            android:id="@+id/note_btn_search"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_note_search"
+        />
+        <ImageView
+            android:id="@+id/note_btn_view"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_note_view"
+        />
+        <ImageView
+            android:id="@+id/note_btn_edit"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_note_edit"
+        />
+        <ImageView
+            android:id="@+id/note_btn_recycle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_note_recycle"
+        />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

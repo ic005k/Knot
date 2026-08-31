@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
@@ -92,7 +93,8 @@ public class NoteEntryAdapter
             }
         }
 
-        holder.itemView.setBackgroundColor(bgColor);
+        // 使用CardView设置背景，保留圆角，禁止直接操作itemView背景
+        holder.cardView.setCardBackgroundColor(bgColor);
         holder.tvNoteTitle.setTextColor(textColor);
 
         int pos = position;
@@ -113,9 +115,11 @@ public class NoteEntryAdapter
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView tvNoteTitle;
+        CardView cardView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            cardView = itemView.findViewById(R.id.note_entry_card);
             tvNoteTitle = itemView.findViewById(R.id.note_tv_note_title);
         }
     }
