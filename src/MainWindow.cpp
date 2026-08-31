@@ -427,8 +427,8 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
       else
         strTip = tr("The last record of today will be deleted.");
 
-      auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-      if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
+      // auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
+      // if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
 
       strLatestModify = tr("Del Item") + " ( " + getTabText() + " ) ";
 

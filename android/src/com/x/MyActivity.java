@@ -1570,6 +1570,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openNoteWindow(ArrayList<String> notebookList) {
+        Intent intent = new Intent(this, NoteActivity.class);
+        intent.putStringArrayListExtra("notebook_list", notebookList);
+        startActivity(intent);
+    }
+
     /**
      * 打开新增事件记录窗口 AddEventRecord
      */

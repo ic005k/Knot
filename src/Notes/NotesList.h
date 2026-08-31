@@ -141,7 +141,7 @@ class NotesList : public QDialog {
   void setNotesListCurrentIndex(int index);
   int getNoteBookCount();
   int getNotesListCount();
-  void loadAllNoteBook();
+  QStringList loadAllNoteBook();
 
   void modifyNoteBookText0(QString text0, int index);
   void modifyNotesListText0(QString text0, int index);
@@ -305,8 +305,8 @@ class NotesList : public QDialog {
   std::atomic<bool> m_rebuildCancelled{false};
   QMutex m_rebuildMutex;  // 防止重复触发重建
 
-  // 递归遍历 QTreeWidget 节点，填充到 QML + 维护映射表
-  void traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex, int level);
+  void traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex, int level,
+                        QStringList& result);
 
   void addItemToQW_Level(QObject* qmlRoot, const QString& t0, const QString& t1,
                          const QString& t2, const QString& t3,

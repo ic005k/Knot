@@ -239,6 +239,8 @@
 
         <activity android:name=".MyEventActivity" android:exported="false" />
 
+         <activity android:name=".NoteActivity" android:exported="false" />
+
         <activity
             android:name="com.x.TodoRecycleActivity"
             android:exported="false"

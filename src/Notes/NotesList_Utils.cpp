@@ -51,7 +51,7 @@ void NotesList::addItemToQW_Level(QObject* qmlRoot, const QString& t0,
       Q_ARG(QVariant, parentIndex), Q_ARG(QVariant, isExpand));
 }
 
-void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
+/*void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
                                  int level) {
   if (!item) return;
 
@@ -100,6 +100,64 @@ void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
     QTreeWidgetItem* childItem = item->child(j);
     if (childItem->text(1).isEmpty()) {
       traverseTreeItem(childItem, currentQmlIndex, level + 1);
+    }
+  }
+}*/
+
+void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
+                                 int level, QStringList& result) {
+  if (!item) return;
+
+  // 普通笔记跳过
+  if (!item->text(1).isEmpty()) {
+    return;
+  }
+
+  QObject* qmlRoot = mui->qwNoteBook->rootObject();
+  if (!qmlRoot) return;
+
+  QString strName = item->text(0);
+  QString strTopColor = item->text(2);
+
+  // 统计直属笔记数
+  int noteCount = 0;
+  int totalChild = item->childCount();
+  for (int n = 0; n < totalChild; ++n) {
+    QTreeWidgetItem* child = item->child(n);
+    if (!child->text(1).isEmpty()) {
+      noteCount++;
+    }
+  }
+  QString strSum = QString::number(noteCount);
+
+  int curFontSize = (level == 0) ? fontSize : (fontSize - 1);
+
+  QString col1Text;
+  if (item->parent() == nullptr) {
+    col1Text = QString::number(pNoteBookItems.size());
+  } else {
+    col1Text = "isNoteBook";
+  }
+
+  int currentQmlIndex = pNoteBookItems.size();
+  bool expand = item->isExpanded();
+
+  // 添加到 QML 列表（原有逻辑不变）
+  addItemToQW_Level(qmlRoot, strName, col1Text, "", strSum, strTopColor,
+                    curFontSize, level, parentQmlIndex, expand);
+  pNoteBookItems.append(item);
+
+  // ====== 新增：写入结果列表 ======
+  // 格式：名称|==|缩进层级
+  // 例如："工作笔记|==|0"、"项目A|==|1"、"2024年|==|2"
+  result.append(QString("%1|==|%2").arg(strName).arg(level));
+  // ================================
+
+  // 递归子笔记本
+  for (int j = 0; j < totalChild; ++j) {
+    QTreeWidgetItem* childItem = item->child(j);
+    if (childItem->text(1).isEmpty()) {
+      traverseTreeItem(childItem, currentQmlIndex, level + 1, result);
     }
   }
 }

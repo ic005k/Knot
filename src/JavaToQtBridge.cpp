@@ -567,6 +567,11 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->on_btnAdd_clicked(); });
           }
 
+          if (strType.contains("del_datadetail")) {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_btnAdd_clicked(); });
+          }
+
           // 主工具栏按钮=============================================
           if (strType == "topbtn_add") {
             QTimer::singleShot(100, mw_one, [=]() { mui->btnAdd->click(); });

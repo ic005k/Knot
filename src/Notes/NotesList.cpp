@@ -662,14 +662,14 @@ void NotesList::moveBy(int ud) {
   saveNotesList();
 }
 
-void NotesList::loadAllNoteBook() {
-  // 1. 清空映射表 + 清空 QML 列表
+/*void NotesList::loadAllNoteBook() {
+
   pNoteBookItems.clear();
   m_Method->clearAllBakList(mui->qwNoteBook);
 
   if (!tw) return;
 
-  // 2. 遍历所有顶层节点（根节点）
+  // 遍历所有顶层节点（根节点）
   int topCount = tw->topLevelItemCount();
   for (int i = 0; i < topCount; ++i) {
     QTreeWidgetItem* topItem = tw->topLevelItem(i);
@@ -681,6 +681,31 @@ void NotesList::loadAllNoteBook() {
   if (m_treeProxyModel) {
     // m_treeProxyModel->resetAll();
   }
+}*/
+
+QStringList NotesList::loadAllNoteBook() {
+  // 1. 清空
+  pNoteBookItems.clear();
+  m_Method->clearAllBakList(mui->qwNoteBook);
+
+  QStringList result;  // ← 新增：收集结果
+
+  if (!tw) return result;
+
+  // 2. 遍历顶层节点
+  int topCount = tw->topLevelItemCount();
+  for (int i = 0; i < topCount; ++i) {
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
+    // 把 result 的引用传进去
+    traverseTreeItem(topItem, -1, 0, result);
+  }
+
+  // 3. 代理模型（保留）
+  if (m_treeProxyModel) {
+    // m_treeProxyModel->resetAll();
+  }
+
+  return result;
 }
 
 int NotesList::countMdFilesImages(const QString& dirPath) {

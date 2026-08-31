@@ -876,7 +876,8 @@ void Notes::loadNotesToUI() {
     return;
   }
 
-  m_NotesList->loadAllNoteBook();
+  listNoteBook.clear();
+  listNoteBook = m_NotesList->loadAllNoteBook();
 
   if (m_NotesList->getNoteBookCount() > 0) {
     if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {
@@ -886,6 +887,8 @@ void Notes::loadNotesToUI() {
 
     m_NotesList->setNoteLabel();
   }
+
+  openNoteWindow();
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
@@ -909,8 +912,10 @@ void Notes::openNotesUI() {
     loadNotesToUI();
   }
 
-  mui->frameNoteList->show();
-  mui->frameMain->hide();
+  if (!isAndroid) {
+    mui->frameNoteList->show();
+    mui->frameMain->hide();
+  }
 }
 
 void Notes::editNote() { openEditUI(); }

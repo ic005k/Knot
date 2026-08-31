@@ -119,9 +119,28 @@ public class MyEventActivity extends AppCompatActivity {
                 "edit_datadetail|==|" + selectPos0 + "|==|" + selectPos1
             );
         });
+
         myevent_btn_delete.setOnClickListener(v -> {
             // 删除事件
+            boolean zh = MyActivity.zh_cn;
+            String title = zh ? "确认删除" : "Confirm Delete";
+            String message = zh
+                ? "今天的最后一条记录将被删除。"
+                : "The last record of today will be deleted.";
+            String btnOk = zh ? "确定" : "OK";
+            String btnCancel = zh ? "取消" : "Cancel";
+
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(btnOk, (dialog, which) -> {
+                    // 用户确认后才调用C++删除
+                    PublicJavaCallCpp("del_datadetail");
+                })
+                .setNegativeButton(btnCancel, null)
+                .show();
         });
+
         myevent_btn_add.setOnClickListener(v -> {
             // 新增事件
             PublicJavaCallCpp("add_datadetail");
