@@ -427,8 +427,8 @@ void NotesList::on_btnDel_clicked() {
   // 安全刷新界面
   if (tw->topLevelItemCount() == 0) {
     m_Notes->loadEmptyNote();
-    mui->lblNoteBook->setText("0/0");
-    mui->lblNoteList->setText("0/0");
+    // mui->lblNoteBook->setText("0/0");
+    // mui->lblNoteList->setText("0/0");
   } else {
     if (tw->currentItem() != nullptr) {
       m_Notes->loadEmptyNote();
@@ -812,8 +812,8 @@ void NotesList::activateNoteBook(QTreeWidgetItem* notebookItem) {
   // 高亮选中项
   setNoteBookCurrentIndex(index);
   // 更新计数标签
-  mui->lblNoteBook->setText(QString::number(index + 1) + "/" +
-                            QString::number(count));
+  // mui->lblNoteBook->setText(QString::number(index + 1) + "/" +
+  //                          QString::number(count));
 }
 
 void NotesList::clickNoteList() {
@@ -839,7 +839,7 @@ void NotesList::clickNoteList() {
     indexNote = noteCount - 1;
   }
 
-  QString strMD = m_Method->getText3(mui->qwNoteList, indexNote);
+  QString strMD = "";  // m_Method->getText3(mui->qwNoteList, indexNote);
   currentMDFile = iniDir + strMD;
 
   setNoteLabel();

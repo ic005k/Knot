@@ -442,8 +442,7 @@ void loadTheme(bool isDark) {
           widget != mui->lblTime && widget != mui->lblGpsInfo &&
           widget != m_Steps->m_speedometer && widget != m_sliderButton &&
           widget != mui->lblGpsDateTime && widget != mui->btnPages &&
-          widget != mui->lblBookName && widget != mui->lblNoteBook &&
-          widget != mui->lblNoteList && widget != mui->lblSyncNote &&
+          widget != mui->lblBookName && widget != mui->lblSyncNote &&
           widget != mui->lblVectorStatus) {
         widget->setFont(qApp->font());
 

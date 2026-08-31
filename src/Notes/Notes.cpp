@@ -448,17 +448,10 @@ void Notes::init_all_notes() {
 void Notes::openNotes() {
   m_NotesList->cancelRebuildNotesVector();
   if (isLocalAIModel) {
-    mui->qwNoteTools->rootContext()->setContextProperty("hideSearchBtn", false);
   } else {
-    mui->qwNoteTools->rootContext()->setContextProperty("hideSearchBtn", true);
   }
   m_Method->setLocalAIModelEnabled(isLocalAIModel);
   m_Method->setAIAPIEnabled(mw_one->m_Preferences->ui->chkAI->isChecked());
-
-  if (!mw_one->m_Preferences->devMode)
-    mui->btnManagement->hide();
-  else
-    mui->btnManagement->show();
 
   isPasswordError = false;
   isWebDAVError = false;
@@ -913,7 +906,7 @@ void Notes::openNotesUI() {
   }
 
   if (!isAndroid) {
-    mui->frameNoteList->show();
+    // mui->frameNoteList->show();
     mui->frameMain->hide();
   }
 }

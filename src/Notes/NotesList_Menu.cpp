@@ -42,7 +42,7 @@ void NotesList::genRecentOpenMenu() {
 
   int x = 0;
   x = mw_one->geometry().x() + 2;
-  int y = mw_one->geometry().y() + mui->btnRecentOpen->height() + 4;
+  int y = mw_one->geometry().y();  //+ mui->btnRecentOpen->height() + 4;
   QPoint pos(x, y);
   menuRecentOpen->exec(pos);
 }
@@ -65,7 +65,8 @@ void NotesList::on_actionAdd_NoteBook_triggered() {
 
       loadAllNoteBook();
 
-      int count = m_Method->getCountFromQW(mui->qwNoteBook);
+      int count =
+          listNoteBook.count();  // m_Method->getCountFromQW(mui->qwNoteBook);
       int index = 0;
       for (int i = 0; i < count; i++) {
         if (pNoteBookItems.at(i) == tw->currentItem()) {
@@ -151,7 +152,7 @@ void NotesList::on_actionAdd_Note_triggered() {
   QString note_name = item1->text(0);
   noteTitle = item1->text(0);
 
-  m_Method->addItemToQW(mui->qwNoteList, note_name, "", "", noteFile, 0);
+  // m_Method->addItemToQW(mui->qwNoteList, note_name, "", "", noteFile, 0);
 
   int count = getNotesListCount();
   setNotesListCurrentIndex(count - 1);
@@ -272,10 +273,10 @@ void NotesList::show_NoteBookPopMenu(int qmlIndex) {
   mainMenu->addAction(actNew);
   mainMenu->setStyleSheet(m_Method->qssMenu);
 
-  QPoint pos(mw_one->geometry().x() + mui->qwNoteBook->geometry().x() + 2,
-             mw_one->geometry().y() + 45);
+  // QPoint pos(mw_one->geometry().x() + mui->qwNoteBook->geometry().x() + 2,
+  //            mw_one->geometry().y() + 45);
 
-  mainMenu->exec(pos);
+  // mainMenu->exec(pos);
 }
 
 void NotesList::init_NoteBookMenu(QMenu* mainMenu) {
@@ -438,7 +439,6 @@ void NotesList::on_actionModificationHistory() {
   }
 
   mui->frameDiff->show();
-  mui->frameNoteList->hide();
 
   // 获取 QML 中的 ListModel（id: noteVersionModel）
   QObject* versionModel = rootItem->findChild<QObject*>("noteVersionModel");
@@ -475,7 +475,7 @@ void NotesList::on_actionModificationHistory() {
 }
 
 void NotesList::on_actionCopyNoteLink() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+  int index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwNoteList);
   QString file = noteModel->getText3(index);
   QString name = noteModel->getText0(index);
   QString strlink = "[" + name + "](" + file + ")";
@@ -530,7 +530,6 @@ void NotesList::on_actionRelationshipGraph() {
   if (!fi.exists()) return;
 
   mui->frameNotesGraph->show();
-  mui->frameNoteList->hide();
 
   QTimer::singleShot(100, this, []() { mw_one->showProgress(); });
 

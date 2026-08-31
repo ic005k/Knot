@@ -214,31 +214,22 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (mui->frameNoteRecycle->isVisible()) {
     mui->btnBackNoteRecycle->click();
-    mui->btnBackNoteList->click();
   }
 
   if (mui->frameNotesSearchResult->isVisible()) {
     mui->btnBack_NotesSearchResult->click();
-    mui->btnBackNoteList->click();
   }
 
   if (mui->frameDiff->isVisible()) {
     mui->btnBackNoteDiff->click();
-    mui->btnBackNoteList->click();
   }
 
   if (mui->frameFavorites->isVisible()) {
     mui->btnBackFavorites->click();
-    mui->btnBackNoteList->click();
-  }
-
-  if (mui->frameNoteList->isVisible()) {
-    mui->btnBackNoteList->click();
   }
 
   if (mui->frameNotesGraph->isVisible()) {
     mui->btnBackNotesGraph->click();
-    mui->btnBackNoteList->click();
   }
 
   if (m_StepsOptions->isVisible()) {

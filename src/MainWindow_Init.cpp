@@ -218,13 +218,6 @@ void MainWindow::init_ButtonStyle() {
   setToolButtonAnimation(mui->btnSpeak, true);
   setToolButtonAnimation(mui->btnStopSpeak, true);
 
-  // Notes
-  setToolButtonAnimation(mui->btnNoteBookMenu, true);
-  setToolButtonAnimation(mui->btnNewNote, true);
-  setToolButtonAnimation(mui->btnFindNotes2, true);
-  setToolButtonAnimation(mui->btnNoteMenu, true);
-  setToolButtonAnimation(mui->btnRecentOpen, true);
-
   if (isDark) {
     // Reader
     mui->btnBackReader->setIcon(QIcon(":/res/reader/exit_l.svg"));
@@ -239,13 +232,6 @@ void MainWindow::init_ButtonStyle() {
     mui->btnSpeak->setIcon(QIcon(":/res/reader/speak_l.svg"));
     mui->btnStopSpeak->setIcon(QIcon(":/res/reader/stopspeak_l.svg"));
 
-    // Notes
-    mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb_l.svg"));
-    mui->btnNewNote->setIcon(QIcon(":/res/newnote_l.svg"));
-    mui->btnFindNotes2->setIcon(QIcon(":/res/find2_l.svg"));
-    mui->btnNoteMenu->setIcon(QIcon(":/res/notes_l.svg"));
-    mui->btnRecentOpen->setIcon(QIcon(":/res/recent_l.svg"));
-
   } else {
     // Reader
     mui->btnBackReader->setIcon(QIcon(":/res/reader/exit.svg"));
@@ -259,13 +245,6 @@ void MainWindow::init_ButtonStyle() {
     mui->btnPages->setIcon(QIcon(":/res/set.svg"));
     mui->btnSpeak->setIcon(QIcon(":/res/reader/speak.svg"));
     mui->btnStopSpeak->setIcon(QIcon(":/res/reader/stopspeak.svg"));
-
-    // Notes
-    mui->btnNoteBookMenu->setIcon(QIcon(":/res/nb.svg"));
-    mui->btnNewNote->setIcon(QIcon(":/res/newnote.svg"));
-    mui->btnFindNotes2->setIcon(QIcon(":/res/find2.svg"));
-    mui->btnNoteMenu->setIcon(QIcon(":/res/notes.svg"));
-    mui->btnRecentOpen->setIcon(QIcon(":/res/recent.svg"));
   }
 
   /*mui->btnPages->setStyleSheet(
@@ -439,10 +418,6 @@ void MainWindow::initMainQW() {
   mui->qwMainTab->setSource(
       QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
 
-  mui->qwNotesTree->rootContext()->setContextProperty("fontSize", fontSize);
-  mui->qwNotesTree->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/tree_main.qml")));
-
   mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
   mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
 
@@ -477,70 +452,7 @@ void MainWindow::initMainQW() {
   initNotesQW();
 }
 
-void MainWindow::initNotesQW() {
-  if (mui->qwNoteBook->source().isEmpty()) {
-    mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwNoteBook->rootContext()->setContextProperty("m_NotesList",
-                                                       m_NotesList);
-    mui->qwNoteBook->rootContext()->setContextProperty("mw_one", mw_one);
-    mui->qwNoteBook->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/notebook.qml")));
-
-    if (isAndroid)
-      mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize",
-                                                         12);
-    else
-      mui->qwNoteList->rootContext()->setContextProperty("noteTimeFontSize", 8);
-    mui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwNoteList->rootContext()->setContextProperty("m_NotesList",
-                                                       m_NotesList);
-    mui->qwNoteList->rootContext()->setContextProperty("mw_one", mw_one);
-    mui->qwNoteList->rootContext()->setContextProperty("noteModel",
-                                                       m_NotesList->noteModel);
-    mui->qwNoteList->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/notelist.qml")));
-
-    mui->qwNoteTools->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwNoteTools->rootContext()->setContextProperty("m_NotesList",
-                                                        m_NotesList);
-    mui->qwNoteTools->rootContext()->setContextProperty("m_Notes", m_Notes);
-    mui->qwNoteTools->rootContext()->setContextProperty("mw_one", mw_one);
-    mui->qwNoteTools->rootContext()->setContextProperty("hideSearchBtn", true);
-    mui->qwNoteTools->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/note_toolsbar.qml")));
-
-    mui->qwNotesSearchResult->rootContext()->setContextProperty("isDark",
-                                                                isDark);
-    mui->qwNotesSearchResult->rootContext()->setContextProperty("fontSize",
-                                                                fontSize);
-    mui->qwNotesSearchResult->rootContext()->setContextProperty("m_NotesList",
-                                                                m_NotesList);
-    mui->qwNotesSearchResult->rootContext()->setContextProperty("mw_one",
-                                                                mw_one);
-    mui->qwNotesSearchResult->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/SearchResults.qml")));
-
-    mui->qwNoteRecycle->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwNoteRecycle->rootContext()->setContextProperty("m_Method", m_Method);
-    mui->qwNoteRecycle->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/noterecycle.qml")));
-
-    mui->qwFavorites->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwFavorites->rootContext()->setContextProperty("m_NotesList",
-                                                        m_NotesList);
-    mui->qwFavorites->rootContext()->setContextProperty("mw_one", mw_one);
-    mui->qwFavorites->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/note_favorites.qml")));
-
-    // 获取qml根对象
-    QObject* qmlRoot = mui->qwFavorites->rootObject();
-    if (qmlRoot) {
-      // 连接qml信号 openNote(QString) → C++槽 onQmlOpenNote(QString)
-      connect(qmlRoot, SIGNAL(openNote(QString)), this,
-              SLOT(onQmlOpenNote(QString)));
-    }
-  }
-}
+void MainWindow::initNotesQW() {}
 
 void MainWindow::init_Theme() {
   // Get the background color to fit the dark mode
@@ -554,8 +466,6 @@ void MainWindow::init_Theme() {
 
   mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
 
-  mui->qwNoteBook->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwNoteList->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteVersion->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteDiff->rootContext()->setContextProperty("isDark", isDark);
   mui->qwNoteGraphView->rootContext()->setContextProperty("isDark", isDark);
@@ -650,9 +560,6 @@ void MainWindow::init_Theme() {
   // Notes Editor
   m_Notes->init_md();
 
-  // Notes ToolsBar
-  mui->qwNoteTools->rootContext()->setContextProperty("isDark", isDark);
-
   mui->lblNoteGraphView->setWordWrap(true);
   mui->lblNoteGraphView->adjustSize();
   mw_one->init_ButtonStyle();
@@ -720,12 +627,10 @@ void MainWindow::init_UIWidget() {
 
   mui->frameViewCate->hide();
   mui->frameTabRecycle->hide();
-  mui->frameNoteList->hide();
+
   mui->frameNotesSearchResult->hide();
   mui->frameNoteRecycle->hide();
-  mui->f_FindNotes->hide();
 
-  mui->frameNotesTree->hide();
   mui->qwBookCata->hide();
   mui->qwBookmark->hide();
   mui->frameDiff->hide();
@@ -779,7 +684,6 @@ void MainWindow::init_UIWidget() {
   mui->tabWidget->setMouseTracking(true);
   mui->lblStats->installEventFilter(mw_one);
   mui->editSearchText->installEventFilter(mw_one);
-  mui->editFindNote->installEventFilter(mw_one);
 
   mui->lblTitleEditRecord->installEventFilter(mw_one);
 

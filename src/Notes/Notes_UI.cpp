@@ -262,7 +262,7 @@ void Notes::on_btnPDF_clicked() {
 
 void Notes::on_btnView_clicked() {
   ui->btnDone->click();
-  mui->btnOpenNote->click();
+  // mui->btnOpenNote->click();
 }
 
 // 搜索

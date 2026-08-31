@@ -95,7 +95,6 @@ void NotesList::closeNoteDiff() {
   noteDiffPatch.clear();
   noteDiffTime.clear();
   mui->frameDiff->hide();
-  mui->frameNoteList->show();
 }
 
 void NotesList::getNoteDiffHtml() {

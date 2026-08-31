@@ -113,8 +113,8 @@ void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
     return;
   }
 
-  QObject* qmlRoot = mui->qwNoteBook->rootObject();
-  if (!qmlRoot) return;
+  // QObject* qmlRoot = mui->qwNoteBook->rootObject();
+  // if (!qmlRoot) return;
 
   QString strName = item->text(0);
   QString strTopColor = item->text(2);
@@ -143,8 +143,8 @@ void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
   bool expand = item->isExpanded();
 
   // 添加到 QML 列表（原有逻辑不变）
-  addItemToQW_Level(qmlRoot, strName, col1Text, "", strSum, strTopColor,
-                    curFontSize, level, parentQmlIndex, expand);
+  // addItemToQW_Level(qmlRoot, strName, col1Text, "", strSum, strTopColor,
+  //                  curFontSize, level, parentQmlIndex, expand);
   pNoteBookItems.append(item);
 
   // ====== 新增：写入结果列表 ======
@@ -162,11 +162,7 @@ void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
   }
 }
 
-void NotesList::setColorFlag(QString strColor) {
-  QQuickItem* root = mui->qwNoteBook->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setColorFlag",
-                            Q_ARG(QVariant, strColor));
-}
+void NotesList::setColorFlag(QString strColor) {}
 
 void NotesList::getAllFiles(const QString& foldPath, QStringList& folds,
                             const QStringList& formats) {
@@ -182,31 +178,33 @@ void NotesList::getAllFiles(const QString& foldPath, QStringList& folds,
 }
 
 int NotesList::getNoteBookCount() {
-  int count = m_Method->getCountFromQW(mui->qwNoteBook);
+  int count =
+      listNoteBook.count();  // m_Method->getCountFromQW(mui->qwNoteBook);
   return count;
 }
 
 int NotesList::getNotesListCount() {
-  int count = m_Method->getCountFromQW(mui->qwNoteList);
+  int count =
+      listNoteEntry.count();  // m_Method->getCountFromQW(mui->qwNoteList);
   return count;
 }
 
 int NotesList::getNoteBookCurrentIndex() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+  int index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
   return index;
 }
 
 int NotesList::getNotesListCurrentIndex() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+  int index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwNoteList);
   return index;
 }
 
 void NotesList::setNoteBookCurrentIndex(int index) {
-  m_Method->setCurrentIndexFromQW(mui->qwNoteBook, index);
+  // m_Method->setCurrentIndexFromQW(mui->qwNoteBook, index);
 }
 
 void NotesList::setNotesListCurrentIndex(int index) {
-  m_Method->setCurrentIndexFromQW(mui->qwNoteList, index);
+  // m_Method->setCurrentIndexFromQW(mui->qwNoteList, index);
 }
 
 int NotesList::getNoteBookIndex_twToqml() {
@@ -232,19 +230,19 @@ int NotesList::getNoteBookIndex_twToqml() {
 }
 
 QString NotesList::getNoteBookText0(int index) {
-  return m_Method->getText0(mui->qwNoteBook, index);
+  return "";  // m_Method->getText0(mui->qwNoteBook, index);
 }
 
 QString NotesList::getNotesListText0(int index) {
-  return m_Method->getText0(mui->qwNoteList, index);
+  return "";  // m_Method->getText0(mui->qwNoteList, index);
 }
 
 void NotesList::modifyNoteBookText0(QString text0, int index) {
-  m_Method->modifyItemText0(mui->qwNoteBook, index, text0);
+  // m_Method->modifyItemText0(mui->qwNoteBook, index, text0);
 }
 
 void NotesList::modifyNotesListText0(QString text0, int index) {
-  m_Method->modifyItemText0(mui->qwNoteList, index, text0);
+  // m_Method->modifyItemText0(mui->qwNoteList, index, text0);
 }
 
 void NotesList::setNoteLabel() {
@@ -252,9 +250,9 @@ void NotesList::setNoteLabel() {
   int index_note = getNotesListCurrentIndex();
   QString notesSn = "";
   if (index_note >= 0) notesSn = QString::number(index_note + 1) + "/";
-  mui->lblNoteList->setText(notesSn + notesSum);
+  // mui->lblNoteList->setText(notesSn + notesSum);
   int index = getNoteBookCurrentIndex();
-  m_Method->modifyItemText3(mui->qwNoteBook, index, notesSum);
+  // m_Method->modifyItemText3(mui->qwNoteBook, index, notesSum);
 }
 
 void NotesList::loadAllRecycle() {
@@ -270,7 +268,7 @@ void NotesList::loadAllRecycle() {
 }
 
 QVariant NotesList::addQmlTreeTopItem(QString strItem) {
-  QQuickItem* root = mui->qwNotesTree->rootObject();
+  QQuickItem* root = NULL;  // mui->qwNotesTree->rootObject();
   QVariant item;
   QMetaObject::invokeMethod((QObject*)root, "addTopItem",
                             Q_RETURN_ARG(QVariant, item),
@@ -281,7 +279,7 @@ QVariant NotesList::addQmlTreeTopItem(QString strItem) {
 QVariant NotesList::addQmlTreeChildItem(QVariant parentItem,
                                         QString strChildItem,
                                         QString iconFile) {
-  QQuickItem* root = mui->qwNotesTree->rootObject();
+  QQuickItem* root = NULL;  // mui->qwNotesTree->rootObject();
   QVariant item;
   QMetaObject::invokeMethod(
       (QObject*)root, "addChildItem", Q_RETURN_ARG(QVariant, item),
@@ -291,8 +289,8 @@ QVariant NotesList::addQmlTreeChildItem(QVariant parentItem,
 }
 
 void NotesList::clearQmlTree() {
-  QQuickItem* root = mui->qwNotesTree->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "clearAll");
+  // QQuickItem* root = mui->qwNotesTree->rootObject();
+  // QMetaObject::invokeMethod((QObject*)root, "clearAll");
 }
 
 void NotesList::initQmlTree() {
@@ -536,8 +534,8 @@ void NotesList::addItem(QTreeWidget* tw, QTreeWidgetItem* item) {
 
 void NotesList::resetQML_List() {
   if (tw->topLevelItemCount() == 0) {
-    m_Method->clearAllBakList(mui->qwNoteBook);
-    m_Method->clearAllBakList(mui->qwNoteList);
+    // m_Method->clearAllBakList(mui->qwNoteBook);
+    // m_Method->clearAllBakList(mui->qwNoteList);
     return;
   }
 
@@ -662,8 +660,8 @@ void NotesList::setNoteBookCurrentItem() {
   int index = getNoteBookCurrentIndex();
   if (index < 0) return;
 
-  QString text1 = m_Method->getText1(mui->qwNoteBook, index);
-  QString text2 = m_Method->getText2(mui->qwNoteBook, index);
+  QString text1 = "";  // m_Method->getText1(mui->qwNoteBook, index);
+  QString text2 = "";  // m_Method->getText2(mui->qwNoteBook, index);
   if (text2.isEmpty()) {
     tw->setCurrentItem(tw->topLevelItem(text1.toInt()));
 

@@ -194,7 +194,7 @@ void NotesList::onSearchFinished() {
 
     mui->editNotesSearch->hide();
     mui->btnClearSearchResults->hide();
-    mui->frameNoteList->hide();
+
     mui->frameNotesSearchResult->show();
   }
 
@@ -257,7 +257,6 @@ void NotesList::showFindNotes() {
   }
   qDebug() << "recycle notes = " << recycleNotesList;
 
-  mui->frameNoteList->hide();
   mui->frameNotesSearchResult->show();
   mui->editNotesSearch->setFocus();
   mui->editNotesSearch->show();

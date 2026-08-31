@@ -22,8 +22,9 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   m_Method->set_ToolButtonStyle(this);
 
   QTreeWidgetItem* item = NULL;
-  if (!m_NotesList->ui->frame0->isHidden() || !mui->frameNoteList->isHidden())
-    item = tw->currentItem();
+  // if (!m_NotesList->ui->frame0->isHidden() ||
+  // !mui->frameNoteList->isHidden())
+  //   item = tw->currentItem();
 
   if (!m_NotesList->ui->frame1->isHidden() ||
       !mui->frameNoteRecycle->isHidden())

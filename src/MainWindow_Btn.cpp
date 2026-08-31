@@ -82,22 +82,11 @@ void MainWindow::updateMainTab() {
 
 void MainWindow::on_btnChart() { m_MainHelper->clickBtnChart(); }
 
-void MainWindow::on_btnManagement_clicked() {
-  mui->frameNotesTree->show();
-  mui->frameNoteList->hide();
-}
+void MainWindow::on_btnManagement_clicked() {}
 
-void MainWindow::on_btnUpMove_clicked() {
-  if (m_Method->getCountFromQW(mui->qwNoteBook) == 0) return;
+void MainWindow::on_btnUpMove_clicked() { m_NotesList->on_btnUp_clicked(); }
 
-  m_NotesList->on_btnUp_clicked();
-}
-
-void MainWindow::on_btnDownMove_clicked() {
-  if (m_Method->getCountFromQW(mui->qwNoteBook) == 0) return;
-
-  m_NotesList->on_btnDown_clicked();
-}
+void MainWindow::on_btnDownMove_clicked() { m_NotesList->on_btnDown_clicked(); }
 
 void MainWindow::on_btnDelNote_NoteBook_clicked() {
   m_NotesList->on_btnDel_clicked();
@@ -108,24 +97,18 @@ void MainWindow::on_btnMoveTo_clicked() {
   m_NotesList->on_btnMoveTo_clicked();
 }
 
-void MainWindow::on_btnBack_Tree_clicked() {
-  mui->frameNotesTree->hide();
-  mui->frameNoteList->show();
-}
+void MainWindow::on_btnBack_Tree_clicked() {}
 
 void MainWindow::on_btnRename_clicked() { m_Notes->renameTitle(false); }
 
-void MainWindow::on_btnHideFind_clicked() {
-  closeTextToolBar();
-  mui->f_FindNotes->hide();
-}
+void MainWindow::on_btnHideFind_clicked() { closeTextToolBar(); }
 
 void MainWindow::on_btnStepsOptions_clicked() { m_StepsOptions->init(); }
 
 void MainWindow::on_btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
 
-  mui->frameNoteList->hide();
+  // mui->frameNoteList->hide();
   mui->frameFavorites->show();
 
   m_Notes->refreshRecentOpenByCounter();
@@ -347,27 +330,11 @@ void MainWindow::on_btnBackNoteList_clicked() {
 
   // ========== 完全异步延迟界面切换，释放渲染资源 ==========
   QTimer::singleShot(0, this, []() {
-    // 找到页面内所有QQuickWidget
-    auto quickWidgets = mui->frameNoteList->findChildren<QQuickWidget*>();
-    for (auto it = quickWidgets.cbegin(); it != quickWidgets.cend(); ++it) {
-      QQuickWidget* w = *it;
-      w->blockSignals(true);
-      w->quickWindow()->releaseResources();
-    }
-
     // 再执行显示/隐藏，此时无活跃离屏渲染任务
     if (!isAndroid) {
       mui->frameMain->show();
     } else
       m_Method->openMainEntranceWindow();
-
-    mui->frameNoteList->hide();
-
-    // 恢复信号
-    for (auto it = quickWidgets.cbegin(); it != quickWidgets.cend(); ++it) {
-      QQuickWidget* w = *it;
-      w->blockSignals(false);
-    }
   });
   // ========================================================
 
@@ -391,7 +358,6 @@ void MainWindow::on_btnBackNoteList_clicked() {
 
 void MainWindow::on_btnBackNoteRecycle_clicked() {
   mui->frameNoteRecycle->hide();
-  mui->frameNoteList->show();
 
   if (m_NotesList->isDelNoteRecycle) {
     m_Notes->startBackgroundTaskDelAndClear();
@@ -399,7 +365,6 @@ void MainWindow::on_btnBackNoteRecycle_clicked() {
 }
 
 void MainWindow::on_btnNoteRecycle_clicked() {
-  mui->frameNoteList->hide();
   mui->frameNoteRecycle->show();
 
   m_NotesList->loadAllRecycle();
@@ -422,24 +387,22 @@ void MainWindow::on_btnRestoreNoteRecycle_clicked() {
 }
 
 void MainWindow::on_btnFindNotes_clicked() {
-  QString str = mui->editFindNote->text().trimmed();
+  QString str = "";  // mui->editFindNote->text().trimmed();
   if (str.length() == 0) return;
   mySearchText = str;
   m_NotesList->startFind(str);
 }
 
-void MainWindow::on_btnClearNoteFindText_clicked() {
-  mui->editFindNote->setText("");
-}
+void MainWindow::on_btnClearNoteFindText_clicked() {}
 
 void MainWindow::on_btnShowFindNotes_clicked() { m_NotesList->showFindNotes(); }
 
 void MainWindow::on_btnNoteBookMenu_clicked() {
-  m_NotesList->showNoteBookMenu(mui->qwNoteBook->x(), mui->qwNoteBook->y());
+  // m_NotesList->showNoteBookMenu(mui->qwNoteBook->x(), mui->qwNoteBook->y());
 }
 
 void MainWindow::on_btnNoteMenu_clicked() {
-  m_NotesList->showNotsListMenu(mui->qwNoteList->x(), mui->qwNoteList->y());
+  // m_NotesList->showNotsListMenu(mui->qwNoteList->x(), mui->qwNoteList->y());
 }
 
 void MainWindow::on_btnCancelType_clicked() {
@@ -751,12 +714,8 @@ void MainWindow::on_chkWebDAV_clicked() {}
 void MainWindow::on_btnBack_NotesSearchResult_clicked() {
   clearWidgetFocus();
   mui->frameNotesSearchResult->hide();
-  mui->frameNoteList->show();
+  // mui->frameNoteList->show();
   isOpenSearchResult = false;
-
-  if (mui->f_FindNotes->isVisible()) {
-    mui->editFindNote->setFocus();
-  }
 }
 
 void MainWindow::on_btnClearSearchResults_clicked() {
@@ -784,20 +743,9 @@ void MainWindow::on_btnOpenSearchView_clicked() {
   m_NotesList->setCurrentItemFromMDFile(mdFile);
 }
 
-void MainWindow::on_btnFindNotes2_clicked() {
-  if (mui->f_FindNotes->isHidden()) {
-    mui->f_FindNotes->show();
-    mui->editFindNote->setFocus();
-  } else
-    mui->f_FindNotes->hide();
-}
+void MainWindow::on_btnFindNotes2_clicked() {}
 
-void MainWindow::on_btnTools_clicked() {
-  if (mui->f_Tools->isHidden())
-    mui->f_Tools->show();
-  else
-    mui->f_Tools->hide();
-}
+void MainWindow::on_btnTools_clicked() {}
 
 void MainWindow::on_btnCopyNoteLink_clicked() {
   QString mdFile = m_NotesList->getSearchResultQmlFile();
@@ -884,9 +832,6 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
 
 #else
 
-  if (!mui->frameNoteList->isHidden()) {
-    m_NotesList->clickNoteBook();
-  }
 #endif
 }
 
@@ -927,7 +872,7 @@ void MainWindow::on_btnBack_One_clicked() { m_CloudBackup->backExit(); }
 
 void MainWindow::on_btnBackNotesGraph_clicked() {
   mui->frameNotesGraph->hide();
-  mui->frameNoteList->show();
+
   m_NotesList->clickNoteList();
 }
 
@@ -1409,19 +1354,8 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (mui->f_FindNotes->isVisible()) {
-    mui->f_FindNotes->hide();
-    return;
-  }
-
   if (mui->frameFavorites->isVisible()) {
     on_btnBackFavorites_clicked();
-    return;
-  }
-
-  if (!mui->frameNoteList->isHidden()) {
-    QTimer::singleShot(200, mw_one,
-                       []() { mw_one->on_btnBackNoteList_clicked(); });
     return;
   }
 
@@ -1513,12 +1447,6 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mui->frameNotesTree->isHidden()) {
-    mui->btnBack_Tree->click();
-
-    return;
-  }
-
   if (mui->frameMain->isVisible()) {
     mui->frameMain->hide();
     m_Method->openMainEntranceWindow();
@@ -1568,10 +1496,7 @@ void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
   }
 }
 
-void MainWindow::on_btnBackFavorites_clicked() {
-  mui->frameNoteList->show();
-  mui->frameFavorites->hide();
-}
+void MainWindow::on_btnBackFavorites_clicked() { mui->frameFavorites->hide(); }
 
 void MainWindow::on_btnOpenFavoritesNote_clicked() {
   if (!QFile::exists(currentMDFile)) return;

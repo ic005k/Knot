@@ -556,12 +556,6 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     return;
   }
 
-  if (!mui->frameNoteList->isHidden()) {
-    on_btnBackNoteList_clicked();
-    event->ignore();
-    return;
-  }
-
   if (!mui->frameDiff->isHidden()) {
     on_btnBackNoteDiff_clicked();
     event->ignore();

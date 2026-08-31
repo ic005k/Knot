@@ -16,26 +16,6 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
 
   noteModel = new NoteListModel(this);
 
-  mui->f_FindNotes->setStyleSheet(
-      "QFrame{background-color: #455364;color: #FFFFFF;border-radius:10px; "
-      "border:0px solid gray;}");
-  mui->f_Tools->setStyleSheet(mui->f_FindNotes->styleSheet());
-  mui->qwNoteTools->setFixedHeight(60);
-
-  mui->btnBackNoteList->hide();
-  mui->btnEditNote->hide();
-  mui->btnOpenNote->hide();
-  mui->btnShowFindNotes->hide();
-  mui->btnTools->hide();
-  mui->f_Tools->hide();
-
-  if (isAndroid) {
-    QFont font = this->font();
-    font.setPointSize(13);
-    mui->lblNoteBook->setFont(font);
-    mui->lblNoteList->setFont(font);
-  }
-
   setModal(true);
   this->layout()->setSpacing(5);
   this->layout()->setContentsMargins(2, 2, 2, 2);
@@ -55,8 +35,8 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   ui->btnExport->hide();
 
   m_treeProxyModel = new QTreeWidgetProxyModel(tw, this);
-  mui->qwNotesTree->rootContext()->setContextProperty("treeModel",
-                                                      m_treeProxyModel);
+  // mui->qwNotesTree->rootContext()->setContextProperty("treeModel",
+  //                                                     m_treeProxyModel);
 
   initNotesList();
   initRecycle();
@@ -686,7 +666,7 @@ void NotesList::moveBy(int ud) {
 QStringList NotesList::loadAllNoteBook() {
   // 1. 清空
   pNoteBookItems.clear();
-  m_Method->clearAllBakList(mui->qwNoteBook);
+  // m_Method->clearAllBakList(mui->qwNoteBook);
 
   QStringList result;  // ← 新增：收集结果
 
@@ -1050,7 +1030,7 @@ QString NotesList::getCurrentNoteNameFromMDFile(QString mdFile) {
 
 void NotesList::moveToFirst() {}
 
-void NotesList::qmlOpenEdit() { mui->btnEditNote->click(); }
+void NotesList::qmlOpenEdit() {}
 
 /**
  * @brief 在指定笔记本节点内部，计算目标笔记在【右侧笔记列表】中的下标
