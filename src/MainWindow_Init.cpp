@@ -205,46 +205,8 @@ void MainWindow::init_ButtonStyle() {
   setToolButtonAnimation(mui->btnFind, true);
   setToolButtonAnimation(mui->btnSelTab, true);
 
-  // Reader
-  setToolButtonAnimation(mui->btnBackReader, true);
-  setToolButtonAnimation(mui->btnBookCata, true);
-  setToolButtonAnimation(mui->btnShowBookmark, true);
-  setToolButtonAnimation(mui->btnAutoRun, true);
-  setToolButtonAnimation(mui->btnAutoStop, true);
-  setToolButtonAnimation(mui->btnPages, true);
-  setToolButtonAnimation(mui->btnOpen, true);
-  setToolButtonAnimation(mui->btnReadList, true);
-  setToolButtonAnimation(mui->btnRotation, true);
-  setToolButtonAnimation(mui->btnSpeak, true);
-  setToolButtonAnimation(mui->btnStopSpeak, true);
-
   if (isDark) {
-    // Reader
-    mui->btnBackReader->setIcon(QIcon(":/res/reader/exit_l.svg"));
-    mui->btnRotation->setIcon(QIcon(":/res/reader/rotation_l.svg"));
-    mui->btnBookCata->setIcon(QIcon(":/res/reader/cata_l.svg"));
-    mui->btnShowBookmark->setIcon(QIcon(":/res/reader/bookmark_l.svg"));
-    mui->btnAutoRun->setIcon(QIcon(":/res/reader/run_l.svg"));
-    mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop_l.svg"));
-    mui->btnOpen->setIcon(QIcon(":/res/reader/open_l.svg"));
-    mui->btnReadList->setIcon(QIcon(":/res/reader/booklist_l.svg"));
-    mui->btnPages->setIcon(QIcon(":/res/set_l.svg"));
-    mui->btnSpeak->setIcon(QIcon(":/res/reader/speak_l.svg"));
-    mui->btnStopSpeak->setIcon(QIcon(":/res/reader/stopspeak_l.svg"));
-
   } else {
-    // Reader
-    mui->btnBackReader->setIcon(QIcon(":/res/reader/exit.svg"));
-    mui->btnRotation->setIcon(QIcon(":/res/reader/rotation.svg"));
-    mui->btnBookCata->setIcon(QIcon(":/res/reader/cata.svg"));
-    mui->btnShowBookmark->setIcon(QIcon(":/res/reader/bookmark.svg"));
-    mui->btnAutoRun->setIcon(QIcon(":/res/reader/run.svg"));
-    mui->btnAutoStop->setIcon(QIcon(":/res/reader/stop.svg"));
-    mui->btnOpen->setIcon(QIcon(":/res/reader/open.svg"));
-    mui->btnReadList->setIcon(QIcon(":/res/reader/booklist.svg"));
-    mui->btnPages->setIcon(QIcon(":/res/set.svg"));
-    mui->btnSpeak->setIcon(QIcon(":/res/reader/speak.svg"));
-    mui->btnStopSpeak->setIcon(QIcon(":/res/reader/stopspeak.svg"));
   }
 
   /*mui->btnPages->setStyleSheet(
@@ -262,195 +224,7 @@ void MainWindow::init_ButtonStyle() {
   mw_one->m_Preferences->ui->btnReStart->setStyleSheet(style);
 }
 
-void MainWindow::initMainQW() {
-  qmlRegisterType<DocumentHandler>("MyModel2", 1, 0, "DocumentHandler");
-
-  if (mui->qwAIAPIList->source().isEmpty()) {
-    mui->qwAIAPIList->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwAIAPIList->rootContext()->setContextProperty("mw_one", mw_one);
-    mui->qwAIAPIList->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/aiapi_list.qml")));
-  }
-
-  if (mui->qwViewCate->source().isEmpty()) {
-    mui->qwViewCate->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwViewCate->rootContext()->setContextProperty("m_Report",
-                                                       mw_one->m_Report);
-    mui->qwViewCate->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/viewcate.qml")));
-  }
-
-  if (mui->qwViewBookNote->source().isEmpty()) {
-    mui->qwViewBookNote->rootContext()->setContextProperty("m_Reader",
-                                                           m_Reader);
-    mui->qwViewBookNote->rootContext()->setContextProperty("fontSize",
-                                                           fontSize);
-    mui->qwViewBookNote->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwViewBookNote->rootContext()->setContextProperty(
-        "notesModel", m_Reader->notesModel);
-
-    mui->qwViewBookNote->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/viewbooknote.qml")));
-  }
-
-  if (mui->qwNoteVersion->source().isEmpty()) {
-    mui->qwNoteVersion->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwNoteVersion->rootContext()->setContextProperty("m_NotesList",
-                                                          m_NotesList);
-    mui->qwNoteVersion->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteVersionList.qml")));
-  }
-
-  if (mui->qwNoteDiff->source().isEmpty()) {
-    mui->qwNoteDiff->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwNoteDiff->rootContext()->setContextProperty("m_NotesList",
-                                                       m_NotesList);
-    mui->qwNoteDiff->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/NoteDiffHtmlViewer.qml")));
-    mui->qwNoteDiff->setResizeMode(
-        QQuickWidget::SizeRootObjectToView);  // 自适应大小
-  }
-
-  if (mui->qwSelTab->source().isEmpty()) {
-    mui->qwSelTab->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwSelTab->rootContext()->setContextProperty("mw_one", mw_one);
-    mui->qwSelTab->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/seltab.qml")));
-  }
-
-  if (mui->qwBookmark->source().isEmpty()) {
-    mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwBookmark->rootContext()->setContextProperty("m_Reader", m_Reader);
-    mui->qwBookmark->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/bookmark.qml")));
-  }
-
-  if (mui->qwBookCata->source().isEmpty()) {
-    mui->qwBookCata->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwBookCata->rootContext()->setContextProperty("m_Reader", m_Reader);
-    mui->qwBookCata->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/epub_cata.qml")));
-  }
-
-  if (mui->qwTabRecycle->source().isEmpty()) {
-    mui->qwTabRecycle->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwTabRecycle->rootContext()->setContextProperty("m_Report",
-                                                         mw_one->m_Report);
-    mui->qwTabRecycle->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/tabrecycle.qml")));
-  }
-
-  if (mui->qwCategory->source().isEmpty()) {
-    mui->qwCategory->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwCategory->rootContext()->setContextProperty("m_CategoryList",
-                                                       m_CategoryList);
-    mui->qwCategory->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/type.qml")));
-  }
-
-  if (mui->qwReport->source().isEmpty()) {
-    int f_size = 19;
-    // if (fontSize <= f_size)
-    f_size = fontSize;
-
-    mui->qwReport->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwReportSub->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwReport->rootContext()->setContextProperty("maxFontSize", f_size);
-    mui->qwReportSub->rootContext()->setContextProperty("maxFontSize", f_size);
-    mui->qwReport->rootContext()->setContextProperty("m_Report",
-                                                     mw_one->m_Report);
-    mui->qwReport->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/report.qml")));
-    mui->qwReportSub->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/details.qml")));
-  }
-
-  if (mui->qwBakList->source().isEmpty()) {
-    mui->qwBakList->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwBakList->rootContext()->setContextProperty("m_Method", m_Method);
-    mui->qwBakList->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/baklist.qml")));
-  }
-
-  if (mui->qwSearch->source().isEmpty()) {
-    mui->qwSearch->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwSearch->rootContext()->setContextProperty("m_Method", m_Method);
-    mui->qwSearch->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/search.qml")));
-  }
-
-  if (mui->qwSteps->source().isEmpty()) {
-    int f_size = 19;
-    if (fontSize <= f_size) f_size = fontSize;
-
-    mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwSteps->rootContext()->setContextProperty("maxFontSize", f_size);
-    mui->qwSteps->rootContext()->setContextProperty("myW", mw_one->width());
-    mui->qwSteps->rootContext()->setContextProperty("text0", "");
-    mui->qwSteps->rootContext()->setContextProperty("text1", "");
-    mui->qwSteps->rootContext()->setContextProperty("text2", "");
-    mui->qwSteps->rootContext()->setContextProperty("text3", "");
-    mui->qwSteps->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/steps.qml")));
-
-    mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
-                                                      m_Steps->isShowRoute);
-    mui->qwGpsList->rootContext()->setContextProperty("myW", mw_one->width());
-    mui->qwGpsList->rootContext()->setContextProperty("m_Steps", m_Steps);
-    mui->qwGpsList->rootContext()->setContextProperty("FontSize", fontSize);
-    mui->qwGpsList->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/gps_list.qml")));
-
-    mui->qwMap->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    mui->qwMap->setFocusPolicy(Qt::StrongFocus);  // 关键设置
-    mui->qwMap->setClearColor(Qt::transparent);   // 避免渲染冲突
-    mui->qwMap->setAttribute(Qt::WA_AcceptTouchEvents, true);
-    mui->qwMap->setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents, true);
-    mui->qwMap->setSource(QUrl(QStringLiteral("qrc:/src/qmlsrc/map.qml")));
-  }
-
-  // mui->qwMainTab->setFixedHeight(50);
-  mui->qwMainTab->rootContext()->setContextProperty("FontSize", fontSize);
-  mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwMainTab->rootContext()->setContextProperty("maintabHeight",
-                                                    mui->qwMainTab->height());
-  mui->qwMainTab->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwMainTab->setSource(
-      QUrl(QStringLiteral("qrc:/src/qmlsrc/maintab.qml")));
-
-  mui->qw_Img->rootContext()->setContextProperty("myW", mw_one->width());
-  mui->qw_Img->rootContext()->setContextProperty("myH", mw_one->height());
-
-  // Reader
-  mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
-  mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
-  mui->qwReader->rootContext()->setContextProperty("m_Reader", m_Reader);
-  mui->qwReader->rootContext()->setContextProperty("mw_one", mw_one);
-  mui->qwReader->rootContext()->setContextProperty("currentPage", currentPage);
-  mui->qwReader->rootContext()->setContextProperty("totalPages", totalPages);
-  mui->qwReader->rootContext()->setContextProperty("myBackgroundColor",
-                                                   "#FFFFFF");
-  mui->qwReader->rootContext()->setContextProperty("isAutoRun",
-                                                   QVariant(false));
-
-  mui->qwReader->rootContext()->setContextProperty("FontSize", fontSize);
-  mui->qwReader->rootContext()->setContextProperty("uiFontSize", fontSize);
-  mui->qwReader->rootContext()->setContextProperty("backImgFile", "/res/b.png");
-  mui->qwReader->rootContext()->setContextProperty("myTextColor", "#664E30");
-
-  m_ReaderSet->setScrollValue();
-
-  // Book List
-  if (mui->qwBookList->source().isEmpty()) {
-    mui->qwBookList->rootContext()->setContextProperty("isDark", isDark);
-    mui->qwBookList->rootContext()->setContextProperty("fontSize", fontSize);
-    mui->qwBookList->rootContext()->setContextProperty("m_Reader", m_Reader);
-    mui->qwBookList->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/booklist.qml")));
-  }
-
-  initNotesQW();
-}
+void MainWindow::initMainQW() {}
 
 void MainWindow::initNotesQW() {}
 
@@ -461,34 +235,6 @@ void MainWindow::init_Theme() {
   red = brush.color().red();
 
   qDebug() << "red=" << red;
-
-  mui->qwAIAPIList->rootContext()->setContextProperty("isDark", isDark);
-
-  mui->qwMainTab->rootContext()->setContextProperty("isDark", isDark);
-
-  mui->qwNoteVersion->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwNoteDiff->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwNoteGraphView->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwFavorites->rootContext()->setContextProperty("isDark", isDark);
-
-  mui->qwNotesSearchResult->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwSearch->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwBakList->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwViewCate->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwTabRecycle->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwNoteRecycle->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwCategory->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwSelTab->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwReportSub->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwSteps->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwGpsList->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwReport->rootContext()->setContextProperty("isDark", isDark);
-
-  mui->qwBookCata->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwBookmark->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwReader->rootContext()->setContextProperty("isDark", isDark);
-  mui->qwViewBookNote->rootContext()->setContextProperty("isDark", isDark);
-  m_Reader->qvBookList->rootContext()->setContextProperty("isDark", isDark);
 
   if (!isDark) {
     mui->btnReader->setIcon(QIcon(":/res/reader.svg"));
@@ -509,8 +255,6 @@ void MainWindow::init_Theme() {
     m_Steps->m_speedometer->setBackgroundColor(QColor(0xF0, 0xF0, 0xF0));
     m_Steps->m_speedometer->updateThemeColors();
 
-    mui->qwNoteGraphView->setClearColor(Qt::white);
-
   } else {
     mui->btnFind->setIcon(QIcon(":/res/find_l.png"));
 
@@ -529,8 +273,6 @@ void MainWindow::init_Theme() {
 
     m_Steps->m_speedometer->setBackgroundColor(QColor(0x32, 0x32, 0x32));
     m_Steps->m_speedometer->updateThemeColors();
-
-    mui->qwNoteGraphView->setClearColor(Qt::black);
   }
 
   mui->editDetails->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
@@ -560,8 +302,6 @@ void MainWindow::init_Theme() {
   // Notes Editor
   m_Notes->init_md();
 
-  mui->lblNoteGraphView->setWordWrap(true);
-  mui->lblNoteGraphView->adjustSize();
   mw_one->init_ButtonStyle();
 
   if (isDark) {
@@ -583,13 +323,9 @@ void MainWindow::init_UIWidget() {
 
   // mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
 
-  mui->qwMainTab->installEventFilter(mw_one);
-
   if (isAndroid) {
     mui->tabWidget->hide();
   }
-
-  mui->qwMainTab->hide();
 
   mw_one->loginTime = m_Method->setCurrentDateTimeValue();
   strDate = m_Method->setCurrentDateValue();
@@ -604,11 +340,6 @@ void MainWindow::init_UIWidget() {
   m_Method->setLineEditToolBar(mw_one, editFilter);
   m_Method->setTextEditToolBar(mw_one, editFilter);
 
-  if (isAndroid) {
-  } else {
-    mui->btnShareBakFile->hide();
-  }
-
   mui->lblVectorStatus->setText("");
   mui->lblVectorStatus->hide();
 
@@ -618,36 +349,14 @@ void MainWindow::init_UIWidget() {
 
   mui->menubar->hide();
   mui->statusbar->hide();
-  mui->frameReader->hide();
 
   mui->frameSteps->hide();
-  mui->frameReport->hide();
-  mui->frameSearch->hide();
-  mui->frameBakList->hide();
-
-  mui->frameViewCate->hide();
-  mui->frameTabRecycle->hide();
-
-  mui->frameNotesSearchResult->hide();
-  mui->frameNoteRecycle->hide();
-
-  mui->qwBookCata->hide();
-  mui->qwBookmark->hide();
-  mui->frameDiff->hide();
 
   mui->frameCategory->hide();
-  mui->frameSetTab->hide();
+
   mui->frameEditRecord->hide();
 
   m_Reader->hideBookListWin();
-
-  mui->f_ReaderSet->hide();
-  mui->btnStopSpeak->hide();
-
-  mui->frameReader->layout()->setContentsMargins(0, 0, 0, 1);
-  mui->frameReader->setContentsMargins(0, 0, 0, 1);
-  mui->frameReader->layout()->setSpacing(1);
-  mui->frameImgView->hide();
 
   mui->frameMain->layout()->setContentsMargins(1, 1, 1, 1);
   mui->frameMain->setContentsMargins(1, 1, 1, 1);
@@ -657,12 +366,6 @@ void MainWindow::init_UIWidget() {
   mui->btnDel->hide();
 
   mui->lblMonthSum->hide();
-
-  mui->frameNotesGraph->hide();
-  mui->frameNotesGraph->layout()->setContentsMargins(1, 1, 1, 1);
-
-  mui->frameFavorites->hide();
-  mui->frameAIAPIList->hide();
 
   mui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
@@ -677,22 +380,15 @@ void MainWindow::init_UIWidget() {
   mui->lblTitleEditRecord->setStyleSheet(
       m_MainHelper->clickableLabelButtonStyle);
 
-  mui->qwReader->installEventFilter(mw_one);
-
   mui->tabWidget->tabBar()->installEventFilter(mw_one);
   mui->tabWidget->installEventFilter(mw_one);
   mui->tabWidget->setMouseTracking(true);
   mui->lblStats->installEventFilter(mw_one);
-  mui->editSearchText->installEventFilter(mw_one);
 
   mui->lblTitleEditRecord->installEventFilter(mw_one);
 
   mui->lblStats->adjustSize();
   mui->lblStats->setWordWrap(true);
-
-  mui->lblNoteTitle->adjustSize();
-  mui->lblNoteTitle->setWordWrap(true);
-  mui->lblNoteTitle->hide();
 
   mui->progBar->setMaximumHeight(4);
   mui->progBar->hide();
@@ -708,21 +404,6 @@ void MainWindow::init_UIWidget() {
       "border-radius:0px;"
       "background-color:rgba(18,150,219,255);"
       "}");
-  mui->progReader->setStyleSheet(mui->progBar->styleSheet());
-  mui->progReader->setFixedHeight(4);
-  mui->progPage->setStyleSheet(
-      "QProgressBar{border:0px solid #FFFFFF;"
-      "height:30;"
-      "background:rgba(25,255,25,0);"
-      "text-align:right;"
-      "color:rgb(255,255,255);"
-      "border-radius:0px;}"
-
-      "QProgressBar:chunk{"
-      "border-radius:0px;"
-      "background-color:rgba(230, 150, 50, 255);"
-      "}");
-  mui->progPage->setFixedHeight(4);
 
   int nIConFontSize;
 #ifdef Q_OS_ANDROID
@@ -748,12 +429,6 @@ void MainWindow::init_UIWidget() {
   mui->btnFind->setFont(f);
 
   mui->btnFind->setFont(f);
-
-  QString lblStyle = mw_one->labelNormalStyleSheet;
-  mui->lblTotal->setStyleSheet(lblStyle);
-  mui->lblDetails->setStyleSheet(lblStyle);
-  mui->lblTitle->setStyleSheet(lblStyle);
-  mui->lblTitle_Report->setStyleSheet(lblStyle);
 
   mui->f_steps_btn->setFixedHeight(mui->tabMotion->tabBar()->height());
   mui->f_steps_btn->setContentsMargins(0, 0, 0, 0);
@@ -856,9 +531,8 @@ void MainWindow::init_Options() {
   btnDText = Reg2.value("/YMD/btnDText", 1).toString();
 
   btnYearText = Reg2.value("/YMD/btnYearText", "2022").toString();
-  mui->btnYear->setText(btnYearText);
+
   btnMonthText = Reg2.value("/YMD/btnMonthText", "01").toString();
-  mui->btnMonth->setText(btnMonthText);
 
   s_y1 = Reg2.value("/YMD/Y1", 2022).toInt();
   s_y2 = Reg2.value("/YMD/Y2", 2022).toInt();
@@ -866,15 +540,6 @@ void MainWindow::init_Options() {
   s_m2 = Reg2.value("/YMD/M2", 12).toInt();
   s_d1 = Reg2.value("/YMD/D1", 1).toInt();
   s_d2 = Reg2.value("/YMD/D2", 1).toInt();
-
-  mui->btnStartDate->setText(QString::number(s_y1) + "  " +
-                             QString("%1").arg(s_m1, 2, 10, QLatin1Char('0')) +
-                             "  " +
-                             QString("%1").arg(s_d1, 2, 10, QLatin1Char('0')));
-  mui->btnEndDate->setText(QString::number(s_y2) + "  " +
-                           QString("%1").arg(s_m2, 2, 10, QLatin1Char('0')) +
-                           "  " +
-                           QString("%1").arg(s_d2, 2, 10, QLatin1Char('0')));
 
   isWholeMonth = Reg2.value("/YMD/isWholeMonth", 1).toBool();
   isDateSection = Reg2.value("/YMD/isDateSection", 0).toBool();

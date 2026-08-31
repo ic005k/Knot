@@ -34,18 +34,13 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   ui->btnImport->hide();
   ui->btnExport->hide();
 
-  m_treeProxyModel = new QTreeWidgetProxyModel(tw, this);
-  // mui->qwNotesTree->rootContext()->setContextProperty("treeModel",
-  //                                                     m_treeProxyModel);
-
   initNotesList();
   initRecycle();
 
   // 连接搜索框
-  connect(mui->editNotesSearch, &QLineEdit::textChanged, this,
-          &NotesList::onSearchTextChanged);
-  mui->qwNotesSearchResult->rootContext()->setContextProperty("searchModel",
-                                                              &m_searchModel);
+  // connect(mui->editNotesSearch, &QLineEdit::textChanged, this,
+  //        &NotesList::onSearchTextChanged);
+
   connect(m_Notes->m_NoteManager, &NoteManager::noteMetaChanged, this,
           [this](const QString& filePath, const NoteMetadata& meta) {
             if (m_vectorSearchService) {
@@ -547,7 +542,6 @@ void NotesList::setWinPos() {
   int w = mw_one->width();
   int x = mw_one->geometry().x();
   this->setGeometry(x, mw_one->geometry().y(), w, mw_one->height());
-  mui->btnBackNotesGraph->hide();
 }
 
 void NotesList::moveBy(int ud) {
@@ -680,11 +674,6 @@ QStringList NotesList::loadAllNoteBook() {
     traverseTreeItem(topItem, -1, 0, result);
   }
 
-  // 3. 代理模型（保留）
-  if (m_treeProxyModel) {
-    // m_treeProxyModel->resetAll();
-  }
-
   return result;
 }
 
@@ -706,30 +695,7 @@ int NotesList::countMdFilesImages(const QString& dirPath) {
   return fileInfoList.count();
 }
 
-int NotesList::getSelectedVersionIndex() {
-  QQuickItem* rootItem = mui->qwNoteVersion->rootObject();
-  if (!rootItem) {
-    qWarning() << "获取 QML 根对象失败，无法读取选中索引";
-    return -1;
-  }
-
-  // 读取根对象的 currentSelectedIndex 属性
-  // 注意：属性名必须和 QML 中定义的完全一致（currentSelectedIndex）
-  QVariant selectedIndexVar = rootItem->property("currentSelectedIndex");
-  if (!selectedIndexVar.isValid()) {
-    qWarning() << "QML 中未找到 currentSelectedIndex 属性，可能 QML 未正确修改";
-    return -1;
-  }
-
-  int selectedIndex = selectedIndexVar.toInt();
-  qDebug() << "当前选中的列表索引：" << selectedIndex;
-
-  if (selectedIndex == -1) {
-    qDebug() << "当前无选中项";
-  }
-
-  return selectedIndex;
-}
+int NotesList::getSelectedVersionIndex() { return 0; }
 
 bool NotesList::moveItem(QTreeWidget* twMain) {
   // 1. 获取当前选中项

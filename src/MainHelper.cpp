@@ -34,16 +34,6 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
 
   if (evn->type() == QEvent::KeyPress) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
-
-    if (watch == mui->editSearchText && keyEvent->key() == Qt::Key_Return) {
-      mw_one->on_btnStartSearch_clicked();
-      return true;
-    }
-
-    if (keyEvent->key() == Qt::Key_Escape) {
-      if (mui->frameReader->isVisible()) mw_one->on_btnBackReader_clicked();
-      return true;
-    }
   }
 
   return true;
@@ -53,9 +43,6 @@ void MainHelper::selectTab() {
   QString title = mui->lblTitleEditRecord->text();
   title = title.mid(0, 4);
   if (!title.contains("Add") && !title.contains(QObject::tr("Add"))) return;
-
-  mui->btnTabMoveDown->hide();
-  mui->btnTabMoveUp->hide();
 
   mw_one->m_EditRecord->saveCurrentValue();
 
@@ -70,7 +57,7 @@ void MainHelper::selectTab() {
 void MainHelper::clickBtnChart() {}
 
 void MainHelper::clickBtnRestoreTab() {
-  if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
+  // if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
 
   int count = mui->tabWidget->tabBar()->count();
   QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
@@ -78,8 +65,8 @@ void MainHelper::clickBtnRestoreTab() {
   int c_year = QDate::currentDate().year();
   int iniFileCount = c_year - 2025 + 1 + 1;
 
-  int index = m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
-  QString recycle = m_Method->getText3(mui->qwTabRecycle, index);
+  int index = 0;         // m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
+  QString recycle = "";  // m_Method->getText3(mui->qwTabRecycle, index);
   QStringList recycleList = recycle.split("\n");
 
   if (recycleList.at(0).contains(".json")) {
@@ -130,7 +117,7 @@ void MainHelper::clickBtnRestoreTab() {
     }
   }
 
-  QString tab_name = m_Method->getText0(mui->qwTabRecycle, index);
+  QString tab_name = "";  // m_Method->getText0(mui->qwTabRecycle, index);
   QTreeWidget* tw = mw_one->init_TreeWidget(twName);
   mui->tabWidget->addTab(tw, tab_name);
 
@@ -166,8 +153,8 @@ void MainHelper::openTabRecycle() {
 
   // 切换UI
   mui->frameMain->hide();
-  mui->frameTabRecycle->show();
-  m_Method->clearAllBakList(mui->qwTabRecycle);
+
+  // m_Method->clearAllBakList(mui->qwTabRecycle);
 
   // 使用QFutureWatcher监控后台任务完成
   QFutureWatcher<QStringList>* watcher = new QFutureWatcher<QStringList>(this);
@@ -258,17 +245,10 @@ void MainHelper::openTabRecycle() {
       QString tab_time = str.split("-=-").at(1);
       QString iniTotal = str.split("-=-").at(2);
       iniTotal = iniTotal.trimmed();
-      m_Method->addItemToQW(mui->qwTabRecycle, tab_name, tab_time, "", iniTotal,
-                            0);
+      // m_Method->addItemToQW(mui->qwTabRecycle, tab_name, tab_time, "",
+      // iniTotal,
+      //                       0);
     }
-
-    int t_count = m_Method->getCountFromQW(mui->qwTabRecycle);
-    if (t_count > 0) {
-      m_Method->setCurrentIndexFromQW(mui->qwTabRecycle, 0);
-    }
-
-    mui->lblTitleTabRecycle->setText(tr("Tab Recycle") + "    " + tr("Total") +
-                                     " : " + QString::number(t_count));
 
     // 清理watcher
     watcher->deleteLater();
@@ -316,7 +296,7 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
     // ======================
     // 所有 UI/QML 操作，全部放在主线程
     // ======================
-    m_Method->clearAllBakList(mui->qwBakList);
+    // m_Method->clearAllBakList(mui->qwBakList);
 
     int bakCount = finalList.count();
     for (int i = 0; i < bakCount; i++) {
@@ -324,16 +304,8 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
       QString str = finalList.at(bakCount - 1 - i);
       action = str.split("-===-").at(0);
       bakfile = str.split("-===-").at(1);
-      m_Method->addItemToQW(mui->qwBakList, action, "", "", bakfile, 0);
+      // m_Method->addItemToQW(mui->qwBakList, action, "", "", bakfile, 0);
     }
-
-    if (m_Method->getCountFromQW(mui->qwBakList) > 0) {
-      m_Method->setCurrentIndexFromQW(mui->qwBakList, 0);
-    }
-
-    mui->lblBakListTitle->setText(
-        tr("Backup File List") + "    " + tr("Total") + " : " +
-        QString::number(m_Method->getCountFromQW(mui->qwBakList)));
 
     qDebug() << "BakFileList update completed";
 
@@ -346,10 +318,10 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
 }
 
 void MainHelper::delBakFile() {
-  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
+  // if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
 
-  int index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
-  QString bak_file = m_Method->getText3(mui->qwBakList, index);
+  int index = 0;          // m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString bak_file = "";  // m_Method->getText3(mui->qwBakList, index);
 
   auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
@@ -358,22 +330,15 @@ void MainHelper::delBakFile() {
 
   QFile file(bak_file);
   file.remove();
-  m_Method->delItemFromQW(mui->qwBakList, index);
 
   int newIndex = index - 1;
   if (newIndex < 0) newIndex = 0;
-
-  m_Method->setCurrentIndexFromQW(mui->qwBakList, newIndex);
-
-  mui->lblBakListTitle->setText(
-      tr("Backup File List") + "    " + tr("Total") + " : " +
-      QString::number(m_Method->getCountFromQW(mui->qwBakList)));
 }
 
 void MainHelper::delTabRecycleFile() {
-  if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
-  int index = m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
-  QString tab_file = m_Method->getText3(mui->qwTabRecycle, index);
+  // if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
+  int index = 0;          // m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
+  QString tab_file = "";  // m_Method->getText3(mui->qwTabRecycle, index);
 
   auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
@@ -393,19 +358,13 @@ void MainHelper::delTabRecycleFile() {
     QFile file(rec_file);
     file.remove();
   }
-
-  m_Method->delItemFromQW(mui->qwTabRecycle, index);
-
-  mui->lblTitleTabRecycle->setText(
-      tr("Tab Recycle") + "    " + tr("Total") + " : " +
-      QString::number(m_Method->getCountFromQW(mui->qwTabRecycle)));
 }
 
 void MainHelper::importBakFileList() {
-  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
+  // if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
 
-  int cur_index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
-  QString str = m_Method->getText3(mui->qwBakList, cur_index);
+  int cur_index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString str = "";   // m_Method->getText3(mui->qwBakList, cur_index);
   zipfile = str.trimmed();
 
   if (!zipfile.isNull()) {
@@ -420,7 +379,7 @@ void MainHelper::importBakFileList() {
   }
 
   isZipOK = true;
-  mui->btnBackBakList->click();
+
   mw_one->showProgress();
 
   isMenuImport = true;

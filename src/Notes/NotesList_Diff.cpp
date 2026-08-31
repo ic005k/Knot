@@ -94,7 +94,6 @@ void NotesList::closeNoteDiff() {
   noteDiffHtml.clear();
   noteDiffPatch.clear();
   noteDiffTime.clear();
-  mui->frameDiff->hide();
 }
 
 void NotesList::getNoteDiffHtml() {
@@ -105,13 +104,4 @@ void NotesList::getNoteDiffHtml() {
   setNoteDiffHtmlToQML(html);
 }
 
-void NotesList::setNoteDiffHtmlToQML(const QString& html) {
-  QQuickItem* rootItem = mui->qwNoteDiff->rootObject();
-  if (!rootItem) {
-    qWarning() << "获取 QML 根对象失败，无法更新 HTML 内容";
-    return;
-  }
-
-  // 设置 QML 中的 htmlContent 属性（名称必须与 QML 中完全一致）
-  rootItem->setProperty("htmlContent", html);
-}
+void NotesList::setNoteDiffHtmlToQML(const QString& html) {}

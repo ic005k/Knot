@@ -15,9 +15,6 @@
 #include <QPlainTextEdit>
 #include <QProcess>
 #include <QProgressBar>
-#include <QQmlEngine>
-#include <QQuickView>
-#include <QQuickWidget>
 #include <QRegExp>
 #include <QRegularExpression>
 #include <QSaveFile>
@@ -55,8 +52,6 @@ class Reader : public QDialog {
   explicit Reader(QWidget* parent = nullptr);
   ~Reader();
   Ui::Reader* ui;
-
-  QQuickView* qvBookList;
 
   QStandardItemModel* notesModel = nullptr;
 

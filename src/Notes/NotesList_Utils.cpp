@@ -26,16 +26,6 @@ bool NotesList::delFile(QString file) {
   return isOk;
 }
 
-void NotesList::addItemToQW(QQuickWidget* qw, QString text0, QString text1,
-                            QString text2, QString text3, QString text4,
-                            int itemH) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, text0),
-                            Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
-                            Q_ARG(QVariant, text3), Q_ARG(QVariant, text4),
-                            Q_ARG(QVariant, itemH));
-}
-
 void NotesList::addItemToQW_Level(QObject* qmlRoot, const QString& t0,
                                   const QString& t1, const QString& t2,
                                   const QString& t3, const QString& t4,
@@ -256,14 +246,14 @@ void NotesList::setNoteLabel() {
 }
 
 void NotesList::loadAllRecycle() {
-  m_Method->clearAllBakList(mui->qwNoteRecycle);
+  // m_Method->clearAllBakList(mui->qwNoteRecycle);
   int childCount = twrb->topLevelItem(0)->childCount();
   for (int i = 0; i < childCount; i++) {
     QTreeWidgetItem* childItem = twrb->topLevelItem(0)->child(i);
     QString text0 = childItem->text(0);
     QString text3 = iniDir + childItem->text(1);
 
-    m_Method->addItemToQW(mui->qwNoteRecycle, text0, "", "", text3, 0);
+    // m_Method->addItemToQW(mui->qwNoteRecycle, text0, "", "", text3, 0);
   }
 }
 
@@ -364,11 +354,11 @@ QStringList NotesList::getValidMDFiles() { return validMDFiles; }
 template class QFutureWatcher<ResultsMap>;
 
 void NotesList::restoreNoteFromRecycle() {
-  int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
-  if (count == 0) return;
+  // int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
+  // if (count == 0) return;
 
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
-  if (index < 0) return;
+  // int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
+  // if (index < 0) return;
 
   if (getNoteBookCount() == 0) return;
 
@@ -598,7 +588,7 @@ void NotesList::resetQML_Recycle() {
     index = twrb->currentIndex().row();
   }
 
-  m_Method->setCurrentIndexFromQW(mui->qwNoteRecycle, index);
+  // m_Method->setCurrentIndexFromQW(mui->qwNoteRecycle, index);
 }
 
 void NotesList::saveCurrentNoteInfo() {
@@ -643,7 +633,7 @@ void NotesList::saveCurrentNoteInfo() {
 }
 
 void NotesList::setTWRBCurrentItem() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
+  int index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
   QTreeWidgetItem* topItem = twrb->topLevelItem(0);
   twrb->setCurrentItem(topItem->child(index));
 }

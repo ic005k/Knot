@@ -17,8 +17,6 @@
 #include <QListWidgetItem>
 #include <QMetaObject>
 #include <QMutex>
-#include <QQmlContext>
-#include <QQuickWidget>
 #include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QStringList>
@@ -315,8 +313,6 @@ class NotesList : public QDialog {
                          const QString& t4, int fontSize, int level,
                          int parentIndex, bool isExpand = true);
 
-  QTreeWidgetProxyModel* m_treeProxyModel = nullptr;
-
   QMutex m_saveMutex;       // 保存锁
   bool m_isSaving = false;  // 保存状态
 
@@ -376,8 +372,6 @@ class NotesList : public QDialog {
 
   bool safeWriteFile(const QString& filePath, const QString& content);
 
-  void addItemToQW(QQuickWidget* qw, QString text0, QString text1,
-                   QString text2, QString text3, QString text4, int itemH);
   void setColorFlag(QString strColor);
   void setDelNoteFlag(QString mdFile);
   void saveNotesListToFile();

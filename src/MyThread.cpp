@@ -184,10 +184,6 @@ void MainWindow::readEBookDone() {
   if (isReport) {
     QTimer::singleShot(100, this, [this]() {
       this->m_Report->updateTable();
-      mui->lblTitle->setText(tabData->tabText(tabData->currentIndex()));
-
-      mui->btnViewCategory->hide();
-      if (listCategory.count() > 0) mui->btnViewCategory->setHidden(false);
 
       isReport = false;
       safeCloseProgress();

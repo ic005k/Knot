@@ -198,10 +198,10 @@ void EditRecord::on_btnType_clicked() {
 
   init_MyCategory();
   m_CategoryList->ui->listWidget->setCurrentRow(0);
-  m_Method->setCurrentIndexFromQW(mui->qwCategory, 0);
+  // m_Method->setCurrentIndexFromQW(mui->qwCategory, 0);
   m_CategoryList->setTypeRenameText();
 
-  int count = m_Method->getCountFromQW(mui->qwCategory);
+  int count = 0;  // m_Method->getCountFromQW(mui->qwCategory);
   mui->lblTypeInfo->setText(QObject::tr("Total") + " : " +
                             QString::number(count));
 }
@@ -255,7 +255,7 @@ void EditRecord::init_MyCategory() {
   ini_file = iniDir + "desc.ini";
   QSettings RegDesc(ini_file, QSettings::IniFormat);
 
-  m_Method->clearAllBakList(mui->qwCategory);
+  // m_Method->clearAllBakList(mui->qwCategory);
 
   c_list.clear();
   m_CategoryList->ui->listWidget->clear();
@@ -269,7 +269,7 @@ void EditRecord::init_MyCategory() {
     m_CategoryList->ui->listWidget->addItem(item);
     c_list.append(str);
 
-    m_Method->addItemToQW(mui->qwCategory, str, "", "", "", 0);
+    // m_Method->addItemToQW(mui->qwCategory, str, "", "", "", 0);
   }
 }
 

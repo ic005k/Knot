@@ -441,13 +441,11 @@ void loadTheme(bool isDark) {
           widget != mui->btnDel_Number && widget != mui->lblMonthSum &&
           widget != mui->lblTime && widget != mui->lblGpsInfo &&
           widget != m_Steps->m_speedometer && widget != m_sliderButton &&
-          widget != mui->lblGpsDateTime && widget != mui->btnPages &&
-          widget != mui->lblBookName && widget != mui->lblSyncNote &&
+          widget != mui->lblGpsDateTime && widget != mui->lblSyncNote &&
           widget != mui->lblVectorStatus) {
         widget->setFont(qApp->font());
 
         font.setBold(true);
-        mui->lblViewCate1->setFont(font);
 
         mui->lblTitleEditRecord->setFont(font);
         if (mui && mui->lblSyncNote) {

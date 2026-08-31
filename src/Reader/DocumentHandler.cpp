@@ -234,8 +234,6 @@ QString DocumentHandler::fileType() const {
 QUrl DocumentHandler::fileUrl() const { return m_fileUrl; }
 
 void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
-  mui->btnAutoStop->click();
-
   if (mw_one->curx != 0) return;
 
   // qDebug() << "link : " << linkFile;
@@ -334,8 +332,6 @@ void DocumentHandler::parsingLink(QString linkFile, QString qwName) {
     if (htmlIndex == 0 && !m_Reader->isHidden()) {
       return;
     }
-
-    mui->btnDelImage->hide();
 
     LoadPic* m_LoadPic = new LoadPic(mw_one);
     m_LoadPic->initMain(linkFile);

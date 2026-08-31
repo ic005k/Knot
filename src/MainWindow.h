@@ -45,10 +45,6 @@
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QPushButton>
-#include <QQmlApplicationEngine>
-#include <QQmlContext>
-#include <QQmlEngine>
-#include <QQuickWidget>
 #include <QRandomGenerator>
 #include <QScatterSeries>
 #include <QScrollBar>

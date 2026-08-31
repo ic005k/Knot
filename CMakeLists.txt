@@ -29,7 +29,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 # ============================================================
 find_package(Qt6 REQUIRED COMPONENTS
     Core Gui Widgets Network PrintSupport Charts Sensors Sql
-    Qml Quick QuickWidgets Location Xml Svg Concurrent LinguistTools Core5Compat
+    Location Xml Svg Concurrent LinguistTools Core5Compat
 )
 
 # ============================================================
@@ -315,7 +315,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     SQLITE_VEC_STATIC
     VECTOR_SEARCH
     $<$<CONFIG:Release>:QT_NO_DEBUG>
-    QML_DISABLE_PROFILER
 
 )
 
@@ -354,8 +353,8 @@ endif()
 # 全平台公共链接
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::PrintSupport
-    Qt6::Charts Qt6::Sensors Qt6::Sql Qt6::Qml Qt6::Quick
-    Qt6::QuickWidgets Qt6::Location Qt6::Xml Qt6::Svg Qt6::Concurrent
+    Qt6::Charts Qt6::Sensors Qt6::Sql
+    Qt6::Location Qt6::Xml Qt6::Svg Qt6::Concurrent
     Qt6::Core5Compat
     llama ggml llama_common
     knot_zlib knot_quazip knot_cmark_gfm knot_sqlite

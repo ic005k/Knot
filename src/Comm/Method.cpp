@@ -83,37 +83,6 @@ void Method::closeGrayWindows() {
   }
 }
 
-/*QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
-                                  QString defaultValue) {
-  QInputDialog* idlg = new QInputDialog(this);
-  idlg->hide();
-  idlg->setWindowFlag(Qt::FramelessWindowHint);
-  QString style1 = "QDialog{border-radius:px;border:0px solid darkred;}";
-  idlg->setStyleSheet(style1);
-  idlg->setOkButtonText(tr("Ok"));
-  idlg->setCancelButtonText(tr("Cancel"));
-  idlg->setContentsMargins(10, 10, 10, 10);
-  idlg->setWindowTitle(windowsTitle);
-  idlg->setTextValue(defaultValue);
-  idlg->setLabelText(lblEdit);
-  set_PushButtonStyle(idlg);
-
-  showGrayWindows();
-
-  idlg->show();
-  idlg->setFixedWidth(mw_one->width() - 2);
-  idlg->setGeometry(
-      mw_one->geometry().x() + (mw_one->geometry().width() - idlg->width()) / 2,
-      mw_one->geometry().y(), idlg->width(), idlg->height());
-
-  connect(idlg, &QDialog::rejected, this,
-          [=]() mutable { closeGrayWindows(); });
-  connect(idlg, &QDialog::accepted, this,
-          [=]() mutable { closeGrayWindows(); });
-
-  return idlg;
-}*/
-
 QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
                                   QString defaultValue) {
   QInputDialog* idlg = new QInputDialog(this);
@@ -243,26 +212,11 @@ int Method::getStrWidth(const QString str) {
 }
 
 void Method::addItem(QString text_tab, QString text0, QString text1,
-                     QString text2, QString text3, int itemH) {
-  QQuickItem* root = mui->qwSearch->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "addItem",
-                            Q_ARG(QVariant, text_tab), Q_ARG(QVariant, text0),
-                            Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
-                            Q_ARG(QVariant, text3), Q_ARG(QVariant, itemH));
-}
+                     QString text2, QString text3, int itemH) {}
 
-void Method::delItem(int index) {
-  QQuickItem* root = mui->qwSearch->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
-}
+void Method::delItem(int index) {}
 
-int Method::getCount() {
-  QQuickItem* root = mui->qwSearch->rootObject();
-  QVariant itemCount;
-  QMetaObject::invokeMethod((QObject*)root, "getItemCount",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toInt();
-}
+int Method::getCount() { return 0; }
 
 void Method::clearAll() {
   int count = getCount();
@@ -271,182 +225,7 @@ void Method::clearAll() {
   }
 }
 
-void Method::setCurrentIndex(int index) {
-  QQuickItem* root = mui->qwSearch->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setCurrentItem",
-                            Q_ARG(QVariant, index));
-}
-
-void Method::addItemToQW(QQuickWidget* qw, QString text0, QString text1,
-                         QString text2, QString text3, int itemH) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, text0),
-                            Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
-                            Q_ARG(QVariant, text3), Q_ARG(QVariant, itemH));
-}
-
-void Method::addItemToQV(QQuickView* qv, QString text0, QString text1,
-                         QString text2, QString text3, int itemH) {
-  QQuickItem* root = qv->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, text0),
-                            Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
-                            Q_ARG(QVariant, text3), Q_ARG(QVariant, itemH));
-}
-
-void Method::insertItem(QQuickWidget* qw, QString text0, QString text1,
-                        QString text2, QString text3, int curIndex) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "insertItem",
-                            Q_ARG(QVariant, text0), Q_ARG(QVariant, text1),
-                            Q_ARG(QVariant, text2), Q_ARG(QVariant, text3),
-                            Q_ARG(QVariant, curIndex));
-}
-
-void Method::delItemFromQW(QQuickWidget* qw, int index) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
-}
-
-void Method::delItemFromQV(QQuickView* qv, int index) {
-  QQuickItem* root = qv->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
-}
-
-int Method::getCountFromQW(QQuickWidget* qw) {
-  QQuickItem* root = qw->rootObject();
-  QVariant itemCount;
-  QMetaObject::invokeMethod((QObject*)root, "getItemCount",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toInt();
-}
-
-int Method::getCountFromQV(QQuickView* qv) {
-  QQuickItem* root = qv->rootObject();
-  QVariant itemCount;
-  QMetaObject::invokeMethod((QObject*)root, "getItemCount",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toInt();
-}
-
-void Method::clearAllBakList(QQuickWidget* qw) {
-  int count = getCountFromQW(qw);
-  for (int i = 0; i < count; i++) {
-    delItemFromQW(qw, 0);
-  }
-}
-
-void Method::clearAllBakListQV(QQuickView* qv) {
-  int count = getCountFromQV(qv);
-  for (int i = 0; i < count; i++) {
-    delItemFromQV(qv, 0);
-  }
-}
-
-void Method::clearAllNotesList(QQuickWidget* qw) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod(root, "clearAllItems");
-}
-
-void Method::gotoBegin(QQuickWidget* qw) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "gotoBeginning");
-}
-
-void Method::gotoEnd(QQuickWidget* qw) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "gotoEnd");
-}
-
-void Method::setScrollBarPos(QQuickWidget* qw, double pos) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setScrollBarPos",
-                            Q_ARG(QVariant, pos));
-}
-
-void Method::setCurrentIndexFromQW(QQuickWidget* qw, int index) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setCurrentItem",
-                            Q_ARG(QVariant, index));
-}
-
-int Method::getCurrentIndexFromQW(QQuickWidget* qw) {
-  QQuickItem* root = qw->rootObject();
-  QVariant itemIndex;
-  QMetaObject::invokeMethod((QObject*)root, "getCurrentIndex",
-                            Q_RETURN_ARG(QVariant, itemIndex));
-  return itemIndex.toInt();
-}
-
-int Method::getCurrentIndexFromQV(QQuickView* qv) {
-  QQuickItem* root = qv->rootObject();
-  QVariant itemIndex;
-  QMetaObject::invokeMethod((QObject*)root, "getCurrentIndex",
-                            Q_RETURN_ARG(QVariant, itemIndex));
-  return itemIndex.toInt();
-}
-
-void Method::modifyItemText0(QQuickWidget* qw, int index, QString strText) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "modifyItemText0",
-                            Q_ARG(QVariant, index), Q_ARG(QVariant, strText));
-}
-
-void Method::modifyItemText2(QQuickWidget* qw, int index, QString strText) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "modifyItemText2",
-                            Q_ARG(QVariant, index), Q_ARG(QVariant, strText));
-}
-
-void Method::modifyItemText3(QQuickWidget* qw, int index, QString strText) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "modifyItemText3",
-                            Q_ARG(QVariant, index), Q_ARG(QVariant, strText));
-}
-
-QString Method::getText0(QQuickWidget* qw, int index) {
-  QQuickItem* root = qw->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText0",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
-
-QString Method::getText1(QQuickWidget* qw, int index) {
-  QQuickItem* root = qw->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText1",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
-
-QString Method::getText2(QQuickWidget* qw, int index) {
-  QQuickItem* root = qw->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText2",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
-
-QString Method::getText3(QQuickWidget* qw, int index) {
-  QQuickItem* root = qw->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText3",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
-
-QString Method::getText3QV(QQuickView* qv, int index) {
-  QQuickItem* root = qv->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText3",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
+void Method::setCurrentIndex(int index) {}
 
 bool Method::eventFilter(QObject* watchDlgSearch, QEvent* evn) {
   if (evn->type() == QEvent::KeyRelease) {
@@ -751,7 +530,8 @@ void Method::initSearchResults() {
   clearAll();
   int count = resultsList.count();
 
-  mui->lblSearchResult->setText(tr("Results") + " : " + QString::number(count));
+  // mui->lblSearchResult->setText(tr("Results") + " : " +
+  // QString::number(count));
   if (count == 0) return;
 
   generateData(count);
@@ -1187,20 +967,6 @@ QString Method::setPushButtonQss(QPushButton* btn, int radius, int padding,
   QString qss = list.join("");
   btn->setStyleSheet(qss);
   return qss;
-}
-
-void Method::setVPosForQW(QQuickWidget* qw, qreal pos) {
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setVPos", Q_ARG(QVariant, pos));
-}
-
-qreal Method::getVPosForQW(QQuickWidget* qw) {
-  QVariant itemCount;
-  QQuickItem* root = qw->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "getVPos",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  qreal textPos = itemCount.toDouble();
-  return textPos;
 }
 
 QString Method::getCustomColor() {
@@ -3033,8 +2799,7 @@ void Method::set_ToolButtonStyle(QObject* parent) {
   for (int i = 0; i < btnList.count(); i++) {
     QToolButton* btn = (QToolButton*)btnList.at(i);
 
-    if (btn != mui->btnStyle1 && btn != mui->btnStyle2 &&
-        btn != mui->btnStyle3 && btn != mui->btnGPS && btn != mui->btnPause) {
+    if (btn != mui->btnGPS && btn != mui->btnPause) {
       setToolButtonQss(btn, 4, 5, "#3B82F6", "#FFFFFF", "#3B82F6", "#FFFFFF",
                        "#2563EB", "#FFFFFF");
 
@@ -3725,36 +3490,6 @@ void Method::delayDelFile(const QString& filePath) {
     if (!ok) {
       qDebug() << "删除失败：" << QFile(filePath).errorString();
     }
-  });
-}
-
-void Method::sendTouch(QQuickWidget* quickWidget) {
-  if (!quickWidget) return;
-  QQuickWindow* targetWin = quickWidget->quickWindow();
-  if (!targetWin) return;
-  const QPointingDevice* device = QPointingDevice::primaryPointingDevice();
-  if (!device) return;
-
-  const QPointF localPos(1, 1);
-  QPointF globalPos = quickWidget->mapToGlobal(localPos);
-
-  const int State_Pressed = 0;
-  const int State_Released = 2;
-
-  // 仅发送按下
-  QEventPoint ptDown(0, static_cast<QEventPoint::State>(State_Pressed),
-                     localPos, globalPos);
-  QTouchEvent evDown(QEvent::TouchBegin, device, Qt::NoModifier,
-                     QList<QEventPoint>{ptDown});
-  QGuiApplication::sendEvent(targetWin, &evDown);
-
-  // 间隔150ms抬起，标准短点击，无中间Moved帧
-  QTimer::singleShot(150, quickWidget, [=]() {
-    QEventPoint ptUp(0, static_cast<QEventPoint::State>(State_Released),
-                     localPos, globalPos);
-    QTouchEvent evUp(QEvent::TouchEnd, device, Qt::NoModifier,
-                     QList<QEventPoint>{ptUp});
-    QGuiApplication::sendEvent(targetWin, &evUp);
   });
 }
 

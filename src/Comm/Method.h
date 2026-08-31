@@ -32,7 +32,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkInterface>
 #include <QNetworkReply>
-#include <QQuickView>
 #include <QTimeZone>
 #include <QTimer>
 #include <QtGui/QEventPoint>
@@ -47,7 +46,6 @@
 #include <QPainter>
 #include <QProgressBar>
 #include <QPropertyAnimation>
-#include <QQuickWidget>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -428,25 +426,6 @@ QScrollBar::sub-page:horizontal {
   void addItem(QString text_tab, QString text0, QString text1, QString text2,
                QString text3, int itemH);
 
-  void setCurrentIndexFromQW(QQuickWidget* qw, int index);
-  void clearAllBakList(QQuickWidget* qw);
-  int getCountFromQW(QQuickWidget* qw);
-  void delItemFromQW(QQuickWidget* qw, int index);
-  void addItemToQW(QQuickWidget* qw, QString text0, QString text1,
-                   QString text2, QString text3, int itemH);
-
-  QString getText3(QQuickWidget* qw, int index);
-  int getCurrentIndexFromQW(QQuickWidget* qw);
-  QString getText0(QQuickWidget* qw, int index);
-
-  void modifyItemText2(QQuickWidget* qw, int index, QString strText);
-
-  void modifyItemText0(QQuickWidget* qw, int index, QString strText);
-  void insertItem(QQuickWidget* qw, QString text0, QString text1, QString text2,
-                  QString text3, int curIndex);
-
-  void gotoEnd(QQuickWidget* qw);
-
   void setSCrollPro(QObject* obj);
 
   void showDelMsgBox(QString title, QString info);
@@ -458,10 +437,6 @@ QScrollBar::sub-page:horizontal {
 
   int getFontHeight();
 
-  void modifyItemText3(QQuickWidget* qw, int index, QString strText);
-  QInputDialog* inputDialog(QString windowsTitle, QString lblEdit,
-                            QString defaultValue);
-
   void showGrayWindows();
   void closeGrayWindows();
 
@@ -469,15 +444,7 @@ QScrollBar::sub-page:horizontal {
 
   int getStrWidth(const QString str);
 
-  QString getText2(QQuickWidget* qw, int index);
-  QString getText1(QQuickWidget* qw, int index);
-
-  void setScrollBarPos(QQuickWidget* qw, double pos);
-
   QString getLastModified(QString file);
-
-  void setVPosForQW(QQuickWidget* qw, qreal pos);
-  qreal getVPosForQW(QQuickWidget* qw);
 
   QString getCustomColor();
 
@@ -614,8 +581,6 @@ QScrollBar::sub-page:horizontal {
 
   bool isInChina();
 
-  void gotoBegin(QQuickWidget* qw);
-
   QList<SearchItem> exportAllDataForSearch();
   QList<SearchItem> data_for_search;
   void startSearch(QList<SearchItem> data, const QString& searchStr);
@@ -623,10 +588,6 @@ QScrollBar::sub-page:horizontal {
   void delayDelFile(const QString& filePath);
 
   float getSystemFontScale();
-
-  void sendTouch(QQuickWidget* quickWidget);
-
-  void clearAllNotesList(QQuickWidget* qw);
 
   QString generateRandom3();
 
@@ -637,15 +598,7 @@ QScrollBar::sub-page:horizontal {
   void setAIAPIEnabled(bool isAIAPI);
 
   void exitSystemFullscreen();
-  void addItemToQV(QQuickView* qv, QString text0, QString text1, QString text2,
-                   QString text3, int itemH);
 
-  void clearAllBakListQV(QQuickView* qv);
-  int getCountFromQV(QQuickView* qv);
-  void delItemFromQV(QQuickView* qv, int index);
-
-  int getCurrentIndexFromQV(QQuickView* qv);
-  QString getText3QV(QQuickView* qv, int index);
   QString getTempSwapStr();
   void setTempSwapStr(const QString& str);
   void openMainEntranceWindow();
@@ -658,6 +611,9 @@ QScrollBar::sub-page:horizontal {
   void refreshMainDateDetail();
 
   void openMyEventWindow();
+
+  QInputDialog* inputDialog(QString windowsTitle, QString lblEdit,
+                            QString defaultValue);
 
  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;

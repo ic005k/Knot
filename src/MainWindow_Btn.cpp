@@ -43,7 +43,7 @@ void MainWindow::on_btnClearAllRecords_clicked() {
   m_Reader->clearAllReaderRecords();
 }
 
-void MainWindow::on_btnAnd_clicked() { mui->editSearchText->insert("&"); }
+void MainWindow::on_btnAnd_clicked() {}
 
 void MainWindow::on_btnModify_clicked() { m_Todo->reeditText(); }
 
@@ -109,29 +109,17 @@ void MainWindow::on_btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
 
   // mui->frameNoteList->hide();
-  mui->frameFavorites->show();
 
   m_Notes->refreshRecentOpenByCounter();
-  mui->editTitleKey->clear();
+
   // 加载最近打开列表推送到QML
   QVariantList data = buildRecentList();
   setDisplayResult(data);
-
-  mui->editTitleKey->setFocus();
 }
 
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
 
-void MainWindow::on_btnBookCata_clicked() {
-  if (mui->lblBookName->text() == "Book Name") return;
-
-  mui->btnAutoStop->click();
-  if (mui->f_ReaderSet->isVisible()) {
-    on_btnBackReaderSet_clicked();
-  }
-
-  m_Reader->showCatalogue();
-}
+void MainWindow::on_btnBookCata_clicked() { m_Reader->showCatalogue(); }
 
 void MainWindow::on_btnShowBookmark_clicked() {
   m_Reader->showOrHideBookmark();
@@ -147,13 +135,11 @@ void MainWindow::on_btnDelImage_clicked() {}
 
 void MainWindow::on_btnBackReaderSet_clicked() {
   closeTextToolBar();
-  mui->f_ReaderSet->hide();
+
   qreal pos = m_Reader->getVPos();
   m_Reader->setVPos(pos + 0.01);
 
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-  Reg.setValue("/Reader/editAutoStopTTS", mui->editAutoStopTTS->text());
-  Reg.setValue("/Reader/chkAutoStopTTS", mui->chkAutoStopTTS->isChecked());
 }
 
 void MainWindow::on_btnSetBookmark_clicked() {
@@ -199,29 +185,9 @@ void MainWindow::on_btnGoPage_clicked() { m_ReaderSet->on_btnGoPage_clicked(); }
 
 void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
 
-void MainWindow::on_btnAutoRun_clicked() {
-  mui->qwViewBookNote->hide();
-  mui->qwBookCata->hide();
-  mui->qwBookmark->hide();
-  mui->qwReader->show();
+void MainWindow::on_btnAutoRun_clicked() {}
 
-  if (!m_Reader->isAutoRun) {
-    mui->qwReader->rootContext()->setContextProperty("isAutoRun", true);
-    mui->btnAutoRun->hide();
-    mui->btnAutoStop->show();
-    m_Reader->isAutoRun = true;
-  }
-}
-
-void MainWindow::on_btnAutoStop_clicked() {
-  if (m_Reader->isAutoRun) {
-    mui->qwReader->rootContext()->setContextProperty("isAutoRun",
-                                                     QVariant(false));
-    mui->btnAutoStop->hide();
-    mui->btnAutoRun->show();
-    m_Reader->isAutoRun = false;
-  }
-}
+void MainWindow::on_btnAutoStop_clicked() {}
 
 void MainWindow::on_btnLessen_clicked() { m_ReaderSet->on_btnLessen_clicked(); }
 
@@ -250,8 +216,6 @@ void MainWindow::on_btnClearReaderFont_clicked() {
 void MainWindow::on_btnMove() {
   isMoveEntry = true;
   if (del_Data((QTreeWidget*)mui->tabWidget->currentWidget())) {
-    mui->btnTabMoveDown->hide();
-    mui->btnTabMoveUp->hide();
     on_btnSelTab_clicked();
 
     while (mui->frameEditRecord->isHidden()) {
@@ -288,8 +252,6 @@ void MainWindow::on_btnBackBakList_clicked() {
     mui->frameMain->show();
   } else
     m_Method->openMainEntranceWindow();
-
-  mui->frameBakList->hide();
 }
 
 void MainWindow::on_btnImportBakList_clicked() {
@@ -303,7 +265,6 @@ void MainWindow::on_btnBackTabRecycle_clicked() {
     mui->frameMain->show();
   } else
     m_Method->openMainEntranceWindow();
-  mui->frameTabRecycle->hide();
 }
 
 void MainWindow::on_btnDelTabRecycle_clicked() {
@@ -357,26 +318,14 @@ void MainWindow::on_btnBackNoteList_clicked() {
 }
 
 void MainWindow::on_btnBackNoteRecycle_clicked() {
-  mui->frameNoteRecycle->hide();
-
   if (m_NotesList->isDelNoteRecycle) {
     m_Notes->startBackgroundTaskDelAndClear();
   }
 }
 
-void MainWindow::on_btnNoteRecycle_clicked() {
-  mui->frameNoteRecycle->show();
-
-  m_NotesList->loadAllRecycle();
-}
+void MainWindow::on_btnNoteRecycle_clicked() { m_NotesList->loadAllRecycle(); }
 
 void MainWindow::on_btnDelNoteRecycle_clicked() {
-  int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
-  if (count == 0) return;
-
-  int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
-  if (index < 0) return;
-
   m_NotesList->setTWRBCurrentItem();
   m_NotesList->on_btnBatchDel_Recycle_clicked();
 }
@@ -421,17 +370,7 @@ void MainWindow::on_btnRenameType_clicked() {
   m_CategoryList->on_Rename();
 }
 
-void MainWindow::on_btnBackSetTab_clicked() {
-  mui->frameMain->show();
-  mui->frameSetTab->hide();
-
-  if (mui->btnTabMoveDown->isHidden()) {
-    mui->btnTabMoveDown->show();
-    mui->btnTabMoveUp->show();
-    on_btnAdd_clicked();
-    m_EditRecord->setCurrentValue();
-  }
-}
+void MainWindow::on_btnBackSetTab_clicked() {}
 
 void MainWindow::on_btnBackSearch_clicked() {
   clearWidgetFocus();
@@ -440,19 +379,12 @@ void MainWindow::on_btnBackSearch_clicked() {
     mui->frameMain->show();
   } else
     m_Method->openMainEntranceWindow();
-
-  mui->frameSearch->hide();
 }
 
-void MainWindow::on_btnClearSearchText_clicked() {
-  mui->editSearchText->setText("");
-  mui->editSearchText->setFocus();
-}
+void MainWindow::on_btnClearSearchText_clicked() {}
 
 void MainWindow::on_btnStartSearch_clicked() {
-  mui->editSearchText->clearFocus();
-
-  searchStr = mui->editSearchText->text().trimmed();
+  searchStr = "";  // mui->editSearchText->text().trimmed();
   if (searchStr.length() == 0) return;
 
   showProgress();
@@ -562,7 +494,7 @@ Rules:
 }
 
 void MainWindow::on_btnAIExplanation_clicked() {
-  QString text = mui->editSetText->text();
+  QString text = "";  //  mui->editSetText->text();
   QString trimText = text.trimmed();
   if (trimText.isEmpty()) {
     auto msg = std::make_unique<ShowMessage>(this);
@@ -713,15 +645,12 @@ void MainWindow::on_chkWebDAV_clicked() {}
 
 void MainWindow::on_btnBack_NotesSearchResult_clicked() {
   clearWidgetFocus();
-  mui->frameNotesSearchResult->hide();
+
   // mui->frameNoteList->show();
   isOpenSearchResult = false;
 }
 
-void MainWindow::on_btnClearSearchResults_clicked() {
-  mui->editNotesSearch->clear();
-  mui->editNotesSearch->setFocus();
-}
+void MainWindow::on_btnClearSearchResults_clicked() {}
 
 void MainWindow::on_btnOpenSearchEdit_clicked() {
   QString mdFile = m_NotesList->getSearchResultQmlFile();
@@ -763,18 +692,7 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
   msg->showMsg(appName, res, 1);
 }
 
-void MainWindow::on_btnRotation_clicked() {
-  if (mui->qwReader->isHidden()) return;
-
-  QQuickItem* rootItem = mui->qwReader->rootObject();
-  QQuickItem* orientationButton =
-      rootItem->findChild<QQuickItem*>("orientationButton");
-  if (orientationButton) {
-    QMetaObject::invokeMethod(orientationButton, "clicked");
-    m_Reader->isLandscape = !m_Reader->isLandscape;
-    m_Reader->readReadNote(m_Reader->cPage);
-  }
-}
+void MainWindow::on_btnRotation_clicked() {}
 
 void MainWindow::on_btnAddBookNote_clicked() { m_Reader->addBookNote(""); }
 
@@ -785,19 +703,12 @@ void MainWindow::on_btnMap_clicked() { m_Steps->openMapWindow(); }
 void MainWindow::on_btnSportsChart_clicked() { m_Steps->showSportsChart(); }
 
 void MainWindow::on_btnSpeak_clicked() {
-  mui->btnSpeak->hide();
-  mui->btnStopSpeak->show();
-
   isPlayBook = true;
   m_Reader->setAutoStopPlayTime();
   m_Reader->startSpeak();
 }
 
-void MainWindow::on_btnStopSpeak_clicked() {
-  mui->btnStopSpeak->hide();
-  mui->btnSpeak->show();
-  m_Reader->stopSpeak();
-}
+void MainWindow::on_btnStopSpeak_clicked() { m_Reader->stopSpeak(); }
 
 void MainWindow::on_btnSteps_clicked() { m_Steps->openStepsUI(); }
 
@@ -822,11 +733,6 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
   }
 
   QMainWindow::resizeEvent(event);
-
-  mui->qwReader->rootContext()->setContextProperty("myW", mw_one->width());
-  mui->qwReader->rootContext()->setContextProperty("myH", mw_one->height());
-
-  mui->qwSteps->rootContext()->setContextProperty("myW", this->width());
 
 #ifdef Q_OS_ANDROID
 
@@ -857,12 +763,7 @@ void MainWindow::on_btnRestoreRecycle_clicked() {
   m_Todo->on_btnRestore_clicked();
 }
 
-void MainWindow::on_btnSelText() {
-  if (mui->f_ReaderSet->isVisible()) {
-    on_btnBackReaderSet_clicked();
-  }
-  m_Reader->selectText();
-}
+void MainWindow::on_btnSelText() {}
 
 void MainWindow::on_btnDownload_clicked() {
   m_CloudBackup->on_pushButton_downloadFile_clicked();
@@ -871,46 +772,27 @@ void MainWindow::on_btnDownload_clicked() {
 void MainWindow::on_btnBack_One_clicked() { m_CloudBackup->backExit(); }
 
 void MainWindow::on_btnBackNotesGraph_clicked() {
-  mui->frameNotesGraph->hide();
-
   m_NotesList->clickNoteList();
 }
 
 void MainWindow::on_btnCopy_clicked() {
   QClipboard* clipboard = QApplication::clipboard();
-  clipboard->setText(mui->editSetText->text().trimmed());
+  // clipboard->setText(mui->editSetText->text().trimmed());
 }
 
 void MainWindow::on_btnCancelSel_clicked() {
   m_Reader->resetTextSelection();
 
-  mui->f_ReaderNote->hide();
-
-  mui->qwReader->show();
-  mui->f_ReaderFun->show();
   m_Reader->isSelText = false;
 }
 
-void MainWindow::on_btnBackImg_clicked() {
-  mui->frameImgView->hide();
-  if (isReaderVisible) mui->frameReader->show();
-  if (isMemoVisible) mui->frameNotesGraph->show();
-}
+void MainWindow::on_btnBackImg_clicked() {}
 
-void MainWindow::on_btnZoomIn_clicked() {
-  QQuickItem* root = mui->qw_Img->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "zoomin");
-}
+void MainWindow::on_btnZoomIn_clicked() {}
 
-void MainWindow::on_btnZoomOut_clicked() {
-  QQuickItem* root = mui->qw_Img->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "zoomout");
-}
+void MainWindow::on_btnZoomOut_clicked() {}
 
-void MainWindow::on_btnReport() {
-  on_actionReport_triggered();
-  mui->btnYear->setFixedHeight(mui->btnMonth->height());
-}
+void MainWindow::on_btnReport() { on_actionReport_triggered(); }
 
 void MainWindow::on_btnShowPassword_pressed() {
   m_Preferences->on_btnShowPassword_pressed();
@@ -929,10 +811,8 @@ void MainWindow::on_btnShowValidate_released() {
 }
 
 void MainWindow::on_btnSendEmail() {
-  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
-
-  int cur_index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
-  QString filePath = m_Method->getText3(mui->qwBakList, cur_index);
+  int cur_index = 0;      // m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString filePath = "";  // m_Method->getText3(mui->qwBakList, cur_index);
 
   if (m_Method->sendMailWithAttachment("", filePath)) {
     qDebug() << "The default email client of the system has been invoked.";
@@ -942,10 +822,10 @@ void MainWindow::on_btnSendEmail() {
 }
 
 void MainWindow::on_btnShareBakFile_clicked() {
-  if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
+  // if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
 
-  int cur_index = m_Method->getCurrentIndexFromQW(mui->qwBakList);
-  QString filePath = m_Method->getText3(mui->qwBakList, cur_index);
+  int cur_index = 0;      // m_Method->getCurrentIndexFromQW(mui->qwBakList);
+  QString filePath = "";  //  m_Method->getText3(mui->qwBakList, cur_index);
   if (QFile::exists(filePath)) {
     mw_one->m_ReceiveShare->shareImage(tr("Share to"), filePath, "*/*");
   }
@@ -956,7 +836,7 @@ void MainWindow::on_btnNewNote_clicked() {
 }
 
 void MainWindow::on_btnShareBookText_clicked() {
-  QString txt = mui->editSetText->text().trimmed();
+  QString txt = "";  // mui->editSetText->text().trimmed();
   if (txt.length() > 0) {
     mw_one->m_ReceiveShare->shareString(tr("Share to"), txt);
   }
@@ -965,19 +845,9 @@ void MainWindow::on_btnShareBookText_clicked() {
 void MainWindow::on_btnBackReader_clicked() { m_Reader->closeReader(); }
 
 void MainWindow::on_btnOpen_clicked() {
-  if (mui->qwViewBookNote->isVisible()) return;
-
-  mui->btnAutoStop->click();
-
   m_Reader->saveReader("", false);
   m_Reader->savePageVPos();
 
-  if (mui->f_ReaderSet->isVisible()) {
-    on_btnBackReaderSet_clicked();
-  }
-  if (mui->qwBookmark->isVisible()) {
-    on_btnShowBookmark_clicked();
-  }
   m_ReaderSet->close();
   m_Reader->closeSelText();
   m_Reader->on_btnOpen_clicked();
@@ -987,33 +857,7 @@ void MainWindow::on_btnPageUp_clicked() { m_Reader->goUpPage(); }
 
 void MainWindow::on_btnPageNext_clicked() { m_Reader->goNextPage(); }
 
-void MainWindow::on_btnPages_clicked() {
-  if (mui->f_ReaderSet->isHidden()) {
-    mui->lblTotalReading->setText(tr("Total Reading: ") +
-                                  m_Reader->getReadTotalTime() + " h");
-    mui->btnAutoStop->click();
-    mui->qwViewBookNote->hide();
-    mui->qwBookCata->hide();
-    mui->qwBookmark->hide();
-    mui->qwReader->show();
-    mui->f_ReaderSet->show();
-
-    m_Reader->closeSelText();
-
-    QStringList list = mui->btnPages->text().split("\n");
-    if (list.count() == 2) {
-      QString cur = list.at(0);
-      QString total = list.at(1);
-      mui->lblProg->setText(tr("Reading Progress") + " : " + cur + " -> " +
-                            total);
-
-      mui->hSlider->setMaximum(total.toInt());
-      mui->hSlider->setMinimum(1);
-      mui->hSlider->setValue(cur.toInt());
-    }
-  } else
-    on_btnBackReaderSet_clicked();
-}
+void MainWindow::on_btnPages_clicked() { on_btnBackReaderSet_clicked(); }
 
 void MainWindow::on_btnOpenNote_clicked() { m_Notes->previewNote(); }
 
@@ -1051,49 +895,29 @@ void MainWindow::on_btnTestWebDav_clicked() {
 
 void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
 
-void MainWindow::on_btnFind_clicked() {
-  mui->frameMain->hide();
-  mui->frameSearch->show();
-  mui->editSearchText->setFocus();
-  mui->btnClearSearchText->setFixedHeight(mui->btnStartSearch->height());
-}
+void MainWindow::on_btnFind_clicked() { mui->frameMain->hide(); }
 
 void MainWindow::on_btnTodo_clicked() { m_Todo->openTodo(); }
 
 void MainWindow::on_btnHome_clicked() {
   if (isAndroid) {
     m_Method->openMainEntranceWindow();
-    mui->qwMainTab->hide();
-  } else {
-    mui->qwMainTab->show();
   }
 
   mui->lblStats->hide();
 }
 
 void MainWindow::on_btnReadList_clicked() {
-  if (mui->qwViewBookNote->isVisible()) return;
-
-  mui->btnAutoStop->click();
-
   m_Reader->saveReader("", false);
   m_Reader->savePageVPos();
 
   if (isAndroid) m_Reader->closeMyPDF();
 
-  if (mui->f_ReaderSet->isVisible()) {
-    on_btnBackReaderSet_clicked();
-  }
-
-  if (mui->qwBookmark->isVisible()) {
-    mw_one->on_btnShowBookmark_clicked();
-  }
-
   m_ReaderSet->close();
   m_Reader->closeSelText();
 
   if (mui->frameMain->isVisible()) mui->frameMain->hide();
-  mui->frameReader->hide();
+
   m_Reader->showBookListWin();
 
   m_Reader->getReadList();
@@ -1127,12 +951,12 @@ void MainWindow::on_btnModifyRecord() {}
 
 void MainWindow::on_btnSelTab_clicked() {
   mui->frameMain->hide();
-  mui->frameSetTab->show();
+
   getMainTabs();
 }
 
 void MainWindow::on_btnSearch_clicked() {
-  QString str = mui->editSetText->text().trimmed();
+  QString str = "";  // mui->editSetText->text().trimmed();
   if (str == "") return;
 
   QString strurl;
@@ -1145,22 +969,6 @@ void MainWindow::on_btnSearch_clicked() {
 void MainWindow::on_btnShowCboxList_clicked() { mui->cboxWebDAV->showPopup(); }
 
 void MainWindow::onAndroidBackHandle() {
-  // ====== 焦点重置，覆盖所有 return 路径 ======
-  // ====== 自动获取 mw_one 下所有 QQuickWidget ======
-  struct FocusGuard {
-    QList<QQuickWidget*> widgets;
-    ~FocusGuard() {
-      for (auto* w : std::as_const(widgets)) {
-        if (w && w->isVisible()) {
-          w->clearFocus();
-          w->setFocus(Qt::OtherFocusReason);
-        }
-      }
-    }
-  } focusGuard{mw_one->findChildren<QQuickWidget*>()};
-
-  ///////////////////////////////////////////////
-
   if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
     closeTextToolBar();
     return;
@@ -1268,11 +1076,6 @@ void MainWindow::onAndroidBackHandle() {
     }
   }
 
-  if (mui->frameAIAPIList->isVisible()) {
-    on_btnBackAIAPIList_clicked();
-    return;
-  }
-
   if (mw_one->m_Preferences->isVisible()) {
     mw_one->m_Preferences->ui->btnBack->click();
     return;
@@ -1303,69 +1106,8 @@ void MainWindow::onAndroidBackHandle() {
     }
   }
 
-  if (mui->qwViewBookNote->isVisible()) {
-    QTimer::singleShot(100, mw_one, []() { m_Reader->closeViewBookNote(); });
-
-    return;
-  }
-
-  if (mui->f_ReaderNote->isVisible()) {
-    mw_one->on_btnCancelSel_clicked();
-    return;
-  }
-
-  if (mui->f_ReaderSet->isVisible()) {
-    mw_one->on_btnBackReaderSet_clicked();
-    return;
-  }
-
-  if (mui->qwBookCata->isVisible()) {
-    mw_one->on_btnBookCata_clicked();
-    return;
-  }
-
-  if (mui->qwBookmark->isVisible()) {
-    mw_one->on_btnShowBookmark_clicked();
-    return;
-  }
-
-  if (!mui->frameReader->isHidden()) {
-    on_btnBackReader_clicked();
-    return;
-  }
-
-  if (!mui->frameImgView->isHidden()) {
-    on_btnBackImg_clicked();
-    return;
-  }
-
   if (!mui->frameOne->isHidden()) {
     on_btnBack_One_clicked();
-    return;
-  }
-
-  if (!mui->frameNoteRecycle->isHidden()) {
-    on_btnBackNoteRecycle_clicked();
-    return;
-  }
-
-  if (!mui->frameNotesSearchResult->isHidden()) {
-    on_btnBack_NotesSearchResult_clicked();
-    return;
-  }
-
-  if (mui->frameFavorites->isVisible()) {
-    on_btnBackFavorites_clicked();
-    return;
-  }
-
-  if (!mui->frameDiff->isHidden()) {
-    on_btnBackNoteDiff_clicked();
-    return;
-  }
-
-  if (!mui->frameNotesGraph->isHidden()) {
-    on_btnBackNotesGraph_clicked();
     return;
   }
 
@@ -1376,11 +1118,6 @@ void MainWindow::onAndroidBackHandle() {
 
   if (mw_one->m_Todo->isTodoAlarmShow) {
     QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
-    return;
-  }
-
-  if (!mui->frameTabRecycle->isHidden()) {
-    on_btnBackTabRecycle_clicked();
     return;
   }
 
@@ -1407,37 +1144,8 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mui->frameViewCate->isHidden()) {
-    QTimer::singleShot(100, mw_one, []() {
-      mui->frameViewCate->hide();
-      mui->frameReport->show();
-    });
-
-    return;
-  }
-
-  if (!mui->frameReport->isHidden()) {
-    on_btnBack_Report_clicked();
-    return;
-  }
-
-  if (!mui->frameSearch->isHidden()) {
-    on_btnBackSearch_clicked();
-    return;
-  }
-
-  if (!mui->frameBakList->isHidden()) {
-    on_btnBackBakList_clicked();
-    return;
-  }
-
   if (!mui->frameCategory->isHidden()) {
     on_btnCancelType_clicked();
-    return;
-  }
-
-  if (!mui->frameSetTab->isHidden()) {
-    on_btnBackSetTab_clicked();
     return;
   }
 
@@ -1496,7 +1204,7 @@ void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
   }
 }
 
-void MainWindow::on_btnBackFavorites_clicked() { mui->frameFavorites->hide(); }
+void MainWindow::on_btnBackFavorites_clicked() {}
 
 void MainWindow::on_btnOpenFavoritesNote_clicked() {
   if (!QFile::exists(currentMDFile)) return;
@@ -1512,13 +1220,9 @@ void MainWindow::on_btnOpenFavoritesView_clicked() {
   m_Notes->previewNote();
 }
 
-void MainWindow::on_btnClearTitleKey_clicked() {
-  mui->editTitleKey->clear();
-  mui->editTitleKey->setFocus();
-}
+void MainWindow::on_btnClearTitleKey_clicked() {}
 
 void MainWindow::on_btnBackAIAPIList_clicked() {
-  mui->frameAIAPIList->hide();
   mui->frameMain->show();
   mw_one->m_Preferences->openPreferences();
 }
@@ -1526,7 +1230,6 @@ void MainWindow::on_btnBackAIAPIList_clicked() {
 void MainWindow::on_btnAIAPIListOk_clicked(int index) {
   if (index < 0) return;
 
-  mui->frameAIAPIList->hide();
   mui->frameMain->show();
   mw_one->m_Preferences->openPreferences();
   mw_one->m_Preferences->ui->cboxEndpoint->setCurrentIndex(index);

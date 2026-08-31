@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget* parent)
 #endif
   }
 
-  qRegisterMetaType<QVector<int>>("QVector<int>");
+  // qRegisterMetaType<QVector<int>>("QVector<int>");
   loading = true;
 
   init_Instance();
@@ -27,8 +27,6 @@ MainWindow::MainWindow(QWidget* parent)
   init_Thread_Timer();
 
   init_UIWidget();
-
-  initMainQW();
 
   init_TotalData();
 
@@ -520,62 +518,8 @@ void MainWindow::get_Today(QTreeWidget* tw) {
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
-  if (mui->qwBookCata->isVisible()) {
-    on_btnBookCata_clicked();
-    event->ignore();
-    return;
-  }
-
-  if (mui->frameReader->isVisible()) {
-    on_btnBackReader_clicked();
-    event->ignore();
-    return;
-  }
-
-  /*if (m_Reader->isBookListWinVisible()) {
-    on_btnBackBookList_clicked();
-    event->ignore();
-    return;
-  }*/
-
-  if (!mui->frameImgView->isHidden()) {
-    on_btnBackImg_clicked();
-    event->ignore();
-    return;
-  }
-
-  if (!mui->frameNoteRecycle->isHidden()) {
-    on_btnBackNoteRecycle_clicked();
-    event->ignore();
-    return;
-  }
-
-  if (!mui->frameNotesSearchResult->isHidden()) {
-    on_btnBack_NotesSearchResult_clicked();
-    event->ignore();
-    return;
-  }
-
-  if (!mui->frameDiff->isHidden()) {
-    on_btnBackNoteDiff_clicked();
-    event->ignore();
-    return;
-  }
-
-  if (!mui->frameNotesGraph->isHidden()) {
-    on_btnBackNotesGraph_clicked();
-    event->ignore();
-    return;
-  }
-
   if (m_Todo->isTodoAlarmShow) {
     m_Todo->closeTodoAlarm();
-    event->ignore();
-    return;
-  }
-
-  if (!mui->frameBakList->isHidden()) {
-    on_btnBackBakList_clicked();
     event->ignore();
     return;
   }
@@ -874,8 +818,6 @@ void MainWindow::clickMainTab() {
 
   mui->lblStats->show();
 
-  mui->qwMainTab->hide();
-
   if (isSelectTab) {
     on_btnAdd_clicked();
     m_EditRecord->setCurrentValue();
@@ -887,7 +829,6 @@ void MainWindow::clickMainTab(int index) {
 
   QString eventName = mui->tabWidget->tabBar()->tabText(index);
 
-  mui->qwMainTab->hide();
   mui->frameMain->hide();
 
   listMyEventTitle.clear();
@@ -1105,34 +1046,9 @@ void MainWindow::changeEvent(QEvent* event) {
   }
 }
 
-void MainWindow::selTab() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwSelTab);
-  tabData->setCurrentIndex(index);
-  on_btnBackSetTab_clicked();
-  m_Method->clearAllBakList(mui->qwSelTab);
+void MainWindow::selTab() {}
 
-  if (mui->btnTabMoveDown->isHidden()) {
-    mui->btnTabMoveDown->show();
-    mui->btnTabMoveUp->show();
-    on_btnAdd_clicked();
-    m_EditRecord->setCurrentValue();
-  }
-}
-
-void MainWindow::getMainTabs() {
-  m_Method->clearAllBakList(mui->qwSelTab);
-  int tab_count = tabData->tabBar()->count();
-  for (int i = 0; i < tab_count; i++) {
-    QString text0 = tabData->tabText(i);
-    m_Method->addItemToQW(mui->qwSelTab, text0, "", "", "", 0);
-  }
-
-  int index = mui->tabWidget->currentIndex();
-  m_Method->setCurrentIndexFromQW(mui->qwSelTab, index);
-
-  mui->lblSelTabInfo->setText(tr("Total") + " : " + QString::number(tab_count) +
-                              " ( " + QString::number(index + 1) + " ) ");
-}
+void MainWindow::getMainTabs() {}
 
 void MainWindow::on_openKnotBakDir() {
 #ifdef Q_OS_ANDROID
@@ -1163,22 +1079,9 @@ QString MainWindow::getYMD(QString date) {
 
 void MainWindow::on_hSlider_sliderMoved(int position) {
   if (isText) {
-    mui->btnPages->setText(QString::number(position) + "\n" +
-                           QString::number(totalPages));
-    m_Reader->updateReaderProperty(position, totalPages);
-    mui->progReader->setMinimum(1);
-    mui->progReader->setMaximum(totalPages);
-    mui->progReader->setValue(position);
   }
 
   if (isEpub) {
-    mui->btnPages->setText(QString::number(position) + "\n" +
-                           QString::number(htmlFiles.count()));
-    m_Reader->updateReaderProperty(position, htmlFiles.count());
-    mui->progReader->setMinimum(1);
-    mui->progReader->setMaximum(htmlFiles.count());
-    if (position == 0) position = 1;
-    mui->progReader->setValue(position);
   }
 
   m_ReaderSet->updateProgress();
@@ -1194,15 +1097,7 @@ void MainWindow::refreshMainUI() {
   qApp->processEvents();
 }
 
-QString MainWindow::getSelectedText() {
-  QString str;
-  QVariant returnedValue;
-  QQuickItem* root = mui->qwReader->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "getSelectedText",
-                            Q_RETURN_ARG(QVariant, returnedValue));
-  str = returnedValue.toString();
-  return str.trimmed();
-}
+QString MainWindow::getSelectedText() { return ""; }
 
 void MainWindow::on_timerMousePress() {
   if (!isMouseMove && isMousePress) on_btnSelText();
@@ -1212,77 +1107,24 @@ void MainWindow::on_editTodo_textChanged() {
   m_Todo->on_editTodo_textChanged();
 }
 
-void MainWindow::setItemHeight(int h) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setItemHeight",
-                            Q_ARG(QVariant, h));
-}
+void MainWindow::setItemHeight(int h) {}
 
 void MainWindow::addItem(QString text0, QString text1, QString text2,
-                         QString text3, int itemH) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, text0),
-                            Q_ARG(QVariant, text1), Q_ARG(QVariant, text2),
-                            Q_ARG(QVariant, text3), Q_ARG(QVariant, itemH));
-}
+                         QString text3, int itemH) {}
 
-QString MainWindow::getTop(int index) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QVariant itemTime;
-  QMetaObject::invokeMethod((QObject*)root, "getTop",
-                            Q_RETURN_ARG(QVariant, itemTime),
-                            Q_ARG(QVariant, index));
-  return itemTime.toString();
-}
+QString MainWindow::getTop(int index) { return ""; }
 
-QString MainWindow::getText0(int index) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText0",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
+QString MainWindow::getText0(int index) { return ""; }
 
-QString MainWindow::getText1(int index) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText1",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
+QString MainWindow::getText1(int index) { return ""; }
 
-QString MainWindow::getText2(int index) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText2",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
+QString MainWindow::getText2(int index) { return ""; }
 
-int MainWindow::getItemType(int index) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QVariant itemType;
-  QMetaObject::invokeMethod((QObject*)root, "getType",
-                            Q_RETURN_ARG(QVariant, itemType),
-                            Q_ARG(QVariant, index));
-  return itemType.toInt();
-}
+int MainWindow::getItemType(int index) { return 0; }
 
-void MainWindow::delItem(int index) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
-}
+void MainWindow::delItem(int index) {}
 
-int MainWindow::getCount() {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QVariant itemCount;
-  QMetaObject::invokeMethod((QObject*)root, "getItemCount",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toInt();
-}
+int MainWindow::getCount() { return 0; }
 
 void MainWindow::clearAll() {
   int count = getCount();
@@ -1291,36 +1133,15 @@ void MainWindow::clearAll() {
   }
 }
 
-void MainWindow::setCurrentIndex(int index) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setCurrentItem",
-                            Q_ARG(QVariant, index));
-}
+void MainWindow::setCurrentIndex(int index) {}
 
-void MainWindow::gotoEnd() {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "gotoEnd");
-}
+void MainWindow::gotoEnd() {}
 
-void MainWindow::gotoIndex(int index) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "gotoIndex",
-                            Q_ARG(QVariant, index));
-}
+void MainWindow::gotoIndex(int index) {}
 
-int MainWindow::getCurrentIndex() {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QVariant itemIndex;
-  QMetaObject::invokeMethod((QObject*)root, "getCurrentIndex",
-                            Q_RETURN_ARG(QVariant, itemIndex));
-  return itemIndex.toInt();
-}
+int MainWindow::getCurrentIndex() { return 0; }
 
-void MainWindow::setScrollBarPos(double pos) {
-  QQuickItem* root = mui->qwMainTab->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setScrollBarPos",
-                            Q_ARG(QVariant, pos));
-}
+void MainWindow::setScrollBarPos(double pos) {}
 
 void MainWindow::reeditData() {
   if (setTWCurrentItem()) {
@@ -1420,7 +1241,6 @@ void MainWindow::on_CloseProgressBar() {
   mw_one->closeProgress();
 
   mui->btnReader->setEnabled(true);
-  mui->f_ReaderFun->setEnabled(true);
 }
 
 void MainWindow::on_StartRecordAudio() {
@@ -1587,11 +1407,7 @@ QVariantList MainWindow::buildRecentList() {
   return result;
 }
 
-void MainWindow::setDisplayResult(const QVariantList& list) {
-  QObject* rootObj = mui->qwFavorites->rootObject();
-  if (!rootObj) return;
-  rootObj->setProperty("displayList", list);
-}
+void MainWindow::setDisplayResult(const QVariantList& list) {}
 
 void MainWindow::onQmlOpenNote(const QString& noteUid) {
   // noteUid 就是完整绝对路径，和现有逻辑完全兼容

@@ -2,8 +2,6 @@
 #include "src/MainWindow.h"
 
 void Reader::addBookNote(const QString& preFillText) {
-  if (mui->editSetText->text().trimmed() == "") return;
-
   if (dlgAddBookNote != nullptr) {
     dlgAddBookNote->close();
     dlgAddBookNote->deleteLater();
@@ -126,7 +124,7 @@ void Reader::addBookNote(const QString& preFillText) {
 
     qDebug() << strColor;
     saveReadNote(cPage, startNote, endNote, strColor, noteText,
-                 mui->editSetText->text().trimmed());
+                 "mui->editSetText->text()");
     readReadNote(cPage);
 
     qDebug() << "Note added:" << noteText;
@@ -262,9 +260,9 @@ void Reader::editBookNote(int index, int page, const QString& content) {
 
     updateReadNote(mpage, index, noteText, strColor);
 
-    if (mui->qwViewBookNote->isVisible()) {
-      modifyText2(currentNoteListIndex, noteText);
-    }
+    // if (mui->qwViewBookNote->isVisible()) {
+    //   modifyText2(currentNoteListIndex, noteText);
+    // }
 
     qDebug() << "Note added:" << noteText;
   } else {
@@ -275,21 +273,10 @@ void Reader::editBookNote(int index, int page, const QString& content) {
 void Reader::viewBookNote() {
   initBookNoteValue(-1, -1);
 
-  mui->qwReader->hide();
-  mui->qwViewCate->hide();
-  mui->qwBookmark->hide();
-  mui->qwViewBookNote->show();
   appendNoteDataToQmlList();
-
-  mui->btnAutoStop->click();
-  mui->btnBackReaderSet->click();
 }
 
-void Reader::closeViewBookNote() {
-  if (mui->qwViewBookNote->isHidden()) return;
-  mui->qwViewBookNote->hide();
-  mui->qwReader->show();
-}
+void Reader::closeViewBookNote() {}
 
 void Reader::appendNoteDataToQmlList() {
   // 清空旧数据
@@ -584,18 +571,7 @@ void Reader::updateReadNote(int page, int index, const QString& content,
   }
 }
 
-void Reader::initBookNoteValue(int cindex, int cpage) {
-  QQuickItem* root = mui->qwViewBookNote->rootObject();
-  if (!root) {
-    qWarning("Error: QML root object not found!");
-    return;
-  }
-
-  // 调用 QML 函数 initValue(cindex, cpage)
-  QMetaObject::invokeMethod(root, "initValue",
-                            Qt::DirectConnection,  // 连接方式：同步调用
-                            Q_ARG(QVariant, cindex), Q_ARG(QVariant, cpage));
-}
+void Reader::initBookNoteValue(int cindex, int cpage) {}
 
 void Reader::setShowNoteValue(bool value) { isShowNote = value; }
 

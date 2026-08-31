@@ -15,7 +15,6 @@
 #include <QNetworkRequest>
 #include <QObject>
 #include <QQueue>
-#include <QQuickWidget>
 #include <functional>
 
 namespace Ui {
@@ -38,7 +37,7 @@ class CloudBackup : public QDialog {
   bool isGetRemoteFileListEnd = false;
   QStringList webdavFileList;
   QList<QDateTime> webdavDateTimeList;
-  QQuickWidget* quickWidget;
+
   void init();
 
   QString WEBDAV_URL = "";

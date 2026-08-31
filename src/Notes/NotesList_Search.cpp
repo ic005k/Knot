@@ -164,7 +164,7 @@ void NotesList::onSearchFinished() {
 
   if (exactResults.isEmpty()) {
     m_searchModel.setResults({});
-    mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
+    // mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
 
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("No match was found."), 1);
@@ -189,13 +189,8 @@ void NotesList::onSearchFinished() {
     m_currentExactMatchIndex = 0;
 
     // 更新UI状态
-    mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
-                                      QString::number(adaptedResults.size()));
-
-    mui->editNotesSearch->hide();
-    mui->btnClearSearchResults->hide();
-
-    mui->frameNotesSearchResult->show();
+    // mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
+    //                                  QString::number(adaptedResults.size()));
   }
 
   watcher->deleteLater();
@@ -256,26 +251,15 @@ void NotesList::showFindNotes() {
     recycleNotesList.append(file);
   }
   qDebug() << "recycle notes = " << recycleNotesList;
-
-  mui->frameNotesSearchResult->show();
-  mui->editNotesSearch->setFocus();
-  mui->editNotesSearch->show();
-  mui->btnClearSearchResults->show();
 }
 
-QString NotesList::getSearchResultQmlFile() {
-  QQuickItem* root = mui->qwNotesSearchResult->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getQmlCurrentMDFile",
-                            Q_RETURN_ARG(QVariant, item));
-  return item.toString();
-}
+QString NotesList::getSearchResultQmlFile() { return ""; }
 
 void NotesList::startVectorSerach(const QString& text) {
   QTimer::singleShot(300, this, [this, text]() {
     // 空文本时清空结果
     if (text.trimmed().isEmpty()) {
-      mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
+      // mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
       return;
     }
 
@@ -284,7 +268,7 @@ void NotesList::startVectorSerach(const QString& text) {
     if (isLocalAIModel && m_vectorSearchService && g_embEngine &&
         g_embEngine->isValid()) {
       // ✅ 向量搜索：异步执行，避免阻塞UI
-      mui->lblNoteSearchResult->setText(tr("Searching (AI)..."));
+      // mui->lblNoteSearchResult->setText(tr("Searching (AI)..."));
       isVectorSearchDone = false;
 
       ////////////////////////////////////////////////////////////////////////////////
@@ -411,8 +395,8 @@ void NotesList::startVectorSerach(const QString& text) {
               if (isEditBoxSearchTextChanged) {
                 isEditBoxSearchTextChanged = false;
                 m_searchModel.setResults(adaptedResults);
-                mui->lblNoteSearchResult->setText(
-                    tr("AI Search Results: %1").arg(adaptedResults.size()));
+                // mui->lblNoteSearchResult->setText(
+                //     tr("AI Search Results: %1").arg(adaptedResults.size()));
               }
 
               isVectorSearchDone = true;

@@ -246,15 +246,11 @@ void Steps::setAddressResolverConnect() {
       isOne = true;
 
       isShowRoute = true;
-      mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
-                                                        isShowRoute);
 
       // test
       getAddress(25.0217, 98.4464);
     } else {
       isShowRoute = false;
-      mui->qwGpsList->rootContext()->setContextProperty("isShowRoute",
-                                                        isShowRoute);
     }
   }
 }
@@ -377,9 +373,6 @@ void Steps::loadStepsToTable() {
   }
 
   m_stepChart->setStepData(m_stepData);
-
-  m_Method->setCurrentIndexFromQW(mui->qwSteps, getCount() - 1);
-  m_Method->setScrollBarPos(mui->qwSteps, 1.0);
 }
 
 void Steps::openStepsUI() {
@@ -438,8 +431,6 @@ void Steps::openStepsUI() {
                      strTotalDistance;
     mui->lblGpsInfo->setText(strGpsInfoShow);
   }
-
-  mui->qwGpsList->rootContext()->setContextProperty("FontSize", fontSize);
 
   if (getGpsListCount() == 0 && !isGpsRun) {
     int nYear = QDate::currentDate().year();
@@ -553,10 +544,6 @@ void Steps::setTableSteps(qlonglong steps) {
 
   m_StepsOptions->ui->editStepLength->setText(stepLength);
   m_StepsOptions->ui->editStepsThreshold->setText(stepsThreshold);
-
-  // 设置上下文属性
-  mui->qwSteps->rootContext()->setContextProperty("nStepsThreshold",
-                                                  stepsThreshold.toInt());
 
   double km = m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
               steps / 100 / 1000;
@@ -682,62 +669,24 @@ void Steps::appendSteps(QString date, int steps, QString km) {
       100 / 1000;
   km = QString("%1").arg(d_km, 0, 'f', 2) + "  " + tr("KM");
 
-  QQuickItem* root = mui->qwSteps->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, date),
-                            Q_ARG(QVariant, strSteps), Q_ARG(QVariant, km),
-                            Q_ARG(QVariant, strCalorie), Q_ARG(QVariant, 0));
+  // QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, date),
+  //                           Q_ARG(QVariant, strSteps), Q_ARG(QVariant, km),
+  //                           Q_ARG(QVariant, strCalorie), Q_ARG(QVariant, 0));
 }
 
-int Steps::getCount() {
-  QQuickItem* root = mui->qwSteps->rootObject();
-  QVariant itemCount;
-  QMetaObject::invokeMethod((QObject*)root, "getItemCount",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toInt();
-}
+int Steps::getCount() { return 0; }
 
-QString Steps::getDate(int row) {
-  QQuickItem* root = mui->qwSteps->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText0",
-                            Q_RETURN_ARG(QVariant, item), Q_ARG(QVariant, row));
-  return item.toString();
-}
+QString Steps::getDate(int row) { return ""; }
 
-int Steps::getSteps(int row) {
-  QQuickItem* root = mui->qwSteps->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText1",
-                            Q_RETURN_ARG(QVariant, item), Q_ARG(QVariant, row));
-  return item.toInt();
-}
+int Steps::getSteps(int row) { return 0; }
 
-QString Steps::getKM(int row) {
-  QQuickItem* root = mui->qwSteps->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText2",
-                            Q_RETURN_ARG(QVariant, item), Q_ARG(QVariant, row));
-  return item.toString();
-}
+QString Steps::getKM(int row) { return ""; }
 
-void Steps::setTableData(int index, QString date, int steps, QString km) {
-  QQuickItem* root = mui->qwSteps->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "modifyItem",
-                            Q_ARG(QVariant, index), Q_ARG(QVariant, date),
-                            Q_ARG(QVariant, QString::number(steps)),
-                            Q_ARG(QVariant, km));
-}
+void Steps::setTableData(int index, QString date, int steps, QString km) {}
 
-void Steps::clearAll() {
-  int count = getCount();
-  for (int i = 0; i < count; i++) m_Method->delItemFromQW(mui->qwSteps, 0);
-}
+void Steps::clearAll() {}
 
-void Steps::setScrollBarPos(double pos) {
-  QQuickItem* root = mui->qwSteps->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "setScrollBarPos",
-                            Q_ARG(QVariant, pos));
-}
+void Steps::setScrollBarPos(double pos) {}
 
 void Steps::startRecordMotion() {
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
@@ -1393,10 +1342,10 @@ void Steps::refreshMotionData() {
     }
 
     QString text0, text1, startTime1, startTime2;
-    int countList = m_Method->getCountFromQW(mui->qwGpsList);
+    int countList = 0;  // m_Method->getCountFromQW(mui->qwGpsList);
     if (countList > 0) {
-      text0 = m_Method->getText0(mui->qwGpsList, 0);
-      text1 = m_Method->getText1(mui->qwGpsList, 0);
+      // text0 = m_Method->getText0(mui->qwGpsList, 0);
+      // text1 = m_Method->getText1(mui->qwGpsList, 0);
     }
     startTime1 = text1.split("-").at(0);
     startTime2 = t1.split("-").at(0);
@@ -1478,22 +1427,8 @@ void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                           QString t3, QString t4, QString t5, QString t6,
                           QString t7, QVariantList speedData,
                           QVariantList altitudeData) {
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  if (!root) {
-    qWarning() << "rootObject is null!";
-    return;
-  }
-
-  // ==========
-  // 关键修改1：获取QML引擎，将QVariantList转为QJSValue（6.10.2兼容）====
-  QQmlEngine* engine = qmlEngine(root);  // 从QQuickItem获取所属的QML引擎
-  if (!engine) {
-    qCritical() << "无法获取QML引擎！";
-    return;
-  }
-
   // 速度数据转QJSValue数组（QML可识别）
-  QJSValue speedJsArray = engine->newArray();
+  /*QJSValue speedJsArray = engine->newArray();
   for (int i = 0; i < speedData.size(); ++i) {
     // 显式转double，避免类型兼容问题
     speedJsArray.setProperty(i, engine->toScriptValue(speedData[i].toDouble()));
@@ -1539,31 +1474,15 @@ void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
       qCritical() << "   2. 参数个数是否匹配（需要11个参数）";
       qCritical() << "   3. rootObject是否正确指向包含insertItem的QML对象";
     }
-  }
+  }*/
 }
 
 void Steps::updateGpsList(int curIndex, QString t0, QString t1, QString t2,
-                          QString t3, QString t4, QString t5, QString t6) {
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  QMetaObject::invokeMethod(
-      (QObject*)root, "updateItem",  // 调用QML的updateItem
-      Q_ARG(QVariant, curIndex), Q_ARG(QVariant, t0), Q_ARG(QVariant, t1),
-      Q_ARG(QVariant, t2), Q_ARG(QVariant, t3), Q_ARG(QVariant, t4),
-      Q_ARG(QVariant, t5), Q_ARG(QVariant, t6), Q_ARG(QVariant, 0));
-}
+                          QString t3, QString t4, QString t5, QString t6) {}
 
-int Steps::getGpsListCount() {
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  QVariant itemCount;
-  QMetaObject::invokeMethod((QObject*)root, "getItemCount",
-                            Q_RETURN_ARG(QVariant, itemCount));
-  return itemCount.toInt();
-}
+int Steps::getGpsListCount() { return 0; }
 
-void Steps::delGpsListItem(int index) {
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "delItem", Q_ARG(QVariant, index));
-}
+void Steps::delGpsListItem(int index) {}
 
 void Steps::clearAllGpsList() {
   int count = getGpsListCount();
@@ -1613,9 +1532,6 @@ void Steps::loadGpsList(int nYear, int nMonth) {
   }
 
   if (count > 0) {
-    QMetaObject::invokeMethod(
-        this, [this]() { m_Method->gotoBegin(mui->qwGpsList); },
-        Qt::QueuedConnection);
   }
 }
 
@@ -1661,23 +1577,9 @@ void Steps::getGpsListDataFromYearMonth() {
   allGpsTotal();
 }
 
-QString Steps::getGpsListText0(int index) {
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText0",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
+QString Steps::getGpsListText0(int index) { return ""; }
 
-QString Steps::getGpsListText2(int index) {
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "getText2",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, index));
-  return item.toString();
-}
+QString Steps::getGpsListText2(int index) { return ""; }
 
 void Steps::allGpsTotal() {
   QString title = mui->btnSelGpsDate->text();
@@ -1804,38 +1706,21 @@ void Steps::appendTrack(double lat, double lon) {
   appendTrackPointAndroid(lat, lon);
 
   return;
-
-  QQuickItem* root = mui->qwMap->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "appendTrack", Q_ARG(QVariant, lat),
-                            Q_ARG(QVariant, lon));
 }
 
 void Steps::updateInfoText(QString strDistance, QString strSpeed) {
   setInfoLabelToAndroid(strDistance + " | " + strSpeed + "\n" + strGpsTerrain);
 
   return;
-
-  QQuickItem* root = mui->qwMap->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "updateInfoText",
-                            Q_ARG(QVariant, strDistance),
-                            Q_ARG(QVariant, strSpeed));
 }
 
 void Steps::updateTrackData(double lat, double lon) {
   addTrackDataToAndroid(lat, lon);
 
   return;
-
-  QQuickItem* root = mui->qwMap->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "updateTrackData",
-                            Q_ARG(QVariant, lat), Q_ARG(QVariant, lon));
 }
 
-void Steps::updateMapTrackUi(double lat, double lon) {
-  QQuickItem* root = mui->qwMap->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "updateMapTrackUi",
-                            Q_ARG(QVariant, lat), Q_ARG(QVariant, lon));
-}
+void Steps::updateMapTrackUi(double lat, double lon) {}
 
 void Steps::clearTrack() {
   clearTrackAndroid();
@@ -1843,9 +1728,6 @@ void Steps::clearTrack() {
   if (!isGpsRun) clearTrackDataToAndroid();
 
   return;
-
-  QQuickItem* root = mui->qwMap->rootObject();
-  QMetaObject::invokeMethod((QObject*)root, "clearTrack");
 }
 
 void Steps::writeGpsPos(double lat, double lon, int i, int count) {
@@ -1869,11 +1751,8 @@ void Steps::getGpsTrack() {
     openMapWindow();
   } else {
     mw_one->showProgress();
-    QQuickItem* root = mui->qwGpsList->rootObject();
-    QVariant item;
-    QMetaObject::invokeMethod((QObject*)root, "getGpsList",
-                              Q_RETURN_ARG(QVariant, item));
-    strGpsList = item.toString();
+
+    // strGpsList = item.toString();
     mw_one->myUpdateGpsMapThread->start();
   }
 }
@@ -2782,14 +2661,7 @@ void Steps::getRouteList(const QString& strGpsTime) {
   qDebug() << "routeFile=" << routeFile;
   if (!QFile::exists(routeFile)) return;
 
-  // 获取弹出窗口对象（routeDialog）
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  if (!root) {
-    qWarning() << "[C++] 未找到QML根对象";
-    return;
-  }
-
-  QObject* routeDialog = root->findChild<QObject*>("routeDialog");
+  QObject* routeDialog = NULL;  // root->findChild<QObject*>("routeDialog");
   if (!routeDialog) {
     qWarning() << "[C++] 未找到 routeDialog 对象";
     return;
@@ -2824,50 +2696,9 @@ void Steps::getRouteList(const QString& strGpsTime) {
   QMetaObject::invokeMethod(routeDialog, "setVisible", Q_ARG(QVariant, true));
 }
 
-void Steps::closeRouteDialog() {
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  if (!root) {
-    qWarning() << "[C++] 未找到QML根对象";
-    return;
-  }
+void Steps::closeRouteDialog() {}
 
-  QObject* routeDialog = root->findChild<QObject*>("routeDialog");
-  if (!routeDialog) {
-    qWarning() << "[C++] 未找到 routeDialog 对象";
-    return;
-  }
-  QMetaObject::invokeMethod(routeDialog, "setVisible", Q_ARG(QVariant, false));
-}
-
-bool Steps::isRouteShow() {
-  QQuickItem* root = mui->qwGpsList->rootObject();
-  if (!root) {
-    qWarning() << "[C++] 未找到QML根对象";
-    return false;
-  }
-
-  QObject* routeDialog = root->findChild<QObject*>("routeDialog");
-  if (!routeDialog) {
-    qWarning() << "[C++] 未找到 routeDialog 对象";
-    return false;
-  }
-
-  // 调用isVisible()并获取返回值
-  QVariant result;
-  bool invokeSuccess = QMetaObject::invokeMethod(
-      routeDialog, "isVisible",
-      Qt::DirectConnection,           // 关键：强制同步调用，允许获取返回值
-      Q_RETURN_ARG(QVariant, result)  // 指定返回值的接收变量
-  );
-
-  if (!invokeSuccess) {
-    qWarning() << "[C++] 调用isVisible()失败";
-    return false;
-  }
-
-  // 将QVariant转换为bool并返回
-  return result.toBool();
-}
+bool Steps::isRouteShow() { return false; }
 
 // 坐标转换：调用安卓端CoordinateConverterUtil工具类
 QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {

@@ -102,41 +102,6 @@ void DateSelector::on_btnOk_clicked() {
   ymdList.append(m);
   ymdList.append(d);
 
-  if (!mui->frameReport->isHidden()) {
-    if (dateFlag == 1 || dateFlag == 2) {
-      mui->btnYear->setText(y);
-
-      int value = m.toInt();
-      if (mw_one->m_Report->isSingleYear) {
-        value = 13;
-        mw_one->m_Report->isSingleYear = false;
-      }
-      if (value == 13)
-        mui->btnMonth->setText(tr("Year-Round"));
-      else {
-        mui->btnMonth->setText(m);
-      }
-    }
-
-    QString strYear, strMonth;
-    strYear = mui->btnYear->text();
-    strMonth = mui->btnMonth->text();
-    if (dateFlag == 1 || dateFlag == 2)
-      mw_one->m_Report->startReport1(strYear, strMonth);
-
-    if (dateFlag == 3) {
-      mui->btnStartDate->setText(y + "  " + m + "  " + d);
-    }
-
-    if (dateFlag == 4) {
-      mui->btnEndDate->setText(y + "  " + m + "  " + d);
-    }
-
-    if (dateFlag == 3 || dateFlag == 4) mw_one->m_Report->startReport2();
-
-    mw_one->m_Report->saveYMD();
-  }
-
   if (!mui->frameSteps->isHidden()) {
     m_Steps->getGpsListDataFromYearMonth();
   }
@@ -147,12 +112,12 @@ void DateSelector::on_btnOk_clicked() {
 void DateSelector::initStartEndDate(QString flag) {
   QString str;
   if (flag == "start") {
-    str = mui->btnStartDate->text();
+    // str = mui->btnStartDate->text();
     dateFlag = 3;
   }
 
   if (flag == "end") {
-    str = mui->btnEndDate->text();
+    // str = mui->btnEndDate->text();
     dateFlag = 4;
   }
 

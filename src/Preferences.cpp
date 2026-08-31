@@ -353,7 +353,6 @@ void Preferences::initOptions() {
     mui->btnDel->hide();
     mui->btnFind->hide();
 
-    mui->qwMainTab->hide();
     mui->btnSelTab->hide();
     mui->lblStats->hide();
 
@@ -374,14 +373,6 @@ void Preferences::initOptions() {
 
   QString readerFontFile =
       iniPreferences->value("/Options/ReaderFont").toString();
-  QString readerFont;
-  if (QFile::exists(readerFontFile))
-    readerFont = setFontDemoUI(readerFontFile, mui->btnFont, fontSize);
-  else
-    readerFont = defaultFontFamily;
-  mui->qwReader->rootContext()->setContextProperty("FontName", readerFont);
-  mui->qwReader->rootContext()->setContextProperty("FontWeight",
-                                                   readerFontWeight);
 }
 
 void Preferences::on_btnReStart_clicked() {
@@ -689,7 +680,6 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
 void Preferences::on_btnAISelect_clicked() {
   close();
   mui->frameMain->hide();
-  mui->frameAIAPIList->show();
 
   QVariantList result;
   for (int i = 0; i < ui->cboxEndpoint->count(); ++i) {
@@ -716,15 +706,6 @@ void Preferences::on_btnAISelect_clicked() {
 
     result.append(row);
   }
-
-  QObject* rootObj = mui->qwAIAPIList->rootObject();
-  if (!rootObj) return;
-  rootObj->setProperty("displayList", result);
-
-  rootObj->setProperty("selectedIndex", -1);
-  int index = ui->cboxEndpoint->currentIndex();
-  // 设置选中索引
-  rootObj->setProperty("selectedIndex", index);
 
   return;
 

@@ -109,11 +109,11 @@ void NoteGraphCache::save(const QString& filePath) const {
 // 注册 & 初始化
 // =================================================================================
 void registerNoteGraphTypes() {
-  qmlRegisterType<NoteGraphModel>("NoteGraph", 1, 0, "NoteGraphModel");
-  qmlRegisterType<NoteRelationParser>("NoteGraph", 1, 0, "NoteRelationParser");
-  qRegisterMetaType<QPointF>("QPointF");
-  qRegisterMetaType<QVector<NoteNode>>("QVector<NoteNode>");
-  qRegisterMetaType<QVector<NoteRelation>>("QVector<NoteRelation>");
+  // qmlRegisterType<NoteGraphModel>("NoteGraph", 1, 0, "NoteGraphModel");
+  // qmlRegisterType<NoteRelationParser>("NoteGraph", 1, 0,
+  // "NoteRelationParser"); qRegisterMetaType<QPointF>("QPointF");
+  // qRegisterMetaType<QVector<NoteNode>>("QVector<NoteNode>");
+  // qRegisterMetaType<QVector<NoteRelation>>("QVector<NoteRelation>");
 }
 
 static QObject* noteGraphControllerSingletonProvider(QQmlEngine*, QJSEngine*) {
@@ -515,10 +515,10 @@ void NoteRelationParser::onParsedDataReady(
 
   QFont font = mw_one->font();
   font.setPointSize(fontSize - 1);
-  mui->lblNoteGraphView->setFont(font);
-  mui->lblNoteGraphView->setText(
-      tr("Nodes") + ": " + QString::number(nodes.size()) + "  " +
-      tr("Relations") + ": " + QString::number(relations.size()));
+  // mui->lblNoteGraphView->setFont(font);
+  // mui->lblNoteGraphView->setText(
+  //     tr("Nodes") + ": " + QString::number(nodes.size()) + "  " +
+  //     tr("Relations") + ": " + QString::number(relations.size()));
 
   arrangeNodes(m_model);
   emit parsingCompleted();

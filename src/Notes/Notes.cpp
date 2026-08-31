@@ -48,10 +48,6 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
     ui->btnAILink->hide();
   ui->f_NoteLink->setMaximumWidth(360);
 
-  if (isAndroid) {
-    mui->btnBack_NotesSearchResult->hide();
-  }
-
   m_Method->set_ToolButtonStyle(this);
 
   ui->lblNoteImage->setFixedHeight(100);

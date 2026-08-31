@@ -431,25 +431,6 @@ void NotesList::on_actionModificationHistory() {
               return a["modifyTime"].toString() > b["modifyTime"].toString();
             });
 
-  // 获取 QML 根对象（即 NoteVersionList.qml 中的 Rectangle）
-  QQuickItem* rootItem = mui->qwNoteVersion->rootObject();
-  if (!rootItem) {
-    qWarning() << "获取 QML 根对象失败";
-    return;
-  }
-
-  mui->frameDiff->show();
-
-  // 获取 QML 中的 ListModel（id: noteVersionModel）
-  QObject* versionModel = rootItem->findChild<QObject*>("noteVersionModel");
-  if (!versionModel) {
-    qWarning() << "获取 noteVersionModel 失败";
-    return;
-  }
-
-  // 清空旧数据（调用 QML 中的 clearModel() 方法）
-  QMetaObject::invokeMethod(versionModel, "clearModel");
-
   noteDiffTime.clear();
   noteDiffHtml.clear();
   noteDiffPatch.clear();
@@ -464,11 +445,6 @@ void NotesList::on_actionModificationHistory() {
     noteDiffTime.append(time);
     noteDiffHtml.append(html);
     noteDiffPatch.append(patch);
-
-    QMetaObject::invokeMethod(
-        versionModel, "addRecord",
-        Q_ARG(QVariant, version)  // 传入修改时间（QVariant 适配 QML 类型）
-    );
   }
 
   setNoteDiffHtmlToQML("");
@@ -528,8 +504,6 @@ void NotesList::on_actionMoveUp_NoteBook_triggered() {
 void NotesList::on_actionRelationshipGraph() {
   QFileInfo fi(currentMDFile);
   if (!fi.exists()) return;
-
-  mui->frameNotesGraph->show();
 
   QTimer::singleShot(100, this, []() { mw_one->showProgress(); });
 

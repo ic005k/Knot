@@ -210,28 +210,6 @@ void ReceiveShare::closeAllChildWindows() {
     mw_one->m_AboutThis->ui->btnBack_About->click();
   }
 
-  if (mui->frameSetTab->isVisible()) mui->btnBackSetTab->click();
-
-  if (mui->frameNoteRecycle->isVisible()) {
-    mui->btnBackNoteRecycle->click();
-  }
-
-  if (mui->frameNotesSearchResult->isVisible()) {
-    mui->btnBack_NotesSearchResult->click();
-  }
-
-  if (mui->frameDiff->isVisible()) {
-    mui->btnBackNoteDiff->click();
-  }
-
-  if (mui->frameFavorites->isVisible()) {
-    mui->btnBackFavorites->click();
-  }
-
-  if (mui->frameNotesGraph->isVisible()) {
-    mui->btnBackNotesGraph->click();
-  }
-
   if (m_StepsOptions->isVisible()) {
     m_StepsOptions->ui->btnBack->click();
     mui->btnBackSteps->click();
@@ -239,29 +217,10 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (mui->frameSteps->isVisible()) mui->btnBackSteps->click();
 
-  if (mui->qwViewBookNote->isVisible()) {
-    QTimer::singleShot(100, mw_one, []() {
-      m_Reader->closeViewBookNote();
-      mui->btnBackReader->click();
-    });
-    return;
-  }
-
-  if (mui->frameReader->isVisible()) {
-    mui->btnBackReader->click();
-    mui->btnBackBookList->click();
-  }
-
-  if (m_Reader->isBookListWinVisible()) {
-    mui->btnBackBookList->click();
-  }
-
   if (mw_one->m_Preferences->isVisible())
     mw_one->m_Preferences->ui->btnBack->click();
 
   if (mui->frameOne->isVisible()) mui->btnBack_One->click();
-
-  if (mui->frameBakList->isVisible()) mui->btnBackBakList->click();
 
   if (mui->frameCategory->isVisible()) {
     mui->btnCancelType->click();
@@ -269,17 +228,6 @@ void ReceiveShare::closeAllChildWindows() {
   }
 
   if (mui->frameEditRecord->isVisible()) mui->btnBackEditRecord->click();
-
-  if (mui->frameTabRecycle->isVisible()) mui->btnBackTabRecycle->click();
-
-  if (mui->frameViewCate->isVisible()) {
-    mui->btnOkViewCate->click();
-    mui->btnBack_Report->click();
-  }
-
-  if (mui->frameReport->isVisible()) mui->btnBack_Report->click();
-
-  if (mui->frameSearch->isVisible()) mui->btnBackSearch->click();
 }
 
 void ReceiveShare::shareString(const QString& title, const QString& content) {

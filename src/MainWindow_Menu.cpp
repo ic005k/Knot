@@ -183,7 +183,7 @@ void MainWindow::on_actionDel_Tab_triggered() {
 
 void MainWindow::on_actionBakFileList() {
   // 【安全】界面切换必须在主线程执行
-  mui->frameBakList->show();
+
   mui->frameMain->hide();
 
   m_MainHelper->startBackgroundTaskUpdateBakFileList();
@@ -271,7 +271,7 @@ void MainWindow::on_actionRename_triggered() {
   if (ok && !text.isEmpty()) {
     mui->tabWidget->setTabText(index, text);
 
-    m_Method->modifyItemText0(mui->qwMainTab, index, text);
+    // m_Method->modifyItemText0(mui->qwMainTab, index, text);
 
     updateMainTab();
 

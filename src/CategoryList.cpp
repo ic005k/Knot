@@ -60,10 +60,10 @@ void CategoryList::on_listWidget_itemClicked(QListWidgetItem* item) {
 }
 
 void CategoryList::on_btnDel_clicked() {
-  int count = m_Method->getCountFromQW(mui->qwCategory);
+  int count = 0;  // m_Method->getCountFromQW(mui->qwCategory);
   if (count == 0) return;
 
-  int row = m_Method->getCurrentIndexFromQW(mui->qwCategory);
+  int row = 0;  // m_Method->getCurrentIndexFromQW(mui->qwCategory);
 
   if (row < 0) return;
 
@@ -78,7 +78,7 @@ void CategoryList::on_btnDel_clicked() {
 
     ui->listWidget->takeItem(row);
 
-    m_Method->delItemFromQW(mui->qwCategory, row);
+    // m_Method->delItemFromQW(mui->qwCategory, row);
   }
   mw_one->m_EditRecord->saveMyClassification();
   if (ui->listWidget->count() > 0)
@@ -86,12 +86,12 @@ void CategoryList::on_btnDel_clicked() {
   else
     ui->editRename->clear();
 
-  count = m_Method->getCountFromQW(mui->qwCategory);
+  // count = m_Method->getCountFromQW(mui->qwCategory);
   mui->lblTypeInfo->setText(tr("Total") + " : " + QString::number(count));
 }
 
 void CategoryList::on_btnOk_clicked() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwCategory);
+  int index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwCategory);
   ui->listWidget->setCurrentRow(index);
 
   int row = ui->listWidget->currentRow();
@@ -110,7 +110,7 @@ void CategoryList::on_listWidget_itemDoubleClicked(QListWidgetItem* item) {
 void CategoryList::on_Rename() {
   if (ui->listWidget->count() == 0) return;
 
-  int row = m_Method->getCurrentIndexFromQW(mui->qwCategory);
+  int row = 0;  // m_Method->getCurrentIndexFromQW(mui->qwCategory);
   ui->listWidget->setCurrentRow(row);
 
   oldName = ui->listWidget->currentItem()->text().trimmed();
@@ -124,7 +124,7 @@ void CategoryList::on_Rename() {
 
     ui->listWidget->insertItem(index, item);
 
-    m_Method->modifyItemText0(mui->qwCategory, row, text);
+    // m_Method->modifyItemText0(mui->qwCategory, row, text);
 
     QStringList list;
     for (int i = 0; i < ui->listWidget->count(); i++) {
@@ -166,7 +166,7 @@ void CategoryList::on_Rename() {
     mui->btnCancelType->click();
     mui->btnType->click();
     ui->listWidget->setCurrentRow(cindex);
-    m_Method->setCurrentIndexFromQW(mui->qwCategory, cindex);
+    // m_Method->setCurrentIndexFromQW(mui->qwCategory, cindex);
     setTypeRenameText();
   }
 }
@@ -321,7 +321,7 @@ void CategoryList::on_btnCancel_clicked() {
 }
 
 void CategoryList::setTypeRenameText() {
-  int index = m_Method->getCurrentIndexFromQW(mui->qwCategory);
-  QString str = m_Method->getText0(mui->qwCategory, index);
+  int index = 0;     // m_Method->getCurrentIndexFromQW(mui->qwCategory);
+  QString str = "";  // m_Method->getText0(mui->qwCategory, index);
   mui->editRenameType->setText(str);
 }

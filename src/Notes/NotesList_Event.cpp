@@ -39,9 +39,7 @@ void NotesList::on_btnRestore_clicked() {
     if (!ui->frame1->isHidden()) {
       on_btnBack_clicked();
     }
-    if (!mui->frameNoteRecycle->isHidden()) {
-      mw_one->on_btnBackNoteRecycle_clicked();
-    }
+
   } else
     return;
 
@@ -50,35 +48,6 @@ void NotesList::on_btnRestore_clicked() {
 
 void NotesList::on_btnBatchRestore_clicked() {
   // ***************** 第一步：完整复用QML选中索引获取逻辑 *****************
-  if (!mui || !mui->qwNoteRecycle) {
-    qWarning() << "QQuickWidget（qwNoteRecycle）无效，无法执行批量移动";
-    return;
-  }
-
-  QQuickWidget* quickWidget = mui->qwNoteRecycle;
-  QObject* qmlRootObj = quickWidget->rootObject();
-  if (!qmlRootObj) {
-    qWarning() << "获取QML根对象失败，请检查QML是否正确加载";
-    return;
-  }
-
-  // 调用QML接口getSelectedIndexes()，获取选中索引列表
-  QVariant selectedIndexesVar;
-  bool invokeSuccess =
-      QMetaObject::invokeMethod(qmlRootObj, "getSelectedIndexes",
-                                Q_RETURN_ARG(QVariant, selectedIndexesVar));
-
-  if (!invokeSuccess || !selectedIndexesVar.canConvert<QVariantList>()) {
-    qWarning() << "调用QML方法getSelectedIndexes失败";
-    return;
-  }
-
-  QVariantList selectedIndexes = selectedIndexesVar.toList();
-  if (selectedIndexes.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg("Knot", tr("Please select at least one item to restore."), 1);
-    return;
-  }
 
   // ***************** 第二步：Qt 6兼容版，设置twrb多选状态（最简洁）
   // 1. 清空twrb原有选中状态，避免残留干扰
@@ -92,7 +61,7 @@ void NotesList::on_btnBatchRestore_clicked() {
   }
 
   // 3. 遍历QML选中索引，一一映射设置twrb子项目的多选状态
-  foreach (QVariant indexVar, selectedIndexes) {
+  /*foreach (QVariant indexVar, selectedIndexes) {
     int qmlIndex = indexVar.toInt();
     if (qmlIndex >= 0 && qmlIndex < twrbTopItem->childCount()) {
       QTreeWidgetItem* targetTWRBItem = twrbTopItem->child(qmlIndex);
@@ -101,7 +70,7 @@ void NotesList::on_btnBatchRestore_clicked() {
         targetTWRBItem->setSelected(true);
       }
     }
-  }
+  }*/
 
   // ***************** 第三步：复用原有批量移动逻辑 *****************
   QList<QTreeWidgetItem*> selectedItems = twrb->selectedItems();
@@ -129,19 +98,10 @@ void NotesList::on_btnBatchRestore_clicked() {
   }
 
   if (allMoveSuccess) {
-    // 清空QML选中状态
-    QObject* qmlRootObj = quickWidget->rootObject();
-    if (qmlRootObj) {
-      QMetaObject::invokeMethod(qmlRootObj, "resetQMLToNewState",
-                                Qt::DirectConnection);
-    }
     resetQML_List();
     clickNoteList();
     if (!ui->frame1->isHidden()) {
       on_btnBack_clicked();
-    }
-    if (!mui->frameNoteRecycle->isHidden()) {
-      mw_one->on_btnBackNoteRecycle_clicked();
     }
   }
 
@@ -149,56 +109,7 @@ void NotesList::on_btnBatchRestore_clicked() {
 }
 
 void NotesList::on_btnBatchDel_Recycle_clicked() {
-  // 1. 通过QQuickWidget直接获取QML根对象
-  if (!mui || !mui->qwNoteRecycle) {
-    qWarning() << "QQuickWidget（qwNoteRecycle）无效，无法执行批量删除";
-    return;
-  }
-
-  QQuickWidget* quickWidget = mui->qwNoteRecycle;
-  QObject* qmlRootObj = quickWidget->rootObject();
-  if (!qmlRootObj) {
-    qWarning() << "获取QML根对象失败，请检查QML是否正确加载";
-    return;
-  }
-
-  // 2. 调用QML接口getSelectedIndexes()，获取选中索引列表
-  QVariant selectedIndexesVar;
-  bool invokeSuccess =
-      QMetaObject::invokeMethod(qmlRootObj, "getSelectedIndexes",
-                                Q_RETURN_ARG(QVariant, selectedIndexesVar));
-
-  if (!invokeSuccess || !selectedIndexesVar.canConvert<QVariantList>()) {
-    qWarning() << "调用QML方法getSelectedIndexes失败";
-    return;
-  }
-
-  QVariantList selectedIndexes = selectedIndexesVar.toList();
-  if (selectedIndexes.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg("Knot", tr("Please select at least one item to delete."), 1);
-    return;
-  }
-
-  // 3. 批量删除确认
-  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-  if (!m_ShowMsg->showMsg(
-          "Knot",
-          tr("Whether to delete the selected %1 items permanently?")
-              .arg(selectedIndexes.count()),
-          2)) {
-    return;
-  }
-
-  // 4. 解决QVariant无>运算符问题：转换为QList<int>并倒序排序
   QList<int> selectedIntIndexes;
-  // 核心：将遍历对象改为const QVariantList&，明确只读属性
-  const QVariantList& constSelectedIndexes = selectedIndexes;
-  for (const QVariant& indexVar : constSelectedIndexes) {
-    if (indexVar.canConvert<int>()) {
-      selectedIntIndexes.append(indexVar.toInt());
-    }
-  }
 
   // 对整数索引倒序排序（无编译错误，整数有默认比较运算符）
   std::sort(selectedIntIndexes.begin(), selectedIntIndexes.end(),
@@ -263,18 +174,6 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 
   // 6. 收尾流程
   saveNotesList();
-
-  // 7. 清空QML选中状态
-  QMetaObject::invokeMethod(qmlRootObj, "resetQMLToNewState",
-                            Qt::DirectConnection);
-  resetQML_Recycle();
-
-  // 8. 完成提示
-  auto msg = std::make_unique<ShowMessage>(mw_one);
-  msg->showMsg("Knot",
-               tr("Batch delete %1 items completed successfully.")
-                   .arg(selectedIntIndexes.count()),
-               1);
 }
 
 void NotesList::on_btnDel_Recycle_clicked() {

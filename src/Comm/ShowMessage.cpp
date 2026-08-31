@@ -19,22 +19,6 @@ ShowMessage::ShowMessage(QWidget* parent)
   setAttribute(Qt::WA_MacAlwaysShowToolWindow, true);
   setWindowModality(Qt::WindowModal);
 
-  if (ui->qwShowMsg->source().isEmpty()) {
-    ui->qwShowMsg->rootContext()->setContextProperty("isDark", isDark);
-    ui->qwShowMsg->rootContext()->setContextProperty("m_Method", m_Method);
-    ui->qwShowMsg->rootContext()->setContextProperty("mw_one", mw_one);
-    ui->qwShowMsg->rootContext()->setContextProperty("textContent", "");
-    ui->qwShowMsg->setSource(
-        QUrl(QStringLiteral("qrc:/src/qmlsrc/showmsg.qml")));
-  }
-
-  auto* quickWindow = ui->qwShowMsg->quickWindow();
-  QObject::connect(
-      quickWindow, &QQuickWindow::afterRendering, this,
-      []() { mw_one->safeCloseProgress(); },
-      Qt::SingleShotConnection  // 自动断开
-  );
-
   // 文本控件设置
   QFont font = this->font();
   font.setBold(true);
@@ -60,7 +44,6 @@ ShowMessage::ShowMessage(QWidget* parent)
   this->installEventFilter(this);
   // 给文本控件安装事件过滤器（
   ui->editMsg->viewport()->installEventFilter(this);
-  ui->editMsg->hide();
 
   // 初始隐藏
   this->hide();
@@ -170,8 +153,8 @@ bool ShowMessage::showMsg(QString title, QString msgtxt, int btnCount) {
   ui->editMsg->updateGeometry();
 
   showText = markdownToHtmlWithMath(showText);
-  ui->qwShowMsg->rootContext()->setContextProperty("textContent", showText);
-  // ui->editMsg->setHtml(showText);
+
+  ui->editMsg->setHtml(showText);
 
   // 计算高度、初始化弹窗尺寸（窗口隐藏状态下计算，无GL surface争夺）
   int textH = getTextEditContentHeight(ui->editMsg);

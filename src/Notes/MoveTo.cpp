@@ -26,9 +26,7 @@ MoveTo::MoveTo(QWidget* parent) : QDialog(parent), ui(new Ui::MoveTo) {
   // !mui->frameNoteList->isHidden())
   //   item = tw->currentItem();
 
-  if (!m_NotesList->ui->frame1->isHidden() ||
-      !mui->frameNoteRecycle->isHidden())
-    item = twrb->currentItem();
+  if (!m_NotesList->ui->frame1->isHidden()) item = twrb->currentItem();
 
   if (item == NULL) {
     close();
