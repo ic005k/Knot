@@ -1,6 +1,7 @@
 #include "DateSelector.h"
 
 #include "MainWindow.h"
+#include "defines.h"
 #include "ui_DateSelector.h"
 
 DateSelector::DateSelector(QWidget* parent)

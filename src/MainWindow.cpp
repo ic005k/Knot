@@ -1,9 +1,15 @@
 ﻿#include "MainWindow.h"
 
+#include "SearchWorker.h"
+#include "defines.h"
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   mui = ui;
+
   ui->setupUi(this);
+
+  mw_one = this;
 
   initMain = true;
 
@@ -17,10 +23,11 @@ MainWindow::MainWindow(QWidget* parent)
 #endif
   }
 
-  // qRegisterMetaType<QVector<int>>("QVector<int>");
   loading = true;
 
   init_Instance();
+
+  return;
 
   init_Options();
 
@@ -109,7 +116,8 @@ void MainWindow::on_ExecShortcut() {
   if (keyType == "reader") m_Reader->ContinueReading();
   if (keyType == "add") mui->btnAdd->click();
   if (keyType == "exercise") {
-    QTimer::singleShot(100, this, []() { mui->btnSteps->click(); });
+    // QTimer::singleShot(100, this, []() { mui->btnSteps->click(); });
+    mui->btnSteps->click();
   }
   if (keyType == "defaultopen") {
 #ifdef Q_OS_ANDROID
@@ -980,9 +988,7 @@ void MainWindow::closeProgress() {
 #endif
 }
 
-void MainWindow::safeCloseProgress() {
-  QTimer::singleShot(100, this, []() { mw_one->closeProgress(); });
-}
+void MainWindow::safeCloseProgress() { closeProgress(); }
 
 int MainWindow::get_Day(QString date) {
   QStringList list = date.split(" ");

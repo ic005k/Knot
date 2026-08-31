@@ -4,6 +4,7 @@
 #include <QMutexLocker>
 #include <QTextCodec>
 
+#include "defines.h"
 #include "src/AI/EmbeddingEngine.h"
 #include "src/AI/GlobalAI.h"
 #include "src/AI/VectorDb.h"

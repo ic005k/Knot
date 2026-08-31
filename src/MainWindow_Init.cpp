@@ -1,4 +1,8 @@
 #include "MainWindow.h"
+#include "SearchWorker.h"
+#include "defines.h"
+
+extern SearchWorker* m_searchWorker;
 
 void MainWindow::init_TotalData() {
   int count = mui->tabWidget->tabBar()->count();
@@ -65,30 +69,34 @@ void MainWindow::init_TotalData() {
 }
 
 void MainWindow::init_Instance() {
-  mw_one = this;
-  m_MainHelper = new MainHelper(this);
   CurrentYear = QString::number(QDate::currentDate().year());
-
   tabData = mui->tabWidget;
+
+  m_MainHelper = new MainHelper(this);
 
   m_Method = new Method(this);
 
   m_AboutThis = new AboutThis(this);
   m_Preferences = new Preferences(this);
   m_EditRecord = new EditRecord();
+
   m_Todo = new Todo(this);
   m_Report = new Report(this);
-  m_Notes = new Notes(this);
-  m_StepsOptions = new StepsOptions(this);
-  m_Steps = new Steps(this);
+
+  // m_Notes = new Notes(this);
+
+  // m_StepsOptions = new StepsOptions(this);
+
+  // m_Steps = new Steps(this);
+
+  return;
+
   m_Reader = new Reader(this);
   m_TodoAlarm = new TodoAlarm(this);
   m_DateSelector = new DateSelector(this);
   m_CloudBackup = new CloudBackup;
   m_ReaderSet = new ReaderSet(this);
-
   m_NotesList = new NotesList(this);
-
   m_ReceiveShare = new ReceiveShare(this);
 
   // AI
@@ -155,11 +163,11 @@ void MainWindow::init_Thread_Timer() {
           &QObject::deleteLater);
   // 搜索结束 → 主线程更新UI
   connect(m_searchWorker, &SearchWorker::searchFinished, this,
-          [](const QList<QString>& results) {
+          [this](const QList<QString>& results) {
             // 主线程安全更新
             resultsList = results;
             m_Method->initSearchResults();
-            mw_one->safeCloseProgress();
+            safeCloseProgress();
           });
   m_workerThread->start();
 

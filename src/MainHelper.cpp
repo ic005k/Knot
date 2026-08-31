@@ -1,11 +1,12 @@
 #include "MainHelper.h"
 
 #include "src/MainWindow.h"
+#include "src/defines.h"
 
 MainHelper::MainHelper(QWidget* parent) : QDialog{parent} {}
 
 bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
-  QMouseEvent* event = static_cast<QMouseEvent*>(evn);  // 将之转换为鼠标事件
+  QMouseEvent* event = static_cast<QMouseEvent*>(evn);
 
   if (evn->type() == QEvent::ToolTip) {
     QToolTip::hideText();

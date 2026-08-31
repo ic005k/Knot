@@ -32,6 +32,7 @@
 #include "QTreeWidgetProxyModel.h"
 #include "SearchModel.h"
 #include "VectorSearchService.h"
+#include "defines.h"
 #include "src/AI/GlobalAI.h"
 #include "src/Comm/TextEditToolbar.h"
 #include "src/Notes/MoveTo.h"

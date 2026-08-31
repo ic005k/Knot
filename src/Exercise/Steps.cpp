@@ -1,5 +1,8 @@
 #include "Steps.h"
 
+#include "MainWindow.h"
+#include "defines.h"
+
 bool isGpsTest = false;
 
 // 常量完全同步Java优化版，无任何修改
@@ -53,54 +56,37 @@ QJniObject gm_activity;
 Steps::Steps(QWidget* parent) : QDialog(parent) {
   this->installEventFilter(this);
 
-  mui->lblSingle->adjustSize();
+  return;
+
   QString date = QString::number(QDate::currentDate().month()) + "-" +
                  QString::number(QDate::currentDate().day());
-  mui->lblCurrent->setText(date + " " + QTime::currentTime().toString());
+  // mui->lblCurrent->setText(date + " " + QTime::currentTime().toString());
 
-  QFont font0 = m_Method->getNewFont(15);
-  mui->lblSteps->setFont(font0);
+  // QFont font0 = m_Method->getNewFont(15);
+  //  mui->lblSteps->setFont(font0);
 
-  font0.setPointSize(13);
-  mui->lblGpsDateTime->setFont(font0);
-  font0.setBold(true);
-  mui->lblCurrent->setFont(font0);
-  mui->lblToNow->setFont(font0);
-  mui->lblNow->setFont(font0);
+  // font0.setPointSize(13);
+  // mui->lblGpsDateTime->setFont(font0);
+  // font0.setBold(true);
 
-  mui->tabMotion->setTabVisible(3, false);
+  // mui->tabMotion->setTabVisible(3, false);
 
-  QFont font1 = m_Method->getNewFont(17);
-  font1.setBold(true);
-  mui->lblKM->setFont(font1);
-  mui->lblSingle->setFont(font1);
+  // QFont font1 = m_Method->getNewFont(17);
+  // font1.setBold(true);
 
-  mui->lblGpsInfo->setStyleSheet(lblStyle);
+  // mui->lblGpsInfo->setStyleSheet(lblStyle);
 
-  if (!isAndroid)
-    font1.setPointSize(8);
-  else
-    font1.setPointSize(17);
-  mui->lblGpsInfo->setFont(font1);
+  // mui->lblGpsInfo->setFont(font1);
 
-  mui->lblYearTotal->setStyleSheet(mui->lblMonthTotal->styleSheet());
-  if (isAndroid)
-    font1.setPointSize(13);
-  else
-    font1.setPointSize(9);
-  mui->lblYearTotal->setFont(font1);
-  mui->lblMonthTotal->setFont(font1);
-  mui->lblYearTotal->hide();
-  mui->lblMonthTotal->hide();
-  mui->btnGetGpsListData->hide();
+  // mui->btnGetGpsListData->hide();
 
   QFontMetrics fm(this->font());
   int textHeight = fm.height();
   int iconSize = static_cast<int>(textHeight * 0.9);
   // 确保图标大小是合理的 (不小于 20px)
   iconSize = qMax(iconSize, 20);
-  mui->btnSelGpsDate->setIconSize(QSize(iconSize, iconSize));
-  mui->btnSportsChart->setIconSize(QSize(iconSize, iconSize));
+  // mui->btnSelGpsDate->setIconSize(QSize(iconSize, iconSize));
+  // mui->btnSportsChart->setIconSize(QSize(iconSize, iconSize));
 
   tmeRefreshSteps = new QTimer(this);
   connect(tmeRefreshSteps, &QTimer::timeout, this, &Steps::refreshSteps);
@@ -112,7 +98,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   // Steps Chart
   m_stepChart = new StepHillChart(this);
   m_stepChart->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  mui->tab_Steps->layout()->addWidget(m_stepChart);
+  // mui->tab_Steps->layout()->addWidget(m_stepChart);
   m_stepChart->setStepData(m_stepData);
 
   getHardStepSensor();
@@ -122,25 +108,25 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 
   // Speed
   m_speedometer = new Speedometer(this);
-  mui->f_speed->setFixedHeight(120);
+  // mui->f_speed->setFixedHeight(120);
   m_speedometer->setMaxSpeed(10.00);  // 最高时速(km/h)
   m_speedometer->setMinSpeed(0);      // 最低时速(km/h)
   m_speedometer->setCurrentSpeed(0.0);
   m_speedometer->setBackgroundColor(QColor(30, 30, 30));  // 背景色
-  mui->f_speed->layout()->setSpacing(0);
-  mui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
-  mui->f_speed->layout()->addWidget(m_speedometer);
-  mui->f_speed->hide();
+  // mui->f_speed->layout()->setSpacing(0);
+  // mui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
+  // mui->f_speed->layout()->addWidget(m_speedometer);
+  // mui->f_speed->hide();
 
   // Compass
   compass = new CompassWidget();
-  mui->vboxCompass->addWidget(compass);
-  mui->vboxCompass->setContentsMargins(0, 0, 0, 0);
-  mui->frame_3->setContentsMargins(0, 0, 0, 0);
-  if (isAndroid)
-    mui->frame_3->setFixedHeight(300);
-  else
-    mui->frame_3->setFixedHeight(200);
+  // mui->vboxCompass->addWidget(compass);
+  // mui->vboxCompass->setContentsMargins(0, 0, 0, 0);
+  // mui->frame_3->setContentsMargins(0, 0, 0, 0);
+  // if (isAndroid)
+  //  mui->frame_3->setFixedHeight(300);
+  // else
+  //  mui->frame_3->setFixedHeight(200);
   directionRoute = tr("Direction");
 
   // Weather
@@ -275,7 +261,6 @@ void Steps::closeSteps() {
 
 void Steps::on_btnReset_clicked() {
   CurrentSteps = 0;
-  mui->lblSingle->setText("0");
 
   if (isHardStepSensor == 1) resetSteps = getAndroidSteps();
 
@@ -283,7 +268,6 @@ void Steps::on_btnReset_clicked() {
                  QString::number(QDate::currentDate().day());
   mui->lblCurrent->setText(date + " " + QTime::currentTime().toString());
   mui->lblNow->setText(date + " " + QTime::currentTime().toString());
-  mui->lblKM->setText("0.00  " + tr("KM"));
 }
 
 void Steps::saveSteps() {
@@ -388,10 +372,8 @@ void Steps::openStepsUI() {
   btn0->setFixedSize(QSize(btnh, btnh));
 
   if (mw_one->m_Preferences->ui->chkAI->isChecked()) {
-    mui->btnAISteps->show();
     mui->btnAIExerciseSuggestions->show();
   } else {
-    mui->btnAISteps->hide();
     mui->btnAIExerciseSuggestions->hide();
   }
 
@@ -413,11 +395,6 @@ void Steps::openStepsUI() {
   QString date = QString::number(QDate::currentDate().month()) + "-" +
                  QString::number(QDate::currentDate().day());
   mui->lblNow->setText(date + " " + QTime::currentTime().toString());
-  double d_km =
-      m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() *
-      mui->lblSingle->text().toInt() / 100 / 1000;
-  QString km = QString("%1").arg(d_km, 0, 'f', 2) + "  " + tr("KM");
-  mui->lblKM->setText(km);
 
   if (mui->lblGpsInfo->text() == tr("GPS Info") ||
       mui->lblGpsInfo->text() == "GPS Info") {
@@ -1696,9 +1673,8 @@ void Steps::allGpsTotal() {
             QString::number(yearRunningCount);
 
   m_monthlyStatsText = s1_month + s2_month + s3_month + s4_month;
-  mui->lblMonthTotal->setText(m_monthlyStatsText);
+
   m_yearlyStatsText = s1_year + s2_year + s3_year + s4_year;
-  mui->lblYearTotal->setText(m_yearlyStatsText);
 }
 
 void Steps::appendTrack(double lat, double lon) {
@@ -2130,7 +2106,6 @@ void Steps::updateHardSensorSteps() {
   if (steps > 100000000) return;
   CurrentSteps = ts - resetSteps;
   mui->lcdNumber->display(QString::number(steps));
-  mui->lblSingle->setText(QString::number(CurrentSteps));
 
   setTableSteps(steps);
 }

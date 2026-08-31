@@ -1,6 +1,6 @@
 #include "AutoUpdate.h"
 
-#include "src/defines.h"
+#include "defines.h"
 #include "ui_AutoUpdate.h"
 
 AutoUpdate::AutoUpdate(QWidget* parent)

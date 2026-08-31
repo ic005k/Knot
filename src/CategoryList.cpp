@@ -1,6 +1,7 @@
 #include "CategoryList.h"
 
 #include "MainWindow.h"
+#include "defines.h"
 #include "ui_CategoryList.h"
 
 CategoryList::CategoryList(QWidget* parent)
@@ -69,7 +70,7 @@ void CategoryList::on_btnDel_clicked() {
 
   ui->listWidget->setCurrentRow(row);
   if (row >= 0) {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
+    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     if (!m_ShowMsg->showMsg("Kont",
                             tr("Delete this category?") + "\n\n" +
                                 ui->listWidget->currentItem()->text(),

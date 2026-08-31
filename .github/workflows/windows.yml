@@ -39,7 +39,8 @@ jobs:
           version: ${{ matrix.qt_ver }}
           arch: ${{ matrix.qt_arch }}
           cached: 'false'
-          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
+          #modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
+          modules: qtcharts qtsensors qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           tools: 'tools_cmake tools_ninja'  # ✅ 仅新增：确保 CMake/Ninja 可用
 
       - uses: actions/checkout@v2

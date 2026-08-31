@@ -43,7 +43,8 @@ jobs:
           host: mac
           target: desktop
           arch: ${{ matrix.qt_arch }}
-          modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
+          #modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
+          modules: qtcharts qtsensors qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
           source: false
           dir: ${{ github.workspace }}/Qt

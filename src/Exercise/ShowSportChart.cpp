@@ -1,3 +1,4 @@
+#include "defines.h"
 #include "src/Exercise/CustomChartView.h"
 #include "src/Exercise/Steps.h"
 

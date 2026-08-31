@@ -5,13 +5,12 @@
 #include <QWidget>
 
 #include "MainWindow.h"
+#include "defines.h"
 
 QStringList c_list;
 
 EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
-  m_CategoryList = new CategoryList(mw_one);
-
-  mw_one->installEventFilter(mw_one);
+  m_CategoryList = new CategoryList(this);
 
   initCategoryCompleter();
 
@@ -24,7 +23,7 @@ EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
 
   nH = mui->editCategory->height();
 
-  QFont font = mw_one->font();
+  QFont font = this->font();
   font.setPointSize(22);
   mui->editCategory->setFont(font);
   if (isAndroid)

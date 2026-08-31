@@ -1,6 +1,7 @@
 #include "TodoAlarm.h"
 
-#include "src/MainWindow.h"
+#include "MainWindow.h"
+#include "defines.h"
 #include "ui_TodoAlarm.h"
 
 TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {

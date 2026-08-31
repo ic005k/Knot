@@ -25,6 +25,7 @@
 #include "MainWindow.h"
 #include "NativeMsgThread.h"
 #include "SplashTimer.h"
+#include "defines.h"
 #include "lib/llama.cpp/ggml/include/ggml-backend.h"
 #include "lib/llama.cpp/include/llama.h"
 #include "lib/quazip/quazip.h"
@@ -432,8 +433,7 @@ void loadTheme(bool isDark) {
           widget != mui->btnSync && widget != mui->btnFind &&
           widget != mui->btnSelTab && widget != mui->btnReader &&
           widget != mui->btnTodo && widget != mui->btnNotes &&
-          widget != mui->btnSteps && widget != mui->lblMonthTotal &&
-          widget != mui->lblYearTotal && widget != mui->btn0 &&
+          widget != mui->btnSteps && widget != mui->btn0 &&
           widget != mui->editAmount && widget != mui->btn1 &&
           widget != mui->btn2 && widget != mui->btn3 && widget != mui->btn4 &&
           widget != mui->btn5 && widget != mui->btn6 && widget != mui->btn7 &&

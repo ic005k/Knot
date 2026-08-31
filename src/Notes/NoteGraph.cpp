@@ -12,6 +12,7 @@
 #include <QtMath>
 #include <algorithm>
 
+#include "defines.h"
 #include "src/MainWindow.h"
 
 // 链接正则：[显示文本](memo/文件名.md)

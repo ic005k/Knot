@@ -56,6 +56,7 @@
 #endif
 
 #include "TitleGenerator.h"
+#include "defines.h"
 #include "src/Comm/ShowMessage.h"
 #include "src/Notes/ColorDialog.h"
 #include "src/Notes/NoteDiffManager.h"
@@ -253,7 +254,8 @@ class Notes : public QDialog {
   void openNoteWindow();
 
   void setNoteEntryList();
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -433,6 +435,56 @@ class Notes : public QDialog {
                             const QString& displayPrefix, const QString& prefix,
                             const QString& match, const QString& suffix,
                             const QString& displaySuffix);
+
+  QString lightPCScrollbarStyle = R"(
+        /* Light Vertical Scrollbar */
+        QScrollBar:vertical {
+            background: #F5F5F5;
+            width: 22px;
+            margin: 2px;
+        }
+        QScrollBar::handle:vertical {
+            background: #C0C0C0;
+            border-radius: 4px;
+            border: 1px solid #D0D0D0;
+            min-height: 30px;
+        }
+        QScrollBar::handle:vertical:hover {
+            background: #A8A8A8;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            background: transparent;
+            border: none;
+            height: 0px;
+        }
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: transparent;
+        })";
+
+  QString darkPCScrollbarStyle = R"(
+        /* Dark Vertical Scrollbar */
+        QScrollBar:vertical {
+            background: #2D2D2D;
+            width: 22px;
+            margin: 2px;
+        }
+        QScrollBar::handle:vertical {
+            background: #606060;
+            border-radius: 4px;
+            border: 1px solid #404040;
+            min-height: 30px;
+        }
+        QScrollBar::handle:vertical:hover {
+            background: #707070;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            background: transparent;
+            border: none;
+            height: 0px;
+        }
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: transparent;
+        })";
 };
 
 #endif  // NOTES_H

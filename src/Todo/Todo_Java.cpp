@@ -1,5 +1,6 @@
+#include "MainWindow.h"
 #include "Todo.h"
-#include "src/MainWindow.h"
+#include "defines.h"
 #include "ui_Todo.h"
 
 void Todo::showAlarmWindow(const QString& strTime, const QString& strText,

@@ -1,4 +1,8 @@
 #include "MainWindow.h"
+#include "SearchWorker.h"
+#include "defines.h"
+
+SearchWorker* m_searchWorker;
 
 void MainWindow::on_btn7_clicked() { m_EditRecord->on_btn7_clicked(); }
 
@@ -293,7 +297,6 @@ void MainWindow::on_btnBackNoteList_clicked() {
   QTimer::singleShot(0, this, []() {
     // 再执行显示/隐藏，此时无活跃离屏渲染任务
     if (!isAndroid) {
-      mui->frameMain->show();
     } else
       m_Method->openMainEntranceWindow();
   });
@@ -1117,7 +1120,7 @@ void MainWindow::onAndroidBackHandle() {
   }
 
   if (mw_one->m_Todo->isTodoAlarmShow) {
-    QTimer::singleShot(100, mw_one, []() { mw_one->m_Todo->closeTodoAlarm(); });
+    mw_one->m_Todo->closeTodoAlarm();
     return;
   }
 

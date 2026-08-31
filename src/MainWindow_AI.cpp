@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "defines.h"
 
 void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
                                    const QString& userQuestion) {

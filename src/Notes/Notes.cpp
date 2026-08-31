@@ -3,6 +3,7 @@
 #include "TextMatchDelegate.h"
 #include "cmark-gfm-core-extensions.h"
 #include "cmark_wrapper.h"
+#include "defines.h"
 #include "src/MainWindow.h"
 #include "src/Notes/ui_Notes.h"
 #include "subscript.h"

@@ -15,7 +15,8 @@
 
 #include "Comm/QAESEncryption.h"
 #include "DelWebDAVFiles.h"
-#include "src/defines.h"
+#include "MainWindow.h"
+#include "defines.h"
 #include "ui_CloudBackup.h"
 
 QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray& data);

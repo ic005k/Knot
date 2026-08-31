@@ -1,6 +1,7 @@
 #include "MyThread.h"
 
-#include "src/MainWindow.h"
+#include "MainWindow.h"
+#include "defines.h"
 
 MyThread::MyThread() {}
 

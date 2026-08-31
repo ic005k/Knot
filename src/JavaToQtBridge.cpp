@@ -4,6 +4,7 @@
 #include <QSettings>
 
 #include "MainWindow.h"
+#include "defines.h"
 
 #ifdef Q_OS_ANDROID
 static void JavaNotify_0();

@@ -1,6 +1,7 @@
 #include <QFutureWatcher>
 #include <QtConcurrent>
 
+#include "defines.h"
 #include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
 

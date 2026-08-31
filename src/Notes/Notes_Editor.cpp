@@ -3,6 +3,7 @@
 
 #include <QFontDatabase>
 
+#include "defines.h"
 #include "src/MainWindow.h"
 #include "src/Notes/Notes.h"
 
@@ -156,11 +157,9 @@ void Notes::init_md() {
 #ifndef Q_OS_ANDROID
 
   if (isDark) {
-    m_EditSource->verticalScrollBar()->setStyleSheet(
-        mw_one->m_MainHelper->darkPCScrollbarStyle);
+    m_EditSource->verticalScrollBar()->setStyleSheet(darkPCScrollbarStyle);
   } else {
-    m_EditSource->verticalScrollBar()->setStyleSheet(
-        mw_one->m_MainHelper->lightPCScrollbarStyle);
+    m_EditSource->verticalScrollBar()->setStyleSheet(lightPCScrollbarStyle);
   }
 
   initMarkdownLexer();

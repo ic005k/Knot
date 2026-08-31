@@ -48,12 +48,13 @@ inline const QString uniqueKey = "KnotMyUniqueApplicationKey_12345";
 inline QSharedMemory sharedMemory;
 #endif
 
+extern MainWindow* mw_one;
+extern Ui::MainWindow* mui;
+
 inline QSettings* iniPreferences;
 inline ReaderSet* m_ReaderSet;
 inline CloudBackup* m_CloudBackup;
 inline QTreeWidgetItem* parentItem;
-inline MainWindow* mw_one;
-inline Ui::MainWindow* mui;
 inline Reader* m_Reader;
 inline Method* m_Method;
 inline Notes* m_Notes;
