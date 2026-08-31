@@ -768,7 +768,21 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                []() { mw_one->m_Todo->on_DelAlarm(); });
           }
 
-          //=============================================================
+          // Notes=====================================================
+
+          if (strType.startsWith("note_book_click|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int index = 0;
+                index = list.at(1).toInt();
+                m_NotesList->clickNoteBook(index);
+              }
+            });
+          }
+
+          //===========================================================
 
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;
         } catch (const std::exception& ex) {

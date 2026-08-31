@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public class NoteActivity extends AppCompatActivity {
 
+    public static NoteActivity mInstance = null;
+
     private boolean mIsDark = false;
     //顶部按钮
     private ImageView mBtnBookMenu;
@@ -36,6 +38,7 @@ public class NoteActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mInstance = this;
 
         mBackCallback = new OnBackPressedCallback(true) {
             @Override
@@ -144,10 +147,32 @@ public class NoteActivity extends AppCompatActivity {
 
     //对外接口，供JNI推送数据
     public void setNoteBookList(ArrayList<String> bookList) {
-        mBookAdapter.setData(bookList);
+        runOnUiThread(() -> {
+            mBookAdapter.setData(bookList);
+        });
     }
 
     public void setNoteEntryList(ArrayList<String> noteList) {
-        mNoteAdapter.setData(noteList);
+        runOnUiThread(() -> {
+            mNoteAdapter.setData(noteList);
+        });
+    }
+
+    public void setSelectedNotebook(int pos) {
+        runOnUiThread(() -> {
+            mBookAdapter.setSelectedPosition(pos);
+        });
+    }
+
+    public void setSelectedNote(int pos) {
+        runOnUiThread(() -> {
+            mNoteAdapter.setSelectedPosition(pos);
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mInstance = null;
     }
 }

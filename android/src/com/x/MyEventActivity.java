@@ -245,4 +245,10 @@ public class MyEventActivity extends AppCompatActivity {
         }
         mRightAdapter.setDetailData(outList);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mInstance = null;
+    }
 }

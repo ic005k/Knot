@@ -74,7 +74,7 @@ void NotesList::on_actionAdd_NoteBook_triggered() {
         }
       }
       setNoteBookCurrentIndex(index);
-      clickNoteBook();
+      clickNoteBook(index);
 
       saveNotesList();
     }
@@ -207,7 +207,7 @@ void NotesList::on_actionMoveUp_Note_triggered() {
   tw->setCurrentItem(tw->currentItem()->child(indexNote));
   on_btnUp_clicked();
 
-  clickNoteBook();
+  clickNoteBook(indexBook);
   setNotesListCurrentIndex(indexNote - 1);
 }
 
@@ -222,7 +222,7 @@ void NotesList::on_actionMoveDown_Note_triggered() {
   tw->setCurrentItem(tw->currentItem()->child(indexNote));
   on_btnDown_clicked();
 
-  clickNoteBook();
+  clickNoteBook(indexBook);
   setNotesListCurrentIndex(indexNote + 1);
 }
 
@@ -246,7 +246,7 @@ void NotesList::on_actionImport_Note_triggered() {
   mw_one->safeCloseProgress();
 
   if (fileCount > 0) {
-    clickNoteBook();
+    clickNoteBook(indexBook);
 
     saveNotesList();
   }
@@ -508,7 +508,7 @@ void NotesList::on_actionMoveDown_NoteBook_triggered() {
 
   loadAllNoteBook();
   setNoteBookCurrentIndex(newIndex);
-  clickNoteBook();
+  clickNoteBook(index);
 }
 
 void NotesList::on_actionMoveUp_NoteBook_triggered() {
@@ -522,7 +522,7 @@ void NotesList::on_actionMoveUp_NoteBook_triggered() {
 
   loadAllNoteBook();
   setNoteBookCurrentIndex(newIndex);
-  clickNoteBook();
+  clickNoteBook(index);
 }
 
 void NotesList::on_actionRelationshipGraph() {
@@ -691,7 +691,7 @@ void NotesList::slotCreateSubNotebook(int qmlIndex) {
       int newIndex = pNoteBookItems.indexOf(newItem);
       if (newIndex >= 0) {
         setNoteBookCurrentIndex(newIndex);
-        clickNoteBook();
+        clickNoteBook(newIndex);
       }
 
       //  保存数据

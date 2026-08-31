@@ -38,6 +38,14 @@ public class NoteEntryAdapter
         notifyDataSetChanged();
     }
 
+    // JNI / Activity 外部调用设置选中
+    public void setSelectedPosition(int pos) {
+        int old = mSelectedPos;
+        mSelectedPos = pos;
+        notifyItemChanged(old);
+        notifyItemChanged(mSelectedPos);
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(
@@ -63,13 +71,29 @@ public class NoteEntryAdapter
         }
 
         boolean sel = position == mSelectedPos;
+        int bgColor;
+        int textColor;
+
         if (mIsDark) {
-            holder.itemView.setBackgroundColor(sel ? 0xFF3A3A3A : 0xFF1E1E1E);
-            holder.tvNoteTitle.setTextColor(0xFFFFFFFF);
+            if (sel) {
+                bgColor = 0xFF3A3A3A;
+                textColor = 0xFFFFFFFF;
+            } else {
+                bgColor = 0xFF1E1E1E;
+                textColor = 0xFFBBBBBB;
+            }
         } else {
-            holder.itemView.setBackgroundColor(sel ? 0xFFE7F1FF : 0xFFFFFFFF);
-            holder.tvNoteTitle.setTextColor(0xFF000000);
+            if (sel) {
+                bgColor = 0xFFE7F1FF;
+                textColor = 0xFF000000;
+            } else {
+                bgColor = 0xFFFFFFFF;
+                textColor = 0xFF333333;
+            }
         }
+
+        holder.itemView.setBackgroundColor(bgColor);
+        holder.tvNoteTitle.setTextColor(textColor);
 
         int pos = position;
         holder.itemView.setOnClickListener(v -> {

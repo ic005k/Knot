@@ -165,7 +165,7 @@ void Notes::appendAIResults(QString str) {
 void Notes::openNoteWindow() {
 #ifdef Q_OS_ANDROID
 
-  QStringList list1 = listNoteBook;
+  QStringList list1 = m_NotesList->listNoteBook;
 
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list1) {
@@ -180,6 +180,30 @@ void Notes::openNoteWindow() {
     instance.callMethod<void>("openNoteWindow", "(Ljava/util/ArrayList;)V",
                               jArrayList.object());
   }
+
+#endif
+}
+
+void Notes::setNoteEntryList() {
+#ifdef Q_OS_ANDROID
+
+  QStringList list1 = m_NotesList->listNoteEntry;
+
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+  for (const QString& item : list1) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/NoteActivity", "mInstance", "Lcom/x/NoteActivity;");
+
+  if (instance.isValid()) {
+    instance.callMethod<void>("setNoteEntryList", "(Ljava/util/ArrayList;)V",
+                              jArrayList.object());
+  }
+
+  qInfo() << "listNoteEntry=" << m_NotesList->listNoteEntry;
 
 #endif
 }

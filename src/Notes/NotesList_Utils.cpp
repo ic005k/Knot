@@ -568,7 +568,7 @@ void NotesList::resetQML_List() {
 
   if (newBookIdx != -1) {
     setNoteBookCurrentIndex(newBookIdx);
-    clickNoteBook();
+    clickNoteBook(newBookIdx);
   }
 
   // 匹配笔记下标并恢复

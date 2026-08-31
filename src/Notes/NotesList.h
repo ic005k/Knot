@@ -73,6 +73,8 @@ class NotesList : public QDialog {
   ~NotesList();
   Ui::NotesList* ui;
 
+  QStringList listNoteBook, listNoteEntry;
+
   void activateNoteBook(QTreeWidgetItem* notebookItem);
 
   int currentNoteslistIndex = 0;
@@ -243,7 +245,7 @@ class NotesList : public QDialog {
 
   void clickNoteList();
 
-  void clickNoteBook();
+  void clickNoteBook(int index);
 
   void on_btnClose_clicked();
 

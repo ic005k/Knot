@@ -876,8 +876,8 @@ void Notes::loadNotesToUI() {
     return;
   }
 
-  listNoteBook.clear();
-  listNoteBook = m_NotesList->loadAllNoteBook();
+  m_NotesList->listNoteBook.clear();
+  m_NotesList->listNoteBook = m_NotesList->loadAllNoteBook();
 
   if (m_NotesList->getNoteBookCount() > 0) {
     if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {

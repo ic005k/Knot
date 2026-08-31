@@ -97,8 +97,6 @@ class Notes : public QDialog {
 
   bool isAIQA = false;
 
-  QStringList listNoteBook;
-
   // ✅ 纯数据解析，供JNI调用，不触碰任何UI
   // 返回值约定：
   //   以 "IMG:" 开头 → 图片绝对路径
@@ -254,7 +252,8 @@ class Notes : public QDialog {
 
   void openNoteWindow();
 
- protected:
+  void setNoteEntryList();
+  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;

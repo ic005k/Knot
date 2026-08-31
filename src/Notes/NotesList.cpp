@@ -873,6 +873,8 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
   int validNoteCount = uiDataList.size();
 
   QFuture<QVector<RawResult>> future = QtConcurrent::run([=]() {
+    listNoteEntry.clear();
+
     QVector<RawResult> rawResults;
     rawResults.reserve(validNoteCount);
 
@@ -891,11 +893,14 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
         fileSize = f.size();
       }
 
-      QString item1 = m_Method->getLastModified(file);
+      QString strLastModi = m_Method->getLastModified(file);
       QString strSize = m_Method->getFileSize(fileSize, 2);
-      QString text2 = f.exists() ? "" : tr("File does not exist");
+      QString strFileNoExists = f.exists() ? "" : tr("File does not exist");
 
-      rawResults.push_back({text0, item1 + " " + strSize, text2, text3});
+      rawResults.push_back(
+          {text0, strLastModi + " " + strSize, strFileNoExists, text3});
+      listNoteEntry.append(text0 + "\n\n" + strLastModi + " " + strSize + "\n" +
+                           strFileNoExists);
     }
     return rawResults;
   });
@@ -973,6 +978,8 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
       tw->setCurrentItem(pNoteBookItems.at(idxNoteBook));
       isMouseClick = false;
     }
+
+    m_Notes->setNoteEntryList();
 
     watcher->deleteLater();
 

@@ -785,11 +785,11 @@ Note:
   m_RenameNotes->show();
 }
 
-void NotesList::clickNoteBook() {
-  int count = getNoteBookCount();
+void NotesList::clickNoteBook(int index) {
+  int count = listNoteBook.count();  // getNoteBookCount();
   if (count <= 0) return;
 
-  int index = getNoteBookCurrentIndex();
+  // int index = getNoteBookCurrentIndex();
   if (index < 0 || index >= pNoteBookItems.size()) return;
 
   activateNoteBook(pNoteBookItems[index]);
@@ -865,7 +865,11 @@ void NotesList::clickNoteList() {
 void NotesList::mouseClickNoteBook() {
   isMouseClick = true;
   isMouseClickNoteBook = true;
-  clickNoteBook();
+
+  int index = getNoteBookCurrentIndex();
+  if (index < 0 || index >= pNoteBookItems.size()) return;
+
+  clickNoteBook(index);
 }
 
 void NotesList::mouseClickNoteList() { isMouseClickNoteBook = false; }
