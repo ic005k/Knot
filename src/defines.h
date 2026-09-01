@@ -6,7 +6,7 @@
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QFile>
-#include <QQmlEngine>
+#include <QPointer>
 #include <QRegularExpression>
 #include <QSettings>
 #include <QSharedMemory>

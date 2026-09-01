@@ -29,7 +29,6 @@
 #include <QXmlStreamReader>
 #include <vector>
 
-#include "src/Reader/DocumentHandler.h"
 #include "src/Reader/EpubReader.h"
 
 // 目录项结构体（存储章节信息）
@@ -92,7 +91,7 @@ class Reader : public QDialog {
   QString currentHtmlFile;
   bool isPageNext = false;
   int mainDirIndex = -1;
-  DocumentHandler* myDocHandler;
+
   QStringList bookList;
 
   QString currentBookName;

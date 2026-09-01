@@ -23,7 +23,6 @@
 #include <QMutex>
 #include <QPainter>
 #include <QPushButton>
-#include <QQmlApplicationEngine>
 #include <QRegularExpressionValidator>
 #include <QSettings>
 #include <QStringList>

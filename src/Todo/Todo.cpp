@@ -1459,44 +1459,6 @@ void Todo::openTodo() {
 void Todo::closeTodoAlarm() {}
 
 void Todo::showTodoAlarm() {
-  // 1. 获取Popup根对象
-  QQuickItem* popupRoot = NULL;
-  if (!popupRoot) {
-    qWarning() << "Failed to get Popup root object!";
-    return;
-  }
-
-  // 2. 查找SetTodoAlarm组件（通过objectName）
-  QQuickItem* todoAlarmComponent =
-      popupRoot->findChild<QQuickItem*>("setTodoAlarmComponent");
-  if (!todoAlarmComponent) {
-    qWarning() << "Failed to find setTodoAlarmComponent in QML!";
-    return;
-  }
-
-  // 3. 查找DateTimePicker组件（通过objectName，在SetTodoAlarm内部）
-  QQuickItem* dateTimePicker =
-      todoAlarmComponent->findChild<QQuickItem*>("dateTimePicker");
-  if (!dateTimePicker) {
-    qWarning() << "Failed to find dateTimePicker in QML!";
-    return;
-  }
-
-  // 4. 传递初始化值（C++ → QML属性赋值）
-  // --------------------------
-  // 4.1 初始化周选择状态（示例：默认选中周一、周三，且"每天"开关关闭）
-  todoAlarmComponent->setProperty("selectAllDays", false);  // 每天：关闭
-  todoAlarmComponent->setProperty("week1Checked", false);   // 周一：选中
-  todoAlarmComponent->setProperty("week2Checked", false);   // 周二：未选中
-  todoAlarmComponent->setProperty("week3Checked", false);   // 周三：选中
-  todoAlarmComponent->setProperty("week4Checked", false);   // 周四：未选中
-  todoAlarmComponent->setProperty("week5Checked", false);   // 周五：未选中
-  todoAlarmComponent->setProperty("week6Checked", false);   // 周六：未选中
-  todoAlarmComponent->setProperty("week7Checked", false);   // 周日：未选中
-
-  // 4.2 初始化语音播报状态（示例：默认开启）
-  todoAlarmComponent->setProperty("voiceBroadcastEnabled", getChkVoice());
-
   int row = getCurrentIndex();
   QString str = getItemTime(row);
   QDate date;
@@ -1513,13 +1475,6 @@ void Todo::showTodoAlarm() {
       QString s1 = list.at(0);
       for (int i = 0; i < s1.length(); i++) {
         QString s2 = s1.mid(i, 1);
-        if (s2 == "1") todoAlarmComponent->setProperty("week1Checked", true);
-        if (s2 == "2") todoAlarmComponent->setProperty("week2Checked", true);
-        if (s2 == "3") todoAlarmComponent->setProperty("week3Checked", true);
-        if (s2 == "4") todoAlarmComponent->setProperty("week4Checked", true);
-        if (s2 == "5") todoAlarmComponent->setProperty("week5Checked", true);
-        if (s2 == "6") todoAlarmComponent->setProperty("week6Checked", true);
-        if (s2 == "7") todoAlarmComponent->setProperty("week7Checked", true);
       }
       date = QDate::currentDate();
 
@@ -1554,13 +1509,6 @@ void Todo::showTodoAlarm() {
       QString s1 = list.at(0);
       for (int i = 0; i < s1.length(); i++) {
         QString s2 = s1.mid(i, 1);
-        if (s2 == "1") todoAlarmComponent->setProperty("week1Checked", true);
-        if (s2 == "2") todoAlarmComponent->setProperty("week2Checked", true);
-        if (s2 == "3") todoAlarmComponent->setProperty("week3Checked", true);
-        if (s2 == "4") todoAlarmComponent->setProperty("week4Checked", true);
-        if (s2 == "5") todoAlarmComponent->setProperty("week5Checked", true);
-        if (s2 == "6") todoAlarmComponent->setProperty("week6Checked", true);
-        if (s2 == "7") todoAlarmComponent->setProperty("week7Checked", true);
       }
       date = QDate::currentDate();
       for (int i = 0; i < list.count(); i++) {
@@ -1575,25 +1523,7 @@ void Todo::showTodoAlarm() {
     alarmTime = time;
   }
 
-  // 4.3 初始化日期时间（示例：设置为2025-12-25 09:30）
-  dateTimePicker->setProperty("selectedYear", alarmDate.year());  // 年
-  dateTimePicker->setProperty(
-      "selectedMonth",
-      alarmDate.month());  // 月（注意：DateTimePicker用的是1-12）
-  dateTimePicker->setProperty("selectedDay", alarmDate.day());        // 日
-  dateTimePicker->setProperty("selectedHour", alarmTime.hour());      // 时
-  dateTimePicker->setProperty("selectedMinute", alarmTime.minute());  // 分
-
   // --------------------------
-  // 5. 最后调用QML函数显示弹窗（此时初始化值已生效）
-  bool success = QMetaObject::invokeMethod(
-      popupRoot, "showTodoAlarm",
-      Qt::QueuedConnection  // 队列连接，确保UI在主线程更新
-  );
-
-  if (!success) {
-    qWarning() << "Failed to call showTodoAlarm() in QML!";
-  }
 
   isTodoAlarmShow = true;
 }

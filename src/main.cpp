@@ -14,7 +14,6 @@
 #include <QObject>
 #include <QOpenGLContext>
 #include <QProgressBar>
-#include <QQuickWindow>
 #include <QSGRendererInterface>
 #include <QSplashScreen>
 #include <QStyleFactory>
@@ -684,8 +683,6 @@ void initAndroidGPU() {
   qputenv("QSG_NO_PERSISTENT_GRAPHICS_CACHE", "1");
   qputenv("QT_RHI_NO_OFFSCREEN_BLIT", "1");
   qputenv("QT_QPA_GL_NO_PBO", "1");
-
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
   QSurfaceFormat fmt;
   fmt.setRenderableType(QSurfaceFormat::OpenGLES);

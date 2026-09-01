@@ -554,7 +554,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                 int index1 = 0;
                 index0 = list.at(1).toInt();
                 index1 = list.at(2).toInt();
-                m_Method->reeditMainEventData(index0, index1);
+                mw_one->m_EditRecord->reeditMainEventData(index0, index1);
               }
             });
           }
@@ -566,7 +566,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
 
           if (strType.contains("del_datadetail")) {
             QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->on_btnAdd_clicked(); });
+                               [=]() { mw_one->on_btnDel_clicked(); });
           }
 
           // 主工具栏按钮=============================================

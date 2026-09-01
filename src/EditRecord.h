@@ -81,9 +81,15 @@ class EditRecord : public QDialog {
 
   void on_AddRecord();
 
-  void openAddEventRecord(const QString &titleText, const QString &categoryText, const QString &noteText, const QString &amountText, const QString &timeTagText);
+  void openAddEventRecord(const QString& titleText, const QString& categoryText,
+                          const QString& noteText, const QString& amountText,
+                          const QString& timeTagText);
   void setDataToUI();
-  private:
+  void modify_Data();
+  void reeditMainEventData(int index0, int index1);
+  int idxMainDate, idxMainDateDetail;
+
+ private:
   void set_Amount(QString Number);
 
   QString lblStyle;

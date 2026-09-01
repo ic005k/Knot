@@ -6,7 +6,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMetaType>
-#include <QQmlEngine>
 #include <QRegularExpression>
 #include <QtConcurrent>
 #include <QtMath>
@@ -117,14 +116,15 @@ void registerNoteGraphTypes() {
   // qRegisterMetaType<QVector<NoteRelation>>("QVector<NoteRelation>");
 }
 
-static QObject* noteGraphControllerSingletonProvider(QQmlEngine*, QJSEngine*) {
-  return new NoteGraphController();
-}
+// static QObject* noteGraphControllerSingletonProvider(QQmlEngine*, QJSEngine*)
+// {
+//  return new NoteGraphController();
+//}
 
 void initializeNoteGraph() {
-  qmlRegisterSingletonType<NoteGraphController>(
-      "NoteGraph", 1, 0, "NoteGraphController",
-      noteGraphControllerSingletonProvider);
+  // qmlRegisterSingletonType<NoteGraphController>(
+  //     "NoteGraph", 1, 0, "NoteGraphController",
+  //     noteGraphControllerSingletonProvider);
 }
 
 // =================================================================================

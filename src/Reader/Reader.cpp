@@ -127,11 +127,11 @@ void Reader::openFile(QString openfile) {
       return;
 
     if (strSuffix == "epub") {
-      /*
       if (reader != nullptr) {
         delete reader;
         reader = nullptr;
       }
+
       reader = new EpubReader();
       if (!reader->open(openfile)) {
         return;
@@ -213,11 +213,7 @@ void Reader::openFile(QString openfile) {
 
         QString str_cate = loadText(catalogueFile);
         StringToFile(str_cate, catalogueFile);
-      }*/
-
-      isEpub = true;
-      isText = false;
-      isPDF = false;
+      }
 
     } else if (strSuffix == "pdf" || strSuffix == "mobi") {
       isPDF = true;
@@ -1652,12 +1648,11 @@ void Reader::readBookDone() {
     mw_one->ui->frameMain->hide();
 
     if (isEpub) {
+      openMyPDF(fileName);
     }
 
     if (isText) {
     }
-
-    openMyPDF(fileName);
   }
 
   if (isPDF) {

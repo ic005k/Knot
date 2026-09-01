@@ -280,7 +280,7 @@ class MainWindow : public QMainWindow {
   static void saveTab();
   bool isSlide = false;
   void init_TotalData();
-  void modify_Data();
+
   void add_Data(QTreeWidget*, QString, QString, QString);
   bool del_Data(QTreeWidget*);
   static QTreeWidget* get_tw(int tabIndex);

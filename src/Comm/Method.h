@@ -628,7 +628,6 @@ QScrollBar::sub-page:horizontal {
 
   void clickMainDateData(int index);
   void clickMainEventData();
-  void reeditMainEventData(int index0, int index1);
 
  private slots:
 

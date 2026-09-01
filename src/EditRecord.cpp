@@ -102,7 +102,7 @@ void EditRecord::on_btnOk_clicked() {
   }
 
   if (!isAdd) {
-    mw_one->modify_Data();
+    modify_Data();
 
     mw_one->strLatestModify =
         QObject::tr("Modify Item") + " ( " + mw_one->getTabText() + " ) ";
@@ -662,4 +662,94 @@ void EditRecord::openAddEventRecord(const QString& titleText,
                             jTitle.object(), jCategory.object(), jNote.object(),
                             jAmount.object(), jTimeTag.object());
 #endif
+}
+
+void EditRecord::reeditMainEventData(int index0, int index1) {
+  idxMainDate = index0;
+  idxMainDateDetail = index1;
+
+  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
+  int maindateIndex = index0;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
+  int maineventIndex =
+      index1;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
+
+  if (maindateIndex < 0) return;
+  if (maineventIndex < 0) return;
+
+  // int maindateCount = getCountFromQW(mw_one->ui->qwMainDate);
+  int topIndex = tw->topLevelItemCount() - 1 - maindateIndex;
+  int childIndex = index1;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
+
+  if (topIndex < 0) return;
+  if (childIndex < 0) return;
+
+  tw->setCurrentItem(tw->topLevelItem(topIndex)->child(childIndex));
+  mw_one->on_twItemDoubleClicked();
+}
+
+void EditRecord::modify_Data() {
+  QTreeWidget* tw = (QTreeWidget*)mw_one->ui->tabWidget->currentWidget();
+  QTreeWidgetItem* item = tw->currentItem();
+  QTreeWidgetItem* topItem = item->parent();
+  QString newtime = mw_one->ui->lblTime->text().trimmed();
+  if (item->childCount() == 0 && item->parent()->childCount() > 0) {
+    item->setText(0, newtime);
+    QString sa = mw_one->ui->editAmount->text().trimmed();
+    if (sa == "")
+      item->setText(1, "");
+    else
+      item->setText(1, QString("%1").arg(sa.toDouble(), 0, 'f', 2));
+    item->setText(2, mw_one->ui->editCategory->text().trimmed());
+    item->setText(3, mw_one->ui->editDetails->toPlainText().trimmed());
+    // Amount
+    int child = item->parent()->childCount();
+    double amount = 0;
+    for (int m = 0; m < child; m++) {
+      QString str = item->parent()->child(m)->text(1);
+      amount = amount + str.toDouble();
+    }
+    QString strAmount = QString("%1").arg(amount, 0, 'f', 2);
+    item->parent()->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
+    item->parent()->setText(1, QString::number(child));
+    if (strAmount == "0.00")
+      item->parent()->setText(2, "");
+    else
+      item->parent()->setText(2, strAmount);
+
+    int childRow0 = tw->currentIndex().row();
+    mw_one->m_MainHelper->sort_childItem(item);
+
+    int childRow1 = 0;
+    for (int i = 0; i < topItem->childCount(); i++) {
+      QTreeWidgetItem* childItem = topItem->child(i);
+
+      QString time = childItem->text(0).split(".").at(1);
+      time = time.trimmed();
+
+      if (time == newtime) {
+        childRow1 = i;
+        break;
+      }
+    }
+
+    int newrow;
+    int row =
+        idxMainDateDetail;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
+    if (childRow0 - childRow1 == 0) newrow = row;
+    if (childRow0 - childRow1 < 0) newrow = row + childRow1 - childRow0;
+    if (childRow0 - childRow1 > 0) newrow = row - (childRow0 - childRow1);
+
+    int maindateIndex =
+        idxMainDate;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainDate);
+
+    mw_one->isEditItem = true;
+    mw_one->reloadMain();
+
+    QTimer::singleShot(100, mw_one, [this, maindateIndex, newrow]() {
+      // m_Method->setCurrentIndexFromQW(mw_one->ui->qwMainDate, maindateIndex);
+      mw_one->isEditItem = true;
+      m_Method->clickMainDate(maindateIndex);
+      // m_Method->setCurrentIndexFromQW(mw_one->ui->qwMainEvent, newrow);
+    });
+  }
 }

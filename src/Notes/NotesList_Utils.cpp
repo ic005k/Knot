@@ -257,31 +257,15 @@ void NotesList::loadAllRecycle() {
   }
 }
 
-QVariant NotesList::addQmlTreeTopItem(QString strItem) {
-  QQuickItem* root = NULL;  // mui->qwNotesTree->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod((QObject*)root, "addTopItem",
-                            Q_RETURN_ARG(QVariant, item),
-                            Q_ARG(QVariant, strItem));
-  return item;
-}
+QVariant NotesList::addQmlTreeTopItem(QString strItem) { return 0; }
 
 QVariant NotesList::addQmlTreeChildItem(QVariant parentItem,
                                         QString strChildItem,
                                         QString iconFile) {
-  QQuickItem* root = NULL;  // mui->qwNotesTree->rootObject();
-  QVariant item;
-  QMetaObject::invokeMethod(
-      (QObject*)root, "addChildItem", Q_RETURN_ARG(QVariant, item),
-      Q_ARG(QVariant, parentItem), Q_ARG(QVariant, strChildItem),
-      Q_ARG(QVariant, iconFile));
-  return item;
+  return 0;
 }
 
-void NotesList::clearQmlTree() {
-  // QQuickItem* root = mui->qwNotesTree->rootObject();
-  // QMetaObject::invokeMethod((QObject*)root, "clearAll");
-}
+void NotesList::clearQmlTree() {}
 
 void NotesList::initQmlTree() {
   clearQmlTree();

@@ -681,26 +681,6 @@ void Method::clickMainEventData() {
   setMainTabCurrentIndex();
 }
 
-void Method::reeditMainEventData(int index0, int index1) {
-  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
-  int maindateIndex = index0;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
-  int maineventIndex =
-      index1;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
-
-  if (maindateIndex < 0) return;
-  if (maineventIndex < 0) return;
-
-  // int maindateCount = getCountFromQW(mw_one->ui->qwMainDate);
-  int topIndex = tw->topLevelItemCount() - 1 - maindateIndex;
-  int childIndex = index1;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
-
-  if (topIndex < 0) return;
-  if (childIndex < 0) return;
-
-  tw->setCurrentItem(tw->topLevelItem(topIndex)->child(childIndex));
-  mw_one->on_twItemDoubleClicked();
-}
-
 void Method::setSCrollPro(QObject* obj) {
   QScrollerProperties sp;
   sp.setScrollMetric(QScrollerProperties::DragStartDistance, 0.001);

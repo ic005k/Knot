@@ -443,8 +443,8 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
     else
       strTip = tr("Only the current day's records can be deleted.");
 
-    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-    m_ShowMsg->showMsg(str, strTip, 1);
+    // auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
+    // m_ShowMsg->showMsg(str, strTip, 1);
 
     return false;
   } else {
@@ -727,74 +727,6 @@ void MainWindow::on_twItemClicked() {
   }
 }
 
-void MainWindow::modify_Data() {
-  return;
-
-  QTreeWidget* tw = (QTreeWidget*)mw_one->ui->tabWidget->currentWidget();
-  QTreeWidgetItem* item = tw->currentItem();
-  QTreeWidgetItem* topItem = item->parent();
-  QString newtime = mw_one->ui->lblTime->text().trimmed();
-  if (item->childCount() == 0 && item->parent()->childCount() > 0) {
-    item->setText(0, newtime);
-    QString sa = mw_one->ui->editAmount->text().trimmed();
-    if (sa == "")
-      item->setText(1, "");
-    else
-      item->setText(1, QString("%1").arg(sa.toDouble(), 0, 'f', 2));
-    item->setText(2, mw_one->ui->editCategory->text().trimmed());
-    item->setText(3, mw_one->ui->editDetails->toPlainText().trimmed());
-    // Amount
-    int child = item->parent()->childCount();
-    double amount = 0;
-    for (int m = 0; m < child; m++) {
-      QString str = item->parent()->child(m)->text(1);
-      amount = amount + str.toDouble();
-    }
-    QString strAmount = QString("%1").arg(amount, 0, 'f', 2);
-    item->parent()->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
-    item->parent()->setText(1, QString::number(child));
-    if (strAmount == "0.00")
-      item->parent()->setText(2, "");
-    else
-      item->parent()->setText(2, strAmount);
-
-    int childRow0 = tw->currentIndex().row();
-    m_MainHelper->sort_childItem(item);
-
-    int childRow1 = 0;
-    for (int i = 0; i < topItem->childCount(); i++) {
-      QTreeWidgetItem* childItem = topItem->child(i);
-
-      QString time = childItem->text(0).split(".").at(1);
-      time = time.trimmed();
-
-      if (time == newtime) {
-        childRow1 = i;
-        break;
-      }
-    }
-
-    int newrow;
-    int row = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
-    if (childRow0 - childRow1 == 0) newrow = row;
-    if (childRow0 - childRow1 < 0) newrow = row + childRow1 - childRow0;
-    if (childRow0 - childRow1 > 0) newrow = row - (childRow0 - childRow1);
-
-    int maindateIndex =
-        0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainDate);
-
-    isEditItem = true;
-    reloadMain();
-
-    QTimer::singleShot(100, mw_one, [this, maindateIndex, newrow]() {
-      // m_Method->setCurrentIndexFromQW(mw_one->ui->qwMainDate, maindateIndex);
-      isEditItem = true;
-      m_Method->clickMainDate(maindateIndex);
-      // m_Method->setCurrentIndexFromQW(mw_one->ui->qwMainEvent, newrow);
-    });
-  }
-}
-
 void MainWindow::on_twItemDoubleClicked() {
   // m_EditRecord->monthSum();
 
@@ -921,18 +853,6 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
 
       return true;
     }
-  }*/
-
-  /*if (watch == mw_one->ui->qwMainTab && evn->type() == QEvent::Show) {
-    QTimer::singleShot(200, this, [this]() {
-      sendFakeTouch();
-
-      QQuickItem* root = mw_one->ui->qwMainTab->rootObject();
-      if (root) {
-        QMetaObject::invokeMethod(root, "forceActivateUI",
-                                  Qt::QueuedConnection);
-      }
-    });
   }*/
 
   return QWidget::eventFilter(watch, evn);
