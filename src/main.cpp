@@ -407,7 +407,7 @@ void loadTheme(bool isDark) {
 
     // 强制窗口重绘
     if (mw_one) {
-      // mw_one->init_Theme();
+      mw_one->init_Theme();
       QEvent updateEvent(QEvent::UpdateRequest);
       QApplication::sendEvent(mw_one, &updateEvent);
     }
@@ -440,9 +440,9 @@ void loadTheme(bool isDark) {
           widget != mw_one->ui->btn8 && widget != mw_one->ui->btn9 &&
           widget != mw_one->ui->btnDot && widget != mw_one->ui->btnDel_Number &&
           widget != mw_one->ui->lblMonthSum && widget != mw_one->ui->lblTime &&
-          widget != mw_one->ui->lblGpsInfo &&
+          widget != m_Steps->getLabelGpsInfoWidget() &&
           widget != m_Steps->m_speedometer && widget != m_sliderButton &&
-          widget != mw_one->ui->lblGpsDateTime &&
+
           widget != mw_one->ui->lblSyncNote &&
           widget != mw_one->ui->lblVectorStatus) {
         widget->setFont(qApp->font());

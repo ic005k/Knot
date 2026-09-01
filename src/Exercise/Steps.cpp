@@ -2,6 +2,7 @@
 
 #include "MainWindow.h"
 #include "defines.h"
+#include "ui_Steps.h"
 
 bool isGpsTest = false;
 
@@ -53,41 +54,35 @@ double calculateHaversineDistance(double lat1, double lon1, double lat2,
 QJniObject gm_activity;
 #endif
 
-Steps::Steps(QWidget* parent) : QDialog(parent) {
+Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
+  ui->setupUi(this);
   this->installEventFilter(this);
+  this->setModal(true);
 
-  return;
+  initUI();
 
-  QString date = QString::number(QDate::currentDate().month()) + "-" +
-                 QString::number(QDate::currentDate().day());
-  // mw_one->ui->lblCurrent->setText(date + " " +
-  // QTime::currentTime().toString());
+  QFont font0 = m_Method->getNewFont(15);
 
-  // QFont font0 = m_Method->getNewFont(15);
-  //  mw_one->ui->lblSteps->setFont(font0);
+  font0.setPointSize(13);
+  // ui->lblGpsDateTime->setFont(font0);
+  font0.setBold(true);
 
-  // font0.setPointSize(13);
-  // mw_one->ui->lblGpsDateTime->setFont(font0);
-  // font0.setBold(true);
+  ui->tabMotion->setTabVisible(3, false);
 
-  // mw_one->ui->tabMotion->setTabVisible(3, false);
+  QFont font1 = m_Method->getNewFont(17);
+  font1.setBold(true);
 
-  // QFont font1 = m_Method->getNewFont(17);
-  // font1.setBold(true);
+  ui->lblGpsInfo->setStyleSheet(lblStyle);
 
-  // mw_one->ui->lblGpsInfo->setStyleSheet(lblStyle);
-
-  // mw_one->ui->lblGpsInfo->setFont(font1);
-
-  // mw_one->ui->btnGetGpsListData->hide();
+  ui->lblGpsInfo->setFont(font1);
 
   QFontMetrics fm(this->font());
   int textHeight = fm.height();
   int iconSize = static_cast<int>(textHeight * 0.9);
   // 确保图标大小是合理的 (不小于 20px)
   iconSize = qMax(iconSize, 20);
-  // mw_one->ui->btnSelGpsDate->setIconSize(QSize(iconSize, iconSize));
-  // mw_one->ui->btnSportsChart->setIconSize(QSize(iconSize, iconSize));
+  // ui->btnSelGpsDate->setIconSize(QSize(iconSize, iconSize));
+  // ui->btnSportsChart->setIconSize(QSize(iconSize, iconSize));
 
   tmeRefreshSteps = new QTimer(this);
   connect(tmeRefreshSteps, &QTimer::timeout, this, &Steps::refreshSteps);
@@ -99,7 +94,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
   // Steps Chart
   m_stepChart = new StepHillChart(this);
   m_stepChart->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  // mw_one->ui->tab_Steps->layout()->addWidget(m_stepChart);
+  ui->tab_Gps->layout()->addWidget(m_stepChart);
   m_stepChart->setStepData(m_stepData);
 
   getHardStepSensor();
@@ -109,25 +104,25 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 
   // Speed
   m_speedometer = new Speedometer(this);
-  // mw_one->ui->f_speed->setFixedHeight(120);
+  ui->f_speed->setFixedHeight(120);
   m_speedometer->setMaxSpeed(10.00);  // 最高时速(km/h)
   m_speedometer->setMinSpeed(0);      // 最低时速(km/h)
   m_speedometer->setCurrentSpeed(0.0);
   m_speedometer->setBackgroundColor(QColor(30, 30, 30));  // 背景色
-  // mw_one->ui->f_speed->layout()->setSpacing(0);
-  // mw_one->ui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
-  // mw_one->ui->f_speed->layout()->addWidget(m_speedometer);
-  // mw_one->ui->f_speed->hide();
+  ui->f_speed->layout()->setSpacing(0);
+  ui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
+  ui->f_speed->layout()->addWidget(m_speedometer);
+  ui->f_speed->hide();
 
   // Compass
   compass = new CompassWidget();
-  // mw_one->ui->vboxCompass->addWidget(compass);
-  // mw_one->ui->vboxCompass->setContentsMargins(0, 0, 0, 0);
-  // mw_one->ui->frame_3->setContentsMargins(0, 0, 0, 0);
-  // if (isAndroid)
-  //  mw_one->ui->frame_3->setFixedHeight(300);
-  // else
-  //  mw_one->ui->frame_3->setFixedHeight(200);
+  ui->vboxCompass->addWidget(compass);
+  ui->vboxCompass->setContentsMargins(0, 0, 0, 0);
+  ui->frame_3->setContentsMargins(0, 0, 0, 0);
+  if (isAndroid)
+    ui->frame_3->setFixedHeight(300);
+  else
+    ui->frame_3->setFixedHeight(200);
   directionRoute = tr("Direction");
 
   // Weather
@@ -184,6 +179,8 @@ Steps::Steps(QWidget* parent) : QDialog(parent) {
 }
 
 Steps::~Steps() {
+  delete ui;
+
   // 【关键】在做任何清理之前，先阻止所有事件（包括底层隐式定时器）
   // 这会告诉 Qt/Cocoa：这个对象正在销毁，不要再派发任何事件给它
   this->blockSignals(true);
@@ -192,6 +189,55 @@ Steps::~Steps() {
   this->hide();
 
   prepareDestroy();
+}
+
+void Steps::initUI() {
+  ui->f_steps_btn->setFixedHeight(ui->tabMotion->tabBar()->height());
+  ui->f_steps_btn->setContentsMargins(0, 0, 0, 0);
+  ui->f_steps_btn->layout()->setContentsMargins(0, 0, 0, 0);
+  ui->tabMotion->setCornerWidget(ui->f_steps_btn, Qt::TopRightCorner);
+
+  QString rbStyle = ui->rbCycling->styleSheet();
+  ui->rbHiking->setStyleSheet(rbStyle);
+  ui->rbRunning->setStyleSheet(rbStyle);
+  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
+
+  ui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
+  ui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
+  ui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
+  ui->chkPlayRunVoice->setChecked(Reg.value("/GPS/isPlayRunVoice", 0).toBool());
+  isChkPlayRunVoice = ui->chkPlayRunVoice->isChecked();
+
+  ui->btnGPS->setStyleSheet(btnRoundStyle);
+  ui->btnGPS->hide();
+
+  ui->frame_btnGps->setFixedHeight(80);
+  QWidget* centralWidget = new QWidget(mw_one);
+  QVBoxLayout* layout = new QVBoxLayout(centralWidget);
+
+  mw_one->m_MainHelper->sliderButton = new SliderButton(centralWidget);
+  mw_one->m_MainHelper->sliderButton->setTipText(
+      tr("Slide Right to Start or Stop"));
+  layout->addWidget(mw_one->m_MainHelper->sliderButton);
+
+  QObject::connect(mw_one->m_MainHelper->sliderButton,
+                   &SliderButton::sliderMovedToEnd, mw_one,
+                   [&]() { ui->btnGPS->click(); });
+
+  ui->frame_btnGps->layout()->addWidget(centralWidget);
+
+  int fh = 80 - ui->frame_btnGps->contentsMargins().top() * 2 -
+           layout->contentsMargins().top() * 2 -
+           mw_one->m_MainHelper->sliderButton->contentsMargins().top() * 2 -
+           centralWidget->contentsMargins().top() * 2 - 10;
+  ui->btnPause->setFixedHeight(fh);
+  ui->btnPause->setFixedWidth(fh);
+  ui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
+  ui->btnPause->setIconSize(QSize(fh - 10, fh - 10));
+  ui->frame_btnGps->layout()->removeWidget(ui->btnPause);
+  ui->frame_btnGps->layout()->addWidget(ui->btnPause);
+  ui->btnPause->setEnabled(false);
+  ui->btnPause->hide();
 }
 
 void Steps::setAddressResolverConnect() {
@@ -256,8 +302,6 @@ void Steps::closeSteps() {
     mw_one->ui->frameMain->show();
   } else
     m_Method->openMainEntranceWindow();
-
-  mw_one->ui->frameSteps->hide();
 }
 
 void Steps::on_btnReset_clicked() {
@@ -267,8 +311,6 @@ void Steps::on_btnReset_clicked() {
 
   QString date = QString::number(QDate::currentDate().month()) + "-" +
                  QString::number(QDate::currentDate().day());
-  mw_one->ui->lblCurrent->setText(date + " " + QTime::currentTime().toString());
-  mw_one->ui->lblNow->setText(date + " " + QTime::currentTime().toString());
 }
 
 void Steps::saveSteps() {
@@ -364,41 +406,25 @@ void Steps::openStepsUI() {
   // 延迟一小段时间再触发，避免模块快速切换时反复启停
   QTimer::singleShot(500, m_NotesList, &NotesList::rebuilderNotesVector);
 
-  mw_one->ui->frameMain->hide();
-  mw_one->ui->frameSteps->show();
-
-  int btnh = mw_one->ui->rbCycling->height();
-  auto btn0 = mw_one->ui->btnAIExerciseSuggestions;
+  int btnh = ui->rbCycling->height();
+  auto btn0 = ui->btnAIExerciseSuggestions;
   btn0->setIconSize(QSize(btnh - 3, btnh - 3));
   btn0->setFixedSize(QSize(btnh, btnh));
 
   if (mw_one->m_Preferences->ui->chkAI->isChecked()) {
-    mw_one->ui->btnAIExerciseSuggestions->show();
+    ui->btnAIExerciseSuggestions->show();
   } else {
-    mw_one->ui->btnAIExerciseSuggestions->hide();
+    ui->btnAIExerciseSuggestions->hide();
   }
 
   if (isAndroid) {
     getHardStepSensor();
-
-    if (isHardStepSensor == 0) {
-      mw_one->ui->tabMotion->setTabEnabled(0, false);
-      mw_one->ui->tabMotion->setCurrentIndex(1);
-    }
-    if (isHardStepSensor == 1) {
-      mw_one->ui->lblSteps->hide();
-      mw_one->ui->tabMotion->setTabEnabled(0, true);
-    }
   }
 
   updateHardSensorSteps();
 
-  QString date = QString::number(QDate::currentDate().month()) + "-" +
-                 QString::number(QDate::currentDate().day());
-  mw_one->ui->lblNow->setText(date + " " + QTime::currentTime().toString());
-
-  if (mw_one->ui->lblGpsInfo->text() == tr("GPS Info") ||
-      mw_one->ui->lblGpsInfo->text() == "GPS Info") {
+  if (ui->lblGpsInfo->text() == tr("GPS Info") ||
+      ui->lblGpsInfo->text() == "GPS Info") {
     QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
     double m_td = Reg.value("/GPS/TotalDistance", 0).toDouble();
 
@@ -407,14 +433,14 @@ void Steps::openStepsUI() {
     strGpsInfoShow = QString(" \n") + " \n" + " \n" + " \n" + " \n" + " \n" +
                      " \n" + " \n" + " \n" + tr("Total Distance") + " : " +
                      strTotalDistance;
-    mw_one->ui->lblGpsInfo->setText(strGpsInfoShow);
+    ui->lblGpsInfo->setText(strGpsInfoShow);
   }
 
   if (getGpsListCount() == 0 && !isGpsRun) {
     int nYear = QDate::currentDate().year();
     int nMonth = QDate::currentDate().month();
-    loadGpsList(nYear, nMonth);
-    allGpsTotal();
+    // loadGpsList(nYear, nMonth);
+    // allGpsTotal();
   }
 
   // Route
@@ -422,11 +448,16 @@ void Steps::openStepsUI() {
   // 再次连接信号槽，防止初始化时连接出现问题
   setAddressResolverConnect();
 
-  if (mw_one->ui->tabMotion->currentIndex() == 0) {
-    tmeRefreshSteps->start(3000);
-  }
-
   m_Reader->initTTS();
+
+  this->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
+                    mw_one->geometry().width(), mw_one->geometry().height());
+
+  show();
+
+  if (isAndroid) {
+    mw_one->ui->frameMain->hide();
+  }
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {
@@ -682,8 +713,8 @@ void Steps::startRecordMotion() {
             &Steps::positionUpdated);
     m_positionSource->setUpdateInterval(2000);
   } else {
-    mw_one->ui->lblGpsInfo->setText(tr("No GPS signal..."));
-    mw_one->ui->btnGPS->setText(tr("Start"));
+    ui->lblGpsInfo->setText(tr("No GPS signal..."));
+    ui->btnGPS->setText(tr("Start"));
     return;
   }
 #endif
@@ -716,7 +747,7 @@ void Steps::startRecordMotion() {
   } else
     t0 = QDate::currentDate().toString();
 
-  mw_one->ui->lblGpsDateTime->setText(t0 + " " + strStartTime);
+  // mw_one->ui->lblGpsDateTime->setText(t0 + " " + strStartTime);
   setDateLabelToAndroid(t0 + " " + strStartTime);
 
   startDT = QDateTime::currentDateTime();
@@ -747,26 +778,26 @@ void Steps::startRecordMotion() {
   m_Reader->keepScreenOn();
   emit distanceChanged(m_distance);
 
-  mw_one->ui->btnGPS->setText(tr("Stop"));
-  mw_one->ui->tabMotion->setCurrentIndex(1);
+  ui->btnGPS->setText(tr("Stop"));
+  ui->tabMotion->setCurrentIndex(1);
 
-  mw_one->ui->lblGpsInfo->setStyleSheet(lblStartStyle);
-  mw_one->ui->btnGPS->setStyleSheet(btnRoundStyleRed);
+  ui->lblGpsInfo->setStyleSheet(lblStartStyle);
+  ui->btnGPS->setStyleSheet(btnRoundStyleRed);
 
-  mw_one->ui->btnSelGpsDate->setEnabled(false);
-  mw_one->ui->rbCycling->setEnabled(false);
-  mw_one->ui->rbHiking->setEnabled(false);
-  mw_one->ui->rbRunning->setEnabled(false);
+  // ui->btnSelGpsDate->setEnabled(false);
+  ui->rbCycling->setEnabled(false);
+  ui->rbHiking->setEnabled(false);
+  ui->rbRunning->setEnabled(false);
 
-  if (mw_one->ui->rbCycling->isChecked()) saveInterval = 0.016f;
-  if (mw_one->ui->rbHiking->isChecked()) saveInterval = 0.008f;
-  if (mw_one->ui->rbRunning->isChecked()) saveInterval = 0.008f;
+  if (ui->rbCycling->isChecked()) saveInterval = 0.016f;
+  if (ui->rbHiking->isChecked()) saveInterval = 0.008f;
+  if (ui->rbRunning->isChecked()) saveInterval = 0.008f;
 
   QTimer::singleShot(1000, mw_one, []() {
     if (!mw_one->myGetGpsDataThread->isRunning()) {
       isRunPaused = false;
       mw_one->myGetGpsDataThread->start();
-      mw_one->ui->btnPause->setEnabled(true);
+      // ui->btnPause->setEnabled(true);
     }
 
     isGpsRun = true;
@@ -924,11 +955,11 @@ void Steps::stopGPSFromService() {
 }
 
 void Steps::updateGpsUI() {
-  mw_one->ui->lblGpsInfo->setText(strGpsInfoShow);
+  ui->lblGpsInfo->setText(strGpsInfoShow);
 
   if (m_time.second() % 3 == 0) {
     compass->setBearing(bearing1);
-    mw_one->ui->lblDirection->setText(directionRoute);
+    ui->lblDirection->setText(directionRoute);
 
     if (mySpeed > 0) {
       compass->setSpeed(mySpeed);
@@ -1211,8 +1242,8 @@ void Steps::stopRecordMotion() {
   refreshRoute();
   saveSpeedData(strJsonSpeedFile, mySpeed, altitude);
 
-  mw_one->ui->btnPause->setEnabled(false);
-  mw_one->ui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
+  ui->btnPause->setEnabled(false);
+  ui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
 
   QTimer::singleShot(2000, mw_one, [this]() {
     isGpsRun = false;
@@ -1232,10 +1263,10 @@ void Steps::stopRecordMotion() {
     str_type = "";
   });
 
-  mw_one->ui->lblGpsInfo->setText(strGpsInfoShow);
+  ui->lblGpsInfo->setText(strGpsInfoShow);
 
-  mw_one->ui->lblGpsInfo->setStyleSheet(lblStyle);
-  mw_one->ui->btnGPS->setStyleSheet(btnRoundStyle);
+  ui->lblGpsInfo->setStyleSheet(lblStyle);
+  ui->btnGPS->setStyleSheet(btnRoundStyle);
 
 #ifdef Q_OS_ANDROID
   stopGPSFromService();
@@ -1246,10 +1277,10 @@ void Steps::stopRecordMotion() {
   delete m_positionSource;
 #endif
 
-  mw_one->ui->btnSelGpsDate->setEnabled(true);
-  mw_one->ui->rbCycling->setEnabled(true);
-  mw_one->ui->rbHiking->setEnabled(true);
-  mw_one->ui->rbRunning->setEnabled(true);
+  // mw_one->ui->btnSelGpsDate->setEnabled(true);
+  ui->rbCycling->setEnabled(true);
+  ui->rbHiking->setEnabled(true);
+  ui->rbRunning->setEnabled(true);
 }
 
 void Steps::refreshRoute() {
@@ -1279,9 +1310,9 @@ void Steps::refreshMotionData() {
 
   QString t00, t1, t2, t3, t4, t5;
 
-  if (mw_one->ui->rbCycling->isChecked()) str_type = tr("Ride");
-  if (mw_one->ui->rbHiking->isChecked()) str_type = tr("Hike");
-  if (mw_one->ui->rbRunning->isChecked()) str_type = tr("Run");
+  if (ui->rbCycling->isChecked()) str_type = tr("Ride");
+  if (ui->rbHiking->isChecked()) str_type = tr("Hike");
+  if (ui->rbRunning->isChecked()) str_type = tr("Run");
   t00 = str_type + " " + t0;
 
   t1 = tr("Time") + ": " + strStartTime + " - " + strEndTime + strCurrentTemp;
@@ -1313,11 +1344,11 @@ void Steps::refreshMotionData() {
     stry = QString::number(nYear);
     strm = QString::number(nMonth);
     QString strTitle = stry + " - " + strm;
-    if (mw_one->ui->btnSelGpsDate->text() != strTitle) {
+    /*if (mw_one->ui->btnSelGpsDate->text() != strTitle) {
       clearAllGpsList();
       loadGpsList(nYear, nMonth);
       mw_one->ui->btnSelGpsDate->setText(strTitle);
-    }
+    }*/
 
     QString text0, text1, startTime1, startTime2;
     int countList = 0;  // m_Method->getCountFromQW(mw_one->ui->qwGpsList);
@@ -1470,8 +1501,8 @@ void Steps::clearAllGpsList() {
 }
 
 void Steps::loadGpsList(int nYear, int nMonth) {
-  mw_one->ui->btnSelGpsDate->setText(QString::number(nYear) + " - " +
-                                     QString::number(nMonth));
+  // mw_one->ui->btnSelGpsDate->setText(QString::number(nYear) + " - " +
+  //                                   QString::number(nMonth));
 
   QSettings Reg(iniDir + QString::number(nYear) + "-gpslist.ini",
                 QSettings::IniFormat);
@@ -1514,7 +1545,7 @@ void Steps::loadGpsList(int nYear, int nMonth) {
 }
 
 void Steps::selGpsListYearMonth() {
-  QStringList list = mw_one->ui->btnSelGpsDate->text().split("-");
+  QStringList list;  // = mw_one->ui->btnSelGpsDate->text().split("-");
   int y = 2025;
   int m = 2;
   if (list.count() == 2) {
@@ -1560,7 +1591,7 @@ QString Steps::getGpsListText0(int index) { return ""; }
 QString Steps::getGpsListText2(int index) { return ""; }
 
 void Steps::allGpsTotal() {
-  QString title = mw_one->ui->btnSelGpsDate->text();
+  QString title;  // = mw_one->ui->btnSelGpsDate->text();
   QStringList list = title.split("-");
   QString stry = list.at(0);
   stry = stry.trimmed();
@@ -1761,7 +1792,7 @@ void Steps::updateGpsTrack() {
   strGpsMapSpeed = st4;
 
   QString str_year, str_month, str_gpsdate;
-  str_gpsdate = mw_one->ui->btnSelGpsDate->text();
+  // str_gpsdate = mw_one->ui->btnSelGpsDate->text();
   QStringList gpsdateList = str_gpsdate.split("-");
   if (gpsdateList.count() == 2) {
     str_year = gpsdateList.at(0).trimmed();
@@ -1907,7 +1938,7 @@ void Steps::updateGpsMapUi() {
     /////////////////////////////////////////////////////
 
     updateMapTrackUi(lastLat, lastLon);
-    mw_one->ui->lblGpsDateTime->setText(strGpsMapDateTime);
+    // mw_one->ui->lblGpsDateTime->setText(strGpsMapDateTime);
     updateInfoText(strGpsMapDistnce, strGpsMapSpeed);
   }
 }
@@ -2008,10 +2039,10 @@ QVector<GPSCoordinate> detectAndCorrectOutliers(
 }
 
 void Steps::saveMovementType() {
-  bool b1 = mw_one->ui->rbCycling->isChecked();
-  bool b2 = mw_one->ui->rbHiking->isChecked();
-  bool b3 = mw_one->ui->rbRunning->isChecked();
-  bool b4 = mw_one->ui->chkPlayRunVoice->isChecked();
+  bool b1 = ui->rbCycling->isChecked();
+  bool b2 = ui->rbHiking->isChecked();
+  bool b3 = ui->rbRunning->isChecked();
+  bool b4 = ui->chkPlayRunVoice->isChecked();
 
   QFuture<void> future = QtConcurrent::run([=]() {
     QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
@@ -2106,7 +2137,6 @@ void Steps::updateHardSensorSteps() {
   if (steps < 0) return;
   if (steps > 100000000) return;
   CurrentSteps = ts - resetSteps;
-  mw_one->ui->lcdNumber->display(QString::number(steps));
 
   setTableSteps(steps);
 }
@@ -2617,7 +2647,7 @@ QString Steps::getGpsListFilePath(const QString& strGpsList) {
   strGpsMapSpeed = st4;
 
   QString str_year, str_month, str_gpsdate;
-  str_gpsdate = mw_one->ui->btnSelGpsDate->text();
+  // str_gpsdate = mw_one->ui->btnSelGpsDate->text();
   QStringList gpsdateList = str_gpsdate.split("-");
   if (gpsdateList.count() == 2) {
     str_year = gpsdateList.at(0).trimmed();
@@ -3256,11 +3286,7 @@ void Steps::getRemarks(const QString& strGpsTime) {
   }
 }
 
-void Steps::refreshSteps() {
-  if (mw_one->ui->frameSteps->isHidden()) return;
-
-  updateHardSensorSteps();
-}
+void Steps::refreshSteps() { updateHardSensorSteps(); }
 
 void Steps::prepareDestroy() {
   // 1. 定时器
@@ -3288,4 +3314,39 @@ void Steps::prepareDestroy() {
 #ifdef Q_OS_ANDROID
   stopGPSFromService();
 #endif
+}
+void Steps::on_btnBack_clicked() {}
+
+void Steps::on_btnGPS_clicked() {
+  if (ui->btnGPS->text() == tr("Start")) {
+    startRecordMotion();
+
+  } else if (ui->btnGPS->text() == tr("Stop")) {
+    stopRecordMotion();
+    ui->btnGPS->setText(tr("Start"));
+  }
+}
+
+void Steps::on_btnPause_clicked() {
+  if (!isRunPaused) {
+    isRunPaused = true;
+    ui->btnPause->setIcon(QIcon(":/res/erun.svg"));
+    ui->lblGpsInfo->setStyleSheet(lblPausedStyle);
+  } else {
+    isRunPaused = false;
+    ui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
+    ui->lblGpsInfo->setStyleSheet(lblStartStyle);
+  }
+}
+
+QString Steps::getDirectionText() { return ui->lblDirection->text(); }
+
+QLabel* Steps::getLabelGpsInfoWidget() { return ui->lblGpsInfo; }
+
+void Steps::on_btnStepsOptions_clicked() { m_StepsOptions->init(); }
+
+void Steps::on_btnMap_clicked() { m_Steps->openMapWindow(); }
+
+void Steps::on_btnAIExerciseSuggestions_clicked() {
+  mw_one->on_btnAIExerciseSuggestions_clicked();
 }

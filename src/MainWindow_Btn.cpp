@@ -107,7 +107,7 @@ void MainWindow::on_btnRename_clicked() { m_Notes->renameTitle(false); }
 
 void MainWindow::on_btnHideFind_clicked() { closeTextToolBar(); }
 
-void MainWindow::on_btnStepsOptions_clicked() { m_StepsOptions->init(); }
+void MainWindow::on_btnStepsOptions_clicked() {}
 
 void MainWindow::on_btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
@@ -235,15 +235,7 @@ void MainWindow::on_btnMove() {
   }
 }
 
-void MainWindow::on_btnGPS_clicked() {
-  if (mw_one->ui->btnGPS->text() == tr("Start")) {
-    m_Steps->startRecordMotion();
-
-  } else if (mw_one->ui->btnGPS->text() == tr("Stop")) {
-    m_Steps->stopRecordMotion();
-    mw_one->ui->btnGPS->setText(tr("Start"));
-  }
-}
+void MainWindow::on_btnGPS_clicked() {}
 
 void MainWindow::on_btnSelGpsDate_clicked() { m_Steps->selGpsListYearMonth(); }
 
@@ -710,7 +702,7 @@ void MainWindow::on_btnAddBookNote_clicked() { m_Reader->addBookNote(""); }
 
 void MainWindow::on_btnViewBookNote_clicked() { m_Reader->viewBookNote(); }
 
-void MainWindow::on_btnMap_clicked() { m_Steps->openMapWindow(); }
+void MainWindow::on_btnMap_clicked() {}
 
 void MainWindow::on_btnSportsChart_clicked() { m_Steps->showSportsChart(); }
 
@@ -881,17 +873,7 @@ void MainWindow::on_btnToPDF_clicked() {
   m_Notes->on_btnPDF_clicked();
 }
 
-void MainWindow::on_btnPause_clicked() {
-  if (!isRunPaused) {
-    isRunPaused = true;
-    mw_one->ui->btnPause->setIcon(QIcon(":/res/erun.svg"));
-    mw_one->ui->lblGpsInfo->setStyleSheet(m_Steps->lblPausedStyle);
-  } else {
-    isRunPaused = false;
-    mw_one->ui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
-    mw_one->ui->lblGpsInfo->setStyleSheet(m_Steps->lblStartStyle);
-  }
-}
+void MainWindow::on_btnPause_clicked() {}
 
 void MainWindow::on_btnTestWebDav_clicked() {
   auto msg = std::make_unique<ShowMessage>(mw_one);
@@ -1153,8 +1135,9 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mw_one->ui->frameSteps->isHidden()) {
-    on_btnBackSteps_clicked();
+  if (m_Steps->isVisible()) {
+    m_Steps->close();
+    m_Method->openMainEntranceWindow();
     return;
   }
 

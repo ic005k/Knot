@@ -16,8 +16,8 @@ class StepHillChart : public QFrame {
   void setStepData(const std::vector<int>& stepData);
 
   // 重写最小尺寸：适配安卓，最小高度50
-  QSize minimumSizeHint() const override { return QSize(0, 55); }
-  QSize sizeHint() const override { return QSize(0, 55); }
+  QSize minimumSizeHint() const override { return QSize(0, 30); }
+  QSize sizeHint() const override { return QSize(0, 30); }
 
  protected:
   void paintEvent(QPaintEvent* event) override;

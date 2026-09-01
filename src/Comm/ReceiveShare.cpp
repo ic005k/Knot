@@ -212,10 +212,10 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (m_StepsOptions->isVisible()) {
     m_StepsOptions->ui->btnBack->click();
-    mw_one->ui->btnBackSteps->click();
+    m_Steps->close();
   }
 
-  if (mw_one->ui->frameSteps->isVisible()) mw_one->ui->btnBackSteps->click();
+  if (m_Steps->isVisible()) m_Steps->close();
 
   if (mw_one->m_Preferences->isVisible())
     mw_one->m_Preferences->ui->btnBack->click();

@@ -384,6 +384,8 @@ class MainWindow : public QMainWindow {
 
   void clickMainTab(int index);
 
+  void on_btnAIExerciseSuggestions_clicked();
+
  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
@@ -864,8 +866,6 @@ class MainWindow : public QMainWindow {
   void on_btnAISteps_clicked();
 
   void on_btnAIExplanation_clicked();
-
-  void on_btnAIExerciseSuggestions_clicked();
 
   void on_actionCopyLog();
 

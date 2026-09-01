@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget* parent)
   qInfo() << "MainWindow初始化线程定时器完成...";
 
   init_UIWidget();
+  // init_Theme();
 
   qInfo() << "MainWindow初始化UI组件完成...";
 
@@ -1271,7 +1272,7 @@ void MainWindow::on_chkPlayRunVoice_clicked(bool checked) {
   if (checked) {
     isPlayBook = false;
     m_Method->stopPlayMyText();
-    m_Method->playMyText(mw_one->ui->lblDirection->text());
+    m_Method->playMyText(m_Steps->getDirectionText());
   }
 }
 

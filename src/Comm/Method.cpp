@@ -3,6 +3,7 @@
 #include <QKeyEvent>
 
 #include "src/Comm/IOSCircularProgress.h"
+// #include "src/Exercise/ui_Steps.h"
 #include "src/MainWindow.h"
 
 Method::Method(QWidget* parent) : QDialog(parent) {
@@ -2780,12 +2781,10 @@ void Method::set_ToolButtonStyle(QObject* parent) {
   for (int i = 0; i < btnList.count(); i++) {
     QToolButton* btn = (QToolButton*)btnList.at(i);
 
-    if (btn != mw_one->ui->btnGPS && btn != mw_one->ui->btnPause) {
-      setToolButtonQss(btn, 4, 5, "#3B82F6", "#FFFFFF", "#3B82F6", "#FFFFFF",
-                       "#2563EB", "#FFFFFF");
-
-      // mw_one->m_MainHelper->setToolButtonAnimation(btn, false);
-    }
+    // if (btn != m_Steps->ui->btnGPS && btn != m_Steps->ui->btnPause) {
+    setToolButtonQss(btn, 4, 5, "#3B82F6", "#FFFFFF", "#3B82F6", "#FFFFFF",
+                     "#2563EB", "#FFFFFF");
+    //}
   }
 }
 

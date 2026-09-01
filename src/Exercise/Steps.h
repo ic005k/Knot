@@ -238,6 +238,8 @@ class Steps : public QDialog {
   void updateGpsUI();
 
   void prepareDestroy();
+  QString getDirectionText();
+  QLabel* getLabelGpsInfoWidget();
  public slots:
   void clearAllGpsList();
   void getGpsTrack();
@@ -249,6 +251,18 @@ class Steps : public QDialog {
   void positionUpdated(const QGeoPositionInfo& info);
 
   void refreshSteps();
+
+  void on_btnBack_clicked();
+
+  void on_btnGPS_clicked();
+
+  void on_btnPause_clicked();
+
+  void on_btnStepsOptions_clicked();
+
+  void on_btnMap_clicked();
+
+  void on_btnAIExerciseSuggestions_clicked();
 
  private:
   QThread* geoThread;
@@ -406,6 +420,7 @@ class Steps : public QDialog {
   QString getGpsStatus();
   bool startGPSFromService();
   void stopGPSFromService();
+  void initUI();
  signals:
   void distanceChanged(double distance);
 

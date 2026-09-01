@@ -365,8 +365,6 @@ void MainWindow::init_UIWidget() {
   mw_one->ui->menubar->hide();
   mw_one->ui->statusbar->hide();
 
-  mw_one->ui->frameSteps->hide();
-
   mw_one->ui->frameCategory->hide();
 
   mw_one->ui->frameEditRecord->hide();
@@ -382,7 +380,7 @@ void MainWindow::init_UIWidget() {
 
   mw_one->ui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mw_one->ui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
-  mw_one->ui->chkPlayRunVoice->setStyleSheet(mw_one->m_Preferences->chkStyle);
+  // m_Steps->ui->chkPlayRunVoice->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mw_one->ui->twCloudBackup->setCurrentIndex(1);
   mw_one->ui->twCloudBackup->setTabVisible(0, false);
   mw_one->ui->chkWebDAV->hide();
@@ -442,59 +440,6 @@ void MainWindow::init_UIWidget() {
   mw_one->ui->btnFind->setFont(f);
 
   mw_one->ui->btnFind->setFont(f);
-
-  //
-
-  // mw_one->ui->f_steps_btn->setFixedHeight(
-  //     mw_one->ui->tabMotion->tabBar()->height());
-  // mw_one->ui->f_steps_btn->setContentsMargins(0, 0, 0, 0);
-  // mw_one->ui->f_steps_btn->layout()->setContentsMargins(0, 0, 0, 0);
-  //  mw_one->ui->tabMotion->setCornerWidget(mw_one->ui->f_steps_btn,
-  //                                         Qt::TopRightCorner);
-
-  // mw_one->ui->tabMotion->setCurrentIndex(1);
-  //
-
-  QString rbStyle = mw_one->ui->rbCycling->styleSheet();
-  mw_one->ui->rbHiking->setStyleSheet(rbStyle);
-  mw_one->ui->rbRunning->setStyleSheet(rbStyle);
-  QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
-
-  mw_one->ui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
-  mw_one->ui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
-  mw_one->ui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
-  mw_one->ui->chkPlayRunVoice->setChecked(
-      Reg.value("/GPS/isPlayRunVoice", 0).toBool());
-  m_Steps->isChkPlayRunVoice = mw_one->ui->chkPlayRunVoice->isChecked();
-
-  mw_one->ui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
-  mw_one->ui->btnGPS->hide();
-
-  mw_one->ui->frame_btnGps->setFixedHeight(80);
-  QWidget* centralWidget = new QWidget(mw_one);
-  QVBoxLayout* layout = new QVBoxLayout(centralWidget);
-
-  m_MainHelper->sliderButton = new SliderButton(centralWidget);
-  m_MainHelper->sliderButton->setTipText(tr("Slide Right to Start or Stop"));
-  layout->addWidget(m_MainHelper->sliderButton);
-
-  QObject::connect(m_MainHelper->sliderButton, &SliderButton::sliderMovedToEnd,
-                   mw_one, [&]() { mw_one->ui->btnGPS->click(); });
-
-  mw_one->ui->frame_btnGps->layout()->addWidget(centralWidget);
-
-  int fh = 80 - mw_one->ui->frame_btnGps->contentsMargins().top() * 2 -
-           layout->contentsMargins().top() * 2 -
-           m_MainHelper->sliderButton->contentsMargins().top() * 2 -
-           centralWidget->contentsMargins().top() * 2 - 10;
-  mw_one->ui->btnPause->setFixedHeight(fh);
-  mw_one->ui->btnPause->setFixedWidth(fh);
-  mw_one->ui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
-  mw_one->ui->btnPause->setIconSize(QSize(fh - 10, fh - 10));
-  mw_one->ui->frame_btnGps->layout()->removeWidget(mw_one->ui->btnPause);
-  mw_one->ui->frame_btnGps->layout()->addWidget(mw_one->ui->btnPause);
-  mw_one->ui->btnPause->setEnabled(false);
-  mw_one->ui->btnPause->hide();
 }
 
 QTreeWidget* MainWindow::init_TreeWidget(QString name) {

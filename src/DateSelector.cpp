@@ -103,7 +103,7 @@ void DateSelector::on_btnOk_clicked() {
   ymdList.append(m);
   ymdList.append(d);
 
-  if (!mw_one->ui->frameSteps->isHidden()) {
+  if (m_Steps->isVisible()) {
     m_Steps->getGpsListDataFromYearMonth();
   }
 

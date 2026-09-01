@@ -255,7 +255,7 @@ static void JavaNotify_14() {
         if (flag == "todo") {
           mw_one->m_TodoAlarm->setDateTime();
         } else if (flag == "gpslist") {
-          mw_one->ui->btnGetGpsListData->click();
+          // m_Steps->ui->btnGetGpsListData->click();
         } else {
           mw_one->m_DateSelector->ui->btnOk->click();
         }
