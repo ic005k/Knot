@@ -284,12 +284,12 @@ QUrl MainWindow::buildAiApiUrl(const QString& rawEndpoint) {
  */
 void MainWindow::setVectorStatus(int status, int current, int total) {
   if (!isLocalAIModel) {
-    mui->lblVectorStatus->hide();
+    mw_one->ui->lblVectorStatus->hide();
     return;
   }
 
-  mui->lblVectorStatus->show();
-  mui->lblVectorStatus->setProperty("state", QString::number(status));
+  mw_one->ui->lblVectorStatus->show();
+  mw_one->ui->lblVectorStatus->setProperty("state", QString::number(status));
 
   // ✅ 核心：整体字号变小，圆点通过 <font> 标签单独放大
   // size="+2" 表示在基础字号上增加 2pt，可根据视觉效果微调为 +3 或 +4
@@ -298,10 +298,10 @@ void MainWindow::setVectorStatus(int status, int current, int total) {
 
   if (status == 1 && total > 0) {
     double pct = 100.0 * current / total;
-    mui->lblVectorStatus->setText(
+    mw_one->ui->lblVectorStatus->setText(
         QString("%1%2(%3%)").arg(dotHtml).arg(space).arg(pct, 0, 'f', 1));
   } else {
-    mui->lblVectorStatus->setText(dotHtml);
+    mw_one->ui->lblVectorStatus->setText(dotHtml);
   }
 
   // ✅ QSS 中调小基础字号（例如从 11px 降到 9px）
@@ -326,8 +326,8 @@ void MainWindow::setVectorStatus(int status, int current, int total) {
         QLabel#lblVectorStatus[state="2"] { color: #ef5350; }
     )";
 
-  mui->lblVectorStatus->setStyleSheet(isDark ? darkStyle : lightStyle);
+  mw_one->ui->lblVectorStatus->setStyleSheet(isDark ? darkStyle : lightStyle);
 
-  mui->lblVectorStatus->style()->unpolish(mui->lblVectorStatus);
-  mui->lblVectorStatus->style()->polish(mui->lblVectorStatus);
+  mw_one->ui->lblVectorStatus->style()->unpolish(mw_one->ui->lblVectorStatus);
+  mw_one->ui->lblVectorStatus->style()->polish(mw_one->ui->lblVectorStatus);
 }

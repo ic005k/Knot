@@ -1,8 +1,9 @@
-﻿#include "src/AboutThis.h"
+﻿#include "AboutThis.h"
 
 #include "MainWindow.h"
 #include "defines.h"
 #include "ui_AboutThis.h"
+#include "ui_MainWindow.h"
 #include "version.h"
 
 AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {
@@ -260,7 +261,7 @@ int AboutThis::getAndroidVer() {
 void AboutThis::on_btnBack_About_clicked() {
   close();
   if (!isAndroid) {
-    mui->frameMain->show();
+    mw_one->ui->frameMain->show();
   } else
     m_Method->openMainEntranceWindow();
 }

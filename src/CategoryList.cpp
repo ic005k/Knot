@@ -61,10 +61,10 @@ void CategoryList::on_listWidget_itemClicked(QListWidgetItem* item) {
 }
 
 void CategoryList::on_btnDel_clicked() {
-  int count = 0;  // m_Method->getCountFromQW(mui->qwCategory);
+  int count = 0;  // m_Method->getCountFromQW(mw_one->ui->qwCategory);
   if (count == 0) return;
 
-  int row = 0;  // m_Method->getCurrentIndexFromQW(mui->qwCategory);
+  int row = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
 
   if (row < 0) return;
 
@@ -79,7 +79,7 @@ void CategoryList::on_btnDel_clicked() {
 
     ui->listWidget->takeItem(row);
 
-    // m_Method->delItemFromQW(mui->qwCategory, row);
+    // m_Method->delItemFromQW(mw_one->ui->qwCategory, row);
   }
   mw_one->m_EditRecord->saveMyClassification();
   if (ui->listWidget->count() > 0)
@@ -87,17 +87,18 @@ void CategoryList::on_btnDel_clicked() {
   else
     ui->editRename->clear();
 
-  // count = m_Method->getCountFromQW(mui->qwCategory);
-  mui->lblTypeInfo->setText(tr("Total") + " : " + QString::number(count));
+  // count = m_Method->getCountFromQW(mw_one->ui->qwCategory);
+  mw_one->ui->lblTypeInfo->setText(tr("Total") + " : " +
+                                   QString::number(count));
 }
 
 void CategoryList::on_btnOk_clicked() {
-  int index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwCategory);
+  int index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
   ui->listWidget->setCurrentRow(index);
 
   int row = ui->listWidget->currentRow();
   if (row >= 0) {
-    mui->editCategory->setText(ui->listWidget->currentItem()->text());
+    mw_one->ui->editCategory->setText(ui->listWidget->currentItem()->text());
   }
 
   on_btnCancel_clicked();
@@ -111,7 +112,7 @@ void CategoryList::on_listWidget_itemDoubleClicked(QListWidgetItem* item) {
 void CategoryList::on_Rename() {
   if (ui->listWidget->count() == 0) return;
 
-  int row = 0;  // m_Method->getCurrentIndexFromQW(mui->qwCategory);
+  int row = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
   ui->listWidget->setCurrentRow(row);
 
   oldName = ui->listWidget->currentItem()->text().trimmed();
@@ -125,7 +126,7 @@ void CategoryList::on_Rename() {
 
     ui->listWidget->insertItem(index, item);
 
-    // m_Method->modifyItemText0(mui->qwCategory, row, text);
+    // m_Method->modifyItemText0(mw_one->ui->qwCategory, row, text);
 
     QStringList list;
     for (int i = 0; i < ui->listWidget->count(); i++) {
@@ -155,7 +156,7 @@ void CategoryList::on_Rename() {
 
     renameAll();
 
-    mui->editCategory->setText(ui->editRename->text().trimmed());
+    mw_one->ui->editCategory->setText(ui->editRename->text().trimmed());
 
     mw_one->reloadMain();
 
@@ -164,10 +165,10 @@ void CategoryList::on_Rename() {
                        1);
 
     int cindex = ui->listWidget->currentRow();
-    mui->btnCancelType->click();
-    mui->btnType->click();
+    mw_one->ui->btnCancelType->click();
+    mw_one->ui->btnType->click();
     ui->listWidget->setCurrentRow(cindex);
-    // m_Method->setCurrentIndexFromQW(mui->qwCategory, cindex);
+    // m_Method->setCurrentIndexFromQW(mw_one->ui->qwCategory, cindex);
     setTypeRenameText();
   }
 }
@@ -311,18 +312,19 @@ void CategoryList::on_btnCancel_clicked() {
 
   if (isAndroid) {
     mw_one->m_EditRecord->openAddEventRecord(
-        mui->lblTitleEditRecord->text(), mui->editCategory->text(),
-        mui->editDetails->toPlainText(), mui->editAmount->text(),
-        mui->lblTime->text());
+        mw_one->ui->lblTitleEditRecord->text(),
+        mw_one->ui->editCategory->text(),
+        mw_one->ui->editDetails->toPlainText(), mw_one->ui->editAmount->text(),
+        mw_one->ui->lblTime->text());
   } else {
-    mui->frameEditRecord->show();
+    mw_one->ui->frameEditRecord->show();
   }
 
-  mui->frameCategory->hide();
+  mw_one->ui->frameCategory->hide();
 }
 
 void CategoryList::setTypeRenameText() {
-  int index = 0;     // m_Method->getCurrentIndexFromQW(mui->qwCategory);
-  QString str = "";  // m_Method->getText0(mui->qwCategory, index);
-  mui->editRenameType->setText(str);
+  int index = 0;     // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
+  QString str = "";  // m_Method->getText0(mw_one->ui->qwCategory, index);
+  mw_one->ui->editRenameType->setText(str);
 }

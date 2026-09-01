@@ -130,10 +130,10 @@ void CloudBackup::uploadData() {
           2))
     return;
 
-  mui->btnWebDAVBackup->setEnabled(false);
-  mui->btnWebDAVRestore->setEnabled(false);
+  mw_one->ui->btnWebDAVBackup->setEnabled(false);
+  mw_one->ui->btnWebDAVRestore->setEnabled(false);
 
-  if (mui->chkWebDAV->isChecked()) {
+  if (mw_one->ui->chkWebDAV->isChecked()) {
     QString url = getWebDAVArgument();
     createDirectory(url, "Knot/");
     uploadFileToWebDAV(url, zipfile, "Knot/memo.zip");
@@ -141,10 +141,10 @@ void CloudBackup::uploadData() {
 }
 
 QString CloudBackup::getWebDAVArgument() {
-  QString url = mui->cboxWebDAV->currentText().trimmed();
+  QString url = mw_one->ui->cboxWebDAV->currentText().trimmed();
   url = unifyWebDAVBaseUrlToDavEnd(url);
-  USERNAME = mui->editWebDAVUsername->text().trimmed();
-  APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
+  USERNAME = mw_one->ui->editWebDAVUsername->text().trimmed();
+  APP_PASSWORD = mw_one->ui->editWebDAVPassword->text().trimmed();
   return url;
 }
 
@@ -160,11 +160,11 @@ void CloudBackup::startBakData() {
   isUpData = true;
   mw_one->showProgress();
 
-  mui->progressBar->setValue(0);
-  mui->progBar->show();
-  mui->progBar->setMaximum(100);
-  mui->progBar->setMinimum(0);
-  mui->progBar->setValue(0);
+  mw_one->ui->progressBar->setValue(0);
+  mw_one->ui->progBar->show();
+  mw_one->ui->progBar->setMaximum(100);
+  mw_one->ui->progBar->setMinimum(0);
+  mw_one->ui->progBar->setValue(0);
 
   mw_one->myBakDataThread->start();
 }
@@ -195,9 +195,9 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
     return;
   }
 
-  // mui->progBar->show();
-  mui->progBar->setValue(0);
-  mui->progressBar->setValue(0);
+  // mw_one->ui->progBar->show();
+  mw_one->ui->progBar->setValue(0);
+  mw_one->ui->progressBar->setValue(0);
 
   QNetworkReply* reply = manager->put(request, file);
 
@@ -219,13 +219,13 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
               .arg(localFilePath, webdavUrl + remoteFileName),
           1);
 
-      mui->progBar->hide();
+      mw_one->ui->progBar->hide();
 
     } else {
       qDebug() << "上传失败：" << reply->errorString();
       qDebug() << "服务器响应：" << reply->readAll();
 
-      mui->progBar->hide();
+      mw_one->ui->progBar->hide();
 
       if (statusCode == 401) {
         auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
@@ -240,16 +240,16 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
     reply->deleteLater();
     manager->deleteLater();
 
-    mui->btnWebDAVBackup->setEnabled(true);
-    mui->btnWebDAVRestore->setEnabled(true);
+    mw_one->ui->btnWebDAVBackup->setEnabled(true);
+    mw_one->ui->btnWebDAVRestore->setEnabled(true);
   });
 }
 
 void CloudBackup::updateUploadProgress(qint64 bytesSent, qint64 bytesTotal) {
   if (bytesTotal > 0) {
     int percent = static_cast<int>((bytesSent * 100) / bytesTotal);
-    mui->progBar->setValue(percent);
-    mui->progressBar->setValue(percent);
+    mw_one->ui->progBar->setValue(percent);
+    mw_one->ui->progressBar->setValue(percent);
   }
 }
 
@@ -321,12 +321,12 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
           QString strReceived = m_Method->getFileSize(bytesReceived, 2);
           // qDebug() << "bytesTotal=" << bytesTotal
           //          << "bytesReceived=" << strReceived;
-          mui->lblReceivedBytes->setText(strReceived);
+          mw_one->ui->lblReceivedBytes->setText(strReceived);
           if (bytesTotal < 0) {
-            mui->progressBar->setMinimum(0);
-            mui->progressBar->setMaximum(0);
+            mw_one->ui->progressBar->setMinimum(0);
+            mw_one->ui->progressBar->setMaximum(0);
           }
-          mui->progressBar->setValue(percent);
+          mw_one->ui->progressBar->setValue(percent);
         });
       });
 
@@ -388,8 +388,8 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
             }
           } else {
             resetProgBar();
-            mui->progressBar->setValue(0);
-            mui->lblReceivedBytes->setText("0");
+            mw_one->ui->progressBar->setValue(0);
+            mw_one->ui->lblReceivedBytes->setText("0");
 
             file->remove();
             if (statusCode == 401) {
@@ -411,10 +411,10 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
 }
 
 void CloudBackup::resetProgBar() {
-  mui->progressBar->setMinimum(0);
-  mui->progressBar->setMaximum(100);
-  mui->btnWebDAVRestore->setEnabled(true);
-  mui->btnWebDAVBackup->setEnabled(true);
+  mw_one->ui->progressBar->setMinimum(0);
+  mw_one->ui->progressBar->setMaximum(100);
+  mw_one->ui->btnWebDAVRestore->setEnabled(true);
+  mw_one->ui->btnWebDAVBackup->setEnabled(true);
 }
 
 // 加密函数（返回Base64编码字符串）
@@ -535,10 +535,10 @@ void CloudBackup::startNextUpload() {
                 int percent = static_cast<int>(sent * 100.0 / total);
                 qDebug() << "Upload Progress:" << filePath << percent << "%";
                 // 同步更新界面进度条
-                mui->progBar->show();
-                mui->progBar->setMinimum(0);
-                mui->progBar->setMaximum(100);
-                mui->progBar->setValue(percent);
+                mw_one->ui->progBar->show();
+                mw_one->ui->progBar->setMinimum(0);
+                mw_one->ui->progBar->setMaximum(100);
+                mw_one->ui->progBar->setValue(percent);
               }
             });
 
@@ -550,7 +550,7 @@ void CloudBackup::startNextUpload() {
       file->close();
       file->deleteLater();
 
-      mui->progBar->setValue(0);
+      mw_one->ui->progBar->setValue(0);
     });
 
     activeReplies.insert(reply);
@@ -583,7 +583,7 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
   if (activeReplies.isEmpty() && uploadQueue.isEmpty()) {
     if (mw_one) {
       mw_one->safeCloseProgress();
-      mui->progBar->hide();
+      mw_one->ui->progBar->hide();
       mw_one->saveNeedSyncNotes();
       emit uploadAllFinished();
     }
@@ -1044,17 +1044,17 @@ void CloudBackup::backExit() {
   mw_one->m_Preferences->setEncSyncStatusTip();
 
   if (!isAndroid) {
-    mui->frameMain->show();
+    mw_one->ui->frameMain->show();
   } else
     m_Method->openMainEntranceWindow();
 
-  mui->frameOne->hide();
+  mw_one->ui->frameOne->hide();
 }
 
 void CloudBackup::save_WebDav() {
-  QString strWebDAV = mui->cboxWebDAV->currentText().trimmed();
-  QString strUserName = mui->editWebDAVUsername->text().trimmed();
-  QString password = mui->editWebDAVPassword->text().trimmed();
+  QString strWebDAV = mw_one->ui->cboxWebDAV->currentText().trimmed();
+  QString strUserName = mw_one->ui->editWebDAVUsername->text().trimmed();
+  QString password = mw_one->ui->editWebDAVPassword->text().trimmed();
   QString aesStr = aesEncrypt(password, aes_key, aes_iv);
 
   // ==========================
@@ -1073,17 +1073,17 @@ void CloudBackup::save_WebDav() {
   // ==========================
   // 3. 先把当前地址添加到ComboBox（自动去重）
   // ==========================
-  int idx = mui->cboxWebDAV->findText(strWebDAV);
+  int idx = mw_one->ui->cboxWebDAV->findText(strWebDAV);
   if (idx == -1) {
-    mui->cboxWebDAV->addItem(strWebDAV);
+    mw_one->ui->cboxWebDAV->addItem(strWebDAV);
   }
 
   // ==========================
   // 4. 去重并保存最终列表
   // ==========================
   QStringList items;
-  for (int i = 0; i < mui->cboxWebDAV->count(); ++i) {
-    QString text = mui->cboxWebDAV->itemText(i).trimmed();
+  for (int i = 0; i < mw_one->ui->cboxWebDAV->count(); ++i) {
+    QString text = mw_one->ui->cboxWebDAV->itemText(i).trimmed();
     if (!text.isEmpty()) {
       items.append(text);
     }
@@ -1101,8 +1101,10 @@ void CloudBackup::save_WebDav() {
   // ==========================
   // 5. 保存选项
   // ==========================
-  iniPreferences->setValue("/cloudbak/webdav", mui->chkWebDAV->isChecked());
-  iniPreferences->setValue("/cloudbak/autosync", mui->chkAutoSync->isChecked());
+  iniPreferences->setValue("/cloudbak/webdav",
+                           mw_one->ui->chkWebDAV->isChecked());
+  iniPreferences->setValue("/cloudbak/autosync",
+                           mw_one->ui->chkAutoSync->isChecked());
 
   // 立即写入磁盘
   iniPreferences->sync();
@@ -1112,9 +1114,9 @@ void CloudBackup::init_CloudBacup() {
   int count = iniPreferences->value("/webdav/count", 0).toInt();
 
   QStringList txtList;
-  int orgCount = mui->cboxWebDAV->count();
+  int orgCount = mw_one->ui->cboxWebDAV->count();
   for (int i = 0; i < orgCount; i++) {
-    txtList.append(mui->cboxWebDAV->itemText(i));
+    txtList.append(mw_one->ui->cboxWebDAV->itemText(i));
   }
 
   for (int i = 0; i < count; i++) {
@@ -1124,23 +1126,23 @@ void CloudBackup::init_CloudBacup() {
     txtList.append(text);
   }
   txtList.removeDuplicates();
-  mui->cboxWebDAV->clear();
-  mui->cboxWebDAV->addItems(txtList);
+  mw_one->ui->cboxWebDAV->clear();
+  mw_one->ui->cboxWebDAV->addItems(txtList);
 
-  mui->cboxWebDAV->setCurrentText(
+  mw_one->ui->cboxWebDAV->setCurrentText(
       iniPreferences->value("/webdav/url", "https://dav.jianguoyun.com/dav/")
           .toString());
 
-  mui->editWebDAVUsername->setText(
+  mw_one->ui->editWebDAVUsername->setText(
       iniPreferences->value("/webdav/username").toString());
 
   QString aesStr = iniPreferences->value("/webdav/password").toString();
   QString password = aesDecrypt(aesStr, aes_key, aes_iv);
-  mui->editWebDAVPassword->setText(password);
+  mw_one->ui->editWebDAVPassword->setText(password);
 
-  mui->chkWebDAV->setChecked(
+  mw_one->ui->chkWebDAV->setChecked(
       iniPreferences->value("/cloudbak/webdav", 1).toBool());
-  mui->chkAutoSync->setChecked(
+  mw_one->ui->chkAutoSync->setChecked(
       iniPreferences->value("/cloudbak/autosync", 0).toBool());
 }
 
@@ -1150,8 +1152,8 @@ void CloudBackup::changeComBoxWebDAV(const QString& arg1) {
   QString aesStr = iniPreferences->value("/webdav/password_" + arg1).toString();
   password = aesDecrypt(aesStr, aes_key, aes_iv);
 
-  mui->editWebDAVUsername->setText(username);
-  mui->editWebDAVPassword->setText(password);
+  mw_one->ui->editWebDAVUsername->setText(username);
+  mw_one->ui->editWebDAVPassword->setText(password);
 }
 
 void CloudBackup::webDAVRestoreData() {
@@ -1169,13 +1171,13 @@ void CloudBackup::webDAVRestoreData() {
           2))
     return;
   WEBDAV_URL = m_CloudBackup->getWebDAVArgument();
-  USERNAME = mui->editWebDAVUsername->text().trimmed();
-  APP_PASSWORD = mui->editWebDAVPassword->text().trimmed();
+  USERNAME = mw_one->ui->editWebDAVUsername->text().trimmed();
+  APP_PASSWORD = mw_one->ui->editWebDAVPassword->text().trimmed();
   downloadFile("Knot/memo.zip", filePath);
 
-  mui->progressBar->setValue(0);
-  mui->btnWebDAVRestore->setEnabled(false);
-  mui->btnWebDAVBackup->setEnabled(false);
+  mw_one->ui->progressBar->setValue(0);
+  mw_one->ui->btnWebDAVRestore->setEnabled(false);
+  mw_one->ui->btnWebDAVBackup->setEnabled(false);
 }
 
 bool CloudBackup::checkWebDAVConnection() {
@@ -1187,8 +1189,8 @@ bool CloudBackup::checkWebDAVConnection() {
     return false;
   }
 
-  QString username = mui->editWebDAVUsername->text().trimmed();
-  QString password = mui->editWebDAVPassword->text().trimmed();
+  QString username = mw_one->ui->editWebDAVUsername->text().trimmed();
+  QString password = mw_one->ui->editWebDAVPassword->text().trimmed();
 
   QNetworkAccessManager manager;
   QNetworkRequest request(url);

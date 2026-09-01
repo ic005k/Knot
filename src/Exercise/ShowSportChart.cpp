@@ -17,7 +17,7 @@ void Steps::showSportsChart() {
   }
 
   // 2. 读取 INI 文件（硬读1-12月，解决数据错乱）
-  QString title = mui->btnSelGpsDate->text();
+  QString title = mw_one->ui->btnSelGpsDate->text();
   QStringList list = title.split("-");
   if (list.size() < 2) {
     QLabel* errLabel = new QLabel(tr("Date format error!"), statsDialog);

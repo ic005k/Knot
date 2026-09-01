@@ -35,14 +35,14 @@ Preferences::Preferences(QWidget* parent)
   isFontChange = false;
 
   chkStyle = ui->chkDark->styleSheet();
-  mui->chkZip->setStyleSheet(chkStyle);
+  mw_one->ui->chkZip->setStyleSheet(chkStyle);
   ui->chkUIFont->setStyleSheet(chkStyle);
   ui->lblFontSize->setFixedHeight(40);
 
   QString lbl_style = ui->lblFontSet->styleSheet();
   ui->lblAdditional->setStyleSheet(lbl_style);
-  mui->lblDataEnc->setStyleSheet(lbl_style);
-  mui->lblWebDAVUrl->setStyleSheet(lbl_style);
+  mw_one->ui->lblDataEnc->setStyleSheet(lbl_style);
+  mw_one->ui->lblWebDAVUrl->setStyleSheet(lbl_style);
 
   ui->btnCustomFont->adjustSize();
   int hei = m_Method->getFontHeight();
@@ -57,8 +57,8 @@ Preferences::Preferences(QWidget* parent)
   // 多语言占位提示
   ui->editConcurrency->setPlaceholderText(tr("Enter 1~50"));
 
-  mui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
-  mui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
+  mw_one->ui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
+  mw_one->ui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
   // ui->editAIKey->setEchoMode(QLineEdit::EchoMode::Password);
 
   if (isAndroid) {
@@ -154,12 +154,12 @@ void Preferences::saveOptions() {
                              ui->cboxEndpoint->currentIndex());
   }
 
-  iniPreferences->setValue("/Options/Zip", mui->chkZip->isChecked());
-  QString password = mui->editPassword->text().trimmed();
+  iniPreferences->setValue("/Options/Zip", mw_one->ui->chkZip->isChecked());
+  QString password = mw_one->ui->editPassword->text().trimmed();
   QString aesStr = m_CloudBackup->aesEncrypt(password, aes_key0, aes_iv0);
   iniPreferences->setValue("/zip/password", aesStr);
 
-  isEncrypt = mui->chkZip->isChecked();
+  isEncrypt = mw_one->ui->chkZip->isChecked();
   if (isEncrypt)
     encPassword = password;
   else
@@ -326,14 +326,14 @@ void Preferences::initOptions() {
 
   QString aesStr = iniPreferences->value("/zip/password").toString();
   QString password = m_CloudBackup->aesDecrypt(aesStr, aes_key0, aes_iv0);
-  mui->editPassword->setText(password);
-  mui->editValidate->setText(password);
+  mw_one->ui->editPassword->setText(password);
+  mw_one->ui->editValidate->setText(password);
 
   maxNetConcurrent = iniPreferences->value("/Options/maxcon", 10).toInt();
   ui->editConcurrency->setText(QString::number(maxNetConcurrent));
 
   bool isZip = iniPreferences->value("/Options/Zip", false).toBool();
-  mui->chkZip->setChecked(isZip);
+  mw_one->ui->chkZip->setChecked(isZip);
   isEncrypt = isZip;
   if (isEncrypt)
     encPassword = password;
@@ -345,26 +345,26 @@ void Preferences::initOptions() {
 #else
 
   if (!devMode) {
-    mui->btnHome->hide();
+    mw_one->ui->btnHome->hide();
 
-    mui->btnSteps->hide();
+    mw_one->ui->btnSteps->hide();
 
-    mui->btnReader->hide();
-    mui->btnAdd->hide();
-    mui->btnDel->hide();
-    mui->btnFind->hide();
+    mw_one->ui->btnReader->hide();
+    mw_one->ui->btnAdd->hide();
+    mw_one->ui->btnDel->hide();
+    mw_one->ui->btnFind->hide();
 
-    mui->btnSelTab->hide();
-    mui->lblStats->hide();
+    mw_one->ui->btnSelTab->hide();
+    mw_one->ui->lblStats->hide();
 
     int s = 120;
     int qs = s - 40;
-    mui->btnTodo->setFixedHeight(s);
-    mui->btnTodo->setFixedWidth(s);
-    mui->btnTodo->setIconSize(QSize(qs, qs));
-    mui->btnNotes->setFixedHeight(s);
-    mui->btnNotes->setFixedWidth(s);
-    mui->btnNotes->setIconSize(QSize(qs, qs));
+    mw_one->ui->btnTodo->setFixedHeight(s);
+    mw_one->ui->btnTodo->setFixedWidth(s);
+    mw_one->ui->btnTodo->setIconSize(QSize(qs, qs));
+    mw_one->ui->btnNotes->setFixedHeight(s);
+    mw_one->ui->btnNotes->setFixedWidth(s);
+    mw_one->ui->btnNotes->setIconSize(QSize(qs, qs));
   }
 #endif
 
@@ -501,14 +501,14 @@ void Preferences::getCheckStatusChange() {
 }
 
 void Preferences::on_chkZip_clicked() {
-  if (mui->editPassword->text().trimmed() == "" ||
-      mui->editValidate->text().trimmed() == "") {
-    mui->chkZip->setChecked(false);
+  if (mw_one->ui->editPassword->text().trimmed() == "" ||
+      mw_one->ui->editValidate->text().trimmed() == "") {
+    mw_one->ui->chkZip->setChecked(false);
   }
 
-  if (mui->editPassword->text().trimmed() !=
-      mui->editValidate->text().trimmed()) {
-    mui->chkZip->setChecked(false);
+  if (mw_one->ui->editPassword->text().trimmed() !=
+      mw_one->ui->editValidate->text().trimmed()) {
+    mw_one->ui->chkZip->setChecked(false);
     auto msg = std::make_unique<ShowMessage>(this);
     msg->showMsg("Knot", tr("Password validation error."), 1);
 
@@ -519,7 +519,7 @@ void Preferences::on_chkZip_clicked() {
 }
 
 void Preferences::on_editPassword_textChanged(const QString& arg1) {
-  if (arg1.length() > 0) mui->chkZip->setChecked(false);
+  if (arg1.length() > 0) mw_one->ui->chkZip->setChecked(false);
 }
 
 void Preferences::on_editValidate_textChanged(const QString& arg1) {
@@ -533,66 +533,69 @@ void Preferences::closeEvent(QCloseEvent* event) {
   setEncSyncStatusTip();
 
   if (isChanged && isVisible()) {
-    mui->frameMain->hide();
+    mw_one->ui->frameMain->hide();
     loadTheme(isDark);
     if (!isAndroid) {
-      mui->frameMain->show();
+      mw_one->ui->frameMain->show();
     }
   }
 
   if (isLocalAIModel)
-    mui->lblVectorStatus->show();
+    mw_one->ui->lblVectorStatus->show();
   else
-    mui->lblVectorStatus->hide();
+    mw_one->ui->lblVectorStatus->hide();
   m_NotesList->rebuilderNotesVector();
 }
 
 void Preferences::on_btnShowPassword_pressed() {
-  mui->editPassword->setEchoMode(QLineEdit::EchoMode::Normal);
+  mw_one->ui->editPassword->setEchoMode(QLineEdit::EchoMode::Normal);
 }
 
 void Preferences::on_btnShowPassword_released() {
-  mui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
+  mw_one->ui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
 }
 
 void Preferences::on_btnShowValidate_pressed() {
-  mui->editValidate->setEchoMode(QLineEdit::EchoMode::Normal);
+  mw_one->ui->editValidate->setEchoMode(QLineEdit::EchoMode::Normal);
 }
 
 void Preferences::on_btnShowValidate_released() {
-  mui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
+  mw_one->ui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
 }
 
 void Preferences::on_chkDark_clicked() {}
 
 void Preferences::setEncSyncStatusTip() {
-  mui->lblStats->setStyleSheet(mw_one->labelNormalStyleSheet);
+  mw_one->ui->lblStats->setStyleSheet(mw_one->labelNormalStyleSheet);
 
-  if (mui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
-      mui->chkWebDAV->isChecked())
-    mui->lblStats->setStyleSheet(mw_one->labelEnSyncStyleSheet);
+  if (mw_one->ui->chkZip->isChecked() && mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked())
+    mw_one->ui->lblStats->setStyleSheet(mw_one->labelEnSyncStyleSheet);
 
-  if (mui->chkZip->isChecked() && !mui->chkAutoSync->isChecked() &&
-      !mui->chkWebDAV->isChecked())
-    mui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
+  if (mw_one->ui->chkZip->isChecked() &&
+      !mw_one->ui->chkAutoSync->isChecked() &&
+      !mw_one->ui->chkWebDAV->isChecked())
+    mw_one->ui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
 
-  if (mui->chkZip->isChecked() && !mui->chkAutoSync->isChecked() &&
-      mui->chkWebDAV->isChecked())
-    mui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
+  if (mw_one->ui->chkZip->isChecked() &&
+      !mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked())
+    mw_one->ui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
 
-  if (mui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
-      !mui->chkWebDAV->isChecked())
-    mui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
+  if (mw_one->ui->chkZip->isChecked() && mw_one->ui->chkAutoSync->isChecked() &&
+      !mw_one->ui->chkWebDAV->isChecked())
+    mw_one->ui->lblStats->setStyleSheet(mw_one->labelEncStyleSheet);
 
-  if (!mui->chkZip->isChecked() && mui->chkAutoSync->isChecked() &&
-      mui->chkWebDAV->isChecked())
-    mui->lblStats->setStyleSheet(mw_one->labelSyncStyleSheet);
+  if (!mw_one->ui->chkZip->isChecked() &&
+      mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked())
+    mw_one->ui->lblStats->setStyleSheet(mw_one->labelSyncStyleSheet);
 
   if (isAndroid)
-    mui->lblStatus->hide();
+    mw_one->ui->lblStatus->hide();
   else {
-    mui->lblStatus->setText("Knot   V:" + ver);
-    mui->lblStatus->setStyleSheet(mui->lblStats->styleSheet());
+    mw_one->ui->lblStatus->setText("Knot   V:" + ver);
+    mw_one->ui->lblStatus->setStyleSheet(mw_one->ui->lblStats->styleSheet());
   }
 }
 
@@ -600,7 +603,7 @@ void Preferences::openPreferences() {
   m_NotesList->safeExitLlama();
 
   if (isAndroid) {
-    mui->frameMain->hide();
+    mw_one->ui->frameMain->hide();
   }
 
   int x, y;
@@ -622,7 +625,7 @@ void Preferences::openPreferences() {
   setGeometry(x, y, width(), height());
   setModal(true);
 
-  ui->sliderFontSize->setStyleSheet(mui->hsM->styleSheet());
+  ui->sliderFontSize->setStyleSheet(mw_one->ui->hsM->styleSheet());
 
   int savedPosition =
       iniPreferences->value("/Options/FontSize", defaultFontSize).toInt();
@@ -643,8 +646,8 @@ void Preferences::openPreferences() {
   // init edit toolbar
   initTextToolbarDynamic(this);
   if (editFilter != nullptr) {
-    mui->editPassword->removeEventFilter(editFilter);
-    mui->editValidate->removeEventFilter(editFilter);
+    mw_one->ui->editPassword->removeEventFilter(editFilter);
+    mw_one->ui->editValidate->removeEventFilter(editFilter);
     ui->editEndpoint->removeEventFilter(editFilter);
     ui->editAIKey->removeEventFilter(editFilter);
     ui->editAIModelID->removeEventFilter(editFilter);
@@ -653,8 +656,8 @@ void Preferences::openPreferences() {
   }
   editFilter = new EditEventFilter(textToolbarDynamic, this);
 
-  mui->editPassword->installEventFilter(editFilter);
-  mui->editValidate->installEventFilter(editFilter);
+  mw_one->ui->editPassword->installEventFilter(editFilter);
+  mw_one->ui->editValidate->installEventFilter(editFilter);
   ui->editEndpoint->installEventFilter(editFilter);
   ui->editAIKey->installEventFilter(editFilter);
   ui->editAIModelID->installEventFilter(editFilter);
@@ -680,7 +683,7 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
 
 void Preferences::on_btnAISelect_clicked() {
   close();
-  mui->frameMain->hide();
+  mw_one->ui->frameMain->hide();
 
   QVariantList result;
   for (int i = 0; i < ui->cboxEndpoint->count(); ++i) {

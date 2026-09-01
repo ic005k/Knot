@@ -14,14 +14,14 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
     return true;
   }
 
-  if (watch == mui->lblStats) {
+  if (watch == mw_one->ui->lblStats) {
     if (event->type() == QEvent::MouseButtonDblClick) {
       mw_one->on_btnSelTab_clicked();
       return true;
     }
   }
 
-  if (watch == mui->lblTitleEditRecord) {
+  if (watch == mw_one->ui->lblTitleEditRecord) {
     if (event->type() == QEvent::MouseButtonPress) {
       selectTab();
 
@@ -41,7 +41,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
 }
 
 void MainHelper::selectTab() {
-  QString title = mui->lblTitleEditRecord->text();
+  QString title = mw_one->ui->lblTitleEditRecord->text();
   title = title.mid(0, 4);
   if (!title.contains("Add") && !title.contains(QObject::tr("Add"))) return;
 
@@ -51,23 +51,23 @@ void MainHelper::selectTab() {
     mw_one->on_btnBackEditRecord_clicked();
   }
 
-  mui->btnHome->click();
+  mw_one->ui->btnHome->click();
   isSelectTab = true;
 }
 
 void MainHelper::clickBtnChart() {}
 
 void MainHelper::clickBtnRestoreTab() {
-  // if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
+  // if (m_Method->getCountFromQW(mw_one->ui->qwTabRecycle) == 0) return;
 
-  int count = mui->tabWidget->tabBar()->count();
+  int count = mw_one->ui->tabWidget->tabBar()->count();
   QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
 
   int c_year = QDate::currentDate().year();
   int iniFileCount = c_year - 2025 + 1 + 1;
 
-  int index = 0;         // m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
-  QString recycle = "";  // m_Method->getText3(mui->qwTabRecycle, index);
+  int index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwTabRecycle);
+  QString recycle = "";  // m_Method->getText3(mw_one->ui->qwTabRecycle, index);
   QStringList recycleList = recycle.split("\n");
 
   if (recycleList.at(0).contains(".json")) {
@@ -118,9 +118,10 @@ void MainHelper::clickBtnRestoreTab() {
     }
   }
 
-  QString tab_name = "";  // m_Method->getText0(mui->qwTabRecycle, index);
+  QString tab_name =
+      "";  // m_Method->getText0(mw_one->ui->qwTabRecycle, index);
   QTreeWidget* tw = mw_one->init_TreeWidget(twName);
-  mui->tabWidget->addTab(tw, tab_name);
+  mw_one->ui->tabWidget->addTab(tw, tab_name);
 
   mw_one->addItem(tab_name, "", "", "", 0);
   mw_one->setCurrentIndex(count);
@@ -153,9 +154,9 @@ void MainHelper::openTabRecycle() {
   mw_one->showProgress();
 
   // 切换UI
-  mui->frameMain->hide();
+  mw_one->ui->frameMain->hide();
 
-  // m_Method->clearAllBakList(mui->qwTabRecycle);
+  // m_Method->clearAllBakList(mw_one->ui->qwTabRecycle);
 
   // 使用QFutureWatcher监控后台任务完成
   QFutureWatcher<QStringList>* watcher = new QFutureWatcher<QStringList>(this);
@@ -246,7 +247,7 @@ void MainHelper::openTabRecycle() {
       QString tab_time = str.split("-=-").at(1);
       QString iniTotal = str.split("-=-").at(2);
       iniTotal = iniTotal.trimmed();
-      // m_Method->addItemToQW(mui->qwTabRecycle, tab_name, tab_time, "",
+      // m_Method->addItemToQW(mw_one->ui->qwTabRecycle, tab_name, tab_time, "",
       // iniTotal,
       //                       0);
     }
@@ -297,7 +298,7 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
     // ======================
     // 所有 UI/QML 操作，全部放在主线程
     // ======================
-    // m_Method->clearAllBakList(mui->qwBakList);
+    // m_Method->clearAllBakList(mw_one->ui->qwBakList);
 
     int bakCount = finalList.count();
     for (int i = 0; i < bakCount; i++) {
@@ -305,7 +306,8 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
       QString str = finalList.at(bakCount - 1 - i);
       action = str.split("-===-").at(0);
       bakfile = str.split("-===-").at(1);
-      // m_Method->addItemToQW(mui->qwBakList, action, "", "", bakfile, 0);
+      // m_Method->addItemToQW(mw_one->ui->qwBakList, action, "", "", bakfile,
+      // 0);
     }
 
     qDebug() << "BakFileList update completed";
@@ -319,10 +321,10 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
 }
 
 void MainHelper::delBakFile() {
-  // if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
+  // if (m_Method->getCountFromQW(mw_one->ui->qwBakList) == 0) return;
 
-  int index = 0;          // m_Method->getCurrentIndexFromQW(mui->qwBakList);
-  QString bak_file = "";  // m_Method->getText3(mui->qwBakList, index);
+  int index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwBakList);
+  QString bak_file = "";  // m_Method->getText3(mw_one->ui->qwBakList, index);
 
   auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
@@ -337,9 +339,10 @@ void MainHelper::delBakFile() {
 }
 
 void MainHelper::delTabRecycleFile() {
-  // if (m_Method->getCountFromQW(mui->qwTabRecycle) == 0) return;
-  int index = 0;          // m_Method->getCurrentIndexFromQW(mui->qwTabRecycle);
-  QString tab_file = "";  // m_Method->getText3(mui->qwTabRecycle, index);
+  // if (m_Method->getCountFromQW(mw_one->ui->qwTabRecycle) == 0) return;
+  int index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwTabRecycle);
+  QString tab_file =
+      "";  // m_Method->getText3(mw_one->ui->qwTabRecycle, index);
 
   auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
@@ -362,10 +365,10 @@ void MainHelper::delTabRecycleFile() {
 }
 
 void MainHelper::importBakFileList() {
-  // if (m_Method->getCountFromQW(mui->qwBakList) == 0) return;
+  // if (m_Method->getCountFromQW(mw_one->ui->qwBakList) == 0) return;
 
-  int cur_index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwBakList);
-  QString str = "";   // m_Method->getText3(mui->qwBakList, cur_index);
+  int cur_index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwBakList);
+  QString str = "";   // m_Method->getText3(mw_one->ui->qwBakList, cur_index);
   zipfile = str.trimmed();
 
   if (!zipfile.isNull()) {
@@ -527,7 +530,7 @@ void MainWindow::reloadMain() {
   int total = tw->topLevelItemCount();
 
   if (total == 0) {
-    // m_Method->clearAllBakList(mui->qwMainEvent);
+    // m_Method->clearAllBakList(mw_one->ui->qwMainEvent);
     return;
   }
 
@@ -552,7 +555,8 @@ void MainWindow::reloadMain() {
 
     topitem = text0;
 
-    // m_Method->insertItem(mui->qwMainDate, text0, text1, text2, text3, 0);
+    // m_Method->insertItem(mw_one->ui->qwMainDate, text0, text1, text2, text3,
+    // 0);
 
     listMainDate.insert(0, text0 + "|==|" + text1 + "|==|" + text2);
 

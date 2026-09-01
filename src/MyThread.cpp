@@ -20,14 +20,14 @@ void MainWindow::readTWDone() {
     tw->setCurrentItem(tw->topLevelItem(tw->topLevelItemCount() - 1));
   }
 
-  mui->actionImport_Data->setEnabled(true);
-  mui->actionExport_Data->setEnabled(true);
-  mui->actionDel_Tab->setEnabled(true);
-  mui->actionAdd_Tab->setEnabled(true);
-  mui->actionView_App_Data->setEnabled(true);
+  mw_one->ui->actionImport_Data->setEnabled(true);
+  mw_one->ui->actionExport_Data->setEnabled(true);
+  mw_one->ui->actionDel_Tab->setEnabled(true);
+  mw_one->ui->actionAdd_Tab->setEnabled(true);
+  mw_one->ui->actionView_App_Data->setEnabled(true);
   isReadTWEnd = true;
 
-  mui->progBar->setMaximum(100);
+  mw_one->ui->progBar->setMaximum(100);
 }
 
 ReadChartThread::ReadChartThread(QObject* parent) : QThread{parent} {
@@ -45,9 +45,9 @@ void ReadChartThread::run() {
 
 void MainWindow::readChartDone() {
   if (isShowDetails)
-    mui->lblStats->setText(strShowDetails);
+    mw_one->ui->lblStats->setText(strShowDetails);
   else
-    mui->lblStats->setText(strStats);
+    mw_one->ui->lblStats->setText(strStats);
   isReadEnd = true;
 
   // qDebug() << "Read Chart End ..." << freqPointList << amountList;
@@ -107,7 +107,7 @@ void MainWindow::saveDone() {
 
   isSaveEnd = true;
 
-  mui->progBar->setMaximum(100);
+  mw_one->ui->progBar->setMaximum(100);
 
   if (SaveType == "tab" || SaveType == "alltab") startRead(strDate);
 }

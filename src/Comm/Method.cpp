@@ -530,7 +530,7 @@ void Method::initSearchResults() {
   clearAll();
   int count = resultsList.count();
 
-  // mui->lblSearchResult->setText(tr("Results") + " : " +
+  // mw_one->ui->lblSearchResult->setText(tr("Results") + " : " +
   // QString::number(count));
   if (count == 0) return;
 
@@ -607,8 +607,8 @@ void Method::clickMainDate(int index) {
   mw_one->isDelItem = false;
   mw_one->isEditItem = false;
 
-  QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
-  int maindateIndex = index;  // getCurrentIndexFromQW(mui->qwMainDate);
+  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
+  int maindateIndex = index;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
 
   int topIndex = tw->topLevelItemCount() - maindateIndex - 1;
 
@@ -627,7 +627,7 @@ void Method::clickMainDate(int index) {
     text2 = childItem->text(2);
     text3 = childItem->text(3);
 
-    // addItemToQW(mui->qwMainEvent, text0, text1, text2, text3, 0);
+    // addItemToQW(mw_one->ui->qwMainEvent, text0, text1, text2, text3, 0);
 
     mw_one->listMainDateDetail.append(text0 + "|==|" + text1 + "|==|" + text2 +
                                       "|==|" + text3);
@@ -651,10 +651,10 @@ void Method::setMainTabCurrentIndex() {
 }
 
 void Method::clickMainDateData(int index) {
-  QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
-  int maindateIndex = index;  // getCurrentIndexFromQW(mui->qwMainDate);
+  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
+  int maindateIndex = index;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
   int maindateCount =
-      mw_one->listMainDate.count();  // getCountFromQW(mui->qwMainDate);
+      mw_one->listMainDate.count();  // getCountFromQW(mw_one->ui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
 
   if (topIndex < 0) return;
@@ -665,12 +665,12 @@ void Method::clickMainDateData(int index) {
 }
 
 void Method::clickMainEventData() {
-  QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
-  int maindateIndex = 0;  // getCurrentIndexFromQW(mui->qwMainDate);
+  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
+  int maindateIndex = 0;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
   int maindateCount =
-      mw_one->listMainDate.count();  // getCountFromQW(mui->qwMainDate);
+      mw_one->listMainDate.count();  // getCountFromQW(mw_one->ui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
-  int childIndex = 0;  // getCurrentIndexFromQW(mui->qwMainEvent);
+  int childIndex = 0;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
   tw->setCurrentItem(tw->topLevelItem(topIndex)->child(childIndex));
 
   if (topIndex < 0) return;
@@ -682,16 +682,17 @@ void Method::clickMainEventData() {
 }
 
 void Method::reeditMainEventData(int index0, int index1) {
-  QTreeWidget* tw = mw_one->get_tw(mui->tabWidget->currentIndex());
-  int maindateIndex = index0;   // getCurrentIndexFromQW(mui->qwMainDate);
-  int maineventIndex = index1;  // getCurrentIndexFromQW(mui->qwMainEvent);
+  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
+  int maindateIndex = index0;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
+  int maineventIndex =
+      index1;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
 
   if (maindateIndex < 0) return;
   if (maineventIndex < 0) return;
 
-  // int maindateCount = getCountFromQW(mui->qwMainDate);
+  // int maindateCount = getCountFromQW(mw_one->ui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - 1 - maindateIndex;
-  int childIndex = index1;  // getCurrentIndexFromQW(mui->qwMainEvent);
+  int childIndex = index1;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
 
   if (topIndex < 0) return;
   if (childIndex < 0) return;
@@ -2799,7 +2800,7 @@ void Method::set_ToolButtonStyle(QObject* parent) {
   for (int i = 0; i < btnList.count(); i++) {
     QToolButton* btn = (QToolButton*)btnList.at(i);
 
-    if (btn != mui->btnGPS && btn != mui->btnPause) {
+    if (btn != mw_one->ui->btnGPS && btn != mw_one->ui->btnPause) {
       setToolButtonQss(btn, 4, 5, "#3B82F6", "#FFFFFF", "#3B82F6", "#FFFFFF",
                        "#2563EB", "#FFFFFF");
 
@@ -3351,7 +3352,7 @@ void Method::setLineEditToolBar(QObject* parent, EditEventFilter* editFilter) {
 
   for (int i = 0; i < btnList.count(); i++) {
     QLineEdit* btn = (QLineEdit*)btnList.at(i);
-    if (btn != mui->editPassword && btn != mui->editValidate &&
+    if (btn != mw_one->ui->editPassword && btn != mw_one->ui->editValidate &&
         btn != m_StepsOptions->ui->editStepLength &&
         btn != m_StepsOptions->ui->editStepsThreshold)
       btn->installEventFilter(editFilter);

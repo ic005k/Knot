@@ -497,7 +497,8 @@ void NotesList::clearMD_Pic() {
     }
   }
 
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+  if (mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked()) {
     int count = needDelWebDAVFiles.count();
     if (count > 0) m_Notes->delRemoteFile(needDelWebDAVFiles);
     m_Method->setAccessCount(needDelWebDAVFiles.count());

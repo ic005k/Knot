@@ -126,7 +126,7 @@ void Todo::showAlarmWindow(const QString& strTime, const QString& strText,
   bool isVoice = mw_one->m_Todo->isVoice(strText);
   connect(closeBtn, &QPushButton::pressed, alarmDialog, [=]() {
     alarmDialog->close();
-    if (mui->frameMain->isHidden()) {
+    if (mw_one->ui->frameMain->isHidden()) {
       m_Method->openMainEntranceWindow();
     }
   });

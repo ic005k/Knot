@@ -192,7 +192,7 @@ void ReceiveShare::on_btnInsertToNote_clicked() {
 void ReceiveShare::openNoteEditor() {
   closeAllChildWindows();
   m_Notes->isRequestOpenNoteEditor = true;
-  mui->btnNotes->click();
+  mw_one->ui->btnNotes->click();
 }
 
 QObjectList ReceiveShare::getAllFrame(QObjectList lstUIControls) {
@@ -212,22 +212,23 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (m_StepsOptions->isVisible()) {
     m_StepsOptions->ui->btnBack->click();
-    mui->btnBackSteps->click();
+    mw_one->ui->btnBackSteps->click();
   }
 
-  if (mui->frameSteps->isVisible()) mui->btnBackSteps->click();
+  if (mw_one->ui->frameSteps->isVisible()) mw_one->ui->btnBackSteps->click();
 
   if (mw_one->m_Preferences->isVisible())
     mw_one->m_Preferences->ui->btnBack->click();
 
-  if (mui->frameOne->isVisible()) mui->btnBack_One->click();
+  if (mw_one->ui->frameOne->isVisible()) mw_one->ui->btnBack_One->click();
 
-  if (mui->frameCategory->isVisible()) {
-    mui->btnCancelType->click();
-    mui->btnBackEditRecord->click();
+  if (mw_one->ui->frameCategory->isVisible()) {
+    mw_one->ui->btnCancelType->click();
+    mw_one->ui->btnBackEditRecord->click();
   }
 
-  if (mui->frameEditRecord->isVisible()) mui->btnBackEditRecord->click();
+  if (mw_one->ui->frameEditRecord->isVisible())
+    mw_one->ui->btnBackEditRecord->click();
 }
 
 void ReceiveShare::shareString(const QString& title, const QString& content) {
@@ -328,7 +329,7 @@ void ReceiveShare::goReceiveShare() {
 
     closeAllChildWindows();
 
-    mui->btnTodo->click();
+    mw_one->ui->btnTodo->click();
   }
 
   if (method == "appendNote") {
@@ -364,7 +365,7 @@ void ReceiveShare::goReceiveShare() {
     }
 
     closeAllChildWindows();
-    mui->btnNotes->click();
+    mw_one->ui->btnNotes->click();
   }
 }
 

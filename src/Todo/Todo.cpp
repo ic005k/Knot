@@ -29,8 +29,9 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   connect(tmePlayProgress, SIGNAL(timeout()), this,
           SLOT(on_ShowPlayProgress()));
 
-  // QScroller::grabGesture(mui->editTodo, QScroller::LeftMouseButtonGesture);
-  // m_Method->setSCrollPro(mui->editTodo);
+  // QScroller::grabGesture(mw_one->ui->editTodo,
+  // QScroller::LeftMouseButtonGesture);
+  // m_Method->setSCrollPro(mw_one->ui->editTodo);
 }
 
 Todo::~Todo() { delete ui; }
@@ -197,14 +198,14 @@ void Todo::closeTodo() {
   if (isAndroid) {
     m_Method->openMainEntranceWindow();
   } else {
-    mui->frameMain->show();
+    mw_one->ui->frameMain->show();
   }
 
   refreshTableLists();
   refreshAlarm();
 
-  if (isNeedSync && mui->chkAutoSync->isChecked() &&
-      mui->chkWebDAV->isChecked()) {
+  if (isNeedSync && mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked()) {
     QString todoFile = iniDir + "todo.json";
     QString todoZipFile = privateDir + "KnotData/todo.json.zip";
 
@@ -870,11 +871,11 @@ void Todo::refreshAlarm() {
 void Todo::changeTodoIcon(bool isToday) {
   if (!isToday) {
     if (isDark)
-      mui->btnTodo->setIcon(QIcon(":/res/todo_l.svg"));
+      mw_one->ui->btnTodo->setIcon(QIcon(":/res/todo_l.svg"));
     else
-      mui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
+      mw_one->ui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
   } else {
-    mui->btnTodo->setIcon(QIcon(":/res/todo1.svg"));
+    mw_one->ui->btnTodo->setIcon(QIcon(":/res/todo1.svg"));
   }
 }
 
@@ -1070,7 +1071,7 @@ void Todo::reeditText() {
 
   edit->horizontalScrollBar()->setHidden(true);
   edit->verticalScrollBar()->setStyleSheet(
-      mui->editDetails->verticalScrollBar()->styleSheet());
+      mw_one->ui->editDetails->verticalScrollBar()->styleSheet());
 
   QToolButton* btnCancel = new QToolButton(this);
   QToolButton* btnCopy = new QToolButton(this);
@@ -1180,7 +1181,7 @@ void Todo::addToRecycle(int index) {
   saveTodo();
 }
 
-void Todo::NewTodo() { mui->btnTodo->click(); }
+void Todo::NewTodo() { mw_one->ui->btnTodo->click(); }
 
 void Todo::startRecordVoice() {}
 
@@ -1309,7 +1310,8 @@ void Todo::openTodo() {
 
   mw_one->showProgress();
 
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+  if (mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked()) {
     if (!m_CloudBackup->checkWebDAVConnection()) {
       mw_one->safeCloseProgress();
       auto msg = std::make_unique<ShowMessage>(mw_one);

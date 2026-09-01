@@ -408,7 +408,7 @@ void loadTheme(bool isDark) {
 
     // 强制窗口重绘
     if (mw_one) {
-      mw_one->init_Theme();
+      // mw_one->init_Theme();
       QEvent updateEvent(QEvent::UpdateRequest);
       QApplication::sendEvent(mw_one, &updateEvent);
     }
@@ -428,33 +428,36 @@ void loadTheme(bool isDark) {
       return;
 
     foreach (QWidget* widget, qApp->allWidgets()) {
-      if (widget != mui->btnMenu && widget != mui->btnHome &&
-          widget != mui->btnAdd && widget != mui->btnDel &&
-          widget != mui->btnSync && widget != mui->btnFind &&
-          widget != mui->btnSelTab && widget != mui->btnReader &&
-          widget != mui->btnTodo && widget != mui->btnNotes &&
-          widget != mui->btnSteps && widget != mui->btn0 &&
-          widget != mui->editAmount && widget != mui->btn1 &&
-          widget != mui->btn2 && widget != mui->btn3 && widget != mui->btn4 &&
-          widget != mui->btn5 && widget != mui->btn6 && widget != mui->btn7 &&
-          widget != mui->btn8 && widget != mui->btn9 && widget != mui->btnDot &&
-          widget != mui->btnDel_Number && widget != mui->lblMonthSum &&
-          widget != mui->lblTime && widget != mui->lblGpsInfo &&
+      if (widget != mw_one->ui->btnMenu && widget != mw_one->ui->btnHome &&
+          widget != mw_one->ui->btnAdd && widget != mw_one->ui->btnDel &&
+          widget != mw_one->ui->btnSync && widget != mw_one->ui->btnFind &&
+          widget != mw_one->ui->btnSelTab && widget != mw_one->ui->btnReader &&
+          widget != mw_one->ui->btnTodo && widget != mw_one->ui->btnNotes &&
+          widget != mw_one->ui->btnSteps && widget != mw_one->ui->btn0 &&
+          widget != mw_one->ui->editAmount && widget != mw_one->ui->btn1 &&
+          widget != mw_one->ui->btn2 && widget != mw_one->ui->btn3 &&
+          widget != mw_one->ui->btn4 && widget != mw_one->ui->btn5 &&
+          widget != mw_one->ui->btn6 && widget != mw_one->ui->btn7 &&
+          widget != mw_one->ui->btn8 && widget != mw_one->ui->btn9 &&
+          widget != mw_one->ui->btnDot && widget != mw_one->ui->btnDel_Number &&
+          widget != mw_one->ui->lblMonthSum && widget != mw_one->ui->lblTime &&
+          widget != mw_one->ui->lblGpsInfo &&
           widget != m_Steps->m_speedometer && widget != m_sliderButton &&
-          widget != mui->lblGpsDateTime && widget != mui->lblSyncNote &&
-          widget != mui->lblVectorStatus) {
+          widget != mw_one->ui->lblGpsDateTime &&
+          widget != mw_one->ui->lblSyncNote &&
+          widget != mw_one->ui->lblVectorStatus) {
         widget->setFont(qApp->font());
 
         font.setBold(true);
 
-        mui->lblTitleEditRecord->setFont(font);
-        if (mui && mui->lblSyncNote) {
+        mw_one->ui->lblTitleEditRecord->setFont(font);
+        if (mw_one->ui && mw_one->ui->lblSyncNote) {
           QFont mFont = font;
           if (!isAndroid)
             mFont.setPointSize(9);
           else
             mFont.setPointSize(12);
-          mui->lblSyncNote->setFont(mFont);
+          mw_one->ui->lblSyncNote->setFont(mFont);
         }
         widget->updateGeometry();
         widget->repaint();
@@ -472,7 +475,7 @@ void loadTheme(bool isDark) {
   }
 
   // 消除潜在的补全列表窗口
-  mui->editCategory->setText("");
+  mw_one->ui->editCategory->setText("");
 
   isInitThemeEnd = true;
 

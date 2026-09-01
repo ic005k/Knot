@@ -5,9 +5,9 @@
 extern SearchWorker* m_searchWorker;
 
 void MainWindow::init_TotalData() {
-  int count = mui->tabWidget->tabBar()->count();
+  int count = mw_one->ui->tabWidget->tabBar()->count();
   for (int i = 0; i < count; i++) {
-    mui->tabWidget->removeTab(0);
+    mw_one->ui->tabWidget->removeTab(0);
   }
 
   QString ini_file;
@@ -27,7 +27,7 @@ void MainWindow::init_TotalData() {
                           .value("TabName" + QString::number(i),
                                  tr("Tab") + QString::number(i + 1))
                           .toString();
-    mui->tabWidget->addTab(tw, tabText);
+    mw_one->ui->tabWidget->addTab(tw, tabText);
 
     addItem(tabText, "", "", "", 0);
   }
@@ -37,7 +37,7 @@ void MainWindow::init_TotalData() {
     QTreeWidget* tw = init_TreeWidget(tw_name);
 
     QString tabText = tr("Tab") + " " + QString::number(1);
-    mui->tabWidget->addTab(tw, tabText);
+    mw_one->ui->tabWidget->addTab(tw, tabText);
     addItem(tabText, "", "", "", 0);
 
     saveTab();
@@ -50,19 +50,19 @@ void MainWindow::init_TotalData() {
   else
     currentTabIndex = 0;
 
-  mui->tabWidget->setCurrentIndex(currentTabIndex);
+  mw_one->ui->tabWidget->setCurrentIndex(currentTabIndex);
   setCurrentIndex(currentTabIndex);
   QTreeWidget* twCur = (QTreeWidget*)tabData->currentWidget();
   readData(twCur);
-  mui->actionImport_Data->setEnabled(false);
-  mui->actionExport_Data->setEnabled(false);
-  mui->actionDel_Tab->setEnabled(false);
-  mui->actionAdd_Tab->setEnabled(false);
-  mui->actionView_App_Data->setEnabled(false);
+  mw_one->ui->actionImport_Data->setEnabled(false);
+  mw_one->ui->actionExport_Data->setEnabled(false);
+  mw_one->ui->actionDel_Tab->setEnabled(false);
+  mw_one->ui->actionAdd_Tab->setEnabled(false);
+  mw_one->ui->actionView_App_Data->setEnabled(false);
 
   if (!initMain) {
-    mui->progBar->setHidden(false);
-    mui->progBar->setMaximum(0);
+    mw_one->ui->progBar->setHidden(false);
+    mw_one->ui->progBar->setMaximum(0);
   }
 
   m_ReadTWThread->start();
@@ -70,33 +70,40 @@ void MainWindow::init_TotalData() {
 
 void MainWindow::init_Instance() {
   CurrentYear = QString::number(QDate::currentDate().year());
-  tabData = mui->tabWidget;
-
-  m_MainHelper = new MainHelper(this);
+  tabData = ui->tabWidget;
 
   m_Method = new Method(this);
 
-  m_AboutThis = new AboutThis(this);
+  m_MainHelper = new MainHelper(this);
+
   m_Preferences = new Preferences(this);
+
+  m_AboutThis = new AboutThis(this);
+
   m_EditRecord = new EditRecord();
 
   m_Todo = new Todo(this);
+
   m_Report = new Report(this);
 
-  // m_Notes = new Notes(this);
+  m_Notes = new Notes(this);
 
-  // m_StepsOptions = new StepsOptions(this);
+  m_StepsOptions = new StepsOptions(this);
 
-  // m_Steps = new Steps(this);
-
-  return;
+  m_Steps = new Steps(this);
 
   m_Reader = new Reader(this);
+
   m_TodoAlarm = new TodoAlarm(this);
+
   m_DateSelector = new DateSelector(this);
+
   m_CloudBackup = new CloudBackup;
+
   m_ReaderSet = new ReaderSet(this);
+
   m_NotesList = new NotesList(this);
+
   m_ReceiveShare = new ReceiveShare(this);
 
   // AI
@@ -200,24 +207,24 @@ void MainWindow::init_ButtonStyle() {
   m_Method->set_ToolButtonStyle(mw_one);
 
   // 主按钮
-  setToolButtonAnimation(mui->btnMenu, true);
-  setToolButtonAnimation(mui->btnHome, true);
-  setToolButtonAnimation(mui->btnReader, true);
-  setToolButtonAnimation(mui->btnTodo, true);
-  setToolButtonAnimation(mui->btnSteps, true);
-  setToolButtonAnimation(mui->btnNotes, true);
-  setToolButtonAnimation(mui->btnAdd, true);
-  setToolButtonAnimation(mui->btnDel, true);
+  setToolButtonAnimation(mw_one->ui->btnMenu, true);
+  setToolButtonAnimation(mw_one->ui->btnHome, true);
+  setToolButtonAnimation(mw_one->ui->btnReader, true);
+  setToolButtonAnimation(mw_one->ui->btnTodo, true);
+  setToolButtonAnimation(mw_one->ui->btnSteps, true);
+  setToolButtonAnimation(mw_one->ui->btnNotes, true);
+  setToolButtonAnimation(mw_one->ui->btnAdd, true);
+  setToolButtonAnimation(mw_one->ui->btnDel, true);
 
-  setToolButtonAnimation(mui->btnSync, true);
-  setToolButtonAnimation(mui->btnFind, true);
-  setToolButtonAnimation(mui->btnSelTab, true);
+  setToolButtonAnimation(mw_one->ui->btnSync, true);
+  setToolButtonAnimation(mw_one->ui->btnFind, true);
+  setToolButtonAnimation(mw_one->ui->btnSelTab, true);
 
   if (isDark) {
   } else {
   }
 
-  /*mui->btnPages->setStyleSheet(
+  /*mw_one->ui->btnPages->setStyleSheet(
     "color: rgb(255, 255, 255);background-color: #FF9933;border: "
     "0px solid "
     "rgb(255,0,0);border-radius: 4px;"
@@ -245,60 +252,65 @@ void MainWindow::init_Theme() {
   qDebug() << "red=" << red;
 
   if (!isDark) {
-    mui->btnReader->setIcon(QIcon(":/res/reader.svg"));
-    mui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
-    mui->btnSteps->setIcon(QIcon(":/res/steps.svg"));
-    mui->btnNotes->setIcon(QIcon(":/res/note.svg"));
+    mw_one->ui->btnReader->setIcon(QIcon(":/res/reader.svg"));
+    mw_one->ui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
+    mw_one->ui->btnSteps->setIcon(QIcon(":/res/steps.svg"));
+    mw_one->ui->btnNotes->setIcon(QIcon(":/res/note.svg"));
 
-    mui->btnFind->setIcon(QIcon(":/res/find.svg"));
+    mw_one->ui->btnFind->setIcon(QIcon(":/res/find.svg"));
 
-    mui->btnSelTab->setIcon(QIcon(":/res/tab.svg"));
+    mw_one->ui->btnSelTab->setIcon(QIcon(":/res/tab.svg"));
 
-    mui->btnMenu->setIcon(QIcon(":/res/mainmenu.svg"));
-    mui->btnHome->setIcon(QIcon(":/res/home.svg"));
-    mui->btnAdd->setIcon(QIcon(":/res/additem.svg"));
-    mui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
-    mui->btnSync->setIcon(QIcon(":/res/upload.svg"));
+    mw_one->ui->btnMenu->setIcon(QIcon(":/res/mainmenu.svg"));
+    mw_one->ui->btnHome->setIcon(QIcon(":/res/home.svg"));
+    mw_one->ui->btnAdd->setIcon(QIcon(":/res/additem.svg"));
+    mw_one->ui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
+    mw_one->ui->btnSync->setIcon(QIcon(":/res/upload.svg"));
 
     m_Steps->m_speedometer->setBackgroundColor(QColor(0xF0, 0xF0, 0xF0));
     m_Steps->m_speedometer->updateThemeColors();
 
   } else {
-    mui->btnFind->setIcon(QIcon(":/res/find_l.png"));
+    mw_one->ui->btnFind->setIcon(QIcon(":/res/find_l.png"));
 
-    mui->btnReader->setIcon(QIcon(":/res/reader_l.svg"));
-    mui->btnTodo->setIcon(QIcon(":/res/todo_l.png"));
-    mui->btnSteps->setIcon(QIcon(":/res/steps_l.svg"));
-    mui->btnNotes->setIcon(QIcon(":/res/note_l.svg"));
+    mw_one->ui->btnReader->setIcon(QIcon(":/res/reader_l.svg"));
+    mw_one->ui->btnTodo->setIcon(QIcon(":/res/todo_l.png"));
+    mw_one->ui->btnSteps->setIcon(QIcon(":/res/steps_l.svg"));
+    mw_one->ui->btnNotes->setIcon(QIcon(":/res/note_l.svg"));
 
-    mui->btnSelTab->setIcon(QIcon(":/res/tab_l.svg"));
+    mw_one->ui->btnSelTab->setIcon(QIcon(":/res/tab_l.svg"));
 
-    mui->btnMenu->setIcon(QIcon(":/res/mainmenu_l.svg"));
-    mui->btnHome->setIcon(QIcon(":/res/home_l.svg"));
-    mui->btnAdd->setIcon(QIcon(":/res/additem_l.svg"));
-    mui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
-    mui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
+    mw_one->ui->btnMenu->setIcon(QIcon(":/res/mainmenu_l.svg"));
+    mw_one->ui->btnHome->setIcon(QIcon(":/res/home_l.svg"));
+    mw_one->ui->btnAdd->setIcon(QIcon(":/res/additem_l.svg"));
+    mw_one->ui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
+    mw_one->ui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
 
     m_Steps->m_speedometer->setBackgroundColor(QColor(0x32, 0x32, 0x32));
     m_Steps->m_speedometer->updateThemeColors();
   }
 
-  mui->editDetails->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
+  mw_one->ui->editDetails->verticalScrollBar()->setStyleSheet(
+      m_Method->vsbarStyleBig);
 
   // Edit Record UI
-  int nH = mui->editCategory->height();
+  int nH = mw_one->ui->editCategory->height();
   if (isDark) {
-    m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl_l.svg");
-    m_Method->setQLabelImage(mui->lblDetailsType, nH, nH, ":/res/xq_l.svg");
-    m_Method->setQLabelImage(mui->lblAmount, nH, nH, ":/res/je_l.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl_l.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
+                             ":/res/xq_l.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je_l.svg");
   } else {
-    m_Method->setQLabelImage(mui->lblCategory, nH, nH, ":/res/fl.svg");
-    m_Method->setQLabelImage(mui->lblDetailsType, nH, nH, ":/res/xq.svg");
-    m_Method->setQLabelImage(mui->lblAmount, nH, nH, ":/res/je.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
+                             ":/res/xq.svg");
+    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je.svg");
   }
 
-  mw_one->m_EditRecord->on_editAmount_textChanged(mui->editAmount->text());
-  mw_one->m_EditRecord->on_editCategory_textChanged(mui->editCategory->text());
+  mw_one->m_EditRecord->on_editAmount_textChanged(
+      mw_one->ui->editAmount->text());
+  mw_one->m_EditRecord->on_editCategory_textChanged(
+      mw_one->ui->editCategory->text());
   mw_one->m_EditRecord->on_editDetails_textChanged();
 
   // Todo
@@ -321,18 +333,13 @@ void MainWindow::init_Theme() {
         m_Method->listWidgetLightStyle);
     m_Notes->ui->listNoteLink->setStyleSheet(m_Method->listWidgetLightStyle);
   }
+
+  qInfo() << "Theme初始化完成。";
 }
 
 void MainWindow::init_UIWidget() {
-  // QFontMetrics fontMetrics(font());
-  // int nFontHeight = fontMetrics.height();
-  // int nHeight = nFontHeight * 1.5;
-  //  mui->tabWidget->tabBar()->setFixedHeight(nHeight);
-
-  // mui->tabWidget->setFixedHeight(mui->tabWidget->tabBar()->height() + 0);
-
   if (isAndroid) {
-    mui->tabWidget->hide();
+    mw_one->ui->tabWidget->hide();
   }
 
   mw_one->loginTime = m_Method->setCurrentDateTimeValue();
@@ -348,59 +355,57 @@ void MainWindow::init_UIWidget() {
   m_Method->setLineEditToolBar(mw_one, editFilter);
   m_Method->setTextEditToolBar(mw_one, editFilter);
 
-  mui->lblVectorStatus->setText("");
-  mui->lblVectorStatus->hide();
+  mw_one->ui->lblVectorStatus->setText("");
+  mw_one->ui->lblVectorStatus->hide();
 
-  mui->lblStats->hide();
+  mw_one->ui->lblStats->hide();
 
-  mui->btnSelTab->hide();
+  mw_one->ui->btnSelTab->hide();
 
-  mui->menubar->hide();
-  mui->statusbar->hide();
+  mw_one->ui->menubar->hide();
+  mw_one->ui->statusbar->hide();
 
-  mui->frameSteps->hide();
+  mw_one->ui->frameSteps->hide();
 
-  mui->frameCategory->hide();
+  mw_one->ui->frameCategory->hide();
 
-  mui->frameEditRecord->hide();
+  mw_one->ui->frameEditRecord->hide();
 
-  m_Reader->hideBookListWin();
+  mw_one->ui->frameMain->layout()->setContentsMargins(1, 1, 1, 1);
+  mw_one->ui->frameMain->setContentsMargins(1, 1, 1, 1);
+  mw_one->ui->frameMain->layout()->setSpacing(5);
 
-  mui->frameMain->layout()->setContentsMargins(1, 1, 1, 1);
-  mui->frameMain->setContentsMargins(1, 1, 1, 1);
-  mui->frameMain->layout()->setSpacing(5);
+  mw_one->ui->frameOne->hide();
+  mw_one->ui->btnDel->hide();
 
-  mui->frameOne->hide();
-  mui->btnDel->hide();
+  mw_one->ui->lblMonthSum->hide();
 
-  mui->lblMonthSum->hide();
+  mw_one->ui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
+  mw_one->ui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
+  mw_one->ui->chkPlayRunVoice->setStyleSheet(mw_one->m_Preferences->chkStyle);
+  mw_one->ui->twCloudBackup->setCurrentIndex(1);
+  mw_one->ui->twCloudBackup->setTabVisible(0, false);
+  mw_one->ui->chkWebDAV->hide();
+  mw_one->ui->lblWebDAV->hide();
 
-  mui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
-  mui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
-  mui->chkPlayRunVoice->setStyleSheet(mw_one->m_Preferences->chkStyle);
-  mui->twCloudBackup->setCurrentIndex(1);
-  mui->twCloudBackup->setTabVisible(0, false);
-  mui->chkWebDAV->hide();
-  mui->lblWebDAV->hide();
-
-  mui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
-  mui->lblWebDAV->setStyleSheet(mw_one->labelNormalStyleSheet);
-  mui->lblTitleEditRecord->setStyleSheet(
+  mw_one->ui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
+  mw_one->ui->lblWebDAV->setStyleSheet(mw_one->labelNormalStyleSheet);
+  mw_one->ui->lblTitleEditRecord->setStyleSheet(
       m_MainHelper->clickableLabelButtonStyle);
 
-  mui->tabWidget->tabBar()->installEventFilter(mw_one);
-  mui->tabWidget->installEventFilter(mw_one);
-  mui->tabWidget->setMouseTracking(true);
-  mui->lblStats->installEventFilter(mw_one);
+  mw_one->ui->tabWidget->tabBar()->installEventFilter(mw_one);
+  mw_one->ui->tabWidget->installEventFilter(mw_one);
+  mw_one->ui->tabWidget->setMouseTracking(true);
+  mw_one->ui->lblStats->installEventFilter(mw_one);
 
-  mui->lblTitleEditRecord->installEventFilter(mw_one);
+  mw_one->ui->lblTitleEditRecord->installEventFilter(mw_one);
 
-  mui->lblStats->adjustSize();
-  mui->lblStats->setWordWrap(true);
+  mw_one->ui->lblStats->adjustSize();
+  mw_one->ui->lblStats->setWordWrap(true);
 
-  mui->progBar->setMaximumHeight(4);
-  mui->progBar->hide();
-  mui->progBar->setStyleSheet(
+  mw_one->ui->progBar->setMaximumHeight(4);
+  mw_one->ui->progBar->hide();
+  mw_one->ui->progBar->setStyleSheet(
       "QProgressBar{border:0px solid #FFFFFF;"
       "height:30;"
       "background:rgba(25,255,25,0);"
@@ -421,45 +426,51 @@ void MainWindow::init_UIWidget() {
 #endif
   QFont f = mw_one->font();
   f.setPointSize(nIConFontSize);
-  mui->btnTodo->setFont(f);
-  mui->btnSteps->setFont(f);
+  mw_one->ui->btnTodo->setFont(f);
+  mw_one->ui->btnSteps->setFont(f);
 
-  mui->btnReader->setFont(f);
-  mui->btnNotes->setFont(f);
-  mui->btnSelTab->setFont(f);
+  mw_one->ui->btnReader->setFont(f);
+  mw_one->ui->btnNotes->setFont(f);
+  mw_one->ui->btnSelTab->setFont(f);
 
   f.setPointSize(nIConFontSize + 0);
-  mui->btnMenu->setFont(f);
-  mui->btnHome->setFont(f);
-  mui->btnAdd->setFont(f);
-  mui->btnDel->setFont(f);
-  mui->btnSync->setFont(f);
-  mui->btnFind->setFont(f);
+  mw_one->ui->btnMenu->setFont(f);
+  mw_one->ui->btnHome->setFont(f);
+  mw_one->ui->btnAdd->setFont(f);
+  mw_one->ui->btnDel->setFont(f);
+  mw_one->ui->btnSync->setFont(f);
+  mw_one->ui->btnFind->setFont(f);
 
-  mui->btnFind->setFont(f);
+  mw_one->ui->btnFind->setFont(f);
 
-  mui->f_steps_btn->setFixedHeight(mui->tabMotion->tabBar()->height());
-  mui->f_steps_btn->setContentsMargins(0, 0, 0, 0);
-  mui->f_steps_btn->layout()->setContentsMargins(0, 0, 0, 0);
-  mui->tabMotion->setCornerWidget(mui->f_steps_btn, Qt::TopRightCorner);
+  //
 
-  mui->tabMotion->setCurrentIndex(1);
-  QString rbStyle = mui->rbCycling->styleSheet();
-  mui->rbHiking->setStyleSheet(rbStyle);
-  mui->rbRunning->setStyleSheet(rbStyle);
+  // mw_one->ui->f_steps_btn->setFixedHeight(
+  //     mw_one->ui->tabMotion->tabBar()->height());
+  // mw_one->ui->f_steps_btn->setContentsMargins(0, 0, 0, 0);
+  // mw_one->ui->f_steps_btn->layout()->setContentsMargins(0, 0, 0, 0);
+  //  mw_one->ui->tabMotion->setCornerWidget(mw_one->ui->f_steps_btn,
+  //                                         Qt::TopRightCorner);
+
+  // mw_one->ui->tabMotion->setCurrentIndex(1);
+  //
+
+  QString rbStyle = mw_one->ui->rbCycling->styleSheet();
+  mw_one->ui->rbHiking->setStyleSheet(rbStyle);
+  mw_one->ui->rbRunning->setStyleSheet(rbStyle);
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
 
-  mui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
-  mui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
-  mui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
-  mui->chkPlayRunVoice->setChecked(
+  mw_one->ui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
+  mw_one->ui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
+  mw_one->ui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
+  mw_one->ui->chkPlayRunVoice->setChecked(
       Reg.value("/GPS/isPlayRunVoice", 0).toBool());
-  m_Steps->isChkPlayRunVoice = mui->chkPlayRunVoice->isChecked();
+  m_Steps->isChkPlayRunVoice = mw_one->ui->chkPlayRunVoice->isChecked();
 
-  mui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
-  mui->btnGPS->hide();
+  mw_one->ui->btnGPS->setStyleSheet(m_Steps->btnRoundStyle);
+  mw_one->ui->btnGPS->hide();
 
-  mui->frame_btnGps->setFixedHeight(80);
+  mw_one->ui->frame_btnGps->setFixedHeight(80);
   QWidget* centralWidget = new QWidget(mw_one);
   QVBoxLayout* layout = new QVBoxLayout(centralWidget);
 
@@ -468,22 +479,22 @@ void MainWindow::init_UIWidget() {
   layout->addWidget(m_MainHelper->sliderButton);
 
   QObject::connect(m_MainHelper->sliderButton, &SliderButton::sliderMovedToEnd,
-                   mw_one, [&]() { mui->btnGPS->click(); });
+                   mw_one, [&]() { mw_one->ui->btnGPS->click(); });
 
-  mui->frame_btnGps->layout()->addWidget(centralWidget);
+  mw_one->ui->frame_btnGps->layout()->addWidget(centralWidget);
 
-  int fh = 80 - mui->frame_btnGps->contentsMargins().top() * 2 -
+  int fh = 80 - mw_one->ui->frame_btnGps->contentsMargins().top() * 2 -
            layout->contentsMargins().top() * 2 -
            m_MainHelper->sliderButton->contentsMargins().top() * 2 -
            centralWidget->contentsMargins().top() * 2 - 10;
-  mui->btnPause->setFixedHeight(fh);
-  mui->btnPause->setFixedWidth(fh);
-  mui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
-  mui->btnPause->setIconSize(QSize(fh - 10, fh - 10));
-  mui->frame_btnGps->layout()->removeWidget(mui->btnPause);
-  mui->frame_btnGps->layout()->addWidget(mui->btnPause);
-  mui->btnPause->setEnabled(false);
-  mui->btnPause->hide();
+  mw_one->ui->btnPause->setFixedHeight(fh);
+  mw_one->ui->btnPause->setFixedWidth(fh);
+  mw_one->ui->btnPause->setIcon(QIcon(":/res/epaused.svg"));
+  mw_one->ui->btnPause->setIconSize(QSize(fh - 10, fh - 10));
+  mw_one->ui->frame_btnGps->layout()->removeWidget(mw_one->ui->btnPause);
+  mw_one->ui->frame_btnGps->layout()->addWidget(mw_one->ui->btnPause);
+  mw_one->ui->btnPause->setEnabled(false);
+  mw_one->ui->btnPause->hide();
 }
 
 QTreeWidget* MainWindow::init_TreeWidget(QString name) {

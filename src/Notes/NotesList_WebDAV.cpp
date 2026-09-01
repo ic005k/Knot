@@ -2,7 +2,8 @@
 #include "src/MainWindow.h"
 
 void NotesList::delRemoteWebDAVFiles() {
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+  if (mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked()) {
     // 去重
     QSet<QString> uniqueSet(needDelWebDAVFiles.begin(),
                             needDelWebDAVFiles.end());

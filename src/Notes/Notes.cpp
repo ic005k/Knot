@@ -456,7 +456,8 @@ void Notes::openNotes() {
 
   loadNotesCounter();
 
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+  if (mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked()) {
     m_Method->showInfoWindow(tr("Processing..."));
     if (!m_CloudBackup->checkWebDAVConnection()) {
       m_Method->safeCloseInfoWindow(m_Method);
@@ -887,7 +888,8 @@ void Notes::loadNotesToUI() {
 }
 
 void Notes::openNotesUI() {
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+  if (mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked()) {
     m_Method->safeCloseInfoWindow(m_Method);
 
     // 先清空旧连接，避免重复触发
@@ -903,8 +905,8 @@ void Notes::openNotesUI() {
   }
 
   if (!isAndroid) {
-    // mui->frameNoteList->show();
-    mui->frameMain->hide();
+    // mw_one->ui->frameNoteList->show();
+    mw_one->ui->frameMain->hide();
   }
 }
 

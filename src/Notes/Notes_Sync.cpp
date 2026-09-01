@@ -6,7 +6,8 @@
 #include "src/Notes/Notes.h"
 
 void Notes::syncToWebDAV() {
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+  if (mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked()) {
     if (notes_sync_files.count() > 0) {
       mw_one->showProgress();
       m_CloudBackup->createRemoteWebDAVDir();
@@ -126,7 +127,8 @@ void Notes::appendToSyncList(QString file) {
 }
 
 void Notes::startBackgroundTaskDelAndClear() {
-  if (mui->chkAutoSync->isChecked() && mui->chkWebDAV->isChecked()) {
+  if (mw_one->ui->chkAutoSync->isChecked() &&
+      mw_one->ui->chkWebDAV->isChecked()) {
     mw_one->showProgress();
 
     QFuture<void> future =

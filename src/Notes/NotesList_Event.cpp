@@ -326,8 +326,8 @@ void NotesList::on_btnDel_clicked() {
   // 安全刷新界面
   if (tw->topLevelItemCount() == 0) {
     m_Notes->loadEmptyNote();
-    // mui->lblNoteBook->setText("0/0");
-    // mui->lblNoteList->setText("0/0");
+    // mw_one->ui->lblNoteBook->setText("0/0");
+    // mw_one->ui->lblNoteList->setText("0/0");
   } else {
     if (tw->currentItem() != nullptr) {
       m_Notes->loadEmptyNote();
@@ -548,7 +548,7 @@ void NotesList::on_btnRename_clicked() {
   QScroller::grabGesture(edit, QScroller::LeftMouseButtonGesture);
   edit->horizontalScrollBar()->setHidden(true);
   edit->verticalScrollBar()->setStyleSheet(
-      mui->editDetails->verticalScrollBar()->styleSheet());
+      mw_one->ui->editDetails->verticalScrollBar()->styleSheet());
 
   if (edit->toPlainText().trimmed() == "无标题笔记" ||
       edit->toPlainText().trimmed() == "Untitled Note") {
@@ -711,7 +711,7 @@ void NotesList::activateNoteBook(QTreeWidgetItem* notebookItem) {
   // 高亮选中项
   setNoteBookCurrentIndex(index);
   // 更新计数标签
-  // mui->lblNoteBook->setText(QString::number(index + 1) + "/" +
+  // mw_one->ui->lblNoteBook->setText(QString::number(index + 1) + "/" +
   //                          QString::number(count));
 }
 
@@ -738,7 +738,7 @@ void NotesList::clickNoteList() {
     indexNote = noteCount - 1;
   }
 
-  QString strMD = "";  // m_Method->getText3(mui->qwNoteList, indexNote);
+  QString strMD = "";  // m_Method->getText3(mw_one->ui->qwNoteList, indexNote);
   currentMDFile = iniDir + strMD;
 
   setNoteLabel();

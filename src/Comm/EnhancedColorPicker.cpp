@@ -11,8 +11,9 @@
 #include <QValidator>
 #include <QtMath>
 
+#include "MainWindow.h"
+#include "defines.h"
 #include "src/Comm/Method.h"
-#include "src/defines.h"
 #include "ui_MainWindow.h"
 
 QString simpleLargeSliderStyle = R"(
@@ -272,7 +273,7 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget* parent,
   m_valueSlider->hide();
 
   // RGB控制
-  simpleLargeSliderStyle = mui->hsH->styleSheet();
+  simpleLargeSliderStyle = mw_one->ui->hsH->styleSheet();
   controlsLayout->addWidget(new QLabel(tr("Red:")), 3, 0);
   m_redSlider = new QSlider(Qt::Horizontal);
   m_redSlider->setRange(0, 255);

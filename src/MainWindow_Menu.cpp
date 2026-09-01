@@ -34,7 +34,7 @@ void MainWindow::on_actionAbout() {
 void MainWindow::on_actionFind_triggered() { on_btnFind_clicked(); }
 
 /*void MainWindow::on_actionAdd_Tab_triggered() {
-  int count = mui->tabWidget->tabBar()->count();
+  int count = mw_one->ui->tabWidget->tabBar()->count();
   QString defaultTabName = tr("Tab") + " " + QString::number(count + 1);
 
   // 1. 创建可自定义样式的 QInputDialog 实例
@@ -65,8 +65,8 @@ void MainWindow::on_actionFind_triggered() { on_btnFind_clicked(); }
         m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
     QTreeWidget* tw = init_TreeWidget(twName);
 
-    mui->tabWidget->addTab(tw, customTabText);
-    mui->tabWidget->setCurrentIndex(count);
+    mw_one->ui->tabWidget->addTab(tw, customTabText);
+    mw_one->ui->tabWidget->setCurrentIndex(count);
     addItem(customTabText, "", "", "", 0);
     setCurrentIndex(count);
 
@@ -77,7 +77,7 @@ void MainWindow::on_actionFind_triggered() { on_btnFind_clicked(); }
 }*/
 
 void MainWindow::on_actionAdd_Tab_triggered() {
-  int count = mui->tabWidget->tabBar()->count();
+  int count = mw_one->ui->tabWidget->tabBar()->count();
   QString defaultTabName = tr("Tab") + " " + QString::number(count + 1);
 
   // 直接调用全局封装的输入框
@@ -95,8 +95,8 @@ void MainWindow::on_actionAdd_Tab_triggered() {
         m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
     QTreeWidget* tw = init_TreeWidget(twName);
 
-    mui->tabWidget->addTab(tw, customTabText);
-    mui->tabWidget->setCurrentIndex(count);
+    mw_one->ui->tabWidget->addTab(tw, customTabText);
+    mw_one->ui->tabWidget->setCurrentIndex(count);
     addItem(customTabText, "", "", "", 0);
     setCurrentIndex(count);
 
@@ -109,10 +109,10 @@ void MainWindow::on_actionAdd_Tab_triggered() {
 }
 
 void MainWindow::on_actionDel_Tab_triggered() {
-  int index = mui->tabWidget->currentIndex();
+  int index = mw_one->ui->tabWidget->currentIndex();
   if (index < 0) return;
 
-  QString tab_name = mui->tabWidget->tabText(index);
+  QString tab_name = mw_one->ui->tabWidget->tabText(index);
 
   auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
   if (!m_ShowMsg->showMsg("Knot",
@@ -160,18 +160,18 @@ void MainWindow::on_actionDel_Tab_triggered() {
     }
   }
 
-  int TabCount = mui->tabWidget->tabBar()->count();
+  int TabCount = mw_one->ui->tabWidget->tabBar()->count();
   if (TabCount > 1) {
-    mui->tabWidget->removeTab(index);
+    mw_one->ui->tabWidget->removeTab(index);
     delItem(index);
   }
 
   if (TabCount == 1) {
-    mui->tabWidget->removeTab(0);
+    mw_one->ui->tabWidget->removeTab(0);
     QString tw_name = m_Notes->getDateTimeStr() + "_" + QString::number(1);
     QTreeWidget* tw = init_TreeWidget(tw_name);
     QString tabText = tr("Tab 1");
-    mui->tabWidget->addTab(tw, tabText);
+    mw_one->ui->tabWidget->addTab(tw, tabText);
 
     clearAll();
     addItem(tabData->tabText(0), "", "", "", 0);
@@ -185,18 +185,18 @@ void MainWindow::on_actionDel_Tab_triggered() {
 void MainWindow::on_actionBakFileList() {
   // 【安全】界面切换必须在主线程执行
 
-  mui->frameMain->hide();
+  mw_one->ui->frameMain->hide();
 
   m_MainHelper->startBackgroundTaskUpdateBakFileList();
 }
 
 void MainWindow::on_actionOneDriveBackupData() {
-  mui->frameMain->hide();
+  mw_one->ui->frameMain->hide();
 
   if (isAndroid) {
-    mui->twCloudBackup->setFixedWidth(mw_one->width() - 24);
+    mw_one->ui->twCloudBackup->setFixedWidth(mw_one->width() - 24);
   }
-  mui->frameOne->show();
+  mw_one->ui->frameOne->show();
 }
 
 void MainWindow::on_actionTabRecycle() { m_MainHelper->openTabRecycle(); }
@@ -249,7 +249,7 @@ void MainWindow::on_actionPreferences_triggered() {
 }
 
 void MainWindow::on_actionRename_triggered() {
-  int index = mui->tabWidget->currentIndex();
+  int index = mw_one->ui->tabWidget->currentIndex();
   bool ok = false;
 
   QString text;
@@ -258,7 +258,7 @@ void MainWindow::on_actionRename_triggered() {
 
   m_RenameDlg =
       m_Method->inputDialog(tr("Rename tab name : "), tr("Tab name : "),
-                            mui->tabWidget->tabText(index));
+                            mw_one->ui->tabWidget->tabText(index));
 
   if (QDialog::Accepted == m_RenameDlg->exec()) {
     ok = true;
@@ -270,9 +270,9 @@ void MainWindow::on_actionRename_triggered() {
   }
 
   if (ok && !text.isEmpty()) {
-    mui->tabWidget->setTabText(index, text);
+    mw_one->ui->tabWidget->setTabText(index, text);
 
-    // m_Method->modifyItemText0(mui->qwMainTab, index, text);
+    // m_Method->modifyItemText0(mw_one->ui->qwMainTab, index, text);
 
     updateMainTab();
 

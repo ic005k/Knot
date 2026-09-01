@@ -115,6 +115,24 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+extern MainWindow* mw_one;
+extern QSettings* iniPreferences;
+extern ReaderSet* m_ReaderSet;
+extern CloudBackup* m_CloudBackup;
+extern QTreeWidgetItem* parentItem;
+extern Reader* m_Reader;
+extern Method* m_Method;
+extern Notes* m_Notes;
+extern NotesList* m_NotesList;
+extern StepsOptions* m_StepsOptions;
+extern Steps* m_Steps;
+extern QTabWidget* tabData;
+extern CategoryList* m_CategoryList;
+extern ColorDialog* colorDlg;
+extern PrintPDF* m_PrintPDF;
+extern QTreeWidget *twrb, *tw;
+extern ShowMessage* m_MsgBox;
+
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
@@ -122,9 +140,6 @@ class MainWindow : public QMainWindow {
   MainWindow(QWidget* parent = nullptr);
   ~MainWindow();
   Ui::MainWindow* ui;
-
-  Ui::MainWindow* mui;
-  MainWindow* mw_one;
 
   QStringList listMyEventTitle, listMainDate, listMainDateDetail;
 

@@ -232,8 +232,8 @@ static void JavaNotify_10() {
 
 static void JavaNotify_11() {
   // Books List
-  QMetaObject::invokeMethod(
-      qApp, []() { mui->btnReadList->click(); }, Qt::QueuedConnection);
+  // QMetaObject::invokeMethod(
+  //    qApp, []() { mw_one->ui->btnReadList->click(); }, Qt::QueuedConnection);
 
   qDebug() << "C++ JavaNotify_11";
 }
@@ -255,7 +255,7 @@ static void JavaNotify_14() {
         if (flag == "todo") {
           mw_one->m_TodoAlarm->setDateTime();
         } else if (flag == "gpslist") {
-          mui->btnGetGpsListData->click();
+          mw_one->ui->btnGetGpsListData->click();
         } else {
           mw_one->m_DateSelector->ui->btnOk->click();
         }
@@ -287,13 +287,7 @@ static void JavaNotify_17() {
 static void JavaNotify_18() {
   // 屏幕熄了（锁屏）
   QTimer::singleShot(100, mw_one, []() {
-    if (mui->frameReader->isVisible()) {
-      if (mui->btnAutoStop->isVisible()) {
-        mw_one->on_btnAutoStop_clicked();
-        m_Reader->saveReader("", false);
-        m_Reader->savePageVPos();
-      }
-    }
+
   });
 
   qDebug() << "C++ JavaNotify_18";
@@ -302,7 +296,10 @@ static void JavaNotify_18() {
 static void JavaNotify_19() {
   // TTS播放长文本完成
   QMetaObject::invokeMethod(
-      qApp, []() { mui->btnStopSpeak->click(); }, Qt::QueuedConnection);
+      qApp,
+      []() {  // mw_one->ui->btnStopSpeak->click();
+      },
+      Qt::QueuedConnection);
   qDebug() << "C++ JavaNotify_19";
 }
 
@@ -467,8 +464,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               QFileInfo fi(bookfile);
               QString suffix = fi.suffix().toLower();
               if (suffix != "pdf" && suffix != "mobi") {
-                mui->frameMain->hide();
-                mui->frameReader->show();
+                mw_one->ui->frameMain->hide();
               }
               m_Reader->startOpenFile(bookfile);
             });
@@ -483,7 +479,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           if (strType == "add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {
               if (mw_one && mw_one->m_EditRecord) {
-                mui->frameMain->show();
+                mw_one->ui->frameMain->show();
                 mw_one->m_EditRecord->on_btnOk_clicked();
               }
             });
@@ -491,7 +487,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
 
           if (strType == "cancel_add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {
-              if (mui->frameMain->isHidden()) {
+              if (mw_one->ui->frameMain->isHidden()) {
                 m_Method->openMainEntranceWindow();
               }
             });
@@ -575,31 +571,38 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
 
           // 主工具栏按钮=============================================
           if (strType == "topbtn_add") {
-            QTimer::singleShot(100, mw_one, [=]() { mui->btnAdd->click(); });
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->ui->btnAdd->click(); });
           }
 
           if (strType == "topbtn_upload") {
-            QTimer::singleShot(100, mw_one, [=]() { mui->btnSync->click(); });
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->ui->btnSync->click(); });
           }
 
           if (strType == "topbtn_search") {
-            QTimer::singleShot(100, mw_one, [=]() { mui->btnFind->click(); });
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->ui->btnFind->click(); });
           }
 
           if (strType == "tab_reader") {
-            QTimer::singleShot(100, mw_one, [=]() { mui->btnReader->click(); });
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->ui->btnReader->click(); });
           }
 
           if (strType == "tab_todo") {
-            QTimer::singleShot(100, mw_one, [=]() { mui->btnTodo->click(); });
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->ui->btnTodo->click(); });
           }
 
           if (strType == "tab_notes") {
-            QTimer::singleShot(100, mw_one, [=]() { mui->btnNotes->click(); });
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->ui->btnNotes->click(); });
           }
 
           if (strType == "tab_steps") {
-            QTimer::singleShot(100, mw_one, [=]() { mui->btnSteps->click(); });
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->ui->btnSteps->click(); });
           }
 
           // 菜单==========================================================

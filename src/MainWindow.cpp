@@ -3,11 +3,29 @@
 #include "SearchWorker.h"
 #include "defines.h"
 
+MainWindow* mw_one = nullptr;
+QSettings* iniPreferences;
+ReaderSet* m_ReaderSet;
+CloudBackup* m_CloudBackup;
+QTreeWidgetItem* parentItem;
+Reader* m_Reader;
+Method* m_Method;
+Notes* m_Notes;
+NotesList* m_NotesList;
+StepsOptions* m_StepsOptions;
+Steps* m_Steps;
+QTabWidget* tabData;
+CategoryList* m_CategoryList;
+ColorDialog* colorDlg;
+PrintPDF* m_PrintPDF = nullptr;
+QTreeWidget *twrb, *tw;
+ShowMessage* m_MsgBox = nullptr;
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
-  mui = ui;
-
   ui->setupUi(this);
+
+  qInfo() << "MainWindow开始初始化...";
 
   mw_one = this;
 
@@ -23,26 +41,39 @@ MainWindow::MainWindow(QWidget* parent)
 #endif
   }
 
+  qInfo() << "MainWindow开始设置参数...";
+
   loading = true;
 
   init_Instance();
 
-  return;
+  qInfo() << "MainWindow开始初始化选项...";
 
   init_Options();
 
+  qInfo() << "MainWindow初始化选项完成...";
+
   init_Thread_Timer();
+
+  qInfo() << "MainWindow初始化线程定时器完成...";
 
   init_UIWidget();
 
+  qInfo() << "MainWindow初始化UI组件完成...";
+
   init_TotalData();
+
+  qInfo() << "MainWindow初始化总数据完成...";
 
   loading = false;
 
   QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
   startRead(strDate);
+  qInfo() << "MainWindow启动读数据完成...";
   get_Today(tw);
   init_Stats(tw);
+
+  qInfo() << "MainWindow加载TW数据完成...";
 
   resetWinPos();
 
@@ -64,9 +95,9 @@ MainWindow::MainWindow(QWidget* parent)
   m_NotesList->rebuilderNotesVector();
 
   if (isAndroid) {
-    mui->frameMain->hide();
-    mui->f_Menu->hide();
-    mui->f_Btn->hide();
+    mw_one->ui->frameMain->hide();
+    mw_one->ui->f_Menu->hide();
+    mw_one->ui->f_Btn->hide();
     m_Method->openMainEntranceWindow();
 
     QTimer::singleShot(0, this,
@@ -112,12 +143,12 @@ void MainWindow::execDeskShortcut() {
 void MainWindow::on_ExecShortcut() {
   keyType = m_Method->getKeyType();
   if (keyType == "todo") m_Todo->NewTodo();
-  if (keyType == "note") mui->btnNotes->click();
+  if (keyType == "note") mw_one->ui->btnNotes->click();
   if (keyType == "reader") m_Reader->ContinueReading();
-  if (keyType == "add") mui->btnAdd->click();
+  if (keyType == "add") mw_one->ui->btnAdd->click();
   if (keyType == "exercise") {
-    // QTimer::singleShot(100, this, []() { mui->btnSteps->click(); });
-    mui->btnSteps->click();
+    // QTimer::singleShot(100, this, []() { mw_one->ui->btnSteps->click(); });
+    mw_one->ui->btnSteps->click();
   }
   if (keyType == "defaultopen") {
 #ifdef Q_OS_ANDROID
@@ -148,7 +179,8 @@ void MainWindow::startSyncData() {
 }
 
 MainWindow::~MainWindow() {
-  delete mui;
+  delete ui;
+  mw_one = nullptr;
 
   // 先退出主界面的搜索线程（非笔记搜索线程）
   if (m_workerThread) {
@@ -243,8 +275,8 @@ void MainWindow::startSave(QString str_type) {
     isBreak = false;
     SaveType = str_type;
 
-    mui->progBar->setHidden(false);
-    mui->progBar->setMaximum(0);
+    mw_one->ui->progBar->setHidden(false);
+    mw_one->ui->progBar->setMaximum(0);
 
     mySaveThread->start();
   }
@@ -293,7 +325,7 @@ void MainWindow::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
         item11->setText(1, QString("%1").arg(strAmount.toDouble(), 0, 'f', 2));
 
       item11->setText(2, strDesc);
-      item11->setText(3, mui->editDetails->toPlainText().trimmed());
+      item11->setText(3, mw_one->ui->editDetails->toPlainText().trimmed());
 
       int childCount = topItem->childCount();
 
@@ -337,7 +369,7 @@ void MainWindow::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
     else
       item11->setText(1, QString("%1").arg(strAmount.toDouble(), 0, 'f', 2));
     item11->setText(2, strDesc);
-    item11->setText(3, mui->editDetails->toPlainText().trimmed());
+    item11->setText(3, mw_one->ui->editDetails->toPlainText().trimmed());
 
     topItem->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
     topItem->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
@@ -402,7 +434,8 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
   }
 
   if (!isTodayData) {
-    QString str = mui->tabWidget->tabText(mui->tabWidget->currentIndex());
+    QString str =
+        mw_one->ui->tabWidget->tabText(mw_one->ui->tabWidget->currentIndex());
 
     QString strTip;
     if (isMoveEntry)
@@ -417,7 +450,8 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
   } else {
     int childCount = topItem->childCount();
     if (childCount > 0) {
-      QString str = mui->tabWidget->tabText(mui->tabWidget->currentIndex());
+      QString str =
+          mw_one->ui->tabWidget->tabText(mw_one->ui->tabWidget->currentIndex());
       strTime = topItem->child(childCount - 1)->text(0);
       strAmount = topItem->child(childCount - 1)->text(1);
       strCategory = topItem->child(childCount - 1)->text(2);
@@ -479,9 +513,9 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
 void MainWindow::on_tmeFlash() {
   nFlashCount = nFlashCount + 1;
   if (nFlashCount % 2 == 0)
-    mui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle0);
+    mw_one->ui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle0);
   else
-    mui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle);
+    mw_one->ui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle);
   if (nFlashCount == 3) {
     tmeFlash->stop();
     nFlashCount = 0;
@@ -532,7 +566,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     return;
   }
 
-  if (!mui->frameOne->isHidden()) {
+  if (!mw_one->ui->frameOne->isHidden()) {
     on_btnBack_One_clicked();
     event->ignore();
     return;
@@ -633,7 +667,7 @@ void MainWindow::resetWinPos() {
 }
 
 void MainWindow::on_twItemClicked() {
-  QTreeWidget* tw = (QTreeWidget*)mui->tabWidget->currentWidget();
+  QTreeWidget* tw = (QTreeWidget*)mw_one->ui->tabWidget->currentWidget();
   if (!tw->currentIndex().isValid()) return;
 
   QTreeWidgetItem* item = tw->currentItem();
@@ -660,7 +694,7 @@ void MainWindow::on_twItemClicked() {
 
     isShowDetails = false;
 
-    mui->lblStats->setText(strStats);
+    mw_one->ui->lblStats->setText(strStats);
   }
 
   // child items
@@ -696,19 +730,19 @@ void MainWindow::on_twItemClicked() {
 void MainWindow::modify_Data() {
   return;
 
-  QTreeWidget* tw = (QTreeWidget*)mui->tabWidget->currentWidget();
+  QTreeWidget* tw = (QTreeWidget*)mw_one->ui->tabWidget->currentWidget();
   QTreeWidgetItem* item = tw->currentItem();
   QTreeWidgetItem* topItem = item->parent();
-  QString newtime = mui->lblTime->text().trimmed();
+  QString newtime = mw_one->ui->lblTime->text().trimmed();
   if (item->childCount() == 0 && item->parent()->childCount() > 0) {
     item->setText(0, newtime);
-    QString sa = mui->editAmount->text().trimmed();
+    QString sa = mw_one->ui->editAmount->text().trimmed();
     if (sa == "")
       item->setText(1, "");
     else
       item->setText(1, QString("%1").arg(sa.toDouble(), 0, 'f', 2));
-    item->setText(2, mui->editCategory->text().trimmed());
-    item->setText(3, mui->editDetails->toPlainText().trimmed());
+    item->setText(2, mw_one->ui->editCategory->text().trimmed());
+    item->setText(3, mw_one->ui->editDetails->toPlainText().trimmed());
     // Amount
     int child = item->parent()->childCount();
     double amount = 0;
@@ -741,21 +775,22 @@ void MainWindow::modify_Data() {
     }
 
     int newrow;
-    int row = 0;  // m_Method->getCurrentIndexFromQW(mui->qwMainEvent);
+    int row = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
     if (childRow0 - childRow1 == 0) newrow = row;
     if (childRow0 - childRow1 < 0) newrow = row + childRow1 - childRow0;
     if (childRow0 - childRow1 > 0) newrow = row - (childRow0 - childRow1);
 
-    int maindateIndex = 0;  // m_Method->getCurrentIndexFromQW(mui->qwMainDate);
+    int maindateIndex =
+        0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainDate);
 
     isEditItem = true;
     reloadMain();
 
     QTimer::singleShot(100, mw_one, [this, maindateIndex, newrow]() {
-      // m_Method->setCurrentIndexFromQW(mui->qwMainDate, maindateIndex);
+      // m_Method->setCurrentIndexFromQW(mw_one->ui->qwMainDate, maindateIndex);
       isEditItem = true;
       m_Method->clickMainDate(maindateIndex);
-      // m_Method->setCurrentIndexFromQW(mui->qwMainEvent, newrow);
+      // m_Method->setCurrentIndexFromQW(mw_one->ui->qwMainEvent, newrow);
     });
   }
 }
@@ -763,7 +798,7 @@ void MainWindow::modify_Data() {
 void MainWindow::on_twItemDoubleClicked() {
   // m_EditRecord->monthSum();
 
-  QTreeWidget* tw = (QTreeWidget*)mui->tabWidget->currentWidget();
+  QTreeWidget* tw = (QTreeWidget*)mw_one->ui->tabWidget->currentWidget();
   QTreeWidgetItem* item = tw->currentItem();
   if (item->childCount() == 0 && item->parent()->childCount() > 0) {
     if (item->parent()->text(3).toInt() != QDate::currentDate().year()) {
@@ -783,34 +818,35 @@ void MainWindow::on_twItemDoubleClicked() {
       sm = list.at(1);
       ss = list.at(2);
     }
-    mui->lblTitleEditRecord->setText(tr("Modify") + "  : " +
-                                     tabData->tabText(tabData->currentIndex()));
+    mw_one->ui->lblTitleEditRecord->setText(
+        tr("Modify") + "  : " + tabData->tabText(tabData->currentIndex()));
 
-    mui->hsH->setValue(sh.toInt());
-    mui->hsM->setValue(sm.toInt());
+    mw_one->ui->hsH->setValue(sh.toInt());
+    mw_one->ui->hsM->setValue(sm.toInt());
 
-    mui->lblTime->setText(t.trimmed());
+    mw_one->ui->lblTime->setText(t.trimmed());
 
     QString str = item->text(1);
     if (str == "0.00")
-      mui->editAmount->setText("");
+      mw_one->ui->editAmount->setText("");
     else
-      mui->editAmount->setText(str);
+      mw_one->ui->editAmount->setText(str);
 
-    mui->editCategory->setText(item->text(2));
+    mw_one->ui->editCategory->setText(item->text(2));
 
-    mui->editDetails->setText(item->text(3));
-    mui->f_Number->setFocus();
+    mw_one->ui->editDetails->setText(item->text(3));
+    mw_one->ui->f_Number->setFocus();
 
     isAdd = false;
     if (isAndroid) {
       mw_one->m_EditRecord->openAddEventRecord(
-          mui->lblTitleEditRecord->text(), mui->editCategory->text(),
-          mui->editDetails->toPlainText(), mui->editAmount->text(),
-          mui->lblTime->text());
+          mw_one->ui->lblTitleEditRecord->text(),
+          mw_one->ui->editCategory->text(),
+          mw_one->ui->editDetails->toPlainText(),
+          mw_one->ui->editAmount->text(), mw_one->ui->lblTime->text());
     } else {
-      mui->frameMain->hide();
-      mui->frameEditRecord->show();
+      mw_one->ui->frameMain->hide();
+      mw_one->ui->frameEditRecord->show();
     }
   }
 
@@ -824,7 +860,7 @@ void MainWindow::clickMainTab() {
   int index = getCurrentIndex();
   tabData->setCurrentIndex(index);
 
-  mui->lblStats->show();
+  mw_one->ui->lblStats->show();
 
   if (isSelectTab) {
     on_btnAdd_clicked();
@@ -835,9 +871,9 @@ void MainWindow::clickMainTab() {
 void MainWindow::clickMainTab(int index) {
   tabData->setCurrentIndex(index);
 
-  QString eventName = mui->tabWidget->tabBar()->tabText(index);
+  QString eventName = mw_one->ui->tabWidget->tabBar()->tabText(index);
 
-  mui->frameMain->hide();
+  mw_one->ui->frameMain->hide();
 
   listMyEventTitle.clear();
   listMyEventTitle.append(eventName);
@@ -851,7 +887,7 @@ void MainWindow::clickMainTab(int index) {
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index) {
-  int count = mui->tabWidget->tabBar()->count();
+  int count = mw_one->ui->tabWidget->tabBar()->count();
 
   if (isSlide || loading || count <= 0) {
     return;
@@ -887,11 +923,11 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
     }
   }*/
 
-  /*if (watch == mui->qwMainTab && evn->type() == QEvent::Show) {
+  /*if (watch == mw_one->ui->qwMainTab && evn->type() == QEvent::Show) {
     QTimer::singleShot(200, this, [this]() {
       sendFakeTouch();
 
-      QQuickItem* root = mui->qwMainTab->rootObject();
+      QQuickItem* root = mw_one->ui->qwMainTab->rootObject();
       if (root) {
         QMetaObject::invokeMethod(root, "forceActivateUI",
                                   Qt::QueuedConnection);
@@ -903,7 +939,7 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
 }
 
 void MainWindow::sendFakeTouch() {
-  QWidget* w = mui->frameMain;
+  QWidget* w = mw_one->ui->frameMain;
   if (!w) return;
 
   auto send = [&](const QPoint& p) {
@@ -1026,7 +1062,7 @@ void MainWindow::paintEvent(QPaintEvent* event) {
   Q_UNUSED(event);
 
   // 获取背景色
-  QPalette pal = mui->btnFind->palette();
+  QPalette pal = mw_one->ui->btnFind->palette();
   QBrush brush = pal.window();
   int c_red = brush.color().red();
 
@@ -1246,7 +1282,7 @@ void MainWindow::on_DelayCloseProgressBar() {
 void MainWindow::on_CloseProgressBar() {
   mw_one->closeProgress();
 
-  mui->btnReader->setEnabled(true);
+  mw_one->ui->btnReader->setEnabled(true);
 }
 
 void MainWindow::on_StartRecordAudio() {
@@ -1315,7 +1351,7 @@ void MainWindow::on_chkPlayRunVoice_clicked(bool checked) {
   if (checked) {
     isPlayBook = false;
     m_Method->stopPlayMyText();
-    m_Method->playMyText(mui->lblDirection->text());
+    m_Method->playMyText(mw_one->ui->lblDirection->text());
   }
 }
 

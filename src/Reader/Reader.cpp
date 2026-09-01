@@ -76,7 +76,7 @@ void Reader::startOpenFile(QString openfile) {
     strTitle = "";
     catalogueFile = "";
 
-    mui->btnReader->setEnabled(false);
+    mw_one->ui->btnReader->setEnabled(false);
 
     QString bookName;
 
@@ -860,11 +860,11 @@ bool Reader::getLandscape() {
 
   QFileInfo fiHtml(currentHtmlFile);
   if (isEpub) {
-    /*if (mui->qwBookCata->isVisible()) {
+    /*if (mw_one->ui->qwBookCata->isVisible()) {
       textPos = Reg.value("/Reader/vpos  CataVPos", 0).toReal();
       int index = Reg.value("/Reader/vpos  CataIndex", 0).toReal();
       if (currentCataIndex > 0) index = currentCataIndex;
-      m_Method->setCurrentIndexFromQW(mui->qwBookCata, index);
+      m_Method->setCurrentIndexFromQW(mw_one->ui->qwBookCata, index);
     } else {
       if (htmlIndex >= 0)
         textPos = Reg.value("/Reader/vpos" + fiHtml.baseName(), 0).toReal();
@@ -907,9 +907,9 @@ void Reader::savePageVPos() {
   QFileInfo fiHtml(currentHtmlFile);
   textPos = getVPos();
   if (isEpub) {
-    /*if (mui->qwBookCata->isVisible()) {
+    /*if (mw_one->ui->qwBookCata->isVisible()) {
       Reg.setValue("/Reader/vpos  CataVPos", textPos);
-      int index = m_Method->getCurrentIndexFromQW(mui->qwBookCata);
+      int index = m_Method->getCurrentIndexFromQW(mw_one->ui->qwBookCata);
       Reg.setValue("/Reader/vpos  CataIndex", index);
     } else {
       if (htmlIndex >= 0) {
@@ -953,11 +953,11 @@ void Reader::setPageVPos() {
 
   QFileInfo fiHtml(currentHtmlFile);
   if (isEpub) {
-    /*if (mui->qwBookCata->isVisible()) {
+    /*if (mw_one->ui->qwBookCata->isVisible()) {
       textPos = Reg.value("/Reader/vpos  CataVPos", 0).toReal();
       int index = Reg.value("/Reader/vpos  CataIndex", 0).toReal();
       if (currentCataIndex > 0) index = currentCataIndex;
-      m_Method->setCurrentIndexFromQW(mui->qwBookCata, index);
+      m_Method->setCurrentIndexFromQW(mw_one->ui->qwBookCata, index);
     } else {
       if (htmlIndex >= 0) {
         textPos = Reg.value("/Reader/vpos" + fiHtml.baseName(), 0).toReal();
@@ -1165,7 +1165,7 @@ void Reader::getReadList() {
 
   if (bookList.count() == 0) return;
 
-  // m_Method->clearAllBakList(mui->qwBookList);
+  // m_Method->clearAllBakList(mw_one->ui->qwBookList);
   // m_Method->clearAllBakListQV(qvBookList);
 
   for (int i = 0; i < bookList.count(); i++) {
@@ -1183,16 +1183,16 @@ void Reader::getReadList() {
     } else
       suffix = "none";
 
-    // m_Method->addItemToQW(mui->qwBookList, bookName, bookPath, "", suffix,
-    // 50);
-    // m_Method->addItemToQV(qvBookList, bookName, bookPath, "", suffix, 50);
+    // m_Method->addItemToQW(mw_one->ui->qwBookList, bookName, bookPath, "",
+    // suffix, 50); m_Method->addItemToQV(qvBookList, bookName, bookPath, "",
+    // suffix, 50);
   }
 
   for (int i = 0; i < bookList.count(); i++) {
     QString str = bookList.at(i);
     QStringList listBooks = str.split("|");
     if (listBooks.at(1) == fileName) {
-      // m_Method->setCurrentIndexFromQW(mui->qwBookList, i);
+      // m_Method->setCurrentIndexFromQW(mw_one->ui->qwBookList, i);
 
       break;
     }
@@ -1592,7 +1592,7 @@ void Reader::removeBookList() {}
 
 void Reader::readBookDone() {
   if (isEpubError) {
-    mui->btnReader->setEnabled(true);
+    mw_one->ui->btnReader->setEnabled(true);
 
     mw_one->safeCloseProgress();
 
@@ -1645,7 +1645,7 @@ void Reader::readBookDone() {
     strShowMsg = "Read  EBook End...";
 
     if (!isAndroid) hideBookListWin();
-    mui->frameMain->hide();
+    mw_one->ui->frameMain->hide();
 
     if (isEpub) {
     }
@@ -1660,8 +1660,7 @@ void Reader::readBookDone() {
 #ifdef Q_OS_ANDROID
 
     if (!mw_one->initMain) {
-      mui->frameMain->hide();
-      mui->frameReader->hide();
+      mw_one->ui->frameMain->hide();
 
       QTimer::singleShot(100, this, [this]() { openMyPDF(fileName); });
     }
@@ -1677,7 +1676,7 @@ void Reader::readBookDone() {
 
   if (!isInitReader) {
     if (!isPDF) {
-      while (!mui->btnReader->isEnabled()) {
+      while (!mw_one->ui->btnReader->isEnabled()) {
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         QThread::msleep(1);
       }
@@ -1737,12 +1736,12 @@ void Reader::setPageScroll0() {}
 void Reader::setPageScroll1() {}
 
 void Reader::ContinueReading() {
-  while (!mui->btnReader->isEnabled()) {
+  while (!mw_one->ui->btnReader->isEnabled()) {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     QThread::msleep(1);
   }
 
-  mui->btnReader->click();
+  mw_one->ui->btnReader->click();
 }
 
 void Reader::shareBook() {
@@ -2145,7 +2144,7 @@ void Reader::openReader() {
   if (isAndroid) {
     openReadListWindow(bookList);
   } else {
-    mui->frameMain->hide();
+    mw_one->ui->frameMain->hide();
     showBookListWin();
     getReadList();
   }
@@ -2155,7 +2154,7 @@ void Reader::openReader() {
   //////////////////////////////
 
   if (!QFile::exists(fileName)) {
-    mui->frameMain->hide();
+    mw_one->ui->frameMain->hide();
 
     showBookListWin();
 
@@ -2165,7 +2164,7 @@ void Reader::openReader() {
 
   if (isPDF) {
     if (isAndroid) {
-      mui->frameMain->hide();
+      mw_one->ui->frameMain->hide();
 
       QTimer::singleShot(100, this, [this]() { openMyPDF(fileName); });
 
@@ -2180,7 +2179,7 @@ void Reader::openReader() {
     });
   }
 
-  mui->frameMain->hide();
+  mw_one->ui->frameMain->hide();
   hideBookListWin();
 }
 

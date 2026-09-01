@@ -48,25 +48,7 @@ inline const QString uniqueKey = "KnotMyUniqueApplicationKey_12345";
 inline QSharedMemory sharedMemory;
 #endif
 
-extern MainWindow* mw_one;
-extern Ui::MainWindow* mui;
-
-inline QSettings* iniPreferences;
-inline ReaderSet* m_ReaderSet;
-inline CloudBackup* m_CloudBackup;
-inline QTreeWidgetItem* parentItem;
-inline Reader* m_Reader;
-inline Method* m_Method;
-inline Notes* m_Notes;
-inline NotesList* m_NotesList;
-inline StepsOptions* m_StepsOptions;
-inline Steps* m_Steps;
-inline QTabWidget* tabData;
-inline CategoryList* m_CategoryList;
-inline ColorDialog* colorDlg;
-inline PrintPDF* m_PrintPDF = nullptr;
-inline QTreeWidget *twrb, *tw;
-inline ShowMessage* m_MsgBox = nullptr;
+extern Method* m_Method;
 
 inline QPointer<TextEditToolbar> textToolbar;
 inline QPointer<TextEditToolbar> textToolbarDynamic;

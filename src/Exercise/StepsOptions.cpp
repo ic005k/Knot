@@ -39,7 +39,7 @@ void StepsOptions::closeEvent(QCloseEvent* event) {
   m_Steps->getAddress(25.0217, 98.4464);
   m_Method->closeGrayWindows();
 
-  if (mui->tabMotion->currentIndex() == 0) {
+  if (mw_one->ui->tabMotion->currentIndex() == 0) {
     m_Steps->tmeRefreshSteps->start(3000);
   }
 }
@@ -159,5 +159,5 @@ void StepsOptions::on_btnCorrection_clicked() {
   m_Steps->strGpsInfoShow =
       QString(" \n") + " \n" + " \n" + " \n" + " \n" + " \n" + " \n" + " \n" +
       " \n" + tr("Total Distance") + " : " + m_Steps->strTotalDistance;
-  mui->lblGpsInfo->setText(m_Steps->strGpsInfoShow);
+  mw_one->ui->lblGpsInfo->setText(m_Steps->strGpsInfoShow);
 }

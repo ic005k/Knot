@@ -103,7 +103,7 @@ void DateSelector::on_btnOk_clicked() {
   ymdList.append(m);
   ymdList.append(d);
 
-  if (!mui->frameSteps->isHidden()) {
+  if (!mw_one->ui->frameSteps->isHidden()) {
     m_Steps->getGpsListDataFromYearMonth();
   }
 
@@ -113,12 +113,12 @@ void DateSelector::on_btnOk_clicked() {
 void DateSelector::initStartEndDate(QString flag) {
   QString str;
   if (flag == "start") {
-    // str = mui->btnStartDate->text();
+    // str = mw_one->ui->btnStartDate->text();
     dateFlag = 3;
   }
 
   if (flag == "end") {
-    // str = mui->btnEndDate->text();
+    // str = mw_one->ui->btnEndDate->text();
     dateFlag = 4;
   }
 

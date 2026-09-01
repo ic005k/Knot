@@ -16,7 +16,7 @@ void LoadPic::initMain(QString imgFile) {
   bookimgFileName = privateDir + "bookimg.png";
   saveBase64ToPng(imgFile, bookimgFileName);
 
-  // mui->lblImgInfo->setText(imgFile + "  " +
+  // mw_one->ui->lblImgInfo->setText(imgFile + "  " +
   //                         m_Method->getFileSize(QFile(imgFile).size(), 2));
 }
 
