@@ -39,7 +39,7 @@ public class TodoActivity extends AppCompatActivity {
         mBackCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                PublicJavaCallCpp("cancel_add_event_record");
+                PublicJavaCallCpp("back_todo");
                 finish();
             }
         };
@@ -141,7 +141,7 @@ public class TodoActivity extends AppCompatActivity {
         }
         mSelfWeakRef.clear();
         mInstance = null;
-        PublicJavaCallCpp("todo_activity_destroy");
+        //PublicJavaCallCpp("todo_activity_destroy");
         if (
             MyActivity.m_instance != null &&
             !MyActivity.m_instance.isFinishing() &&

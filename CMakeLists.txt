@@ -175,7 +175,8 @@ file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS
 
 file(GLOB_RECURSE APP_FORMS CONFIGURE_DEPENDS src/*.ui)
 
-set(APP_RESOURCES knotqml.qrc res.qrc)
+# set(APP_RESOURCES knotqml.qrc res.qrc)
+set(APP_RESOURCES res.qrc)
 
 set(APP_TRANSLATIONS
     src/cn.ts
@@ -401,9 +402,9 @@ endif()
 # ============================================================
 # 10. QML 导入路径
 # ============================================================
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    QT_QML_IMPORT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/qmlsrc"
-)
+# set_target_properties(${PROJECT_NAME} PROPERTIES
+#    QT_QML_IMPORT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/qmlsrc"
+# )
 
 # ============================================================
 # 11. Android 部署配置 (✅ 已修复 libomp 查找逻辑)
@@ -487,16 +488,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 # ✅ 关键：显式收集所有 QML/JS 源文件
 # qt_add_translations 不会自动递归扫描目录寻找 QML 文件
-file(GLOB_RECURSE APP_QML_SOURCES CONFIGURE_DEPENDS
-    src/*.qml
-    src/*.js
-)
+# file(GLOB_RECURSE APP_QML_SOURCES CONFIGURE_DEPENDS
+#    src/*.qml
+#    src/*.js
+# )
 
 qt_add_translations(${PROJECT_NAME}
     TS_FILES ${APP_TRANSLATIONS}
     QM_FILES_OUTPUT_VARIABLE QM_FILES
     # ✅ 将 QML/JS 文件作为额外源文件传入，使 lupdate 能够提取其中的 qsTr()
-    SOURCES ${APP_QML_SOURCES}
+    # SOURCES ${APP_QML_SOURCES}
 )
 
 # ============================================================

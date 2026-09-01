@@ -651,6 +651,14 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           }
 
           // Todo ===================================================
+          if (strType == "back_todo") {
+            QTimer::singleShot(100, mw_one, [=]() {
+              if (mw_one->ui->frameMain->isHidden()) {
+                mw_one->m_Todo->closeTodo();
+              }
+            });
+          }
+
           if (strType == "todo_recycle") {
             QTimer::singleShot(100, mw_one,
                                [=]() { mw_one->m_Todo->on_btnRecycle(); });

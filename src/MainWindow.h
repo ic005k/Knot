@@ -551,8 +551,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnDel_clicked();
 
-  void on_btnBackTodo_clicked();
-
   void on_btnHigh();
 
   void on_btnLow();

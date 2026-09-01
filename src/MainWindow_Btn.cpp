@@ -753,8 +753,6 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
 #endif
 }
 
-void MainWindow::on_btnBackTodo_clicked() { m_Todo->closeTodo(); }
-
 void MainWindow::on_btnHigh() {}
 
 void MainWindow::on_btnLow() {}

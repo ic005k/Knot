@@ -32,7 +32,7 @@
                 android:id="@+id/tv_todo_tag"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"
+                android:textSize="13sp"
             />
 
             <TextView
@@ -40,7 +40,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textSize="14sp"
+                android:textSize="16sp"
             />
 
         </LinearLayout>

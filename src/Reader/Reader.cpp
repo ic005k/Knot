@@ -127,6 +127,7 @@ void Reader::openFile(QString openfile) {
       return;
 
     if (strSuffix == "epub") {
+      /*
       if (reader != nullptr) {
         delete reader;
         reader = nullptr;
@@ -212,7 +213,11 @@ void Reader::openFile(QString openfile) {
 
         QString str_cate = loadText(catalogueFile);
         StringToFile(str_cate, catalogueFile);
-      }
+      }*/
+
+      isEpub = true;
+      isText = false;
+      isPDF = false;
 
     } else if (strSuffix == "pdf" || strSuffix == "mobi") {
       isPDF = true;
@@ -1644,7 +1649,6 @@ void Reader::readBookDone() {
   if (isText || isEpub) {
     strShowMsg = "Read  EBook End...";
 
-    if (!isAndroid) hideBookListWin();
     mw_one->ui->frameMain->hide();
 
     if (isEpub) {
@@ -1652,6 +1656,8 @@ void Reader::readBookDone() {
 
     if (isText) {
     }
+
+    openMyPDF(fileName);
   }
 
   if (isPDF) {

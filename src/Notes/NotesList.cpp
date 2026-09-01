@@ -845,8 +845,7 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
       rawResults.push_back(
           {text0, strLastModi + " " + strSize, strFileNoExists, text3});
-      listNoteEntry.append(text0 + "\n\n" + strLastModi + " " + strSize + "\n" +
-                           strFileNoExists);
+      listNoteEntry.append(text0);
     }
     return rawResults;
   });
