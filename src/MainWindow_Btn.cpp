@@ -361,11 +361,7 @@ void MainWindow::on_btnDelType_clicked() {
   m_CategoryList->on_btnDel_clicked();
 }
 
-void MainWindow::on_btnRenameType_clicked() {
-  m_CategoryList->ui->editRename->setText(
-      mw_one->ui->editRenameType->text().trimmed());
-  m_CategoryList->on_Rename();
-}
+void MainWindow::on_btnRenameType_clicked() {}
 
 void MainWindow::on_btnBackSetTab_clicked() {}
 
@@ -1141,8 +1137,9 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mw_one->ui->frameCategory->isHidden()) {
-    on_btnCancelType_clicked();
+  if (m_CategoryList->isVisible()) {
+    m_CategoryList->on_btnCancel_clicked();
+
     return;
   }
 

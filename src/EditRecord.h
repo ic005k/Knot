@@ -89,7 +89,8 @@ class EditRecord : public QDialog {
   void reeditMainEventData(int index0, int index1);
   int idxMainDate, idxMainDateDetail;
 
- private:
+  void showCategorySelectDialog();
+  private:
   void set_Amount(QString Number);
 
   QString lblStyle;

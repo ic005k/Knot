@@ -1,24 +1,33 @@
 package com.x;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AddEventRecord extends AppCompatActivity {
+
+    public static AddEventRecord mInstance = null;
 
     private Button etTitle;
     private AutoCompleteTextView etCategory;
@@ -53,6 +62,8 @@ public class AddEventRecord extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mInstance = this;
 
         // 注册返回拦截回调
         mBackCallback = new OnBackPressedCallback(true /* enabled */) {
@@ -358,9 +369,11 @@ public class AddEventRecord extends AppCompatActivity {
 
         btnCategory.setOnClickListener(v -> {
             // TODO:打开分类弹窗
-            sendDataToCpp();
+            //sendDataToCpp();
             PublicJavaCallCpp("open_category_dialog");
-            finish();
+            //finish();
+
+            PublicJavaCallCpp("open_category_select");
         });
 
         btnConfirm.setOnClickListener(v -> {
@@ -496,5 +509,248 @@ public class AddEventRecord extends AppCompatActivity {
             mBackCallback.remove();
             mBackCallback = null;
         }
+
+        mInstance = null;
+    }
+
+    /**
+     * 由C++直接回调调用，传入分类字符串数组
+     */
+    /**
+     * 由C++直接回调调用，传入分类字符串数组
+     */
+    public void showCategorySelectDialog(final ArrayList<String> catList) {
+        // 切到Android UI主线程，防止Qt子线程调用崩溃
+        if (!isMainThread()) {
+            runOnUiThread(() -> showCategorySelectDialog(catList));
+            return;
+        }
+
+        //防御判空
+        if (catList == null || catList.isEmpty()) {
+            return;
+        }
+        Context ctx = AddEventRecord.this;
+        LinearLayout rootLayout = new LinearLayout(ctx);
+        rootLayout.setOrientation(LinearLayout.VERTICAL);
+        int dp12 = dip2px(ctx, 12);
+        rootLayout.setPadding(dp12, dp12, dp12, dp12);
+        //顶部：重命名按钮 + 输入框
+        LinearLayout topRow = new LinearLayout(ctx);
+        topRow.setOrientation(LinearLayout.HORIZONTAL);
+        topRow.setGravity(Gravity.CENTER_VERTICAL);
+        topRow.setLayoutParams(
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        );
+        Button btnRename = new Button(ctx);
+        btnRename.setText(MyActivity.zh_cn ? "重命名" : "Rename");
+        EditText etInput = new EditText(ctx);
+        LinearLayout.LayoutParams etLp = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1.0f
+        );
+        etLp.setMargins(dip2px(ctx, 8), 0, 0, 0);
+        etInput.setLayoutParams(etLp);
+        etInput.setText(etCategory.getText());
+        topRow.addView(btnRename);
+        topRow.addView(etInput);
+        rootLayout.addView(topRow);
+        //ListView，系统内置item
+        ListView listView = new ListView(ctx);
+        LinearLayout.LayoutParams listLp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            0,
+            1.0f
+        );
+        listLp.setMargins(0, dip2px(ctx, 12), 0, dip2px(ctx, 8));
+        listView.setLayoutParams(listLp);
+
+        class CatListAdapter extends ArrayAdapter<String> {
+
+            private int mSelectedIndex = -1;
+
+            public CatListAdapter(
+                Context context,
+                int resource,
+                java.util.List<String> objects
+            ) {
+                super(context, resource, objects);
+            }
+
+            public void setSelectIndex(int pos) {
+                mSelectedIndex = pos;
+                notifyDataSetChanged();
+            }
+
+            public int getSelectIndex() {
+                return mSelectedIndex;
+            }
+
+            public String getSelectedItem() {
+                if (mSelectedIndex >= 0 && mSelectedIndex < getCount()) {
+                    return getItem(mSelectedIndex);
+                }
+                return "";
+            }
+
+            @NonNull
+            @Override
+            public View getView(
+                int position,
+                @Nullable View convertView,
+                @NonNull ViewGroup parent
+            ) {
+                View v = super.getView(position, convertView, parent);
+                TextView tv = v.findViewById(android.R.id.text1);
+                boolean sel = position == mSelectedIndex;
+                if (MyActivity.isDark) {
+                    if (sel) {
+                        v.setBackgroundColor(0xFF3A3A3A);
+                        tv.setTextColor(0xFFFFFFFF);
+                    } else {
+                        v.setBackgroundColor(0xFF1E1E1E);
+                        tv.setTextColor(0xFFBBBBBB);
+                    }
+                } else {
+                    if (sel) {
+                        v.setBackgroundColor(0xFFB8DAF5);
+                        tv.setTextColor(0xFF000000);
+                    } else {
+                        v.setBackgroundColor(0xFFFFFFFF);
+                        tv.setTextColor(0xFF222222);
+                    }
+                }
+                return v;
+            }
+        }
+        CatListAdapter adapter = new CatListAdapter(
+            ctx,
+            android.R.layout.simple_list_item_1,
+            catList
+        );
+
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            adapter.setSelectIndex(position);
+            String item = catList.get(position);
+            etInput.setText(item);
+        });
+        rootLayout.addView(listView);
+        //总计文本
+        TextView tvTotal = new TextView(ctx);
+        String totalStr;
+        if (MyActivity.zh_cn) {
+            totalStr = "总计：" + catList.size();
+        } else {
+            totalStr = "Total: " + catList.size();
+        }
+        tvTotal.setText(totalStr);
+        tvTotal.setPadding(0, 0, 0, dip2px(ctx, 8));
+        rootLayout.addView(tvTotal);
+        //底部三个按钮
+        LinearLayout bottomRow = new LinearLayout(ctx);
+        bottomRow.setOrientation(LinearLayout.HORIZONTAL);
+        bottomRow.setLayoutParams(
+            new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        );
+        Button btnCancel = new Button(ctx);
+        btnCancel.setText(MyActivity.zh_cn ? "取消" : "Cancel");
+        Button btnDelete = new Button(ctx);
+        btnDelete.setText(MyActivity.zh_cn ? "删除" : "Delete");
+        Button btnOk = new Button(ctx);
+        btnOk.setText(MyActivity.zh_cn ? "确定" : "Confirm");
+        int margin4 = dip2px(ctx, 4);
+        LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1.0f
+        );
+        btnLp.setMargins(0, 0, margin4, 0);
+        btnCancel.setLayoutParams(btnLp);
+        btnLp = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1.0f
+        );
+        btnLp.setMargins(margin4, 0, margin4, 0);
+        btnDelete.setLayoutParams(btnLp);
+        btnLp = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1.0f
+        );
+        btnLp.setMargins(margin4, 0, 0, 0);
+        btnOk.setLayoutParams(btnLp);
+        bottomRow.addView(btnCancel);
+        bottomRow.addView(btnDelete);
+        bottomRow.addView(btnOk);
+        rootLayout.addView(bottomRow);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+        builder.setView(rootLayout);
+        AlertDialog dialog = builder.create();
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnOk.setOnClickListener(v -> {
+            String selText = adapter.getSelectedItem();
+            if (!selText.isEmpty()) {
+                etCategory.setText(selText);
+            }
+            dialog.dismiss();
+        });
+
+        btnDelete.setOnClickListener(v -> {
+            final int pos = adapter.getSelectIndex();
+            if (pos < 0) {
+                return;
+            }
+            // 弹出二次确认框
+            new AlertDialog.Builder(ctx)
+                .setTitle(MyActivity.zh_cn ? "确认删除" : "Confirm Delete")
+                .setMessage(
+                    MyActivity.zh_cn
+                        ? "确定要删除该分类吗？"
+                        : "Are you sure to delete this category?"
+                )
+                .setPositiveButton(
+                    MyActivity.zh_cn ? "删除" : "Delete",
+                    (d, which) -> {
+                        // 用户确认，才调用C++执行删除
+                        PublicJavaCallCpp("category_delete|==|" + pos);
+                        dialog.dismiss(); // 关闭外层分类选择弹窗
+                    }
+                )
+                .setNegativeButton(MyActivity.zh_cn ? "取消" : "Cancel", null)
+                .show();
+        });
+
+        btnRename.setOnClickListener(v -> {
+            int pos = adapter.getSelectIndex();
+            String newName = etInput.getText().toString();
+            if (pos >= 0) {
+                PublicJavaCallCpp(
+                    "category_rename|==|" + pos + "|==|" + newName
+                );
+            }
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    /** 判断当前是否Android主线程 */
+    private boolean isMainThread() {
+        return (
+            android.os.Looper.myLooper() == android.os.Looper.getMainLooper()
+        );
+    }
+
+    private int dip2px(Context context, int dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
     }
 }

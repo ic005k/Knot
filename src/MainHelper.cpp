@@ -530,7 +530,6 @@ void MainWindow::reloadMain() {
   int total = tw->topLevelItemCount();
 
   if (total == 0) {
-    // m_Method->clearAllBakList(mw_one->ui->qwMainEvent);
     return;
   }
 

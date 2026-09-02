@@ -20,7 +20,7 @@ class CategoryList : public QDialog {
 
   QFrame* frame;
 
-  void on_Rename();
+  void on_Rename(int index, const QString& newName);
 
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
@@ -40,8 +40,10 @@ class CategoryList : public QDialog {
   void setTypeRenameText();
  private slots:
 
+  void on_btnRename_clicked();
+
  private:
-  void renameAll();
+  void renameAll(const QString& newName);
   QString oldName;
   void renameAll_oldini();
 };

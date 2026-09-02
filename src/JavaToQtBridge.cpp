@@ -494,7 +494,38 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
 
           if (strType == "open_category_dialog") {
             QTimer::singleShot(100, mw_one, [=]() {
-              mw_one->m_EditRecord->on_btnType_clicked();
+              // mw_one->m_EditRecord->on_btnType_clicked();
+              mw_one->m_EditRecord->showCategorySelectDialog();
+            });
+          }
+
+          if (strType.contains("category_delete|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int index = 0;
+                index = list.at(1).toInt();
+
+                m_CategoryList->ui->listWidget->setCurrentRow(index);
+                m_CategoryList->on_btnDel_clicked();
+                mw_one->m_EditRecord->showCategorySelectDialog();
+              }
+            });
+          }
+
+          if (strType.contains("category_rename|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 3) {
+                int index = 0;
+                index = list.at(1).toInt();
+                QString newName = list.at(2).trimmed();
+                m_CategoryList->ui->listWidget->setCurrentRow(index);
+                m_CategoryList->on_Rename(index, newName);
+                mw_one->m_EditRecord->showCategorySelectDialog();
+              }
             });
           }
 

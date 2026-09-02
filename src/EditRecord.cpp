@@ -188,13 +188,11 @@ void EditRecord::set_Amount(QString Number) {
 
 void EditRecord::on_btnType_clicked() {
   if (!isAndroid) {
-    mw_one->ui->frameEditRecord->hide();
+    // mw_one->ui->frameEditRecord->hide();
   } else {
     mw_one->ui->frameMain->hide();
     setDataToUI();
   }
-
-  mw_one->ui->frameCategory->show();
 
   init_MyCategory();
   m_CategoryList->ui->listWidget->setCurrentRow(0);
@@ -204,6 +202,11 @@ void EditRecord::on_btnType_clicked() {
   int count = 0;  // m_Method->getCountFromQW(mw_one->ui->qwCategory);
   mw_one->ui->lblTypeInfo->setText(QObject::tr("Total") + " : " +
                                    QString::number(count));
+
+  m_CategoryList->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
+                              mw_one->geometry().width(),
+                              mw_one->geometry().height());
+  m_CategoryList->show();
 }
 
 void EditRecord::saveMyClassification() {
@@ -752,4 +755,26 @@ void EditRecord::modify_Data() {
       // m_Method->setCurrentIndexFromQW(mw_one->ui->qwMainEvent, newrow);
     });
   }
+}
+
+void EditRecord::showCategorySelectDialog() {
+#ifdef Q_OS_ANDROID
+
+  QStringList list1 = c_list;
+
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+  for (const QString& item : list1) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/AddEventRecord", "mInstance", "Lcom/x/AddEventRecord;");
+
+  if (instance.isValid()) {
+    instance.callMethod<void>("showCategorySelectDialog",
+                              "(Ljava/util/ArrayList;)V", jArrayList.object());
+  }
+
+#endif
 }

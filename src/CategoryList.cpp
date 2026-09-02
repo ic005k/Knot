@@ -61,39 +61,41 @@ void CategoryList::on_listWidget_itemClicked(QListWidgetItem* item) {
 }
 
 void CategoryList::on_btnDel_clicked() {
-  int count = 0;  // m_Method->getCountFromQW(mw_one->ui->qwCategory);
+  int count = ui->listWidget->count();
   if (count == 0) return;
 
-  int row = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
+  int row = ui->listWidget->currentRow();
 
   if (row < 0) return;
 
-  ui->listWidget->setCurrentRow(row);
-  if (row >= 0) {
+  if (!isAndroid) {
     auto m_ShowMsg = std::make_unique<ShowMessage>(this);
     if (!m_ShowMsg->showMsg("Kont",
                             tr("Delete this category?") + "\n\n" +
                                 ui->listWidget->currentItem()->text(),
                             2))
       return;
-
-    ui->listWidget->takeItem(row);
-
-    // m_Method->delItemFromQW(mw_one->ui->qwCategory, row);
   }
+
+  ui->listWidget->takeItem(row);
+
   mw_one->m_EditRecord->saveMyClassification();
+
   if (ui->listWidget->count() > 0)
     on_listWidget_itemClicked(ui->listWidget->currentItem());
   else
     ui->editRename->clear();
 
-  // count = m_Method->getCountFromQW(mw_one->ui->qwCategory);
+  count = ui->listWidget->count();
+
   mw_one->ui->lblTypeInfo->setText(tr("Total") + " : " +
                                    QString::number(count));
 }
 
 void CategoryList::on_btnOk_clicked() {
-  int index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
+  int index =
+      ui->listWidget
+          ->currentRow();  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
   ui->listWidget->setCurrentRow(index);
 
   int row = ui->listWidget->currentRow();
@@ -109,24 +111,23 @@ void CategoryList::on_listWidget_itemDoubleClicked(QListWidgetItem* item) {
   on_btnOk_clicked();
 }
 
-void CategoryList::on_Rename() {
+void CategoryList::on_Rename(int index, const QString& newName) {
   if (ui->listWidget->count() == 0) return;
 
-  int row = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
-  ui->listWidget->setCurrentRow(row);
+  if (index < 0) return;
+  ui->listWidget->setCurrentRow(index);
+
+  if (newName.trimmed().isEmpty()) return;
 
   oldName = ui->listWidget->currentItem()->text().trimmed();
 
-  QString text = ui->editRename->text().trimmed();
   QString str = ui->listWidget->currentItem()->text();
-  if (!text.isEmpty() && text != str) {
+  if (!newName.isEmpty() && newName != oldName) {
     int index = ui->listWidget->currentRow();
     ui->listWidget->takeItem(index);
-    QListWidgetItem* item = new QListWidgetItem(text);
+    QListWidgetItem* item = new QListWidgetItem(newName);
 
     ui->listWidget->insertItem(index, item);
-
-    // m_Method->modifyItemText0(mw_one->ui->qwCategory, row, text);
 
     QStringList list;
     for (int i = 0; i < ui->listWidget->count(); i++) {
@@ -140,6 +141,7 @@ void CategoryList::on_Rename() {
       ui->listWidget->addItem(item);
     }
     if (index >= 0) ui->listWidget->setCurrentRow(index);
+
     mw_one->m_EditRecord->saveMyClassification();
 
     for (int i = 0; i < tabData->tabBar()->count(); i++) {
@@ -148,27 +150,29 @@ void CategoryList::on_Rename() {
         QTreeWidgetItem* topItem = tw->topLevelItem(m);
         for (int n = 0; n < topItem->childCount(); n++) {
           if (str == topItem->child(n)->text(2)) {
-            topItem->child(n)->setText(2, text);
+            topItem->child(n)->setText(2, newName);
           }
         }
       }
     }
 
-    renameAll();
+    renameAll(newName);
 
     mw_one->ui->editCategory->setText(ui->editRename->text().trimmed());
 
-    mw_one->reloadMain();
+    // mw_one->reloadMain();
 
-    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-    m_ShowMsg->showMsg("Kont", oldName + " -> " + text + " " + tr("Success"),
-                       1);
+    if (!isAndroid) {
+      auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
+      m_ShowMsg->showMsg("Kont",
+                         oldName + " -> " + newName + " " + tr("Success"), 1);
+    }
 
     int cindex = ui->listWidget->currentRow();
     mw_one->ui->btnCancelType->click();
     mw_one->ui->btnType->click();
     ui->listWidget->setCurrentRow(cindex);
-    // m_Method->setCurrentIndexFromQW(mw_one->ui->qwCategory, cindex);
+
     setTypeRenameText();
   }
 }
@@ -202,7 +206,7 @@ void CategoryList::renameAll_oldini() {
   }
 }
 
-void CategoryList::renameAll() {
+void CategoryList::renameAll(const QString& newName) {
   // 1. 初始化目录和过滤规则（简单直接）
   QDir dir(iniDir);
   QStringList filters;
@@ -214,7 +218,8 @@ void CategoryList::renameAll() {
   QFileInfoList fileInfoList = dir.entryInfoList();
 
   // 3. 获取新名称（提前取，避免循环内重复访问UI）
-  QString newName = ui->editRename->text().trimmed();
+  // QString newName = ui->editRename->text().trimmed();
+
   if (newName.isEmpty()) {
     qWarning() << "新名称不能为空，取消修改";
     return;
@@ -317,14 +322,26 @@ void CategoryList::on_btnCancel_clicked() {
         mw_one->ui->editDetails->toPlainText(), mw_one->ui->editAmount->text(),
         mw_one->ui->lblTime->text());
   } else {
-    mw_one->ui->frameEditRecord->show();
+    // mw_one->ui->frameEditRecord->show();
   }
 
-  mw_one->ui->frameCategory->hide();
+  // mw_one->ui->frameCategory->hide();
+  close();
 }
 
 void CategoryList::setTypeRenameText() {
-  int index = 0;     // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
-  QString str = "";  // m_Method->getText0(mw_one->ui->qwCategory, index);
+  int index =
+      ui->listWidget
+          ->currentRow();  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwCategory);
+  QString str =
+      ui->listWidget->item(index)
+          ->text();  // m_Method->getText0(mw_one->ui->qwCategory, index);
   mw_one->ui->editRenameType->setText(str);
+}
+
+void CategoryList::on_btnRename_clicked() {
+  int index = ui->listWidget->currentRow();
+  QString newName = ui->editRename->text().trimmed();
+
+  on_Rename(index, newName);
 }
