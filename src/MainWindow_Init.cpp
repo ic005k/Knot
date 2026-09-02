@@ -358,14 +358,12 @@ void MainWindow::init_UIWidget() {
   mw_one->ui->lblVectorStatus->setText("");
   mw_one->ui->lblVectorStatus->hide();
 
-  mw_one->ui->lblStats->hide();
+  // mw_one->ui->lblStats->hide();
 
   mw_one->ui->btnSelTab->hide();
 
   mw_one->ui->menubar->hide();
   mw_one->ui->statusbar->hide();
-
-  mw_one->ui->frameCategory->hide();
 
   mw_one->ui->frameEditRecord->hide();
 

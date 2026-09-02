@@ -222,11 +222,6 @@ void ReceiveShare::closeAllChildWindows() {
 
   if (mw_one->ui->frameOne->isVisible()) mw_one->ui->btnBack_One->click();
 
-  if (mw_one->ui->frameCategory->isVisible()) {
-    mw_one->ui->btnCancelType->click();
-    mw_one->ui->btnBackEditRecord->click();
-  }
-
   if (mw_one->ui->frameEditRecord->isVisible())
     mw_one->ui->btnBackEditRecord->click();
 }

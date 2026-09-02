@@ -791,18 +791,6 @@ void MainWindow::on_twItemDoubleClicked() {
   }
 }
 
-void MainWindow::clickMainTab() {
-  int index = getCurrentIndex();
-  tabData->setCurrentIndex(index);
-
-  mw_one->ui->lblStats->show();
-
-  if (isSelectTab) {
-    on_btnAdd_clicked();
-    m_EditRecord->setCurrentValue();
-  }
-}
-
 void MainWindow::clickMainTab(int index) {
   tabData->setCurrentIndex(index);
 
@@ -812,6 +800,7 @@ void MainWindow::clickMainTab(int index) {
 
   listMyEventTitle.clear();
   listMyEventTitle.append(eventName);
+  listMyEventTitle.append(strStats);
 
   if (!isSelectTab) m_Method->openMyEventWindow();
 

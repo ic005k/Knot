@@ -87,9 +87,6 @@ void CategoryList::on_btnDel_clicked() {
     ui->editRename->clear();
 
   count = ui->listWidget->count();
-
-  mw_one->ui->lblTypeInfo->setText(tr("Total") + " : " +
-                                   QString::number(count));
 }
 
 void CategoryList::on_btnOk_clicked() {
@@ -169,7 +166,7 @@ void CategoryList::on_Rename(int index, const QString& newName) {
     }
 
     int cindex = ui->listWidget->currentRow();
-    mw_one->ui->btnCancelType->click();
+    on_btnCancel_clicked();
     mw_one->ui->btnType->click();
     ui->listWidget->setCurrentRow(cindex);
 
@@ -336,7 +333,7 @@ void CategoryList::setTypeRenameText() {
   QString str =
       ui->listWidget->item(index)
           ->text();  // m_Method->getText0(mw_one->ui->qwCategory, index);
-  mw_one->ui->editRenameType->setText(str);
+  // mw_one->ui->editRenameType->setText(str);
 }
 
 void CategoryList::on_btnRename_clicked() {

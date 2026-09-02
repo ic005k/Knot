@@ -519,12 +519,6 @@ bool MainWindow::importBakData(QString fileName) {
 }
 
 void MainWindow::reloadMain() {
-  bool isAniEffects;
-  if (isDelItem || isEditItem)
-    isAniEffects = false;
-  else
-    isAniEffects = true;
-
   QTreeWidget* tw = get_tw(tabData->currentIndex());
 
   int total = tw->topLevelItemCount();

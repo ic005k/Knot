@@ -351,9 +351,7 @@ void MainWindow::on_btnNoteMenu_clicked() {
   // mw_one->ui->qwNoteList->y());
 }
 
-void MainWindow::on_btnCancelType_clicked() {
-  m_CategoryList->on_btnCancel_clicked();
-}
+void MainWindow::on_btnCancelType_clicked() {}
 
 void MainWindow::on_btnOkType_clicked() { m_CategoryList->on_btnOk_clicked(); }
 

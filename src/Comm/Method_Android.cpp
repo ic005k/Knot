@@ -184,6 +184,8 @@ void Method::refreshMainDate() {
   // 1. 构建与打开时相同格式的数据列表
   QStringList list1 = mw_one->listMainDate;
 
+  QJniObject jStr = QJniObject::fromString(strStats);
+
   // 2. 构造 Java ArrayList<String>
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list1) {
@@ -198,6 +200,9 @@ void Method::refreshMainDate() {
   if (instance.isValid()) {
     instance.callMethod<void>("refreshLeftGroupList",
                               "(Ljava/util/ArrayList;)V", jArrayList.object());
+
+    instance.callMethod<void>("refreshTotalValue", "(Ljava/lang/String;)V",
+                              jStr.object());
   }
 
 #endif

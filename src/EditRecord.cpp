@@ -200,8 +200,8 @@ void EditRecord::on_btnType_clicked() {
   m_CategoryList->setTypeRenameText();
 
   int count = 0;  // m_Method->getCountFromQW(mw_one->ui->qwCategory);
-  mw_one->ui->lblTypeInfo->setText(QObject::tr("Total") + " : " +
-                                   QString::number(count));
+  // mw_one->ui->lblTypeInfo->setText(QObject::tr("Total") + " : " +
+  //                                  QString::number(count));
 
   m_CategoryList->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
                               mw_one->geometry().width(),

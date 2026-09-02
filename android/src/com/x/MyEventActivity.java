@@ -72,9 +72,12 @@ public class MyEventActivity extends AppCompatActivity {
             );
             if (receiveList != null && !receiveList.isEmpty()) {
                 String titleStr = receiveList.get(0);
+                String totalStr = receiveList.get(1);
                 myevent_tv_title.setText(titleStr);
+                //myevent_tv_total.setText(totalStr);
             } else {
                 myevent_tv_title.setText("My Event");
+                //myevent_tv_total.setText("");
             }
         }
 
@@ -245,6 +248,19 @@ public class MyEventActivity extends AppCompatActivity {
             outList.add(obj);
         }
         mRightAdapter.setDetailData(outList);
+    }
+
+    public void refreshTotalValue(String totalStr) {
+        if (
+            !Thread.currentThread().equals(Looper.getMainLooper().getThread())
+        ) {
+            new Handler(Looper.getMainLooper()).post(() ->
+                refreshTotalValue(totalStr)
+            );
+            return;
+        }
+
+        myevent_tv_total.setText(totalStr);
     }
 
     @Override

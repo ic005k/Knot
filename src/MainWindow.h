@@ -417,7 +417,6 @@ class MainWindow : public QMainWindow {
   void on_btnSelText();
 
   void on_hSlider_sliderMoved(int position);
-  void clickMainTab();
 
   void on_btnTodo_clicked();
   void readEBookDone();
