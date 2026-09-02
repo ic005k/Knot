@@ -35,7 +35,7 @@ void NotesList::on_btnRestore_clicked() {
 
   if (moveItem(twrb)) {
     resetQML_List();
-    clickNoteList();
+    // clickNoteList();
     if (!ui->frame1->isHidden()) {
       on_btnBack_clicked();
     }
@@ -99,7 +99,7 @@ void NotesList::on_btnBatchRestore_clicked() {
 
   if (allMoveSuccess) {
     resetQML_List();
-    clickNoteList();
+    // clickNoteList();
     if (!ui->frame1->isHidden()) {
       on_btnBack_clicked();
     }
@@ -348,7 +348,7 @@ void NotesList::on_btnDown_clicked() {
   if (isNoteBook) {
     isMouseClick = true;
   } else {
-    clickNoteList();
+    // clickNoteList();
   }
 }
 
@@ -361,7 +361,7 @@ void NotesList::on_btnUp_clicked() {
   if (isNoteBook) {
     isMouseClick = true;
   } else {
-    clickNoteList();
+    // clickNoteList();
   }
 }
 
@@ -715,30 +715,31 @@ void NotesList::activateNoteBook(QTreeWidgetItem* notebookItem) {
   //                          QString::number(count));
 }
 
-void NotesList::clickNoteList() {
-  int indexBook = getNoteBookCurrentIndex();
-  if (indexBook < 0) return;
+void NotesList::clickNoteList(int index) {
+  // int indexBook = getNoteBookCurrentIndex();
+  // if (indexBook < 0) return;
 
-  int indexNote = getNotesListCurrentIndex();
+  int indexNote = index;  // getNotesListCurrentIndex();
   if (indexNote < 0) {
     currentMDFile = "";
     return;
   }
 
-  QTreeWidgetItem* noteItem = pNoteItems.at(indexNote);
-  tw->setCurrentItem(noteItem);
-
-  int noteCount = getNotesListCount();
-  qInfo() << "The currently clicked note index=" << indexNote << "("
-          << indexBook << ")"
-          << "Total of notes=" << noteCount;
-
   // 容错处理，防止索引越界
+  int noteCount = getNotesListCount();
   if (indexNote >= noteCount) {
     indexNote = noteCount - 1;
   }
 
-  QString strMD = "";  // m_Method->getText3(mw_one->ui->qwNoteList, indexNote);
+  QTreeWidgetItem* noteItem = pNoteItems.at(indexNote);
+  tw->setCurrentItem(noteItem);
+
+  qInfo() << "The currently clicked note index=" << indexNote
+          << "Total of notes=" << noteCount << "noteItem=" << noteItem->text(0)
+          << noteItem->text(1);
+
+  QString strMD = noteItem->text(
+      1);  // m_Method->getText3(mw_one->ui->qwNoteList, indexNote);
   currentMDFile = iniDir + strMD;
 
   setNoteLabel();

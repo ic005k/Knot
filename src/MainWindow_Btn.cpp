@@ -774,7 +774,7 @@ void MainWindow::on_btnDownload_clicked() {
 void MainWindow::on_btnBack_One_clicked() { m_CloudBackup->backExit(); }
 
 void MainWindow::on_btnBackNotesGraph_clicked() {
-  m_NotesList->clickNoteList();
+  // m_NotesList->clickNoteList();
 }
 
 void MainWindow::on_btnCopy_clicked() {

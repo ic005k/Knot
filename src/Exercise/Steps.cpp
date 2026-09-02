@@ -1255,7 +1255,7 @@ void Steps::stopRecordMotion() {
     int nYear = QDate::currentDate().year();
     int nMonth = QDate::currentDate().month();
     clearAllGpsList();
-    loadGpsList(nYear, nMonth);
+    // loadGpsList(nYear, nMonth);
 
     refreshMotionData();
 
@@ -1427,7 +1427,7 @@ void Steps::refreshMotionData() {
     Reg1.setValue("/" + stry + "/" + strm,
                   s1 + "-=-" + s2 + "-=-" + s3 + "-=-" + s4);
 
-    allGpsTotal();
+    // allGpsTotal();
   }
 }
 
@@ -1537,7 +1537,8 @@ void Steps::loadGpsList(int nYear, int nMonth) {
               << QVariant(7.8) << QVariant(10.1) << QVariant(8.5)
               << QVariant(6.3) << QVariant(4.0);*/
 
-    insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, t7, speedData, altitudeData);
+    // insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, t7, speedData,
+    // altitudeData);
   }
 
   if (count > 0) {

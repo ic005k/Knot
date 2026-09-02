@@ -400,6 +400,8 @@ void MainWindow::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
 
   isEditItem = true;
   reloadMain();
+
+  m_Method->openMyEventWindow();
 }
 
 int MainWindow::calcStringPixelWidth(QString s_str, QFont font,
@@ -811,7 +813,7 @@ void MainWindow::clickMainTab(int index) {
   listMyEventTitle.clear();
   listMyEventTitle.append(eventName);
 
-  m_Method->openMyEventWindow();
+  if (!isSelectTab) m_Method->openMyEventWindow();
 
   if (isSelectTab) {
     on_btnAdd_clicked();

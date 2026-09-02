@@ -38,6 +38,10 @@ public class NoteBookAdapter
         notifyItemChanged(mSelectedPos);
     }
 
+    public int getSelectedPosition() {
+        return mSelectedPos;
+    }
+
     @NonNull
     @Override
     public BookViewHolder onCreateViewHolder(

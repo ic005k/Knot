@@ -47,6 +47,11 @@ public class NoteEntryAdapter
         notifyItemChanged(mSelectedPos);
     }
 
+    // ====获取当前选中笔记索引，-1代表没有选中=====
+    public int getSelectedPosition() {
+        return mSelectedPos;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(

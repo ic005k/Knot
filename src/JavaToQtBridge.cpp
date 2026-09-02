@@ -280,7 +280,7 @@ static void JavaNotify_16() {
 }
 
 static void JavaNotify_17() {
-  QTimer::singleShot(100, mw_one, []() { m_NotesList->clickNoteList(); });
+  // QTimer::singleShot(100, mw_one, []() { m_NotesList->clickNoteList(); });
   qDebug() << "C++ JavaNotify_17";
 }
 
@@ -479,7 +479,6 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           if (strType == "add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {
               if (mw_one && mw_one->m_EditRecord) {
-                mw_one->ui->frameMain->show();
                 mw_one->m_EditRecord->on_btnOk_clicked();
               }
             });
@@ -790,6 +789,42 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                 int index = 0;
                 index = list.at(1).toInt();
                 m_NotesList->clickNoteBook(index);
+              }
+            });
+          }
+
+          if (strType.startsWith("note_click|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int index = 0;
+                index = list.at(1).toInt();
+                m_NotesList->clickNoteList(index);
+              }
+            });
+          }
+
+          if (strType.startsWith("note_view|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int index = 0;
+                index = list.at(1).toInt();
+                m_Notes->previewNote();
+              }
+            });
+          }
+
+          if (strType.startsWith("note_edit|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int index = 0;
+                index = list.at(1).toInt();
+                m_Notes->openEditUI();
               }
             });
           }

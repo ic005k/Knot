@@ -144,6 +144,7 @@ public class MyEventActivity extends AppCompatActivity {
         myevent_btn_add.setOnClickListener(v -> {
             // 新增事件
             PublicJavaCallCpp("add_datadetail");
+            finish();
         });
 
         // 初始化UI颜色

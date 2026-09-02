@@ -242,7 +242,7 @@ class NotesList : public QDialog {
 
   void on_actionCopyNoteLink();
 
-  void clickNoteList();
+  void clickNoteList(int index);
 
   void clickNoteBook(int index);
 

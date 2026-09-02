@@ -86,6 +86,11 @@ public class NoteActivity extends AppCompatActivity {
         mNoteAdapter = new NoteEntryAdapter();
         mRvNoteList.setLayoutManager(new LinearLayoutManager(this));
         mRvNoteList.setAdapter(mNoteAdapter);
+
+        // ✅笔记列表点击回调
+        mNoteAdapter.setListener((pos, title) -> {
+            PublicJavaCallCpp("note_click|==|" + pos);
+        });
     }
 
     private void setupClickListeners() {
@@ -99,9 +104,26 @@ public class NoteActivity extends AppCompatActivity {
         mBtnNewNote.setOnClickListener(v ->
             PublicJavaCallCpp("note_create_new")
         );
+
         mBtnSearch.setOnClickListener(v -> PublicJavaCallCpp("note_search"));
-        mBtnView.setOnClickListener(v -> PublicJavaCallCpp("note_view"));
-        mBtnEdit.setOnClickListener(v -> PublicJavaCallCpp("note_edit"));
+
+        mBtnView.setOnClickListener(v -> {
+            int selectedNoteIndex = mNoteAdapter.getSelectedPosition();
+            // 没有选中的笔记，直接返回，不调用C++
+            if (selectedNoteIndex == -1) {
+                return;
+            }
+            // 格式：note_view|==|索引，C++端split解析拿到索引
+            String callArg = "note_view|==|" + selectedNoteIndex;
+            PublicJavaCallCpp(callArg);
+        });
+
+        mBtnEdit.setOnClickListener(v -> {
+            int selectedNoteIndex = mNoteAdapter.getSelectedPosition();
+            if (selectedNoteIndex == -1) return;
+            PublicJavaCallCpp("note_edit|==|" + selectedNoteIndex);
+        });
+
         mBtnRecycle.setOnClickListener(v ->
             PublicJavaCallCpp("note_open_recycle")
         );

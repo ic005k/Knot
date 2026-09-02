@@ -915,7 +915,7 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
       }
     }
 
-    clickNoteList();
+    // clickNoteList();
 
     if (isMouseClick) {
       setNotesListCurrentIndex(-1);

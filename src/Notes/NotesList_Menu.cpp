@@ -159,7 +159,8 @@ void NotesList::on_actionAdd_Note_triggered() {
   int count = getNotesListCount();
   setNotesListCurrentIndex(count - 1);
 
-  clickNoteList();
+  // clickNoteList();
+
   m_Notes->updateMDFileToSyncLists();
 
   setNoteLabel();

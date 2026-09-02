@@ -309,7 +309,9 @@ void Notes::previewNote() {
 
   if (!QFile::exists(currentMDFile)) return;
 
+  // if (!isAndroid)
   mw_one->showProgress();
+
   QString title = m_NoteManager->getNoteTitle(currentMDFile);
 
   QFuture<void> future = QtConcurrent::run([=]() {
