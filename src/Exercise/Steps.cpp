@@ -707,16 +707,6 @@ void Steps::startRecordMotion() {
 #else
   isGpsTest = true;
 
-  m_positionSource = QGeoPositionInfoSource::createDefaultSource(this);
-  if (m_positionSource) {
-    connect(m_positionSource, &QGeoPositionInfoSource::positionUpdated, this,
-            &Steps::positionUpdated);
-    m_positionSource->setUpdateInterval(2000);
-  } else {
-    ui->lblGpsInfo->setText(tr("No GPS signal..."));
-    ui->btnGPS->setText(tr("Start"));
-    return;
-  }
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -726,9 +716,7 @@ void Steps::startRecordMotion() {
   if (!startGPSFromService()) return;
 
 #else
-  if (m_positionSource) {
-    m_positionSource->startUpdates();
-  }
+
 #endif
 
   clearTrack();
@@ -802,21 +790,6 @@ void Steps::startRecordMotion() {
 
     isGpsRun = true;
   });
-}
-
-void Steps::positionUpdated(const QGeoPositionInfo& info) {
-  if (lastPosition.isValid()) {
-    double b = 1000;
-    // Convert to km
-    m_distance += (double)lastPosition.distanceTo(info.coordinate()) / b;
-    emit distanceChanged(m_distance);
-  }
-  lastPosition = info.coordinate();
-
-  if (!isGpsTest) {
-    latitude = lastPosition.latitude();
-    longitude = lastPosition.longitude();
-  }
 }
 
 double Steps::getGpsLatitude() {
@@ -1271,10 +1244,7 @@ void Steps::stopRecordMotion() {
 #ifdef Q_OS_ANDROID
   stopGPSFromService();
 #else
-  if (m_positionSource) {
-    m_positionSource->stopUpdates();
-  }
-  delete m_positionSource;
+
 #endif
 
   // mw_one->ui->btnSelGpsDate->setEnabled(true);

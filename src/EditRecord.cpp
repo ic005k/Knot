@@ -140,7 +140,7 @@ void EditRecord::on_btnOk_clicked() {
     mw_one->clearAll();
     for (int i = 0; i < tabData->count(); i++) {
       QString text = tabData->tabText(i);
-      mw_one->addItem(text, "", "", "", 0);
+      // mw_one->addItem(text, "", "", "", 0);
     }
   }
 
@@ -745,13 +745,12 @@ void EditRecord::modify_Data() {
     int maindateIndex =
         idxMainDate;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainDate);
 
-    mw_one->isEditItem = true;
     mw_one->reloadMain();
 
     QTimer::singleShot(100, mw_one, [this, maindateIndex, newrow]() {
       // m_Method->setCurrentIndexFromQW(mw_one->ui->qwMainDate, maindateIndex);
-      mw_one->isEditItem = true;
-      m_Method->clickMainDate(maindateIndex);
+
+      mw_one->clickMainDate(maindateIndex);
       // m_Method->setCurrentIndexFromQW(mw_one->ui->qwMainEvent, newrow);
     });
   }

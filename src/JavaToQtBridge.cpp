@@ -562,7 +562,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               if (list.count() == 2) {
                 int index = 0;
                 index = list.at(1).toInt();
-                m_Method->clickMainDate(index);
+                mw_one->clickMainDate(index);
                 m_Method->clickMainDateData(index);
               }
             });
@@ -635,19 +635,42 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->ui->btnSteps->click(); });
           }
 
-          // 菜单==========================================================
-          if (strType == "menu_id_add_tab") {
-            QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->on_actionAdd_Tab_triggered(); });
+          // 主菜单==========================================================
+
+          if (strType.startsWith("add_tab_confirm|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              QString name = list.at(1);
+              QTimer::singleShot(0, mw_one, [name]() {
+                mw_one->addTab(name);
+                m_Method->refreshMainEntranceCards();
+              });
+            }
           }
-          if (strType == "menu_id_delete_tab") {
-            QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->on_actionDel_Tab_triggered(); });
+
+          if (strType.startsWith("rename_tab_confirm|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              QString newName = list.at(1);
+              QTimer::singleShot(0, mw_one, [newName]() {
+                mw_one->renameTab(newName);
+                m_Method->refreshMainEntranceCards();
+              });
+            }
           }
-          if (strType == "menu_id_rename_tab") {
-            QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->on_actionRename_triggered(); });
+
+          if (strType.startsWith("delete_tab_confirm|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 3) {
+              // QString rawItem = list.at(1);
+              // QString flag = list.at(2);
+              QTimer::singleShot(0, mw_one, []() {
+                mw_one->delTab();
+                m_Method->refreshMainEntranceCards();
+              });
+            }
           }
+
           if (strType == "menu_id_export_data") {
             QTimer::singleShot(100, mw_one, [=]() {
               mw_one->on_actionExport_Data_triggered();

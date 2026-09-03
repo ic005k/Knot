@@ -14,7 +14,7 @@
 #include <QObject>
 #include <QOpenGLContext>
 #include <QProgressBar>
-#include <QSGRendererInterface>
+// #include <QSGRendererInterface>
 #include <QSplashScreen>
 #include <QStyleFactory>
 #include <QSurfaceFormat>
@@ -675,7 +675,7 @@ void migrateOldDataIfNeeded() {
 #endif
 
 void initAndroidGPU() {
-  qputenv("QSG_RHI_BACKEND", "opengl");
+  /*qputenv("QSG_RHI_BACKEND", "opengl");
   qputenv("QT_QUICK_BACKEND", "opengl");
   qputenv("QSG_INFO", "1");
 
@@ -687,7 +687,7 @@ void initAndroidGPU() {
   QSurfaceFormat fmt;
   fmt.setRenderableType(QSurfaceFormat::OpenGLES);
   fmt.setVersion(3, 2);
-  fmt.setDefaultFormat(fmt);
+  fmt.setDefaultFormat(fmt);*/
 }
 
 int clearLockFiles(const QString& iniDir) {

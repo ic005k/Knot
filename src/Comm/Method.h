@@ -624,8 +624,6 @@ QScrollBar::sub-page:horizontal {
 
  public slots:
 
-  void clickMainDate(int index);
-
   void clickMainDateData(int index);
   void clickMainEventData();
 
@@ -643,7 +641,6 @@ QScrollBar::sub-page:horizontal {
 
   int x, y, w, h;
 
-  void setMainTabCurrentIndex();
   QString quazipErrorString(int code);
   bool addFilesToZip(void* zip_handle, const QString& currentDir,
                      const QString& baseDir);

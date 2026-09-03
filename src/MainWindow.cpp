@@ -398,7 +398,6 @@ void MainWindow::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
   m_MainHelper->sort_childItem(topItem->child(0));
   tw->setCurrentItem(topItem->child(topItem->childCount() - 1));
 
-  isEditItem = true;
   reloadMain();
 
   m_Method->openMyEventWindow();
@@ -496,7 +495,6 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
         }
       }
 
-      isDelItem = true;
       reloadMain();
     }
   }
@@ -799,14 +797,15 @@ void MainWindow::clickMainTab(int index) {
   mw_one->ui->frameMain->hide();
 
   listMyEventTitle.clear();
+
   listMyEventTitle.append(eventName);
   listMyEventTitle.append(strStats);
-
-  if (!isSelectTab) m_Method->openMyEventWindow();
 
   if (isSelectTab) {
     on_btnAdd_clicked();
     m_EditRecord->setCurrentValue();
+  } else {
+    m_Method->openMyEventWindow();
   }
 }
 
@@ -828,9 +827,40 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 
   reloadMain();
 
-  isTabChanged = true;
-
   m_Method->clickMainDateData(0);
+
+  isTabChanged = true;
+}
+
+void MainWindow::clickMainDate(int index) {
+  listMainDateDetail.clear();
+
+  QTreeWidget* tw = get_tw(ui->tabWidget->currentIndex());
+  int maindateIndex = index;
+
+  int topIndex = tw->topLevelItemCount() - maindateIndex - 1;
+
+  if (topIndex < 0) {
+    m_Method->refreshMainDateDetail();
+    return;
+  }
+
+  QTreeWidgetItem* topItem = tw->topLevelItem(topIndex);
+  int childCount = topItem->childCount();
+  QString text0, text1, text2, text3;
+
+  for (int j = 0; j < childCount; j++) {
+    QTreeWidgetItem* childItem = topItem->child(j);
+    text0 = childItem->text(0);
+    text1 = childItem->text(1);
+    text2 = childItem->text(2);
+    text3 = childItem->text(3);
+
+    listMainDateDetail.append(text0 + "|==|" + text1 + "|==|" + text2 + "|==|" +
+                              text3);
+  }
+
+  m_Method->refreshMainDateDetail();
 }
 
 bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
@@ -1062,9 +1092,6 @@ void MainWindow::on_editTodo_textChanged() {
 }
 
 void MainWindow::setItemHeight(int h) {}
-
-void MainWindow::addItem(QString text0, QString text1, QString text2,
-                         QString text3, int itemH) {}
 
 QString MainWindow::getTop(int index) { return ""; }
 

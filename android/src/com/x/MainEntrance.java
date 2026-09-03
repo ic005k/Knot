@@ -459,9 +459,13 @@ public class MainEntrance extends AppCompatActivity {
         ArrayList<MenuItem> items = new ArrayList<>();
 
         // -------- 以下三项暂时隐藏，将来启用时取消注释即可 --------
-        // items.add(new MenuItem(MENU_ID_ADD_TAB,    zh ? "增加标签页"       : "Add Tab"));
-        // items.add(new MenuItem(MENU_ID_DELETE_TAB, zh ? "删除标签页"       : "Delete Tab"));
-        // items.add(new MenuItem(MENU_ID_RENAME_TAB, zh ? "重命名标签页"     : "Rename Tab"));
+        items.add(new MenuItem(MENU_ID_ADD_TAB, zh ? "增加标签页" : "Add Tab"));
+        items.add(
+            new MenuItem(MENU_ID_DELETE_TAB, zh ? "删除标签页" : "Delete Tab")
+        );
+        items.add(
+            new MenuItem(MENU_ID_RENAME_TAB, zh ? "重命名标签页" : "Rename Tab")
+        );
 
         items.add(
             new MenuItem(MENU_ID_EXPORT_DATA, zh ? "导出数据" : "Export Data")
@@ -503,7 +507,6 @@ public class MainEntrance extends AppCompatActivity {
         switch (pos) {
             case MENU_ID_ADD_TAB:
                 // 增加标签页
-                //PublicJavaCallCpp("menu_id_add_tab");
                 showAddTabDialog();
 
                 break;
@@ -625,8 +628,8 @@ public class MainEntrance extends AppCompatActivity {
 
             builder.setPositiveButton(textOk, (dialog, which) -> {
                 String name = etInput.getText().toString().trim();
-                // ==========【确定事件，留空，你自己写业务】==========
-                // PublicJavaCallCpp("add_tab_confirm|==|" + name);
+                // ==========【确定事件】==========
+                PublicJavaCallCpp("add_tab_confirm|==|" + name);
             });
             builder.setNegativeButton(textCancel, (dialog, which) -> {
                 dialog.dismiss();
@@ -678,7 +681,7 @@ public class MainEntrance extends AppCompatActivity {
             builder.setPositiveButton(textOk, (dialog, which) -> {
                 String newName = etInput.getText().toString().trim();
                 // TODO：业务，可使用 rawItem + newName
-                // PublicJavaCallCpp("rename_tab_confirm|==|" + rawItem + "|==|" + newName);
+                PublicJavaCallCpp("rename_tab_confirm|==|" + newName);
             });
             builder.setNegativeButton(textCancel, (dialog, which) -> {
                 dialog.dismiss();
@@ -712,8 +715,8 @@ public class MainEntrance extends AppCompatActivity {
             String textOk = MyActivity.zh_cn ? "确定" : "OK";
             String textCancel = MyActivity.zh_cn ? "取消" : "Cancel";
             builder.setPositiveButton(textOk, (dialog, which) -> {
-                // TODO：业务，使用 rawItem
-                // PublicJavaCallCpp("delete_tab_confirm|==|" + rawItem);
+                // TODO：业务，使用 rawItem(tab text|==|flag)
+                PublicJavaCallCpp("delete_tab_confirm|==|" + rawItem);
             });
             builder.setNegativeButton(textCancel, (dialog, which) -> {
                 dialog.dismiss();

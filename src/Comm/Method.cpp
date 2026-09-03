@@ -599,58 +599,6 @@ QString Method::getLastModified(QString file) {
   return item1;
 }
 
-void Method::clickMainDate(int index) {
-  bool isAniEffects;
-  if (mw_one->isDelItem || mw_one->isEditItem)
-    isAniEffects = false;
-  else
-    isAniEffects = true;
-  mw_one->isDelItem = false;
-  mw_one->isEditItem = false;
-
-  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
-  int maindateIndex = index;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
-
-  int topIndex = tw->topLevelItemCount() - maindateIndex - 1;
-
-  if (topIndex < 0) return;
-
-  QTreeWidgetItem* topItem = tw->topLevelItem(topIndex);
-  int childCount = topItem->childCount();
-  QString text0, text1, text2, text3;
-
-  mw_one->listMainDateDetail.clear();
-
-  for (int j = 0; j < childCount; j++) {
-    QTreeWidgetItem* childItem = topItem->child(j);
-    text0 = childItem->text(0);
-    text1 = childItem->text(1);
-    text2 = childItem->text(2);
-    text3 = childItem->text(3);
-
-    // addItemToQW(mw_one->ui->qwMainEvent, text0, text1, text2, text3, 0);
-
-    mw_one->listMainDateDetail.append(text0 + "|==|" + text1 + "|==|" + text2 +
-                                      "|==|" + text3);
-  }
-
-  setMainTabCurrentIndex();
-
-  refreshMainDateDetail();
-}
-
-void Method::setMainTabCurrentIndex() {
-  int tabIndex = tabData->currentIndex();
-  if (tabIndex > 0) {
-    mw_one->setCurrentIndex(tabIndex - 1);
-    mw_one->setCurrentIndex(tabIndex);
-  }
-  if (tabIndex == 0 && mw_one->getCount() > 1) {
-    mw_one->setCurrentIndex(tabIndex + 1);
-    mw_one->setCurrentIndex(tabIndex);
-  }
-}
-
 void Method::clickMainDateData(int index) {
   QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
   int maindateIndex = index;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
@@ -678,8 +626,6 @@ void Method::clickMainEventData() {
   if (childIndex < 0) return;
 
   mw_one->on_twItemClicked();
-
-  setMainTabCurrentIndex();
 }
 
 void Method::setSCrollPro(QObject* obj) {

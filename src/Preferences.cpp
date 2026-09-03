@@ -346,7 +346,7 @@ void Preferences::initOptions() {
 
   if (!devMode) {
     mw_one->ui->btnHome->hide();
-
+    mw_one->ui->tabWidget->hide();
     mw_one->ui->btnSteps->hide();
 
     mw_one->ui->btnReader->hide();

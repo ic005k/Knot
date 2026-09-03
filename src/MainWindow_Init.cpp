@@ -29,7 +29,7 @@ void MainWindow::init_TotalData() {
                           .toString();
     mw_one->ui->tabWidget->addTab(tw, tabText);
 
-    addItem(tabText, "", "", "", 0);
+    // addItem(tabText, "", "", "", 0);
   }
 
   if (TabCount == 0) {
@@ -38,7 +38,7 @@ void MainWindow::init_TotalData() {
 
     QString tabText = tr("Tab") + " " + QString::number(1);
     mw_one->ui->tabWidget->addTab(tw, tabText);
-    addItem(tabText, "", "", "", 0);
+    // addItem(tabText, "", "", "", 0);
 
     saveTab();
   }

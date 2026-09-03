@@ -12,9 +12,6 @@
 #include <QDebug>
 #include <QDialog>
 #include <QGeoCoordinate>
-#include <QGeoPositionInfo>
-#include <QGeoPositionInfoSource>
-#include <QGeoServiceProvider>
 #include <QHorizontalBarSeries>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -248,7 +245,6 @@ class Steps : public QDialog {
   void getRemarks(const QString& strGpsTime);
   void updateGetGpsData();
  private slots:
-  void positionUpdated(const QGeoPositionInfo& info);
 
   void refreshSteps();
 
@@ -309,8 +305,7 @@ class Steps : public QDialog {
   int maxCount = 90;
 
   double distance() const { return m_distance; }
-  QGeoPositionInfoSource* m_positionSource;
-  QGeoCoordinate lastPosition;
+
   double m_distance;
   double m_TotalDistance, oldTotalDistance;
   double m_speed;

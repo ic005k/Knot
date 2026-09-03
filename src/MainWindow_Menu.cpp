@@ -97,7 +97,7 @@ void MainWindow::on_actionAdd_Tab_triggered() {
 
     mw_one->ui->tabWidget->addTab(tw, customTabText);
     mw_one->ui->tabWidget->setCurrentIndex(count);
-    addItem(customTabText, "", "", "", 0);
+    // addItem(customTabText, "", "", "", 0);
     setCurrentIndex(count);
 
     reloadMain();
@@ -106,6 +106,21 @@ void MainWindow::on_actionAdd_Tab_triggered() {
   });
 
   connect(dlg, &QDialog::rejected, this, [=]() { dlg->deleteLater(); });
+}
+
+void MainWindow::addTab(const QString& customTabText) {
+  int count = mw_one->ui->tabWidget->tabBar()->count();
+
+  QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
+  QTreeWidget* tw = init_TreeWidget(twName);
+
+  mw_one->ui->tabWidget->addTab(tw, customTabText);
+  mw_one->ui->tabWidget->setCurrentIndex(count);
+
+  setCurrentIndex(count);
+
+  saveTab();
+  strLatestModify = tr("Add Tab") + " ( " + customTabText + " ) ";
 }
 
 void MainWindow::on_actionDel_Tab_triggered() {
@@ -174,9 +189,52 @@ void MainWindow::on_actionDel_Tab_triggered() {
     mw_one->ui->tabWidget->addTab(tw, tabText);
 
     clearAll();
-    addItem(tabData->tabText(0), "", "", "", 0);
+    // addItem(tabData->tabText(0), "", "", "", 0);
 
     reloadMain();
+  }
+
+  saveTab();
+}
+
+void MainWindow::delTab() {
+  int index = mw_one->ui->tabWidget->currentIndex();
+  if (index < 0) return;
+
+  QString tab_name = mw_one->ui->tabWidget->tabText(index);
+
+  strLatestModify = tr("Del Tab") + " ( " + tab_name + " ) ";
+
+  QString date_time = m_Notes->getDateTimeStr();
+  m_Method->saveRecycleTabName(date_time, tab_name);
+
+  QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
+  QString twName = tw->objectName();
+  int c_year = QDate::currentDate().year();
+
+  bool isFileExists = false;
+  for (int i = 2022; i <= c_year; i++) {
+    QString file = iniDir + QString::number(i) + "-" + twName + ".json";
+    if (QFile::exists(file)) {
+      isFileExists = true;
+      QFileInfo fi(file);
+      QString fn = fi.fileName();
+      QString newFile = iniDir + "recycle_" + tab_name + "_" + fn;
+      QFile::rename(file, newFile);
+    }
+  }
+
+  int TabCount = ui->tabWidget->tabBar()->count();
+  if (TabCount > 1) {
+    ui->tabWidget->removeTab(index);
+  }
+
+  if (TabCount == 1) {
+    ui->tabWidget->removeTab(0);
+    QString tw_name = m_Notes->getDateTimeStr() + "_" + QString::number(1);
+    QTreeWidget* tw = init_TreeWidget(tw_name);
+    QString tabText = tr("Tab 1");
+    ui->tabWidget->addTab(tw, tabText);
   }
 
   saveTab();
@@ -279,6 +337,15 @@ void MainWindow::on_actionRename_triggered() {
     saveTab();
   }
 
+  strLatestModify = tr("Rename Tab");
+}
+
+void MainWindow::renameTab(const QString& newName) {
+  int index = ui->tabWidget->currentIndex();
+  if (index < 0) return;
+
+  ui->tabWidget->setTabText(index, newName);
+  saveTab();
   strLatestModify = tr("Rename Tab");
 }
 

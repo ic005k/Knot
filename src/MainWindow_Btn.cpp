@@ -73,16 +73,7 @@ void MainWindow::on_btnTabMoveDown_clicked() {
   }
 }
 
-void MainWindow::updateMainTab() {
-  clearAll();
-  for (int i = 0; i < tabData->count(); i++) {
-    QString tabText = tabData->tabText(i);
-    QTreeWidget* tw = get_tw(i);
-    int isFlagToday = m_Method->getFlagToday(tw);
-    addItem(tabText, "", "", "", isFlagToday);
-  }
-  setCurrentIndex(tabData->currentIndex());
-}
+void MainWindow::updateMainTab() {}
 
 void MainWindow::on_btnChart() { m_MainHelper->clickBtnChart(); }
 

@@ -123,7 +123,7 @@ void MainHelper::clickBtnRestoreTab() {
   QTreeWidget* tw = mw_one->init_TreeWidget(twName);
   mw_one->ui->tabWidget->addTab(tw, tab_name);
 
-  mw_one->addItem(tab_name, "", "", "", 0);
+  // mw_one->addItem(tab_name, "", "", "", 0);
   mw_one->setCurrentIndex(count);
 
   mw_one->readData(tw);
@@ -519,11 +519,13 @@ bool MainWindow::importBakData(QString fileName) {
 }
 
 void MainWindow::reloadMain() {
-  QTreeWidget* tw = get_tw(tabData->currentIndex());
+  listMainDate.clear();
 
+  QTreeWidget* tw = get_tw(tabData->currentIndex());
   int total = tw->topLevelItemCount();
 
   if (total == 0) {
+    m_Method->refreshMainDate();
     return;
   }
 
@@ -533,8 +535,6 @@ void MainWindow::reloadMain() {
     a = total - days;
   else
     a = 0;
-
-  listMainDate.clear();
 
   QString text0, text1, text2, text3, topitem;
   QString mainString =
@@ -547,9 +547,6 @@ void MainWindow::reloadMain() {
     text2 = topItem->text(2);
 
     topitem = text0;
-
-    // m_Method->insertItem(mw_one->ui->qwMainDate, text0, text1, text2, text3,
-    // 0);
 
     listMainDate.insert(0, text0 + "|==|" + text1 + "|==|" + text2);
 
@@ -566,7 +563,9 @@ void MainWindow::reloadMain() {
   m_Report->mainDataString = mainString;
   // qInfo() << "MainDataString=" << mainString;
 
-  m_Method->clickMainDate(0);
+  m_Method->refreshMainDate();
+
+  clickMainDate(0);
 }
 
 QStringList MainWindow::get_MonthList(QString strY, QString strM) {

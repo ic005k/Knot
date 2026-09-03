@@ -1288,6 +1288,8 @@ void Todo::openTodoUI() {
 
   if (isAndroid) {
     openTodoListWindow(listTodo);
+  } else {
+    show();
   }
 
   refreshAlarm();

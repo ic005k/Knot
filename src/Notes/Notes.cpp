@@ -907,8 +907,8 @@ void Notes::openNotesUI() {
   }
 
   if (!isAndroid) {
-    // mw_one->ui->frameNoteList->show();
-    mw_one->ui->frameMain->hide();
+    m_NotesList->show();
+    // mw_one->ui->frameMain->hide();
   }
 }
 

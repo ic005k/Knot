@@ -7,8 +7,6 @@
 #include <QAccelerometerReading>
 #include <QCheckBox>
 #include <QClipboard>
-#include <QGeoServiceProvider>
-#include <QGeoServiceProviderFactory>
 #include <QInputMethod>
 #include <QPointingDevice>
 #include <QSplashScreen>
@@ -184,9 +182,6 @@ class MainWindow : public QMainWindow {
 
   bool isOpenSearchResult = false;
 
-  bool isEditItem = false;
-  bool isDelItem = false;
-
   QString strLatestModify = tr("None");
 
   QDialog* dlgProg = nullptr;
@@ -338,9 +333,6 @@ class MainWindow : public QMainWindow {
 
   void setScrollBarPos(double pos);
 
-  void addItem(QString text0, QString text1, QString text2, QString text3,
-               int itemH);
-
   void execDeskShortcut();
 
   void on_DelayCloseProgressBar();
@@ -385,6 +377,13 @@ class MainWindow : public QMainWindow {
   void clickMainTab(int index);
 
   void on_btnAIExerciseSuggestions_clicked();
+
+  void addTab(const QString& customTabText);
+
+  void renameTab(const QString& newName);
+
+  void delTab();
+  void clickMainDate(int index);
 
  protected:
   void closeEvent(QCloseEvent* event) override;
