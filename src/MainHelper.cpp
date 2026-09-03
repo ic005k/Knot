@@ -156,8 +156,6 @@ void MainHelper::openTabRecycle() {
   // 切换UI
   mw_one->ui->frameMain->hide();
 
-  // m_Method->clearAllBakList(mw_one->ui->qwTabRecycle);
-
   // 使用QFutureWatcher监控后台任务完成
   QFutureWatcher<QStringList>* watcher = new QFutureWatcher<QStringList>(this);
 
@@ -241,16 +239,20 @@ void MainHelper::openTabRecycle() {
     QStringList uniqueList = watcher->result();
 
     // 在主线程更新UI
+    QStringList list;
     for (int i = 0; i < uniqueList.count(); i++) {
       QString str = uniqueList.at(i);
       QString tab_name = str.split("-=-").at(0);
       QString tab_time = str.split("-=-").at(1);
       QString iniTotal = str.split("-=-").at(2);
       iniTotal = iniTotal.trimmed();
-      // m_Method->addItemToQW(mw_one->ui->qwTabRecycle, tab_name, tab_time, "",
-      // iniTotal,
-      //                       0);
+
+      list.append(tab_name + "|==|" + iniTotal);
     }
+
+    m_Method->openTabRecycleBinActivity(list);
+
+    qInfo() << "TabRecycle=" << list;
 
     // 清理watcher
     watcher->deleteLater();
@@ -520,12 +522,14 @@ bool MainWindow::importBakData(QString fileName) {
 
 void MainWindow::reloadMain() {
   listMainDate.clear();
+  listMainDateDetail.clear();
 
   QTreeWidget* tw = get_tw(tabData->currentIndex());
   int total = tw->topLevelItemCount();
 
   if (total == 0) {
     m_Method->refreshMainDate();
+    m_Method->refreshMainDateDetail();
     return;
   }
 

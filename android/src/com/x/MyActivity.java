@@ -1600,6 +1600,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openTabRecycleBinActivity(ArrayList<String> tabRecycleList) {
+        Intent intent = new Intent(this, TabRecycleBinActivity.class);
+        intent.putStringArrayListExtra("recycle_list", tabRecycleList);
+        startActivity(intent);
+    }
+
     public void openMainEntranceWindow(ArrayList<String> maintabList) {
         Intent intent = new Intent(this, MainEntrance.class);
         // 把ArrayList直接放入intent

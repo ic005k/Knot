@@ -615,7 +615,8 @@ QScrollBar::sub-page:horizontal {
   QInputDialog* inputDialog(QString windowsTitle, QString lblEdit,
                             QString defaultValue);
 
- protected:
+  void openTabRecycleBinActivity(QStringList list);
+  protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

@@ -233,3 +233,19 @@ void Method::refreshMainDateDetail() {
 
 #endif
 }
+
+void Method::openTabRecycleBinActivity(QStringList list) {
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+
+  for (const QString& item : list) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  activity.callMethod<void>("openTabRecycleBinActivity",
+                            "(Ljava/util/ArrayList;)V", jArrayList.object());
+#endif
+}
