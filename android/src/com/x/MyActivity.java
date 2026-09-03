@@ -1606,6 +1606,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openNoteRecycleBinActivity(ArrayList<String> noteRecycleList) {
+        Intent intent = new Intent(this, NoteRecycleBinActivity.class);
+        intent.putStringArrayListExtra("recycle_note_list", noteRecycleList);
+        startActivity(intent);
+    }
+
     public void openTabRecycleBinActivity(ArrayList<String> tabRecycleList) {
         Intent intent = new Intent(this, TabRecycleBinActivity.class);
         intent.putStringArrayListExtra("recycle_list", tabRecycleList);

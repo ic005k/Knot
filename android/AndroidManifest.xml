@@ -249,6 +249,11 @@
             android:exported="false"
         />
 
+        <activity
+            android:name=".NoteRecycleBinActivity"
+            android:exported="false"
+        />
+
          <activity android:name=".NoteActivity" android:exported="false" />
 
         <activity

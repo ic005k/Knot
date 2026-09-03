@@ -246,15 +246,17 @@ void NotesList::setNoteLabel() {
 }
 
 void NotesList::loadAllRecycle() {
-  // m_Method->clearAllBakList(mui->qwNoteRecycle);
+  QStringList list;
   int childCount = twrb->topLevelItem(0)->childCount();
   for (int i = 0; i < childCount; i++) {
     QTreeWidgetItem* childItem = twrb->topLevelItem(0)->child(i);
     QString text0 = childItem->text(0);
     QString text3 = iniDir + childItem->text(1);
 
-    // m_Method->addItemToQW(mui->qwNoteRecycle, text0, "", "", text3, 0);
+    list.append(text0 + "===" + text3);
   }
+
+  m_Method->openActivity("openNoteRecycleBinActivity", list);
 }
 
 QVariant NotesList::addQmlTreeTopItem(QString strItem) { return 0; }

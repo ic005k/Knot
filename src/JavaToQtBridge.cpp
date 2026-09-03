@@ -884,9 +884,13 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           }
 
           if (strType.startsWith("note_favorite")) {
-            QTimer::singleShot(100, mw_one, [=]() {
-              mw_one->on_btnRecentOpen_clicked();
-            });
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_btnRecentOpen_clicked(); });
+          }
+
+          if (strType.startsWith("note_open_recycle")) {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->on_btnNoteRecycle_clicked(); });
           }
 
           //===========================================================
