@@ -249,3 +249,37 @@ void Method::openTabRecycleBinActivity(QStringList list) {
                             "(Ljava/util/ArrayList;)V", jArrayList.object());
 #endif
 }
+
+void Method::openRecentNotesActivity(QStringList list) {
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+
+  for (const QString& item : list) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  activity.callMethod<void>("openRecentNotesActivity",
+                            "(Ljava/util/ArrayList;)V", jArrayList.object());
+#endif
+}
+
+void Method::openActivity(QString callJavaName, QStringList list) {
+#ifdef Q_OS_ANDROID
+
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+
+  for (const QString& item : list) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  activity.callMethod<void>(callJavaName.toUtf8().constData(),
+                            "(Ljava/util/ArrayList;)V", jArrayList.object());
+
+  qInfo() << callJavaName << "=" << list;
+#endif
+}

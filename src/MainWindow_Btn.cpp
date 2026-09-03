@@ -103,13 +103,14 @@ void MainWindow::on_btnStepsOptions_clicked() {}
 void MainWindow::on_btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
 
-  // mw_one->ui->frameNoteList->hide();
-
   m_Notes->refreshRecentOpenByCounter();
 
+  m_Method->openActivity("openRecentNotesActivity",
+                         m_NotesList->listRecentOpen);
+
   // 加载最近打开列表推送到QML
-  QVariantList data = buildRecentList();
-  setDisplayResult(data);
+  // QVariantList data = buildRecentList();
+  // setDisplayResult(data);
 }
 
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }

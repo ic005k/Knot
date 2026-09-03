@@ -1600,6 +1600,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openRecentNotesActivity(ArrayList<String> noteList) {
+        Intent intent = new Intent(this, RecentNotesActivity.class);
+        intent.putStringArrayListExtra("recent_note_list", noteList);
+        startActivity(intent);
+    }
+
     public void openTabRecycleBinActivity(ArrayList<String> tabRecycleList) {
         Intent intent = new Intent(this, TabRecycleBinActivity.class);
         intent.putStringArrayListExtra("recycle_list", tabRecycleList);

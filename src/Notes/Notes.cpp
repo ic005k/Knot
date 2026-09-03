@@ -1017,7 +1017,7 @@ void Notes::refreshRecentOpenByCounter() {
 
     QString title = m_Notes->m_NoteManager->getNoteTitle(mdFile);
     QString strmd = mdFile;
-    strmd = strmd.replace(iniDir, "").trimmed();
+    // strmd = strmd.replace(iniDir, "").trimmed();
 
     m_NotesList->listRecentOpen.append(title + "===" + strmd);
   }

@@ -883,6 +883,12 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.startsWith("note_favorite")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              mw_one->on_btnRecentOpen_clicked();
+            });
+          }
+
           //===========================================================
 
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;

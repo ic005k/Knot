@@ -397,6 +397,8 @@ class MainWindow : public QMainWindow {
   void showEvent(QShowEvent* event) override;
 
  public slots:
+  void on_btnRecentOpen_clicked();
+
   void on_btnBackAIAPIList_clicked();
 
   void on_btnAIAPIListOk_clicked(int index);
@@ -713,8 +715,6 @@ class MainWindow : public QMainWindow {
   void on_btnHideFind_clicked();
 
   void on_btnStepsOptions_clicked();
-
-  void on_btnRecentOpen_clicked();
 
   void on_btnMenuReport_clicked();
 

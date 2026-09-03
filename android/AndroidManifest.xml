@@ -238,8 +238,14 @@
         <activity android:name=".TodoActivity" android:exported="false" />
 
         <activity android:name=".MyEventActivity" android:exported="false" />
+
         <activity
             android:name=".TabRecycleBinActivity"
+            android:exported="false"
+        />
+
+         <activity
+            android:name=".RecentNotesActivity"
             android:exported="false"
         />
 
