@@ -10,6 +10,7 @@
 #include <QPointer>
 #include <QShortcut>
 #include <QStandardPaths>
+#include <QStyledItemDelegate>
 #include <QTextEdit>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -485,6 +486,21 @@ class Notes : public QDialog {
         QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
             background: transparent;
         })";
+};
+
+class IndentDelegate : public QStyledItemDelegate {
+  Q_OBJECT
+ public:
+  explicit IndentDelegate(QObject* parent = nullptr)
+      : QStyledItemDelegate(parent) {}
+
+  void paint(QPainter* painter, const QStyleOptionViewItem& option,
+             const QModelIndex& index) const override {
+    QStyleOptionViewItem opt = option;
+    int indent = index.data(Qt::UserRole).toInt();
+    opt.rect.setLeft(opt.rect.left() + indent * 20);
+    QStyledItemDelegate::paint(painter, opt, index);
+  }
 };
 
 #endif  // NOTES_H

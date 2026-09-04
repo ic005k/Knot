@@ -714,7 +714,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->on_actionAbout(); });
           }
 
-          // Todo ===================================================
+          // Todo ========================================================
           if (strType == "back_todo") {
             QTimer::singleShot(100, mw_one, [=]() {
               if (mw_one->ui->frameMain->isHidden()) {
@@ -844,7 +844,16 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                []() { mw_one->m_Todo->on_DelAlarm(); });
           }
 
-          // Notes=====================================================
+          // Notes===========================================================
+
+          if (strType == "back_note") {
+            QTimer::singleShot(100, mw_one, [=]() {
+              if (mw_one->ui->frameMain->isHidden()) {
+                mw_one->on_btnBackNoteList_clicked();
+                m_Method->openMainEntranceWindow();
+              }
+            });
+          }
 
           if (strType.startsWith("note_book_click|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
@@ -909,7 +918,8 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
-          if (strType.startsWith("note_search_view|==|")) {
+          if (strType.startsWith("note_search_view|==|") ||
+              strType.startsWith("recent_note_view|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
 
@@ -933,7 +943,8 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
-          if (strType.startsWith("note_search_edit|==|")) {
+          if (strType.startsWith("note_search_edit|==|") ||
+              strType.startsWith("recent_note_edit|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
 

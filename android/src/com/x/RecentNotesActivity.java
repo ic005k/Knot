@@ -173,19 +173,24 @@ public class RecentNotesActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> {
             getOnBackPressedDispatcher().onBackPressed();
         });
+        btnBack.setVisibility(View.GONE); // 暂时隐藏
 
         Button btnView = createButton(MyActivity.zh_cn ? "查看" : "View");
         btnView.setOnClickListener(v -> {
             if (mSelectedPos < 0) return;
             String item = mFilteredList.get(mSelectedPos);
-            PublicJavaCallCpp("recent_note_view|==|" + item);
+            String[] parts = item.split("===");
+            String filePath = parts.length >= 2 ? parts[1] : "";
+            PublicJavaCallCpp("recent_note_view|==|" + filePath);
         });
 
         Button btnEdit = createButton(MyActivity.zh_cn ? "编辑" : "Edit");
         btnEdit.setOnClickListener(v -> {
             if (mSelectedPos < 0) return;
             String item = mFilteredList.get(mSelectedPos);
-            PublicJavaCallCpp("recent_note_edit|==|" + item);
+            String[] parts = item.split("===");
+            String filePath = parts.length >= 2 ? parts[1] : "";
+            PublicJavaCallCpp("recent_note_edit|==|" + filePath);
         });
 
         mBottomBtnContainer.addView(btnBack);

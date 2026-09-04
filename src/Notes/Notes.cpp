@@ -17,6 +17,8 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   ui->listSearchResults->setItemDelegate(new TextMatchDelegate(this));
 
+  ui->listNoteBook->setItemDelegate(new IndentDelegate(this));
+
   initEditor();
   init_md();
 
@@ -881,6 +883,34 @@ void Notes::loadNotesToUI() {
     m_NotesList->setNoteLabel();
   }
 
+  if (!isAndroid) {
+    ui->listNoteBook->clear();
+    int count = m_NotesList->listNoteBook.count();
+    for (int i = 0; i < count; i++) {
+      QString str = m_NotesList->listNoteBook.at(i);
+      QStringList parts = str.split("|==|");
+
+      // 防御性检查：防止格式异常导致崩溃
+      if (parts.size() < 2) continue;
+
+      QString text = parts.at(0);
+      int indentLevel = parts.at(1).toInt();  // "0" -> 0, "1" -> 1, ...
+
+      QListWidgetItem* item = new QListWidgetItem(text);
+
+      // 按缩进级别设置左边距（每级缩进 20px，可根据需要调整）
+      if (indentLevel > 0) {
+        item->setData(Qt::UserRole, indentLevel);
+
+        QFontMetrics fm(ui->listNoteBook->font());
+        int padding = indentLevel * fm.horizontalAdvance("  ");
+        item->setData(Qt::UserRole + 1, padding);
+      }
+
+      ui->listNoteBook->addItem(item);
+    }
+  }
+
   openNoteWindow();
 
   if (isRequestOpenNoteEditor) {
@@ -907,8 +937,7 @@ void Notes::openNotesUI() {
   }
 
   if (!isAndroid) {
-    m_NotesList->show();
-    // mw_one->ui->frameMain->hide();
+    m_Notes->show();
   }
 }
 

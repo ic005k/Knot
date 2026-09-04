@@ -43,7 +43,7 @@ public class NoteActivity extends AppCompatActivity {
         mBackCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                PublicJavaCallCpp("cancel_add_event_record");
+                PublicJavaCallCpp("back_note");
                 finish();
             }
         };
