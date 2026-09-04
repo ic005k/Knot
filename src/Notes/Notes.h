@@ -332,6 +332,12 @@ class Notes : public QDialog {
 
   void onSearchResultClicked(QListWidgetItem* item);
 
+  void on_listNoteBook_currentRowChanged(int currentRow);
+
+  void on_listNoteList_currentRowChanged(int currentRow);
+
+  void on_listNoteBook_itemClicked(QListWidgetItem* item);
+
  private:
   void findAllAndShowResults(const QString& text);
   void updateResultCount(int count);

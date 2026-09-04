@@ -915,8 +915,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
       }
     }
 
-    // clickNoteList();
-
     if (isMouseClick) {
       setNotesListCurrentIndex(-1);
       int idxNoteBook = getNoteBookCurrentIndex();
@@ -924,21 +922,20 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
       isMouseClick = false;
     }
 
-    m_Notes->setNoteEntryList();
+    if (isAndroid)
+      m_Notes->setNoteEntryList();
+    else {
+      m_Notes->ui->listNoteList->clear();
+      int count = listNoteEntry.count();
+      QStringList items;
+      for (int i = 0; i < count; i++) {
+        QString title = listNoteEntry.at(i);
+        items.append(title);
+      }
+      m_Notes->ui->listNoteList->addItems(items);
+    }
 
     watcher->deleteLater();
-
-    /*if (isExecRecentOpen) {
-        isExecRecentOpen = false;
-
-        QTimer::singleShot(50, this, [=]() {
-#ifdef Q_OS_ANDROID
-            mw_one->on_btnOpenNote_clicked();
-#else
-            mw_one->on_btnEditNote_clicked();
-#endif
-        });
-    }*/
   });
   watcher->setFuture(future);
 }

@@ -685,10 +685,9 @@ Note:
 }
 
 void NotesList::clickNoteBook(int index) {
-  int count = listNoteBook.count();  // getNoteBookCount();
+  int count = listNoteBook.count();
   if (count <= 0) return;
 
-  // int index = getNoteBookCurrentIndex();
   if (index < 0 || index >= pNoteBookItems.size()) return;
 
   activateNoteBook(pNoteBookItems[index]);

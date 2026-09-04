@@ -149,15 +149,13 @@ void Notes::restoreEditorState(const QString& filePath) {
   Q_UNUSED(filePath);
 #ifndef Q_OS_ANDROID
   QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
-
-  int x, y, w, h;
+  /*int x, y, w, h;
   x = settings.value("x", 0).toInt();
   y = settings.value("y", 20).toInt();
   w = settings.value("w", this->width()).toInt();
   h = settings.value("h", this->height()).toInt();
-
   move(x, y);
-  resize(w, h);
+  resize(w, h);*/
 
   QString groupName = "Documents/" + QFileInfo(filePath).canonicalFilePath();
   groupName.replace("/", "_");

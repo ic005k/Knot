@@ -229,14 +229,16 @@ void Notes::openEditUI() {
   qInfo() << "currentMDFile=" << currentMDFile
           << m_Notes->m_NoteManager->getNoteTitle(currentMDFile);
 
-  if (!QFile::exists(currentMDFile)) {
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg(appName,
-                 tr("The current note does not exist. Please select another "
-                    "note or create a new note."),
-                 0);
+  if (!isAndroid) {
+    if (!QFile::exists(currentMDFile)) {
+      auto msg = std::make_unique<ShowMessage>(mw_one);
+      msg->showMsg(appName,
+                   tr("The current note does not exist. Please select another "
+                      "note or create a new note."),
+                   0);
 
-    return;
+      return;
+    }
   }
 
   oldText = loadText(currentMDFile);
@@ -244,7 +246,6 @@ void Notes::openEditUI() {
   // m_NotesList->refreshRecentOpen();
   // m_NotesList->saveRecentOpen();
   setNotesCounter();
-  m_NotesList->moveToFirst();
 
   if (isAndroid) {
     m_Method->setMDFile(currentMDFile);
@@ -277,14 +278,10 @@ void Notes::openEditUI() {
     ui->tabAI->setTabVisible(1, false);
   }
 
-  show();
-
-  m_Method->Sleep(100);
-
-  restoreEditorState(currentMDFile);
   m_EditSource->setFocus();
 
-  m_Method->Sleep(200);
+  QTimer::singleShot(100, this,
+                     [this]() { restoreEditorState(currentMDFile); });
 
   isTextChange = false;
 
@@ -298,9 +295,9 @@ void Notes::openEditUI() {
       ui->editFind->setText(findText);
       on_btnNext_clicked();
     }
-  }
 
-  mw_one->isOpenSearchResult = false;
+    mw_one->isOpenSearchResult = false;
+  }
 
 #endif
 }
@@ -884,6 +881,16 @@ void Notes::loadNotesToUI() {
   }
 
   if (!isAndroid) {
+    QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
+    int x, y, w, h;
+    x = settings.value("x", 0).toInt();
+    y = settings.value("y", 20).toInt();
+    w = settings.value("w", this->width()).toInt();
+    h = settings.value("h", this->height()).toInt();
+    move(x, y);
+    resize(w, h);
+    m_Notes->show();
+
     ui->listNoteBook->clear();
     int count = m_NotesList->listNoteBook.count();
     for (int i = 0; i < count; i++) {
@@ -909,9 +916,9 @@ void Notes::loadNotesToUI() {
 
       ui->listNoteBook->addItem(item);
     }
-  }
-
-  openNoteWindow();
+    qInfo() << "NoteBookUI=" << m_NotesList->listNoteBook;
+  } else
+    openNoteWindow();
 
   if (isRequestOpenNoteEditor) {
     isRequestOpenNoteEditor = false;
@@ -934,10 +941,6 @@ void Notes::openNotesUI() {
     mw_one->execNeedSyncNotes();
   } else {
     loadNotesToUI();
-  }
-
-  if (!isAndroid) {
-    m_Notes->show();
   }
 }
 
@@ -1055,3 +1058,15 @@ void Notes::refreshRecentOpenByCounter() {
   m_NotesList->listRecentOpen =
       m_Method->removeDuplicatesFromQStringList(m_NotesList->listRecentOpen);
 }
+void Notes::on_listNoteBook_currentRowChanged(int currentRow) {
+  m_NotesList->clickNoteBook(currentRow);
+}
+
+void Notes::on_listNoteList_currentRowChanged(int currentRow) {
+  if (currentRow < 0) return;
+
+  m_NotesList->clickNoteList(currentRow);
+  openEditUI();
+}
+
+void Notes::on_listNoteBook_itemClicked(QListWidgetItem* item) {}

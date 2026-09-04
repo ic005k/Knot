@@ -168,14 +168,12 @@ void NotesList::getAllFiles(const QString& foldPath, QStringList& folds,
 }
 
 int NotesList::getNoteBookCount() {
-  int count =
-      listNoteBook.count();  // m_Method->getCountFromQW(mui->qwNoteBook);
+  int count = listNoteBook.count();
   return count;
 }
 
 int NotesList::getNotesListCount() {
-  int count =
-      listNoteEntry.count();  // m_Method->getCountFromQW(mui->qwNoteList);
+  int count = listNoteEntry.count();
   return count;
 }
 
