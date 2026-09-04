@@ -1248,7 +1248,7 @@ void MainWindow::on_rbHiking_clicked() {}
 
 void MainWindow::on_rbRunning_clicked() {}
 
-void MainWindow::on_editFindNote_returnPressed() { on_btnFindNotes_clicked(); }
+void MainWindow::on_editFindNote_returnPressed() {}
 
 void MainWindow::on_cboxWebDAV_currentTextChanged(const QString& arg1) {
   m_CloudBackup->changeComBoxWebDAV(arg1);

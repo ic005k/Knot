@@ -162,12 +162,13 @@ void NotesList::onSearchFinished() {
 
   const QVector<ExactMatchResult> exactResults = watcher->result();
 
+  QStringList list;
+
   if (exactResults.isEmpty()) {
     m_searchModel.setResults({});
     // mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
-
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg("Knot", tr("No match was found."), 1);
+    // auto msg = std::make_unique<ShowMessage>(mw_one);
+    // msg->showMsg("Knot", tr("No match was found."), 1);
   } else {
     // ========== 适配层：ExactMatchResult → SearchResult ==========
     QVector<SearchResult> adaptedResults;
@@ -179,19 +180,19 @@ void NotesList::onSearchFinished() {
       sr.title = emr.title;
       sr.preview = emr.preview;  // 已在后台清洗完毕，直接赋值
       adaptedResults.append(sr);
+
+      list.append(sr.title + "===" + sr.preview + "===" + sr.filePath);
     }
 
     // ✅ 设置UI模型（复用同一个 SearchModel）
-    m_searchModel.setResults(adaptedResults);
+    // m_searchModel.setResults(adaptedResults);
 
     // ✅ 缓存精准搜索专属导航数据（不参与UI显示）
     m_exactMatchCache = exactResults;
     m_currentExactMatchIndex = 0;
-
-    // 更新UI状态
-    // mui->lblNoteSearchResult->setText(tr("Note Search Results:") +
-    //                                  QString::number(adaptedResults.size()));
   }
+
+  m_Method->refreshJavaData("setSearchResult", "NoteSearchActivity", list);
 
   watcher->deleteLater();
   watcher = nullptr;
@@ -326,6 +327,8 @@ void NotesList::startVectorSerach(const QString& text) {
               adaptedResults.clear();
               adaptedResults.reserve(results.size());
 
+              QStringList listJG;
+
               for (const auto& item : results) {
                 SearchResult sr;
                 sr.filePath = item.filePath;
@@ -390,14 +393,20 @@ void NotesList::startVectorSerach(const QString& text) {
                 sr.preview = sr.preview.simplified();
 
                 adaptedResults.append(sr);
+
+                listJG.append(sr.title + "===" + sr.preview +
+                              "===" + sr.filePath);
               }
 
               if (isEditBoxSearchTextChanged) {
                 isEditBoxSearchTextChanged = false;
-                m_searchModel.setResults(adaptedResults);
-                // mui->lblNoteSearchResult->setText(
-                //     tr("AI Search Results: %1").arg(adaptedResults.size()));
+                // m_searchModel.setResults(adaptedResults);
+                //  mui->lblNoteSearchResult->setText(
+                //      tr("AI Search Results: %1").arg(adaptedResults.size()));
               }
+
+              m_Method->refreshJavaData("setSearchResult", "NoteSearchActivity",
+                                        listJG);
 
               isVectorSearchDone = true;
 

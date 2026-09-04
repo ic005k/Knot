@@ -322,8 +322,9 @@ void MainWindow::on_btnRestoreNoteRecycle_clicked() {
   m_NotesList->restoreNoteFromRecycle();
 }
 
-void MainWindow::on_btnFindNotes_clicked() {
-  QString str = "";  // mw_one->ui->editFindNote->text().trimmed();
+void MainWindow::on_btnFindNotes_clicked(const QString& kw) {
+  // 笔记精准匹配搜索
+  QString str = kw;
   if (str.length() == 0) return;
   mySearchText = str;
   m_NotesList->startFind(str);
@@ -367,7 +368,7 @@ void MainWindow::on_btnBackSearch_clicked() {
 void MainWindow::on_btnClearSearchText_clicked() {}
 
 void MainWindow::on_btnStartSearch_clicked(const QString& searchStr) {
-  // searchStr = "";  // mw_one->ui->editSearchText->text().trimmed();
+  // 主事件搜索
 
   if (searchStr.length() == 0) return;
 

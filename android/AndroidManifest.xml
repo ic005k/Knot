@@ -244,6 +244,8 @@
             android:exported="false"
         />
 
+        <activity android:name=".NoteSearchActivity" android:exported="false" />
+
         <activity
             android:name=".TabRecycleBinActivity"
             android:exported="false"

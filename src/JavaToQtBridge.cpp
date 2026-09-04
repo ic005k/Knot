@@ -870,6 +870,33 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.startsWith("note_search")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list;
+              m_Method->openActivity("openNoteSearchActivity", list);
+            });
+          }
+
+          if (strType.startsWith("note_exact_search|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              if (list.count() == 2) {
+                QString kw = list.at(1).trimmed();
+                m_NotesList->startFind(kw);
+              }
+            });
+          }
+
+          if (strType.startsWith("note_ai_search|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              if (list.count() == 2) {
+                QString kw = list.at(1).trimmed();
+                m_NotesList->onSearchTextChanged(kw);
+              }
+            });
+          }
+
           if (strType.startsWith("note_view|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");

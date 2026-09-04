@@ -235,6 +235,7 @@ class NotesList : public QDialog {
   void closeEvent(QCloseEvent* event) override;
 
  public slots:
+  void onSearchTextChanged(const QString& text);
   void showNoteBookMenu(int x, int y);
   void showNotsListMenu(int x, int y);
 
@@ -282,8 +283,6 @@ class NotesList : public QDialog {
   void on_actionShareNoteFile();
 
   void onSearchFinished();
-
-  void onSearchTextChanged(const QString& text);
 
   void on_actionSetColorFlag();
 

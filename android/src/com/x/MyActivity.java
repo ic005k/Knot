@@ -1600,6 +1600,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openNoteSearchActivity(ArrayList<String> mList) {
+        Intent intent = new Intent(this, NoteSearchActivity.class);
+        intent.putStringArrayListExtra("preload_item_list", mList);
+        startActivity(intent);
+    }
+
     public void openMyEventSearchActivity(ArrayList<String> eventList) {
         Intent intent = new Intent(this, MyEventSearchActivity.class);
         intent.putStringArrayListExtra("event_list", eventList);

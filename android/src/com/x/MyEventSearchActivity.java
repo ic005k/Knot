@@ -194,7 +194,7 @@ public class MyEventSearchActivity extends AppCompatActivity {
 
         //----------底部返回按钮----------
         Button btnBack = new Button(this);
-        btnBack.setText(MyActivity.zh_cn ? "返回" : "Back");
+        btnBack.setText(MyActivity.zh_cn ? "开始" : "Start");
         btnBack.setBackgroundColor(btnBg);
         btnBack.setTextColor(Color.WHITE);
         btnBack.setLayoutParams(
@@ -203,7 +203,9 @@ public class MyEventSearchActivity extends AppCompatActivity {
                 dp(52)
             )
         );
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> {
+            triggerSearch();
+        });
         mRootLayout.addView(btnBack);
 
         setContentView(mRootLayout);
