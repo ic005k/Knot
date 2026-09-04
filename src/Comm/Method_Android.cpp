@@ -250,22 +250,6 @@ void Method::openTabRecycleBinActivity(QStringList list) {
 #endif
 }
 
-void Method::openRecentNotesActivity(QStringList list) {
-#ifdef Q_OS_ANDROID
-
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  QJniObject jArrayList("java/util/ArrayList", "()V");
-
-  for (const QString& item : list) {
-    QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
-  }
-
-  activity.callMethod<void>("openRecentNotesActivity",
-                            "(Ljava/util/ArrayList;)V", jArrayList.object());
-#endif
-}
-
 void Method::openActivity(QString callJavaName, QStringList list) {
 #ifdef Q_OS_ANDROID
 
@@ -281,5 +265,32 @@ void Method::openActivity(QString callJavaName, QStringList list) {
                             "(Ljava/util/ArrayList;)V", jArrayList.object());
 
   qInfo() << callJavaName << "=" << list;
+#endif
+}
+
+void Method::refreshJavaData(QString callJavaName, QString className,
+                             QStringList list) {
+#ifdef Q_OS_ANDROID
+
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+  for (const QString& item : list) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), "mInstance", c2.toUtf8().constData());
+
+  if (instance.isValid()) {
+    instance.callMethod<void>(callJavaName.toUtf8().constData(),
+                              "(Ljava/util/ArrayList;)V", jArrayList.object());
+  }
+
+  qInfo() << callJavaName << "=" << list;
+
 #endif
 }

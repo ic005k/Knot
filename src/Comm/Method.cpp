@@ -544,6 +544,7 @@ void Method::generateData(int count) {
   QFontMetrics fontMetrics(font());
   int nFontHeight = fontMetrics.height();
 
+  QStringList listJG;
   for (int i = 0; i < count; i++) {
     QStringList list = resultsList.at(count - 1 - i).split("=|=");
     QString str_tab, str0, str1, str2, str3;
@@ -565,7 +566,11 @@ void Method::generateData(int count) {
     }
 
     addItem(str_tab, str0, text1, text2, text3, nFontHeight * (0));
+
+    listJG.append(str_tab + "===" + str0 + "===" + text1 + "===" + text2 +
+                  "===" + text3);
   }
+  refreshJavaData("setSearchResult", "MyEventSearchActivity", listJG);
 }
 
 void Method::setCellText(int row, int column, QString str,

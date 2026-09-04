@@ -617,8 +617,11 @@ QScrollBar::sub-page:horizontal {
 
   void openTabRecycleBinActivity(QStringList list);
   void openActivity(QString callJavaName, QStringList list);
-  void openRecentNotesActivity(QStringList list);
-  protected:
+
+  void refreshJavaData(QString callJavaName, QString className,
+                       QStringList list);
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

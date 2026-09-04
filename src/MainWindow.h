@@ -511,7 +511,7 @@ class MainWindow : public QMainWindow {
 
   void clickData();
 
-  void on_btnStartSearch_clicked();
+  void on_btnStartSearch_clicked(const QString& searchStr);
 
   void on_btnChart();
 

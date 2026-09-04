@@ -212,6 +212,7 @@ int main(int argc, char* argv[]) {
   RegJniPublicJavaCallCpp("com/x/TabRecycleBinActivity");
   RegJniPublicJavaCallCpp("com/x/RecentNotesActivity");
   RegJniPublicJavaCallCpp("com/x/NoteRecycleBinActivity");
+  RegJniPublicJavaCallCpp("com/x/MyEventSearchActivity");
 
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";

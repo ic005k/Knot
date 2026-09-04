@@ -53,7 +53,6 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
             }
         };
         getOnBackPressedDispatcher().addCallback(this, mBackCallback);
-
         // 使用ImmersiveUtil返回值获取暗黑状态，项目统一方案
         mIsDark = ImmersiveUtil.applyRealImmersive(this);
 
@@ -74,7 +73,6 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
         int pathColor;
         int btnNormalBg;
         int checkBoxTint;
-
         if (mIsDark) {
             // 暗黑模式
             bgColor = 0xFF121212;
@@ -166,11 +164,13 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
         );
         mListView.setBackgroundColor(cardBgColor);
 
+        // 传入cardBgColor作为未选中条目的底色
         mAdapter = new NoteRecycleBinAdapter(
             this,
             mAllRawList,
             mSelectedItems,
             itemBgColor,
+            cardBgColor,
             textColor,
             pathColor,
             checkBoxTint
@@ -346,7 +346,8 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
         private final Context mCtx;
         private final ArrayList<String> mList;
         private final ArrayList<String> mSelectedItems;
-        private final int mItemBgColor;
+        private final int mSelectedBg;
+        private final int mNormalBg;
         private final int mTextColor;
         private final int mPathColor;
         private final int mCheckBoxTint;
@@ -355,7 +356,8 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
             @NonNull Context context,
             ArrayList<String> objects,
             ArrayList<String> selectedItems,
-            int itemBgColor,
+            int selectedBg,
+            int normalBg,
             int textColor,
             int pathColor,
             int checkBoxTint
@@ -364,7 +366,8 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
             mCtx = context;
             mList = objects;
             mSelectedItems = selectedItems;
-            mItemBgColor = itemBgColor;
+            mSelectedBg = selectedBg;
+            mNormalBg = normalBg;
             mTextColor = textColor;
             mPathColor = pathColor;
             mCheckBoxTint = checkBoxTint;
@@ -383,8 +386,7 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
                 itemLayout.setOrientation(LinearLayout.HORIZONTAL);
                 itemLayout.setGravity(Gravity.CENTER_VERTICAL);
                 itemLayout.setPadding(dp(14), dp(14), dp(14), dp(14));
-                itemLayout.setBackgroundColor(mItemBgColor);
-
+                // 初始化不给固定背景，运行时动态赋值
                 CheckBox checkBox = new CheckBox(mCtx);
                 checkBox.setButtonTintList(
                     android.content.res.ColorStateList.valueOf(mCheckBoxTint)
@@ -415,6 +417,7 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
 
                 convertView = itemLayout;
                 holder = new ViewHolder();
+                holder.itemLayout = itemLayout;
                 holder.checkBox = checkBox;
                 holder.tvTitle = tvTitle;
                 holder.tvPath = tvPath;
@@ -434,6 +437,13 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
             holder.tvPath.setTextColor(mPathColor);
 
             boolean checked = mSelectedItems.contains(currentItem);
+            // 根据选中状态动态切换条目背景
+            if (checked) {
+                holder.itemLayout.setBackgroundColor(mSelectedBg);
+            } else {
+                holder.itemLayout.setBackgroundColor(mNormalBg);
+            }
+
             // 复用时先清空监听，防止setChecked触发旧回调错乱
             holder.checkBox.setOnCheckedChangeListener(null);
             holder.checkBox.setChecked(checked);
@@ -447,6 +457,7 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
                     } else {
                         mSelectedItems.remove(currentItem);
                     }
+                    notifyDataSetChanged();
                 }
             );
 
@@ -465,6 +476,7 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
 
         private static class ViewHolder {
 
+            LinearLayout itemLayout;
             CheckBox checkBox;
             TextView tvTitle;
             TextView tvPath;

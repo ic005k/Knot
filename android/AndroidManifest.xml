@@ -240,6 +240,11 @@
         <activity android:name=".MyEventActivity" android:exported="false" />
 
         <activity
+            android:name=".MyEventSearchActivity"
+            android:exported="false"
+        />
+
+        <activity
             android:name=".TabRecycleBinActivity"
             android:exported="false"
         />

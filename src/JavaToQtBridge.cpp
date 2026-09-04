@@ -611,8 +611,19 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           }
 
           if (strType == "topbtn_search") {
-            QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->ui->btnFind->click(); });
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list;
+              m_Method->openActivity("openMyEventSearchActivity", list);
+            });
+          }
+
+          if (strType.startsWith("myevent_search|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              QString kw = list.at(1);
+              QTimer::singleShot(
+                  0, mw_one, [kw]() { mw_one->on_btnStartSearch_clicked(kw); });
+            }
           }
 
           if (strType == "tab_reader") {

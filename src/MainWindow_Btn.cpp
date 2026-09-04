@@ -366,8 +366,9 @@ void MainWindow::on_btnBackSearch_clicked() {
 
 void MainWindow::on_btnClearSearchText_clicked() {}
 
-void MainWindow::on_btnStartSearch_clicked() {
-  searchStr = "";  // mw_one->ui->editSearchText->text().trimmed();
+void MainWindow::on_btnStartSearch_clicked(const QString& searchStr) {
+  // searchStr = "";  // mw_one->ui->editSearchText->text().trimmed();
+
   if (searchStr.length() == 0) return;
 
   showProgress();
