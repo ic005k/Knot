@@ -104,11 +104,11 @@ public class MyEventSearchActivity extends AppCompatActivity {
         topBar.setGravity(Gravity.CENTER_VERTICAL);
 
         TextView tvEmoji1 = new TextView(this);
-        tvEmoji1.setText("📋");
-        tvEmoji1.setTextSize(24);
+        tvEmoji1.setText(MyActivity.zh_cn ? "关键词：" : "Key Words:");
+        tvEmoji1.setTextSize(18);
         tvEmoji1.setTextColor(textMain);
         tvEmoji1.setPadding(dp(4), dp(4), dp(8), dp(4));
-        tvEmoji1.setVisibility(View.GONE); // 暂时隐藏
+        //tvEmoji1.setVisibility(View.GONE); // 暂时隐藏
 
         TextView tvEmoji2 = new TextView(this);
         tvEmoji2.setText("🔍");
@@ -144,6 +144,7 @@ public class MyEventSearchActivity extends AppCompatActivity {
         btnSearch.setBackgroundColor(btnBg);
         btnSearch.setTextColor(Color.WHITE);
         btnSearch.setOnClickListener(v -> triggerSearch());
+        btnSearch.setVisibility(View.GONE); // 暂时隐藏
 
         topBar.addView(tvEmoji1);
         topBar.addView(tvEmoji2);
@@ -194,7 +195,7 @@ public class MyEventSearchActivity extends AppCompatActivity {
 
         //----------底部返回按钮----------
         Button btnBack = new Button(this);
-        btnBack.setText(MyActivity.zh_cn ? "开始" : "Start");
+        btnBack.setText(MyActivity.zh_cn ? "搜索" : "Search");
         btnBack.setBackgroundColor(btnBg);
         btnBack.setTextColor(Color.WHITE);
         btnBack.setLayoutParams(

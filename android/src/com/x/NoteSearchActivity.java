@@ -3,6 +3,7 @@ package com.x;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,7 +27,6 @@ import java.util.ArrayList;
 public class NoteSearchActivity extends AppCompatActivity {
 
     private ProgressDialog mSearchWaitingDialog;
-
     public static NoteSearchActivity mInstance = null;
     private LinearLayout mRootLayout;
     private EditText mEtSearchInput;
@@ -39,6 +39,8 @@ public class NoteSearchActivity extends AppCompatActivity {
     private ArrayList<String> mPreloadItemList = new ArrayList<>();
     private boolean mIsDark;
     private int mSelectedPosition = -1;
+    // 状态恢复标记：true=正在恢复数据，屏蔽TextWatcher触发搜索
+    private boolean mIsRestoringState = false;
 
     public static native void PublicJavaCallCpp(String cmd);
 
@@ -55,9 +57,7 @@ public class NoteSearchActivity extends AppCompatActivity {
             }
         };
         getOnBackPressedDispatcher().addCallback(this, mBackCallback);
-
         mIsDark = ImmersiveUtil.applyRealImmersive(this);
-
         //读取intent预留扩展预加载数组，可选传入，不做UI渲染
         Intent srcIntent = getIntent();
         ArrayList<String> preloadList = srcIntent.getStringArrayListExtra(
@@ -67,7 +67,6 @@ public class NoteSearchActivity extends AppCompatActivity {
             mPreloadItemList.clear();
             mPreloadItemList.addAll(preloadList);
         }
-
         mRootLayout = new LinearLayout(this);
         mRootLayout.setOrientation(LinearLayout.VERTICAL);
         mRootLayout.setLayoutParams(
@@ -76,7 +75,6 @@ public class NoteSearchActivity extends AppCompatActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         );
-
         int bgColor, cardBg, selectBg, textMain, textSub, btnBg;
         if (mIsDark) {
             bgColor = 0xFF121212;
@@ -94,14 +92,12 @@ public class NoteSearchActivity extends AppCompatActivity {
             btnBg = 0xFF2179D4;
         }
         mRootLayout.setBackgroundColor(bgColor);
-
         //搜索等待弹窗
         mSearchWaitingDialog = new ProgressDialog(this);
         mSearchWaitingDialog.setMessage(
             MyActivity.zh_cn ? "正在搜索…" : "Searching…"
         );
         mSearchWaitingDialog.setCancelable(false); //不允许点击返回取消，等待后端返回结果
-
         //1.【页面最顶部：搜索结果计数，左对齐，匹配截图UI】
         mTvResultCount = new TextView(this);
         mTvResultCount.setGravity(Gravity.LEFT);
@@ -112,7 +108,6 @@ public class NoteSearchActivity extends AppCompatActivity {
             MyActivity.zh_cn ? "笔记搜索结果：0" : "Result: 0"
         );
         mRootLayout.addView(mTvResultCount);
-
         //2.搜索输入框+搜索按钮同一行布局
         LinearLayout layoutSearchRow = new LinearLayout(this);
         layoutSearchRow.setOrientation(LinearLayout.HORIZONTAL);
@@ -123,7 +118,6 @@ public class NoteSearchActivity extends AppCompatActivity {
         );
         lpSearchRow.setMargins(dp(12), dp(0), dp(12), dp(8));
         layoutSearchRow.setLayoutParams(lpSearchRow);
-
         mEtSearchInput = new EditText(this);
         LinearLayout.LayoutParams lpEdit = new LinearLayout.LayoutParams(
             0,
@@ -152,6 +146,9 @@ public class NoteSearchActivity extends AppCompatActivity {
                     int before,
                     int count
                 ) {
+                    //正在恢复状态，屏蔽AI搜索调用
+                    if (mIsRestoringState) return;
+
                     String kw = s.toString().trim();
                     PublicJavaCallCpp("note_ai_search|==|" + kw);
                     //新搜索重置选中
@@ -164,7 +161,6 @@ public class NoteSearchActivity extends AppCompatActivity {
             }
         );
         layoutSearchRow.addView(mEtSearchInput);
-
         mBtnExactSearch = new Button(this);
         mBtnExactSearch.setText(MyActivity.zh_cn ? "搜索" : "Search");
         mBtnExactSearch.setBackgroundColor(btnBg);
@@ -174,7 +170,6 @@ public class NoteSearchActivity extends AppCompatActivity {
             if (kw.isEmpty()) {
                 return;
             }
-
             mSearchWaitingDialog.show(); //打开等待框
             //点击按钮直接执行精准匹配，不再需要复选框
             PublicJavaCallCpp("note_exact_search|==|" + kw);
@@ -183,7 +178,6 @@ public class NoteSearchActivity extends AppCompatActivity {
         });
         layoutSearchRow.addView(mBtnExactSearch);
         mRootLayout.addView(layoutSearchRow);
-
         //3.列表
         mListView = new ListView(this);
         LinearLayout.LayoutParams lpList = new LinearLayout.LayoutParams(
@@ -196,7 +190,6 @@ public class NoteSearchActivity extends AppCompatActivity {
         mListView.setBackgroundColor(cardBg);
         mListView.setDividerHeight(dp(1));
         mListView.setSelector(android.R.color.transparent);
-
         mAdapter = new NoteSearchAdapter(
             this,
             mResultList,
@@ -210,10 +203,15 @@ public class NoteSearchActivity extends AppCompatActivity {
         mListView.setOnItemClickListener((parent, view, position, id) -> {
             mSelectedPosition = position;
             mAdapter.setSelectedIndex(mSelectedPosition);
-            //==== 留空，不再发送 PublicJavaCallCpp 调用 ====
+            //更新持久化选中位置
+            String currentKeyword = mEtSearchInput.getText().toString();
+            saveSearchPersistentState(
+                currentKeyword,
+                mResultList,
+                mSelectedPosition
+            );
         });
         mRootLayout.addView(mListView);
-
         //4.底部按钮栏：查看、编辑，按钮之间增加间隔
         LinearLayout layoutBottom = new LinearLayout(this);
         layoutBottom.setOrientation(LinearLayout.HORIZONTAL);
@@ -225,7 +223,6 @@ public class NoteSearchActivity extends AppCompatActivity {
             )
         );
         layoutBottom.setPadding(dp(8), dp(8), dp(8), dp(8));
-
         Button btnView = new Button(this);
         btnView.setText(MyActivity.zh_cn ? "查看" : "View");
         btnView.setBackgroundColor(btnBg);
@@ -239,10 +236,14 @@ public class NoteSearchActivity extends AppCompatActivity {
         btnView.setLayoutParams(lpBtnView);
         btnView.setOnClickListener(v -> {
             if (mSelectedPosition >= 0) {
-                PublicJavaCallCpp("note_search_view|==|" + mSelectedPosition);
+                String rowText = mResultList.get(mSelectedPosition);
+                String[] parts = rowText.split("===");
+                String filePath = parts.length >= 3 ? parts[2] : "";
+                if (!TextUtils.isEmpty(filePath)) {
+                    PublicJavaCallCpp("note_search_view|==|" + filePath);
+                }
             }
         });
-
         Button btnEdit = new Button(this);
         btnEdit.setText(MyActivity.zh_cn ? "编辑" : "Edit");
         btnEdit.setBackgroundColor(btnBg);
@@ -250,29 +251,149 @@ public class NoteSearchActivity extends AppCompatActivity {
         btnEdit.setLayoutParams(new LinearLayout.LayoutParams(0, dp(52), 1.0f));
         btnEdit.setOnClickListener(v -> {
             if (mSelectedPosition >= 0) {
-                PublicJavaCallCpp("note_search_edit|==|" + mSelectedPosition);
+                String rowText = mResultList.get(mSelectedPosition);
+                String[] parts = rowText.split("===");
+                String filePath = parts.length >= 3 ? parts[2] : "";
+                if (!TextUtils.isEmpty(filePath)) {
+                    PublicJavaCallCpp("note_search_edit|==|" + filePath);
+                }
             }
         });
-
         layoutBottom.addView(btnView);
         layoutBottom.addView(btnEdit);
         mRootLayout.addView(layoutBottom);
-
         setContentView(mRootLayout);
+
+        //状态恢复逻辑
+        if (savedInstanceState != null) {
+            //系统销毁重建，优先取Bundle
+            mIsRestoringState = true;
+            String restoreKeyword = savedInstanceState.getString(
+                "search_key",
+                ""
+            );
+            mEtSearchInput.setText(restoreKeyword);
+            ArrayList<String> restoreResult =
+                savedInstanceState.getStringArrayList("search_result_list");
+            if (restoreResult != null) {
+                mResultList.clear();
+                mResultList.addAll(restoreResult);
+                mSelectedPosition = savedInstanceState.getInt("sel_pos", -1);
+                mTvResultCount.setText(
+                    MyActivity.zh_cn
+                        ? "笔记搜索结果：" + mResultList.size()
+                        : "Result: " + mResultList.size()
+                );
+                mAdapter.setSelectedIndex(mSelectedPosition);
+                mAdapter.notifyDataSetChanged();
+            }
+            mIsRestoringState = false;
+        } else {
+            //用户手动finish关闭后重新打开，读取磁盘持久化
+            mIsRestoringState = true;
+            loadSearchPersistentState();
+            mIsRestoringState = false;
+        }
+    }
+
+    /**
+     * 持久化保存搜索状态到SharedPreferences
+     */
+    private void saveSearchPersistentState(
+        String keyword,
+        ArrayList<String> resultList,
+        int selectPos
+    ) {
+        SharedPreferences sp = getSharedPreferences(
+            "note_search_state",
+            Context.MODE_PRIVATE
+        );
+        SharedPreferences.Editor edit = sp.edit();
+        edit.putString("last_search_key", keyword);
+        edit.putInt("last_sel_pos", selectPos);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < resultList.size(); i++) {
+            if (i > 0) sb.append("\n");
+            sb.append(resultList.get(i));
+        }
+        edit.putString("last_search_result", sb.toString());
+        edit.apply();
+    }
+
+    /**
+     * 从SharedPreferences读取上次持久化搜索状态
+     */
+    private void loadSearchPersistentState() {
+        SharedPreferences sp = getSharedPreferences(
+            "note_search_state",
+            Context.MODE_PRIVATE
+        );
+        String lastKey = sp.getString("last_search_key", "");
+        String rawResult = sp.getString("last_search_result", "");
+        int lastSelPos = sp.getInt("last_sel_pos", -1);
+        if (TextUtils.isEmpty(lastKey) && TextUtils.isEmpty(rawResult)) {
+            return;
+        }
+        mEtSearchInput.setText(lastKey);
+        mResultList.clear();
+        if (!TextUtils.isEmpty(rawResult)) {
+            String[] lines = rawResult.split("\n");
+            for (String line : lines) {
+                if (!TextUtils.isEmpty(line)) {
+                    mResultList.add(line);
+                }
+            }
+        }
+        mSelectedPosition = lastSelPos;
+        mTvResultCount.setText(
+            MyActivity.zh_cn
+                ? "笔记搜索结果：" + mResultList.size()
+                : "Result: " + mResultList.size()
+        );
+        mAdapter.setSelectedIndex(mSelectedPosition);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * C++可调用：清空持久化搜索历史并重置UI
+     */
+    public void clearSearchHistory() {
+        SharedPreferences sp = getSharedPreferences(
+            "note_search_state",
+            Context.MODE_PRIVATE
+        );
+        sp.edit().clear().apply();
+        mIsRestoringState = true;
+        mEtSearchInput.setText("");
+        mIsRestoringState = false;
+
+        mResultList.clear();
+        mSelectedPosition = -1;
+        mAdapter.setSelectedIndex(-1);
+        mAdapter.notifyDataSetChanged();
+        mTvResultCount.setText(
+            MyActivity.zh_cn ? "笔记搜索结果：0" : "Result: 0"
+        );
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("search_key", mEtSearchInput.getText().toString());
+        outState.putStringArrayList("search_result_list", mResultList);
+        outState.putInt("sel_pos", mSelectedPosition);
     }
 
     /** C++调用推送搜索结果，格式 title===previewHtml===filePath */
     public void setSearchResult(ArrayList<String> rawArray) {
         new Handler(Looper.getMainLooper()).post(() -> {
             if (isFinishing() || isDestroyed()) return;
-
             //关闭等待弹窗
             if (
                 mSearchWaitingDialog != null && mSearchWaitingDialog.isShowing()
             ) {
                 mSearchWaitingDialog.dismiss();
             }
-
             mResultList.clear();
             for (String item : rawArray) {
                 if (!TextUtils.isEmpty(item)) {
@@ -287,6 +408,13 @@ public class NoteSearchActivity extends AppCompatActivity {
                     : "Result: " + mResultList.size()
             );
             mAdapter.notifyDataSetChanged();
+            //保存本次搜索结果至磁盘持久化
+            String currentKeyword = mEtSearchInput.getText().toString();
+            saveSearchPersistentState(
+                currentKeyword,
+                mResultList,
+                mSelectedPosition
+            );
         });
     }
 
@@ -359,27 +487,22 @@ public class NoteSearchActivity extends AppCompatActivity {
                 LinearLayout itemRoot = new LinearLayout(mCtx);
                 itemRoot.setOrientation(LinearLayout.VERTICAL);
                 itemRoot.setPadding(dp(14), dp(12), dp(14), dp(12));
-
                 TextView tvTitle = new TextView(mCtx);
                 tvTitle.setTextSize(18);
                 tvTitle.setTextColor(mTextMain);
                 tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-
                 TextView tvPreview = new TextView(mCtx);
                 tvPreview.setTextSize(15);
                 tvPreview.setTextColor(mTextSub);
                 tvPreview.setPadding(0, dp(4), 0, dp(4));
-
                 TextView tvPath = new TextView(mCtx);
                 tvPath.setTextSize(13);
                 tvPath.setTextColor(mTextSub);
                 tvPath.setEllipsize(android.text.TextUtils.TruncateAt.MIDDLE);
                 tvPath.setSingleLine(true);
-
                 itemRoot.addView(tvTitle);
                 itemRoot.addView(tvPreview);
                 itemRoot.addView(tvPath);
-
                 convertView = itemRoot;
                 holder = new ViewHolder();
                 holder.rootItem = itemRoot;
@@ -390,13 +513,11 @@ public class NoteSearchActivity extends AppCompatActivity {
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-
             String line = mData.get(position);
             String[] parts = line.split("===");
             String title = parts.length >= 1 ? parts[0] : "";
             String preview = parts.length >= 2 ? parts[1] : "";
             String filePath = parts.length >= 3 ? parts[2] : "";
-
             //标题
             if (TextUtils.isEmpty(title)) {
                 holder.tvTitle.setVisibility(View.GONE);
@@ -404,7 +525,6 @@ public class NoteSearchActivity extends AppCompatActivity {
                 holder.tvTitle.setVisibility(View.VISIBLE);
                 holder.tvTitle.setText(title);
             }
-
             //预览 html
             if (TextUtils.isEmpty(preview)) {
                 holder.tvPreview.setVisibility(View.GONE);
@@ -421,7 +541,6 @@ public class NoteSearchActivity extends AppCompatActivity {
                     holder.tvPreview.setText(Html.fromHtml(preview));
                 }
             }
-
             //文件路径，中间省略
             if (TextUtils.isEmpty(filePath)) {
                 holder.tvPath.setVisibility(View.GONE);
@@ -429,7 +548,6 @@ public class NoteSearchActivity extends AppCompatActivity {
                 holder.tvPath.setVisibility(View.VISIBLE);
                 holder.tvPath.setText(filePath);
             }
-
             //选中背景
             if (position == mSelectedIndex) {
                 holder.rootItem.setBackgroundColor(mSelectBg);

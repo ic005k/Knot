@@ -226,7 +226,7 @@ void Notes::openEditUI() {
 
   qInfo() << "currentMDFile=" << currentMDFile
           << m_Notes->m_NoteManager->getNoteTitle(currentMDFile);
-  ;
+
   if (!QFile::exists(currentMDFile)) {
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg(appName,

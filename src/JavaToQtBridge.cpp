@@ -870,7 +870,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
-          if (strType.startsWith("note_search")) {
+          if (strType == "note_search") {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list;
               m_Method->openActivity("openNoteSearchActivity", list);
@@ -909,6 +909,18 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.startsWith("note_search_view|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                QString filePath = list.at(1);
+                currentMDFile = filePath;
+                m_Notes->previewNote();
+              }
+            });
+          }
+
           if (strType.startsWith("note_edit|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
@@ -916,6 +928,17 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               if (list.count() == 2) {
                 int index = 0;
                 index = list.at(1).toInt();
+                m_Notes->openEditUI();
+              }
+            });
+          }
+
+          if (strType.startsWith("note_search_edit|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                currentMDFile = list.at(1);
                 m_Notes->openEditUI();
               }
             });
