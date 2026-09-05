@@ -67,8 +67,6 @@ Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
   // ui->lblGpsDateTime->setFont(font0);
   font0.setBold(true);
 
-  ui->tabMotion->setTabVisible(3, false);
-
   QFont font1 = m_Method->getNewFont(17);
   font1.setBold(true);
 
@@ -94,7 +92,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
   // Steps Chart
   m_stepChart = new StepHillChart(this);
   m_stepChart->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  ui->tab_Gps->layout()->addWidget(m_stepChart);
+  ui->f_gps->layout()->addWidget(m_stepChart);
   m_stepChart->setStepData(m_stepData);
 
   getHardStepSensor();
@@ -192,10 +190,9 @@ Steps::~Steps() {
 }
 
 void Steps::initUI() {
-  ui->f_steps_btn->setFixedHeight(ui->tabMotion->tabBar()->height());
-  ui->f_steps_btn->setContentsMargins(0, 0, 0, 0);
-  ui->f_steps_btn->layout()->setContentsMargins(0, 0, 0, 0);
-  ui->tabMotion->setCornerWidget(ui->f_steps_btn, Qt::TopRightCorner);
+  // ui->f_steps_btn->setContentsMargins(0, 0, 0, 0);
+  // ui->f_steps_btn->layout()->setContentsMargins(0, 0, 0, 0);
+  // ui->tabMotion->setCornerWidget(ui->f_steps_btn, Qt::TopRightCorner);
 
   QString rbStyle = ui->rbCycling->styleSheet();
   ui->rbHiking->setStyleSheet(rbStyle);
@@ -767,7 +764,6 @@ void Steps::startRecordMotion() {
   emit distanceChanged(m_distance);
 
   ui->btnGPS->setText(tr("Stop"));
-  ui->tabMotion->setCurrentIndex(1);
 
   ui->lblGpsInfo->setStyleSheet(lblStartStyle);
   ui->btnGPS->setStyleSheet(btnRoundStyleRed);
@@ -3320,4 +3316,15 @@ void Steps::on_btnMap_clicked() { m_Steps->openMapWindow(); }
 
 void Steps::on_btnAIExerciseSuggestions_clicked() {
   mw_one->on_btnAIExerciseSuggestions_clicked();
+}
+
+void Steps::on_btnList_clicked() {}
+
+void Steps::on_btnStepCount_clicked() {}
+
+void Steps::on_chkPlayRunVoice_clicked(bool checked) {
+  if (checked) {
+    m_Method->stopPlayMyText();
+    m_Method->playMyText(ui->lblDirection->text());
+  }
 }

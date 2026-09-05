@@ -9,24 +9,6 @@ WeatherFetcher* WeatherFetcher::instance() {
   QMutexLocker locker(&mutex);
   static WeatherFetcher* s_instance = nullptr;
 
-  /*if (!s_instance) {
-    // 专用工作线程静态全局
-    static QThread* s_workerThread = new QThread();
-    s_workerThread->setObjectName("WeatherFetcherThread");
-
-    // 创建无父实例
-    s_instance = new WeatherFetcher();
-    s_instance->moveToThread(s_workerThread);
-
-    s_workerThread->start();
-
-    // 线程自动释放连接
-    QObject::connect(s_workerThread, &QThread::finished, s_workerThread,
-                     &QThread::deleteLater);
-    QObject::connect(s_instance, &QObject::destroyed, s_workerThread,
-                     &QThread::quit);
-  }*/
-
   if (!s_instance) {
     s_instance = new WeatherFetcher();
     s_instance->m_workerThread = new QThread();

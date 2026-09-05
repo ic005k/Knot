@@ -260,6 +260,12 @@ class Steps : public QDialog {
 
   void on_btnAIExerciseSuggestions_clicked();
 
+  void on_btnList_clicked();
+
+  void on_btnStepCount_clicked();
+
+  void on_chkPlayRunVoice_clicked(bool checked);
+
  private:
   QThread* geoThread;
   QString str_type = "";

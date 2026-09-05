@@ -350,7 +350,6 @@ void MainWindow::init_UIWidget() {
 
   mw_one->ui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mw_one->ui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
-  // m_Steps->ui->chkPlayRunVoice->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mw_one->ui->twCloudBackup->setCurrentIndex(1);
   mw_one->ui->twCloudBackup->setTabVisible(0, false);
   mw_one->ui->chkWebDAV->hide();
