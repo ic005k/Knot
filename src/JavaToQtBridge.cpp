@@ -78,6 +78,21 @@ static void JavaNotify_2() {
 // Todo闹钟时间到，显示弹窗
 static void JavaNotify_3() {
 #ifdef Q_OS_ANDROID
+  QString strTime0 = mw_one->m_Todo->strAlarmTime;
+  QString strText0 = mw_one->m_Todo->strAlarmText;
+  QString strTodoAlarmActiveTime0 =
+      QDateTime::currentDateTime().toString("yyyy-MM-dd  HH:mm:ss");
+
+  QStringList list;
+  list.append(strTime0);
+  list.append(strText0);
+  list.append(strTodoAlarmActiveTime0);
+  m_Method->openActivity("openTodoReminderActivity", list);
+
+  return;
+
+  //////////////////////////////////////////////////////////////////////
+
   // ✅ JNI 入口级防护，防止 Qt 未初始化时崩溃
   if (!QCoreApplication::instance() || !QCoreApplication::eventDispatcher()) {
     qDebug() << "JavaNotify_3: Qt未就绪，丢弃本次闹钟通知";

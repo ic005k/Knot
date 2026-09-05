@@ -1600,6 +1600,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openTodoReminderActivity(ArrayList<String> mList) {
+        Intent intent = new Intent(this, TodoReminderActivity.class);
+        intent.putStringArrayListExtra("todo_reminder_data", mList);
+        startActivity(intent);
+    }
+
     public void openNoteSearchActivity(ArrayList<String> mList) {
         Intent intent = new Intent(this, NoteSearchActivity.class);
         intent.putStringArrayListExtra("preload_item_list", mList);

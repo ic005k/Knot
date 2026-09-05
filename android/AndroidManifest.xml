@@ -247,6 +247,11 @@
         <activity android:name=".NoteSearchActivity" android:exported="false" />
 
         <activity
+            android:name=".TodoReminderActivity"
+            android:exported="false"
+        />
+
+        <activity
             android:name=".TabRecycleBinActivity"
             android:exported="false"
         />
