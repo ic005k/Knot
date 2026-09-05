@@ -21,14 +21,6 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
     }
   }
 
-  if (watch == mw_one->ui->lblTitleEditRecord) {
-    if (event->type() == QEvent::MouseButtonPress) {
-      selectTab();
-
-      return true;
-    }
-  }
-
   m_Reader->eventFilterReader(watch, evn);
 
   m_Notes->eventFilterQwNote(watch, evn);
@@ -41,7 +33,7 @@ bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
 }
 
 void MainHelper::selectTab() {
-  QString title = mw_one->ui->lblTitleEditRecord->text();
+  QString title = mw_one->m_EditRecord->titleAdd;
   title = title.mid(0, 4);
   if (!title.contains("Add") && !title.contains(QObject::tr("Add"))) return;
 

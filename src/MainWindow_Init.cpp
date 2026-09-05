@@ -128,8 +128,7 @@ void MainWindow::init_Thread_Timer() {
   timerMousePress = new QTimer(this);
   connect(timerMousePress, SIGNAL(timeout()), this, SLOT(on_timerMousePress()));
   timerMousePress->setSingleShot(true);
-  tmeFlash = new QTimer(this);
-  connect(tmeFlash, SIGNAL(timeout()), this, SLOT(on_tmeFlash()));
+
   tmeStartRecordAudio = new QTimer(this);
   connect(tmeStartRecordAudio, SIGNAL(timeout()), this,
           SLOT(on_StartRecordAudio()));
@@ -290,29 +289,6 @@ void MainWindow::init_Theme() {
     m_Steps->m_speedometer->updateThemeColors();
   }
 
-  mw_one->ui->editDetails->verticalScrollBar()->setStyleSheet(
-      m_Method->vsbarStyleBig);
-
-  // Edit Record UI
-  int nH = mw_one->ui->editCategory->height();
-  if (isDark) {
-    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl_l.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                             ":/res/xq_l.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je_l.svg");
-  } else {
-    m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                             ":/res/xq.svg");
-    m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je.svg");
-  }
-
-  mw_one->m_EditRecord->on_editAmount_textChanged(
-      mw_one->ui->editAmount->text());
-  mw_one->m_EditRecord->on_editCategory_textChanged(
-      mw_one->ui->editCategory->text());
-  mw_one->m_EditRecord->on_editDetails_textChanged();
-
   // Todo
   mw_one->m_Todo->changeTodoIcon(mw_one->m_Todo->isToday);
 
@@ -365,16 +341,12 @@ void MainWindow::init_UIWidget() {
   mw_one->ui->menubar->hide();
   mw_one->ui->statusbar->hide();
 
-  mw_one->ui->frameEditRecord->hide();
-
   mw_one->ui->frameMain->layout()->setContentsMargins(1, 1, 1, 1);
   mw_one->ui->frameMain->setContentsMargins(1, 1, 1, 1);
   mw_one->ui->frameMain->layout()->setSpacing(5);
 
   mw_one->ui->frameOne->hide();
   mw_one->ui->btnDel->hide();
-
-  mw_one->ui->lblMonthSum->hide();
 
   mw_one->ui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mw_one->ui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
@@ -386,15 +358,11 @@ void MainWindow::init_UIWidget() {
 
   mw_one->ui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
   mw_one->ui->lblWebDAV->setStyleSheet(mw_one->labelNormalStyleSheet);
-  mw_one->ui->lblTitleEditRecord->setStyleSheet(
-      m_MainHelper->clickableLabelButtonStyle);
 
   mw_one->ui->tabWidget->tabBar()->installEventFilter(mw_one);
   mw_one->ui->tabWidget->installEventFilter(mw_one);
   mw_one->ui->tabWidget->setMouseTracking(true);
   mw_one->ui->lblStats->installEventFilter(mw_one);
-
-  mw_one->ui->lblTitleEditRecord->installEventFilter(mw_one);
 
   mw_one->ui->lblStats->adjustSize();
   mw_one->ui->lblStats->setWordWrap(true);

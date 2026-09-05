@@ -97,7 +97,7 @@ void CategoryList::on_btnOk_clicked() {
 
   int row = ui->listWidget->currentRow();
   if (row >= 0) {
-    mw_one->ui->editCategory->setText(ui->listWidget->currentItem()->text());
+    // mw_one->ui->editCategory->setText(ui->listWidget->currentItem()->text());
   }
 
   on_btnCancel_clicked();
@@ -155,7 +155,7 @@ void CategoryList::on_Rename(int index, const QString& newName) {
 
     renameAll(newName);
 
-    mw_one->ui->editCategory->setText(ui->editRename->text().trimmed());
+    // mw_one->ui->editCategory->setText(ui->editRename->text().trimmed());
 
     // mw_one->reloadMain();
 
@@ -167,7 +167,7 @@ void CategoryList::on_Rename(int index, const QString& newName) {
 
     int cindex = ui->listWidget->currentRow();
     on_btnCancel_clicked();
-    mw_one->ui->btnType->click();
+    // mw_one->ui->btnType->click();
     ui->listWidget->setCurrentRow(cindex);
 
     setTypeRenameText();
@@ -313,11 +313,11 @@ void CategoryList::on_btnCancel_clicked() {
   mw_one->clearWidgetFocus();
 
   if (isAndroid) {
-    mw_one->m_EditRecord->openAddEventRecord(
-        mw_one->ui->lblTitleEditRecord->text(),
-        mw_one->ui->editCategory->text(),
-        mw_one->ui->editDetails->toPlainText(), mw_one->ui->editAmount->text(),
-        mw_one->ui->lblTime->text());
+    // mw_one->m_EditRecord->openAddEventRecord(
+    // mw_one->ui->lblTitleEditRecord->text(),
+    // mw_one->ui->editCategory->text(),
+    // mw_one->ui->editDetails->toPlainText(), mw_one->ui->editAmount->text(),
+    // mw_one->ui->lblTime->text());
   } else {
     // mw_one->ui->frameEditRecord->show();
   }

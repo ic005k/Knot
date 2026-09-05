@@ -437,14 +437,7 @@ void loadTheme(bool isDark) {
           widget != mw_one->ui->btnSync && widget != mw_one->ui->btnFind &&
           widget != mw_one->ui->btnSelTab && widget != mw_one->ui->btnReader &&
           widget != mw_one->ui->btnTodo && widget != mw_one->ui->btnNotes &&
-          widget != mw_one->ui->btnSteps && widget != mw_one->ui->btn0 &&
-          widget != mw_one->ui->editAmount && widget != mw_one->ui->btn1 &&
-          widget != mw_one->ui->btn2 && widget != mw_one->ui->btn3 &&
-          widget != mw_one->ui->btn4 && widget != mw_one->ui->btn5 &&
-          widget != mw_one->ui->btn6 && widget != mw_one->ui->btn7 &&
-          widget != mw_one->ui->btn8 && widget != mw_one->ui->btn9 &&
-          widget != mw_one->ui->btnDot && widget != mw_one->ui->btnDel_Number &&
-          widget != mw_one->ui->lblMonthSum && widget != mw_one->ui->lblTime &&
+          widget != mw_one->ui->btnSteps &&
           widget != m_Steps->getLabelGpsInfoWidget() &&
           widget != m_Steps->m_speedometer && widget != m_sliderButton &&
 
@@ -454,7 +447,6 @@ void loadTheme(bool isDark) {
 
         font.setBold(true);
 
-        mw_one->ui->lblTitleEditRecord->setFont(font);
         if (mw_one->ui && mw_one->ui->lblSyncNote) {
           QFont mFont = font;
           if (!isAndroid)
@@ -477,9 +469,6 @@ void loadTheme(bool isDark) {
       mw_one->m_Todo->refreshAlarm();
     }
   }
-
-  // 消除潜在的补全列表窗口
-  mw_one->ui->editCategory->setText("");
 
   isInitThemeEnd = true;
 

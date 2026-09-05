@@ -276,7 +276,6 @@ class MainWindow : public QMainWindow {
   bool isSlide = false;
   void init_TotalData();
 
-  void add_Data(QTreeWidget*, QString, QString, QString);
   bool del_Data(QTreeWidget*);
   static QTreeWidget* get_tw(int tabIndex);
 
@@ -767,8 +766,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnAddTodo_released();
 
-  void on_tmeFlash();
-
   void on_btnClearReaderFont_clicked();
 
   void on_StartRecordAudio();
@@ -885,7 +882,7 @@ class MainWindow : public QMainWindow {
   QNetworkAccessManager* m_ainetMgr;
   QUrl buildAiApiUrl(const QString& rawEndpoint);
   bool isMoveEntry;
-  QTimer* tmeFlash;
+
   int nFlashCount = 0;
   QString keyType;
   bool isShowDetails = false;

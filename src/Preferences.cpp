@@ -625,7 +625,7 @@ void Preferences::openPreferences() {
   setGeometry(x, y, width(), height());
   setModal(true);
 
-  ui->sliderFontSize->setStyleSheet(mw_one->ui->hsM->styleSheet());
+  // ui->sliderFontSize->setStyleSheet(mw_one->ui->hsM->styleSheet());
 
   int savedPosition =
       iniPreferences->value("/Options/FontSize", defaultFontSize).toInt();

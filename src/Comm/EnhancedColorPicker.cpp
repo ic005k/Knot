@@ -273,14 +273,14 @@ EnhancedColorPicker::EnhancedColorPicker(QWidget* parent,
   m_valueSlider->hide();
 
   // RGB控制
-  simpleLargeSliderStyle = mw_one->ui->hsH->styleSheet();
+  // simpleLargeSliderStyle = mw_one->ui->hsH->styleSheet();
   controlsLayout->addWidget(new QLabel(tr("Red:")), 3, 0);
   m_redSlider = new QSlider(Qt::Horizontal);
   m_redSlider->setRange(0, 255);
   controlsLayout->addWidget(m_redSlider, 3, 1);
   if (isAndroid) {
     m_redSlider->setMinimumHeight(35);
-    m_redSlider->setStyleSheet(simpleLargeSliderStyle);
+    // m_redSlider->setStyleSheet(simpleLargeSliderStyle);
   }
 
   controlsLayout->addWidget(new QLabel(tr("Green:")), 4, 0);

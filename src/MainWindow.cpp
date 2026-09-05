@@ -202,14 +202,14 @@ MainWindow::~MainWindow() {
   timer->stop();
   timerSyncData->stop();
   timerMousePress->stop();
-  tmeFlash->stop();
+
   tmeStartRecordAudio->stop();
 
   // 释放定时器
   delete timer;
   delete timerSyncData;
   delete timerMousePress;
-  delete tmeFlash;
+
   delete tmeStartRecordAudio;
 
   if (m_ainetMgr) {
@@ -302,105 +302,6 @@ void MainWindow::startRead(QString Date) {
     isBreak = false;
     myReadChartThread->start();
   }
-}
-
-void MainWindow::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
-                          QString strDesc) {
-  bool isYes = false;
-
-  strDate = m_Method->setCurrentDateValue();
-
-  int topc = tw->topLevelItemCount();
-  for (int i = 0; i < topc; i++) {
-    QString str = tw->topLevelItem(topc - 1 - i)->text(0) + " " +
-                  tw->topLevelItem(topc - 1 - i)->text(3);
-    if (getYMD(str) == getYMD(strDate)) {
-      isYes = true;
-
-      QTreeWidgetItem* topItem = tw->topLevelItem(topc - 1 - i);
-      QTreeWidgetItem* item11 = new QTreeWidgetItem(topItem);
-      item11->setText(0, strTime);
-      if (strAmount == "")
-        item11->setText(1, "");
-      else
-        item11->setText(1, QString("%1").arg(strAmount.toDouble(), 0, 'f', 2));
-
-      item11->setText(2, strDesc);
-      item11->setText(3, mw_one->ui->editDetails->toPlainText().trimmed());
-
-      int childCount = topItem->childCount();
-
-      topItem->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
-      topItem->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
-      item11->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
-
-      // Amount
-      double amount = 0;
-      for (int m = 0; m < childCount; m++) {
-        QString str = topItem->child(m)->text(1);
-        amount = amount + str.toDouble();
-      }
-      QString strAmount = QString("%1").arg(amount, 0, 'f', 2);
-      topItem->setText(1, QString::number(childCount));
-      if (strAmount == "0.00")
-        topItem->setText(2, "");
-      else
-        topItem->setText(2, strAmount);
-
-      break;
-    } else
-      break;
-  }
-
-  if (!isYes) {
-    QTreeWidgetItem* topItem = new QTreeWidgetItem;
-
-    QStringList lista = strDate.split(" ");
-    if (lista.count() == 4) {
-      QString a = lista.at(0) + " " + lista.at(1) + " " + lista.at(2);
-      topItem->setText(0, a);
-      topItem->setText(3, lista.at(3));
-    }
-
-    tw->addTopLevelItem(topItem);
-    QTreeWidgetItem* item11 = new QTreeWidgetItem(topItem);
-    item11->setText(0, strTime);
-    if (strAmount == "")
-      item11->setText(1, "");
-    else
-      item11->setText(1, QString("%1").arg(strAmount.toDouble(), 0, 'f', 2));
-    item11->setText(2, strDesc);
-    item11->setText(3, mw_one->ui->editDetails->toPlainText().trimmed());
-
-    topItem->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
-    topItem->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
-    item11->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
-
-    //  Amount
-    int child = topItem->childCount();
-    double amount = 0;
-    for (int m = 0; m < child; m++) {
-      QString str = topItem->child(m)->text(1);
-      amount = amount + str.toDouble();
-    }
-
-    QString strAmount = QString("%1").arg(amount, 0, 'f', 2);
-    topItem->setText(1, QString::number(child));
-    if (strAmount == "0.00")
-      topItem->setText(2, "");
-    else
-      topItem->setText(2, strAmount);
-  }
-
-  int topCount = tw->topLevelItemCount();
-  QTreeWidgetItem* topItem = tw->topLevelItem(topCount - 1);
-  tw->setCurrentItem(topItem);
-  m_MainHelper->sort_childItem(topItem->child(0));
-  tw->setCurrentItem(topItem->child(topItem->childCount() - 1));
-
-  reloadMain();
-
-  m_Method->openMyEventWindow();
 }
 
 int MainWindow::calcStringPixelWidth(QString s_str, QFont font,
@@ -509,18 +410,6 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
   startSave("tab");
 
   return true;
-}
-
-void MainWindow::on_tmeFlash() {
-  nFlashCount = nFlashCount + 1;
-  if (nFlashCount % 2 == 0)
-    mw_one->ui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle0);
-  else
-    mw_one->ui->lblTitleEditRecord->setStyleSheet(m_Method->lblStyle);
-  if (nFlashCount == 3) {
-    tmeFlash->stop();
-    nFlashCount = 0;
-  }
 }
 
 void MainWindow::saveTab() {
@@ -751,35 +640,29 @@ void MainWindow::on_twItemDoubleClicked() {
       sm = list.at(1);
       ss = list.at(2);
     }
-    mw_one->ui->lblTitleEditRecord->setText(
-        tr("Modify") + "  : " + tabData->tabText(tabData->currentIndex()));
 
-    mw_one->ui->hsH->setValue(sh.toInt());
-    mw_one->ui->hsM->setValue(sm.toInt());
-
-    mw_one->ui->lblTime->setText(t.trimmed());
+    m_EditRecord->titleAdd =
+        tr("Modify") + "  : " + tabData->tabText(tabData->currentIndex());
+    m_EditRecord->timeH = sh.toInt();
+    m_EditRecord->timeM = sm.toInt();
+    m_EditRecord->timeLabel = t.trimmed();
 
     QString str = item->text(1);
     if (str == "0.00")
-      mw_one->ui->editAmount->setText("");
+
+      m_EditRecord->strAmount = "";
     else
-      mw_one->ui->editAmount->setText(str);
+      m_EditRecord->strAmount = str;
 
-    mw_one->ui->editCategory->setText(item->text(2));
-
-    mw_one->ui->editDetails->setText(item->text(3));
-    mw_one->ui->f_Number->setFocus();
+    m_EditRecord->strCate = item->text(2);
+    m_EditRecord->strDeta = item->text(3);
 
     isAdd = false;
     if (isAndroid) {
       mw_one->m_EditRecord->openAddEventRecord(
-          mw_one->ui->lblTitleEditRecord->text(),
-          mw_one->ui->editCategory->text(),
-          mw_one->ui->editDetails->toPlainText(),
-          mw_one->ui->editAmount->text(), mw_one->ui->lblTime->text());
+          m_EditRecord->titleAdd, m_EditRecord->strCate, m_EditRecord->strDeta,
+          m_EditRecord->strAmount, m_EditRecord->timeLabel);
     } else {
-      mw_one->ui->frameMain->hide();
-      mw_one->ui->frameEditRecord->show();
     }
   }
 
@@ -1107,12 +990,7 @@ void MainWindow::delItem(int index) {}
 
 int MainWindow::getCount() { return 0; }
 
-void MainWindow::clearAll() {
-  int count = getCount();
-  for (int i = 0; i < count; i++) {
-    delItem(0);
-  }
-}
+void MainWindow::clearAll() {}
 
 void MainWindow::setCurrentIndex(int index) {}
 

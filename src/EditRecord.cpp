@@ -11,76 +11,6 @@ QStringList c_list;
 
 EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
   m_CategoryList = new CategoryList(this);
-
-  initCategoryCompleter();
-
-  mw_one->ui->editCategory->setFocus();
-  mw_one->ui->editDetails->setAcceptRichText(false);
-
-  mw_one->ui->btnBackEditRecord->setFixedHeight(45);
-  mw_one->ui->btnType->setFixedHeight(45);
-  mw_one->ui->btnOkEditRecord->setFixedHeight(45);
-
-  nH = mw_one->ui->editCategory->height();
-
-  QFont font = this->font();
-  font.setPointSize(22);
-  mw_one->ui->editCategory->setFont(font);
-  if (isAndroid)
-    font.setPointSize(40);
-  else {
-    font.setPointSize(12);
-    mw_one->ui->btn0->setMinimumHeight(0);
-    mw_one->ui->btn1->setMinimumHeight(0);
-    mw_one->ui->btn2->setMinimumHeight(0);
-    mw_one->ui->btn3->setMinimumHeight(0);
-    mw_one->ui->btn4->setMinimumHeight(0);
-    mw_one->ui->btn5->setMinimumHeight(0);
-    mw_one->ui->btn6->setMinimumHeight(0);
-    mw_one->ui->btn7->setMinimumHeight(0);
-    mw_one->ui->btn8->setMinimumHeight(0);
-    mw_one->ui->btn9->setMinimumHeight(0);
-    mw_one->ui->btnDot->setMinimumHeight(0);
-    mw_one->ui->btnDel_Number->setMinimumHeight(0);
-  }
-  font.setBold(true);
-
-  mw_one->ui->editAmount->setFont(font);
-
-  mw_one->ui->btn0->setFont(font);
-  mw_one->ui->btn1->setFont(font);
-  mw_one->ui->btn2->setFont(font);
-  mw_one->ui->btn3->setFont(font);
-  mw_one->ui->btn4->setFont(font);
-  mw_one->ui->btn5->setFont(font);
-  mw_one->ui->btn6->setFont(font);
-  mw_one->ui->btn7->setFont(font);
-  mw_one->ui->btn8->setFont(font);
-  mw_one->ui->btn9->setFont(font);
-  mw_one->ui->btn0->setFont(font);
-  mw_one->ui->btnDot->setFont(font);
-  mw_one->ui->btnDel_Number->setFont(font);
-
-  font.setPointSize(fontSize);
-  mw_one->ui->editDetails->setFont(font);
-  font.setBold(true);
-  mw_one->ui->lblTitleEditRecord->setFont(font);
-  mw_one->ui->lblTitleEditRecord->setFixedHeight(50);
-
-  QValidator* validator =
-      new QRegularExpressionValidator(regxNumber, mw_one->ui->editAmount);
-  mw_one->ui->editAmount->setValidator(validator);
-  mw_one->ui->editAmount->setAttribute(Qt::WA_InputMethodEnabled, false);
-  mw_one->ui->editAmount->setReadOnly(true);
-
-  mw_one->ui->editCategory->setPlaceholderText(QObject::tr("Enter a category"));
-  mw_one->ui->editDetails->setPlaceholderText(QObject::tr("Enter notes"));
-
-  lblStyle = mw_one->ui->lblCategory->styleSheet();
-
-  mw_one->ui->hsM->setStyleSheet(mw_one->ui->hsH->styleSheet());
-
-  m_Method->qssSlider = mw_one->ui->hsH->styleSheet();
 }
 
 EditRecord::~EditRecord() { delete m_CategoryList; }
@@ -88,37 +18,32 @@ EditRecord::~EditRecord() { delete m_CategoryList; }
 void EditRecord::setDataToUI() {
   QString str = m_Method->getTempSwapStr();
   QStringList list = str.split("|==|");
-  mw_one->ui->editCategory->setText(list.at(0));
-  mw_one->ui->editDetails->setText(list.at(1));
-  mw_one->ui->editAmount->setText(list.at(2));
-  mw_one->ui->lblTime->setText(list.at(3));
+
+  timeLabel = list.at(3);
+  strAmount = list.at(2).trimmed();
+  strCate = list.at(0).trimmed();
+  strDeta = list.at(1).trimmed();
 }
 
 void EditRecord::on_btnOk_clicked() {
-  if (!isAndroid)
-    mw_one->on_btnBackEditRecord_clicked();
-  else {
-    setDataToUI();
-  }
+  setDataToUI();
 
   if (!isAdd) {
-    modify_Data();
+    modify_Data(timeLabel, strAmount, strCate, strDeta);
 
     mw_one->strLatestModify =
         QObject::tr("Modify Item") + " ( " + mw_one->getTabText() + " ) ";
 
   } else {
-    mw_one->add_Data(mw_one->get_tw(mw_one->ui->tabWidget->currentIndex()),
-                     mw_one->ui->lblTime->text(),
-                     mw_one->ui->editAmount->text().trimmed(),
-                     mw_one->ui->editCategory->text().trimmed());
+    add_Data(mw_one->get_tw(mw_one->ui->tabWidget->currentIndex()), timeLabel,
+             strAmount, strCate, strDeta);
 
     mw_one->strLatestModify =
         QObject::tr("Add Item") + " ( " + mw_one->getTabText() + " ) ";
   }
 
   // Save Category Text
-  QString str = mw_one->ui->editCategory->text().trimmed();
+  QString str = strCate.trimmed();
   int count = m_CategoryList->ui->listWidget->count();
   for (int i = 0; i < count; i++) {
     QString str1 = m_CategoryList->ui->listWidget->item(i)->text().trimmed();
@@ -136,15 +61,8 @@ void EditRecord::on_btnOk_clicked() {
   if (tabData->currentIndex() != 0) {
     int curindex = tabData->currentIndex();
     tabData->tabBar()->moveTab(curindex, 0);
-
-    mw_one->clearAll();
-    for (int i = 0; i < tabData->count(); i++) {
-      QString text = tabData->tabText(i);
-      // mw_one->addItem(text, "", "", "", 0);
-    }
   }
 
-  mw_one->updateMainTab();
   mw_one->startSave("tab");
 }
 
@@ -170,21 +88,9 @@ void EditRecord::on_btn0_clicked() { set_Amount("0"); }
 
 void EditRecord::on_btnDot_clicked() { set_Amount("."); }
 
-void EditRecord::on_btnDel_clicked() {
-  QString str = mw_one->ui->editAmount->text().trimmed();
-  str = str.mid(0, str.length() - 1);
-  mw_one->ui->editAmount->setText(str);
-}
+void EditRecord::on_btnDel_clicked() {}
 
-void EditRecord::set_Amount(QString Number) {
-  QString str = mw_one->ui->editAmount->text().trimmed();
-  if (str == "0.00") mw_one->ui->editAmount->setText("");
-  if (str.split(".").count() == 2 && str != "0.00") {
-    QString str0 = str.split(".").at(1);
-    if (str0.length() == 2) return;
-  }
-  mw_one->ui->editAmount->setText(str + Number);
-}
+void EditRecord::set_Amount(QString Number) {}
 
 void EditRecord::on_btnType_clicked() {
   if (!isAndroid) {
@@ -276,7 +182,7 @@ void EditRecord::init_MyCategory() {
   }
 }
 
-void EditRecord::getTime(int h, int m) {
+QString EditRecord::getTime(int h, int m) {
   QString strh, strm, strs;
   if (h < 10)
     strh = "0" + QString::number(h);
@@ -291,85 +197,25 @@ void EditRecord::getTime(int h, int m) {
     strs = "0" + QString::number(s);
   else
     strs = QString::number(s);
-  mw_one->ui->lblTime->setText(strh + ":" + strm + ":" + strs);
+
+  return strh + ":" + strm + ":" + strs;
 }
 
-void EditRecord::on_btnClearAmount_clicked() {
-  mw_one->ui->editAmount->clear();
-}
+void EditRecord::on_btnClearAmount_clicked() {}
 
-void EditRecord::on_btnClearDesc_clicked() {
-  mw_one->ui->editCategory->clear();
-}
+void EditRecord::on_btnClearDesc_clicked() {}
 
-void EditRecord::on_editAmount_textChanged(const QString& arg1) {
-  int count = 0;
-  for (int i = 0; i < arg1.length(); i++) {
-    if (arg1.mid(i, 1) == ".") count++;
-    if (count == 2) {
-      QString str0 = arg1;
-      QString str = str0.mid(0, str0.length() - 1);
-      mw_one->ui->editAmount->setText(str);
-      break;
-    }
-  }
+void EditRecord::on_editAmount_textChanged(const QString& arg1) {}
 
-  if (arg1.length() > 0) {
-    mw_one->ui->lblAmount->setStyleSheet(lblStyleHighLight);
-    if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je_l.svg");
-    }
-  } else {
-    mw_one->ui->lblAmount->setStyleSheet(lblStyle);
-    if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblAmount, nH, nH, ":/res/je.svg");
-    }
-  }
-}
+void EditRecord::on_hsH_valueChanged(int value) {}
 
-void EditRecord::on_hsH_valueChanged(int value) {
-  getTime(value, mw_one->ui->hsM->value());
-}
+void EditRecord::on_hsM_valueChanged(int value) {}
 
-void EditRecord::on_hsM_valueChanged(int value) {
-  getTime(mw_one->ui->hsH->value(), value);
-}
+void EditRecord::on_btnClearDetails_clicked() {}
 
-void EditRecord::on_btnClearDetails_clicked() {
-  mw_one->ui->editDetails->clear();
-}
+void EditRecord::on_editCategory_textChanged(const QString& arg1) {}
 
-void EditRecord::on_editCategory_textChanged(const QString& arg1) {
-  if (arg1.length() > 0) {
-    mw_one->ui->lblCategory->setStyleSheet(lblStyleHighLight);
-    if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH,
-                               ":/res/fl_l.svg");
-    }
-  } else {
-    mw_one->ui->lblCategory->setStyleSheet(lblStyle);
-    if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblCategory, nH, nH, ":/res/fl.svg");
-    }
-  }
-}
-
-void EditRecord::on_editDetails_textChanged() {
-  QString arg1 = mw_one->ui->editDetails->toPlainText();
-  if (arg1.length() > 0) {
-    mw_one->ui->lblDetailsType->setStyleSheet(lblStyleHighLight);
-    if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                               ":/res/xq_l.svg");
-    }
-  } else {
-    mw_one->ui->lblDetailsType->setStyleSheet(lblStyle);
-    if (!isDark) {
-      m_Method->setQLabelImage(mw_one->ui->lblDetailsType, nH, nH,
-                               ":/res/xq.svg");
-    }
-  }
-}
+void EditRecord::on_editDetails_textChanged() {}
 
 void EditRecord::saveCurrentYearData() {
   QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
@@ -463,18 +309,18 @@ void EditRecord::saveCurrentValue() {
   QString ini_file = privateDir + "editrecord_value.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
 
-  Reg.setValue("value1", mw_one->ui->editCategory->text());
-  Reg.setValue("value2", mw_one->ui->editDetails->toPlainText());
-  Reg.setValue("value3", mw_one->ui->editAmount->text());
+  Reg.setValue("value1", strCate);
+  Reg.setValue("value2", strDeta);
+  Reg.setValue("value3", strAmount);
 }
 
 void EditRecord::setCurrentValue() {
   QString ini_file = privateDir + "editrecord_value.ini";
   QSettings Reg(ini_file, QSettings::IniFormat);
 
-  mw_one->ui->editCategory->setText(Reg.value("value1").toString());
-  mw_one->ui->editDetails->setText(Reg.value("value2").toString());
-  mw_one->ui->editAmount->setText(Reg.value("value3").toString());
+  strCate = Reg.value("value1").toString();
+  strDeta = Reg.value("value2").toString();
+  strAmount = Reg.value("value3").toString();
 }
 
 void EditRecord::monthSum() {
@@ -526,64 +372,6 @@ QList<int> EditRecord::getExistingYears(QTreeWidget* tw) {
   return yearsList;
 }
 
-void EditRecord::initCategoryCompleter() {
-  // 1. Model
-  m_categoryModel = new QStringListModel(this);
-  m_categoryModel->setStringList(c_list);
-
-  // 2. Completer（不传 c_list，显式绑定 model）
-  completer = new QCompleter(this);
-  completer->setFilterMode(Qt::MatchContains);
-  completer->setCaseSensitivity(Qt::CaseInsensitive);
-  completer->setModel(m_categoryModel);
-
-  // 3. Popup 嵌入为子控件（Android 规避 RHI 崩溃，桌面端行为等价）
-  QWidget* popupParent = mw_one->ui->frameEditRecord;
-  QAbstractItemView* popup = completer->popup();
-  popup->setParent(popupParent);
-  popup->setWindowFlags(Qt::Widget);
-  popup->setAttribute(Qt::WA_ShowWithoutActivating);
-  popup->verticalScrollBar()->hide();
-  popup->hide();
-
-  // 4. 手动触发补全 + 定位
-  connect(mw_one->ui->editCategory, &QLineEdit::textChanged, this,
-          [this, popup, popupParent](const QString& text) {
-            if (text.isEmpty()) {
-              popup->hide();
-              return;
-            }
-
-            completer->setCompletionPrefix(text);
-            if (completer->completionCount() > 0) {
-              QPoint pos = mw_one->ui->editCategory->mapTo(
-                  popupParent, QPoint(0, mw_one->ui->editCategory->height()));
-              int rowH = popup->sizeHintForRow(0);
-              int visibleRows = qMin(completer->completionCount(), 8);
-              popup->setGeometry(pos.x(), pos.y(),
-                                 mw_one->ui->editCategory->width(),
-                                 rowH * visibleRows);
-              popup->raise();
-              popup->show();
-            } else {
-              popup->hide();
-            }
-          });
-
-  // 5. 选中项填入
-  connect(completer, QOverload<const QString&>::of(&QCompleter::activated),
-          this, [this, popup](const QString& text) {
-            mw_one->ui->editCategory->setText(text);
-
-            popup->hide();
-          });
-
-  // ✅ 安装事件过滤器监听父容器隐藏
-  popupParent->installEventFilter(this);
-
-  // ⚠ 不调用 setCompleter()，避免触发原生弹窗路径
-}
-
 void EditRecord::updateCategoryCompleterList() {
   if (!m_categoryModel) return;
 
@@ -593,51 +381,37 @@ void EditRecord::updateCategoryCompleterList() {
 void EditRecord::on_AddRecord() {
   isAdd = true;
 
-  mw_one->ui->lblTitleEditRecord->setText(
-      tr("Add") + "  : " + tabData->tabText(tabData->currentIndex()));
+  titleAdd = tr("Add") + "  : " + tabData->tabText(tabData->currentIndex());
+  timeH = QTime::currentTime().hour();
+  timeM = QTime::currentTime().minute();
 
-  mw_one->ui->hsH->setValue(QTime::currentTime().hour());
-  mw_one->ui->hsM->setValue(QTime::currentTime().minute());
-  getTime(mw_one->ui->hsH->value(), mw_one->ui->hsM->value());
+  timeLabel = getTime(timeH, timeM);
 
-  mw_one->ui->editDetails->clear();
+#ifdef Q_OS_ANDROID
 
-  mw_one->ui->editCategory->setText("");
-
-  mw_one->ui->editAmount->setText("");
-
-  if (isAndroid) {
-    if (isSelectTab) {
-      isSelectTab = false;
-      setDataToUI();
-      openAddEventRecord(
-          tr("Add") + "  : " + tabData->tabText(tabData->currentIndex()),
-          mw_one->ui->editCategory->text(),
-          mw_one->ui->editDetails->toPlainText(),
-          mw_one->ui->editAmount->text(), mw_one->ui->lblTime->text());
-    } else {
-      openAddEventRecord(
-          tr("Add") + "  : " + tabData->tabText(tabData->currentIndex()), "",
-          "", "", mw_one->ui->lblTime->text());
-    }
+  if (isSelectTab) {
+    isSelectTab = false;
+    setDataToUI();
+    openAddEventRecord(titleAdd, strCate, strDeta, strAmount, timeLabel);
   } else {
-    mw_one->ui->frameMain->hide();
-    mw_one->ui->frameEditRecord->show();
+    openAddEventRecord(titleAdd, "", "", "", timeLabel);
   }
+#else
+  mw_one->ui->lblTitleEditRecord->setText(titleAdd);
+  mw_one->ui->hsH->setValue(timeH);
+  mw_one->ui->hsM->setValue(timeM);
+  mw_one->ui->lblTime->setText(timeLabel);
+  mw_one->ui->editDetails->setText(strDeta);
+  mw_one->ui->editCategory->setText(strCate);
+  mw_one->ui->editAmount->setText(strAmount);
 
+  mw_one->ui->frameMain->hide();
+  mw_one->ui->frameEditRecord->show();
   updateCategoryCompleterList();
-
-  // tmeFlash->start(300);
+#endif
 }
 
 bool EditRecord::eventFilter(QObject* watched, QEvent* event) {
-  // 当 frameEditRecord 被隐藏时，强制关闭 popup
-  if (watched == mw_one->ui->frameEditRecord && event->type() == QEvent::Hide) {
-    if (completer) {
-      completer->popup()->hide();
-    }
-  }
-
   return QDialog::eventFilter(watched, event);
 }
 
@@ -690,20 +464,120 @@ void EditRecord::reeditMainEventData(int index0, int index1) {
   mw_one->on_twItemDoubleClicked();
 }
 
-void EditRecord::modify_Data() {
+void EditRecord::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
+                          QString strCate, QString strDeta) {
+  bool isYes = false;
+
+  strDate = m_Method->setCurrentDateValue();
+
+  int topc = tw->topLevelItemCount();
+  for (int i = 0; i < topc; i++) {
+    QString str = tw->topLevelItem(topc - 1 - i)->text(0) + " " +
+                  tw->topLevelItem(topc - 1 - i)->text(3);
+    if (mw_one->getYMD(str) == mw_one->getYMD(strDate)) {
+      isYes = true;
+
+      QTreeWidgetItem* topItem = tw->topLevelItem(topc - 1 - i);
+      QTreeWidgetItem* item11 = new QTreeWidgetItem(topItem);
+      item11->setText(0, strTime);
+      if (strAmount == "")
+        item11->setText(1, "");
+      else
+        item11->setText(1, QString("%1").arg(strAmount.toDouble(), 0, 'f', 2));
+
+      item11->setText(2, strCate);
+      item11->setText(3, strDeta.trimmed());
+
+      int childCount = topItem->childCount();
+
+      topItem->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
+      topItem->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
+      item11->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+
+      // Amount
+      double amount = 0;
+      for (int m = 0; m < childCount; m++) {
+        QString str = topItem->child(m)->text(1);
+        amount = amount + str.toDouble();
+      }
+      QString strAmount = QString("%1").arg(amount, 0, 'f', 2);
+      topItem->setText(1, QString::number(childCount));
+      if (strAmount == "0.00")
+        topItem->setText(2, "");
+      else
+        topItem->setText(2, strAmount);
+
+      break;
+    } else
+      break;
+  }
+
+  if (!isYes) {
+    QTreeWidgetItem* topItem = new QTreeWidgetItem;
+
+    QStringList lista = strDate.split(" ");
+    if (lista.count() == 4) {
+      QString a = lista.at(0) + " " + lista.at(1) + " " + lista.at(2);
+      topItem->setText(0, a);
+      topItem->setText(3, lista.at(3));
+    }
+
+    tw->addTopLevelItem(topItem);
+    QTreeWidgetItem* item11 = new QTreeWidgetItem(topItem);
+    item11->setText(0, strTime);
+    if (strAmount == "")
+      item11->setText(1, "");
+    else
+      item11->setText(1, QString("%1").arg(strAmount.toDouble(), 0, 'f', 2));
+    item11->setText(2, strCate);
+    item11->setText(3, strDeta);
+
+    topItem->setTextAlignment(1, Qt::AlignHCenter | Qt::AlignVCenter);
+    topItem->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
+    item11->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+
+    //  Amount
+    int child = topItem->childCount();
+    double amount = 0;
+    for (int m = 0; m < child; m++) {
+      QString str = topItem->child(m)->text(1);
+      amount = amount + str.toDouble();
+    }
+
+    QString strAmount = QString("%1").arg(amount, 0, 'f', 2);
+    topItem->setText(1, QString::number(child));
+    if (strAmount == "0.00")
+      topItem->setText(2, "");
+    else
+      topItem->setText(2, strAmount);
+  }
+
+  int topCount = tw->topLevelItemCount();
+  QTreeWidgetItem* topItem = tw->topLevelItem(topCount - 1);
+  tw->setCurrentItem(topItem);
+  mw_one->m_MainHelper->sort_childItem(topItem->child(0));
+  tw->setCurrentItem(topItem->child(topItem->childCount() - 1));
+
+  mw_one->reloadMain();
+
+  m_Method->openMyEventWindow();
+}
+
+void EditRecord::modify_Data(QString strTime, QString strAmount,
+                             QString strCate, QString strDeta) {
   QTreeWidget* tw = (QTreeWidget*)mw_one->ui->tabWidget->currentWidget();
   QTreeWidgetItem* item = tw->currentItem();
   QTreeWidgetItem* topItem = item->parent();
-  QString newtime = mw_one->ui->lblTime->text().trimmed();
+  QString newtime = strTime;
   if (item->childCount() == 0 && item->parent()->childCount() > 0) {
     item->setText(0, newtime);
-    QString sa = mw_one->ui->editAmount->text().trimmed();
+    QString sa = strAmount;
     if (sa == "")
       item->setText(1, "");
     else
       item->setText(1, QString("%1").arg(sa.toDouble(), 0, 'f', 2));
-    item->setText(2, mw_one->ui->editCategory->text().trimmed());
-    item->setText(3, mw_one->ui->editDetails->toPlainText().trimmed());
+    item->setText(2, strCate);
+    item->setText(3, strDeta);
     // Amount
     int child = item->parent()->childCount();
     double amount = 0;

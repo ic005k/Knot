@@ -214,14 +214,14 @@ void MainWindow::on_btnMove() {
   if (del_Data((QTreeWidget*)mw_one->ui->tabWidget->currentWidget())) {
     on_btnSelTab_clicked();
 
-    while (mw_one->ui->frameEditRecord->isHidden()) {
-      QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-      QThread::msleep(1);
-    }
+    // while (mw_one->ui->frameEditRecord->isHidden()) {
+    //   QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    //   QThread::msleep(1);
+    // }
 
-    mw_one->ui->editCategory->setText(strCategory);
-    mw_one->ui->editDetails->setText(strDetails);
-    mw_one->ui->editAmount->setText(strAmount);
+    m_EditRecord->strCate = strCategory;
+    m_EditRecord->strDeta = strDetails;
+    m_EditRecord->strAmount = strAmount;
 
     on_btnOkEditRecord_clicked();
   }
@@ -394,12 +394,7 @@ void MainWindow::on_btnEndDate_clicked() {
   m_DateSelector->initStartEndDate("end");
 }
 
-void MainWindow::on_btnBackEditRecord_clicked() {
-  clearWidgetFocus();
-
-  mw_one->ui->frameMain->show();
-  mw_one->ui->frameEditRecord->hide();
-}
+void MainWindow::on_btnBackEditRecord_clicked() {}
 
 void MainWindow::on_btnType_clicked() { m_EditRecord->on_btnType_clicked(); }
 
@@ -407,17 +402,11 @@ void MainWindow::on_btnOkEditRecord_clicked() {
   m_EditRecord->on_btnOk_clicked();
 }
 
-void MainWindow::on_btnClearType_clicked() {
-  mw_one->ui->editCategory->setText("");
-}
+void MainWindow::on_btnClearType_clicked() {}
 
-void MainWindow::on_btnClearDetails_clicked() {
-  mw_one->ui->editDetails->setText("");
-}
+void MainWindow::on_btnClearDetails_clicked() {}
 
-void MainWindow::on_btnClearAmount_clicked() {
-  mw_one->ui->editAmount->setText("");
-}
+void MainWindow::on_btnClearAmount_clicked() {}
 
 void MainWindow::on_btnBackSteps_clicked() { m_Steps->closeSteps(); }
 
@@ -1135,16 +1124,15 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (!mw_one->ui->frameEditRecord->isHidden()) {
-    on_btnBackEditRecord_clicked();
-
-    return;
-  }
-
   if (mw_one->ui->frameMain->isVisible()) {
     mw_one->ui->frameMain->hide();
     m_Method->openMainEntranceWindow();
 
+    return;
+  }
+
+  if (ui->frameMain->isHidden()) {
+    m_Method->openMainEntranceWindow();
     return;
   }
 }

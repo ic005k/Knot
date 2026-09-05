@@ -221,9 +221,6 @@ void ReceiveShare::closeAllChildWindows() {
     mw_one->m_Preferences->ui->btnBack->click();
 
   if (mw_one->ui->frameOne->isVisible()) mw_one->ui->btnBack_One->click();
-
-  if (mw_one->ui->frameEditRecord->isVisible())
-    mw_one->ui->btnBackEditRecord->click();
 }
 
 void ReceiveShare::shareString(const QString& title, const QString& content) {

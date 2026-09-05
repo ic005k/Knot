@@ -1070,8 +1070,8 @@ void Todo::reeditText() {
   edit->setPlainText(strItem);
 
   edit->horizontalScrollBar()->setHidden(true);
-  edit->verticalScrollBar()->setStyleSheet(
-      mw_one->ui->editDetails->verticalScrollBar()->styleSheet());
+  // edit->verticalScrollBar()->setStyleSheet(
+  //     mw_one->ui->editDetails->verticalScrollBar()->styleSheet());
 
   QToolButton* btnCancel = new QToolButton(this);
   QToolButton* btnCopy = new QToolButton(this);

@@ -29,7 +29,7 @@ class EditRecord : public QDialog {
 
   void init_MyCategory();
 
-  void getTime(int h, int m);
+  QString getTime(int h, int m);
 
   static void saveCurrentYearData();
 
@@ -39,6 +39,9 @@ class EditRecord : public QDialog {
   bool eventFilter(QObject* watched, QEvent* event) override;
 
  public:
+  QString titleAdd, timeLabel, strCate, strDeta, strAmount;
+  int timeH, timeM;
+
   void on_btnOk_clicked();
 
   void on_btn7_clicked();
@@ -85,20 +88,20 @@ class EditRecord : public QDialog {
                           const QString& noteText, const QString& amountText,
                           const QString& timeTagText);
   void setDataToUI();
-  void modify_Data();
+  void add_Data(QTreeWidget*, QString, QString, QString, QString);
+  void modify_Data(QString, QString, QString, QString);
   void reeditMainEventData(int index0, int index1);
   int idxMainDate, idxMainDateDetail;
 
   void showCategorySelectDialog();
-  private:
+
+ private:
   void set_Amount(QString Number);
 
   QString lblStyle;
   int nH;
 
   static QList<int> getExistingYears(QTreeWidget* tw);
-
-  void initCategoryCompleter();
 
   QStringListModel* m_categoryModel = nullptr;
 };

@@ -83,6 +83,8 @@ static void JavaNotify_3() {
   QString strTodoAlarmActiveTime0 =
       QDateTime::currentDateTime().toString("yyyy-MM-dd  HH:mm:ss");
 
+  mw_one->m_Todo->refreshAlarm();
+
   QStringList list;
   list.append(strTime0);
   list.append(strText0);
@@ -617,7 +619,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           // 主工具栏按钮=============================================
           if (strType == "topbtn_add") {
             QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->ui->btnAdd->click(); });
+                               [=]() { mw_one->m_EditRecord->on_AddRecord(); });
           }
 
           if (strType == "topbtn_upload") {

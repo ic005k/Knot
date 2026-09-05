@@ -547,8 +547,6 @@ void NotesList::on_btnRename_clicked() {
   edit->setPlainText(item->text(0));
   QScroller::grabGesture(edit, QScroller::LeftMouseButtonGesture);
   edit->horizontalScrollBar()->setHidden(true);
-  edit->verticalScrollBar()->setStyleSheet(
-      mw_one->ui->editDetails->verticalScrollBar()->styleSheet());
 
   if (edit->toPlainText().trimmed() == "无标题笔记" ||
       edit->toPlainText().trimmed() == "Untitled Note") {
