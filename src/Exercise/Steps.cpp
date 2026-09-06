@@ -414,12 +414,6 @@ void Steps::openStepsUI() {
     ui->btnAIExerciseSuggestions->hide();
   }
 
-  if (isAndroid) {
-    getHardStepSensor();
-  }
-
-  updateHardSensorSteps();
-
   if (ui->lblGpsInfo->text() == tr("GPS Info") ||
       ui->lblGpsInfo->text() == "GPS Info") {
     QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
@@ -668,16 +662,18 @@ void Steps::appendSteps(QString date, int steps, QString km) {
   QString strSteps = QString::number(steps);
   double dCalorie = steps * 0.04;
   QString strCalorie =
-      QString("%1").arg(dCalorie, 0, 'f', 2) + "  " + tr("Calorie");
+      QString("%1").arg(dCalorie, 0, 'f', 2);  // + "  " + tr("Calorie");
 
   double d_km =
       m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() * steps /
       100 / 1000;
-  km = QString("%1").arg(d_km, 0, 'f', 2) + "  " + tr("KM");
+  km = QString("%1").arg(d_km, 0, 'f', 2);  //+ "  " + tr("KM");
 
   // QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, date),
   //                           Q_ARG(QVariant, strSteps), Q_ARG(QVariant, km),
   //                           Q_ARG(QVariant, strCalorie), Q_ARG(QVariant, 0));
+
+  listSteps.append(date + "===" + strSteps + "===" + km + "===" + strCalorie);
 }
 
 int Steps::getCount() { return 0; }
@@ -3320,7 +3316,16 @@ void Steps::on_btnAIExerciseSuggestions_clicked() {
 
 void Steps::on_btnList_clicked() {}
 
-void Steps::on_btnStepCount_clicked() {}
+void Steps::on_btnStepCount_clicked() {
+  if (isAndroid) {
+    getHardStepSensor();
+  }
+
+  listSteps.clear();
+  updateHardSensorSteps();
+
+  m_Method->openActivity("openStepListActivity", listSteps);
+}
 
 void Steps::on_chkPlayRunVoice_clicked(bool checked) {
   if (checked) {

@@ -1600,6 +1600,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openStepListActivity(ArrayList<String> mList) {
+        Intent intent = new Intent(this, StepListActivity.class);
+        intent.putStringArrayListExtra("step_list_data", mList);
+        startActivity(intent);
+    }
+
     public void openTodoReminderActivity(ArrayList<String> mList) {
         Intent intent = new Intent(this, TodoReminderActivity.class);
         intent.putStringArrayListExtra("todo_reminder_data", mList);

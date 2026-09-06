@@ -267,6 +267,7 @@ class Steps : public QDialog {
   void on_chkPlayRunVoice_clicked(bool checked);
 
  private:
+  QStringList listSteps;
   QThread* geoThread;
   QString str_type = "";
   bool latValid = false;
