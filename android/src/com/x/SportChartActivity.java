@@ -139,16 +139,16 @@ public class SportChartActivity extends AppCompatActivity {
 
                 LinearLayout statContainer = new LinearLayout(this);
                 statContainer.setOrientation(LinearLayout.VERTICAL);
-                for (int t = 0; t < 7; t++) {
+                for (int t = 0; t < sevenTexts.length; t++) {
+                    // 第6号索引是svg图标路径，直接跳过不显示
+                    if (t == 6) {
+                        continue;
+                    }
                     TextView tv = new TextView(this);
                     tv.setTextSize(15);
                     tv.setTextColor(textColor);
                     tv.setPadding(0, dp(3), 0, dp(3));
-                    if (t < sevenTexts.length) {
-                        tv.setText(sevenTexts[t]);
-                    } else {
-                        tv.setText("");
-                    }
+                    tv.setText(sevenTexts[t]);
                     statContainer.addView(tv);
                 }
                 itemRoot.addView(statContainer);

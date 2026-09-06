@@ -61,26 +61,10 @@ Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
 
   initUI();
 
-  QFont font0 = m_Method->getNewFont(15);
-
-  font0.setPointSize(13);
-  // ui->lblGpsDateTime->setFont(font0);
-  font0.setBold(true);
-
   QFont font1 = m_Method->getNewFont(17);
   font1.setBold(true);
-
   ui->lblGpsInfo->setStyleSheet(lblStyle);
-
   ui->lblGpsInfo->setFont(font1);
-
-  QFontMetrics fm(this->font());
-  int textHeight = fm.height();
-  int iconSize = static_cast<int>(textHeight * 0.9);
-  // 确保图标大小是合理的 (不小于 20px)
-  iconSize = qMax(iconSize, 20);
-  // ui->btnSelGpsDate->setIconSize(QSize(iconSize, iconSize));
-  // ui->btnSportsChart->setIconSize(QSize(iconSize, iconSize));
 
   tmeRefreshSteps = new QTimer(this);
   connect(tmeRefreshSteps, &QTimer::timeout, this, &Steps::refreshSteps);
@@ -190,10 +174,6 @@ Steps::~Steps() {
 }
 
 void Steps::initUI() {
-  // ui->f_steps_btn->setContentsMargins(0, 0, 0, 0);
-  // ui->f_steps_btn->layout()->setContentsMargins(0, 0, 0, 0);
-  // ui->tabMotion->setCornerWidget(ui->f_steps_btn, Qt::TopRightCorner);
-
   QString rbStyle = ui->rbCycling->styleSheet();
   ui->rbHiking->setStyleSheet(rbStyle);
   ui->rbRunning->setStyleSheet(rbStyle);
@@ -427,12 +407,10 @@ void Steps::openStepsUI() {
     ui->lblGpsInfo->setText(strGpsInfoShow);
   }
 
-  if (getGpsListCount() == 0 && !isGpsRun) {
-    nYear = QDate::currentDate().year();
-    nMonth = QDate::currentDate().month();
-    loadGpsList(nYear, nMonth);
-    allGpsTotal();
-  }
+  nYear = QDate::currentDate().year();
+  nMonth = QDate::currentDate().month();
+  loadGpsList(nYear, nMonth);
+  allGpsTotal();
 
   // Route
   if (!isChina) isChina = m_Method->isInChina();
@@ -669,10 +647,6 @@ void Steps::appendSteps(QString date, int steps, QString km) {
       100 / 1000;
   km = QString("%1").arg(d_km, 0, 'f', 2);  //+ "  " + tr("KM");
 
-  // QMetaObject::invokeMethod((QObject*)root, "addItem", Q_ARG(QVariant, date),
-  //                           Q_ARG(QVariant, strSteps), Q_ARG(QVariant, km),
-  //                           Q_ARG(QVariant, strCalorie), Q_ARG(QVariant, 0));
-
   listSteps.append(date + "===" + strSteps + "===" + km + "===" + strCalorie +
                    "===" + stepsThreshold);
 }
@@ -729,7 +703,6 @@ void Steps::startRecordMotion() {
   } else
     t0 = QDate::currentDate().toString();
 
-  // mw_one->ui->lblGpsDateTime->setText(t0 + " " + strStartTime);
   setDateLabelToAndroid(t0 + " " + strStartTime);
 
   startDT = QDateTime::currentDateTime();
@@ -765,7 +738,6 @@ void Steps::startRecordMotion() {
   ui->lblGpsInfo->setStyleSheet(lblStartStyle);
   ui->btnGPS->setStyleSheet(btnRoundStyleRed);
 
-  // ui->btnSelGpsDate->setEnabled(false);
   ui->rbCycling->setEnabled(false);
   ui->rbHiking->setEnabled(false);
   ui->rbRunning->setEnabled(false);
@@ -778,7 +750,6 @@ void Steps::startRecordMotion() {
     if (!mw_one->myGetGpsDataThread->isRunning()) {
       isRunPaused = false;
       mw_one->myGetGpsDataThread->start();
-      // ui->btnPause->setEnabled(true);
     }
 
     isGpsRun = true;
@@ -1218,10 +1189,10 @@ void Steps::stopRecordMotion() {
 
     m_Reader->cancelKeepScreenOn();
 
-    int nYear = QDate::currentDate().year();
-    int nMonth = QDate::currentDate().month();
-    clearAllGpsList();
-    // loadGpsList(nYear, nMonth);
+    int cnYear = QDate::currentDate().year();
+    int cnMonth = QDate::currentDate().month();
+
+    loadGpsList(cnYear, cnMonth);
 
     refreshMotionData();
 
@@ -1240,7 +1211,6 @@ void Steps::stopRecordMotion() {
 
 #endif
 
-  // mw_one->ui->btnSelGpsDate->setEnabled(true);
   ui->rbCycling->setEnabled(true);
   ui->rbHiking->setEnabled(true);
   ui->rbRunning->setEnabled(true);
@@ -1307,34 +1277,12 @@ void Steps::refreshMotionData() {
     stry = QString::number(cnYear);
     strm = QString::number(cnMonth);
 
-    // QString strTitle = stry + " - " + strm;
-    //  if (mw_one->ui->btnSelGpsDate->text() != strTitle) {
     if (cnYear != nYear && cnMonth != nMonth) {
-      // clearAllGpsList();
-
       loadGpsList(cnYear, cnMonth);
 
       nYear = cnYear;
       nMonth = cnMonth;
-      // mw_one->ui->btnSelGpsDate->setText(strTitle);
     }
-
-    // QString text0, text1, startTime1, startTime2;
-    // int countList =
-    //     listText.count();  //
-    //     m_Method->getCountFromQW(mw_one->ui->qwGpsList);
-    // if (countList > 0) {
-    //  text0 = m_Method->getText0(mw_one->ui->qwGpsList, 0);
-    //  text1 = m_Method->getText1(mw_one->ui->qwGpsList, 0);
-    // }
-    // startTime1 = text1.split("-").at(0);
-    // startTime2 = t1.split("-").at(0);
-
-    // if (text0 == t00 && startTime1 == startTime2) {
-    //  updateGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
-    //} else {
-    // insertGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
-    //}
 
     strGpsMapDateTime = t00 + " " + t1;
     setDateLabelToAndroid(strGpsMapDateTime);
@@ -1406,56 +1354,7 @@ void Steps::refreshMotionData() {
 void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                           QString t3, QString t4, QString t5, QString t6,
                           QString t7, QVariantList speedData,
-                          QVariantList altitudeData) {
-  // 速度数据转QJSValue数组（QML可识别）
-  /*QJSValue speedJsArray = engine->newArray();
-  for (int i = 0; i < speedData.size(); ++i) {
-    // 显式转double，避免类型兼容问题
-    speedJsArray.setProperty(i, engine->toScriptValue(speedData[i].toDouble()));
-  }
-
-  // 海拔数据转QJSValue数组
-  QJSValue altitudeJsArray = engine->newArray();
-  for (int i = 0; i < altitudeData.size(); ++i) {
-    altitudeJsArray.setProperty(
-        i, engine->toScriptValue(altitudeData[i].toDouble()));
-  }
-
-  // ========== 关键修改2：补充Qt::DirectConnection，校验调用结果 ==========
-  // 调用QML的insertItem，参数要和QML完全匹配（11个）
-  bool invokeSuccess = QMetaObject::invokeMethod(
-      root, "insertItem",
-      Qt::DirectConnection,       // 强制同步调用，避免异步导致的问题
-      Q_ARG(QVariant, curIndex),  // 参数1：索引
-      Q_ARG(QVariant, t0),        // 参数2：text0
-      Q_ARG(QVariant, t1),        // 参数3：text1
-      Q_ARG(QVariant, t2),        // 参数4：text2
-      Q_ARG(QVariant, t3),        // 参数5：text3
-      Q_ARG(QVariant, t4),        // 参数6：text4
-      Q_ARG(QVariant, t5),        // 参数7：text5
-      Q_ARG(QVariant, t6),        // 参数8：text6
-      Q_ARG(QVariant, t7),        // 参数9：text7
-      Q_ARG(QVariant,
-            speedJsArray.toVariant()),  // 修正：QJSValue调用toVariant()
-      Q_ARG(QVariant, altitudeJsArray.toVariant())  // 修正：同上
-  );
-
-  // ========== 关键修改3：打印日志，定位问题 ==========
-  if (!isAndroid) {
-    if (invokeSuccess) {
-      qDebug() << "✅ 调用QML insertItem成功！";
-      // qDebug() << "   传入速度数据长度：" << speedData.size() << "数据："
-      //         << speedData;
-      // qDebug() << "   传入海拔数据长度：" << altitudeData.size() << "数据："
-      //          << altitudeData;
-    } else {
-      qCritical() << "❌ 调用QML insertItem失败！请检查：";
-      qCritical() << "   1. QML中insertItem函数名是否拼写正确（大小写敏感）";
-      qCritical() << "   2. 参数个数是否匹配（需要11个参数）";
-      qCritical() << "   3. rootObject是否正确指向包含insertItem的QML对象";
-    }
-  }*/
-}
+                          QVariantList altitudeData) {}
 
 void Steps::updateGpsList(int curIndex, QString t0, QString t1, QString t2,
                           QString t3, QString t4, QString t5, QString t6) {}
@@ -1472,8 +1371,8 @@ void Steps::clearAllGpsList() {
 }
 
 void Steps::loadGpsList(int nYear, int nMonth) {
-  // mw_one->ui->btnSelGpsDate->setText(QString::number(nYear) + " - " +
-  //                                   QString::number(nMonth));
+  nYear = nYear;
+  nMonth = nMonth;
 
   listText.clear();
   m_Speed.clear();
@@ -1515,14 +1414,13 @@ void Steps::loadGpsList(int nYear, int nMonth) {
               << QVariant(7.8) << QVariant(10.1) << QVariant(8.5)
               << QVariant(6.3) << QVariant(4.0);*/
 
-    // insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, t7, speedData,
-    // altitudeData);
-
     listText.append(t0 + "===" + t1 + "===" + t2 + "===" + t3 + "===" + t4 +
                     "===" + t5 + "===" + t6 + "===" + t7);
     m_Speed.append(speedData);
     m_Altitude.append(altitudeData);
   }
+
+  if (!isAndroid) qInfo() << "listText=" << listText.count() << listText;
 }
 
 void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
@@ -1840,13 +1738,17 @@ void Steps::updateGpsTrack() {
   strGpsMapDistnce = st3;
   strGpsMapSpeed = st4;
 
-  QString str_year, str_month, str_gpsdate;
+  QString str_year, str_month;
+
   // str_gpsdate = mw_one->ui->btnSelGpsDate->text();
-  QStringList gpsdateList = str_gpsdate.split("-");
-  if (gpsdateList.count() == 2) {
-    str_year = gpsdateList.at(0).trimmed();
-    str_month = gpsdateList.at(1).trimmed();
-  }
+  // QStringList gpsdateList = str_gpsdate.split("-");
+  // if (gpsdateList.count() == 2) {
+  //  str_year = gpsdateList.at(0).trimmed();
+  // str_month = gpsdateList.at(1).trimmed();
+  //}
+
+  str_year = QString::number(nYear);
+  str_month = QString::number(nMonth);
 
   QString csvPath = iniDir + "memo/gps/" + str_year + "/" + str_month + "/";
   QString gpsFile = iniDir + "memo/gps/" + st1 + "-gps-" + st2 + ".csv";
@@ -2695,15 +2597,7 @@ QString Steps::getGpsListFilePath(const QString& strGpsList) {
   strGpsMapDistnce = st3;
   strGpsMapSpeed = st4;
 
-  QString str_year, str_month, str_gpsdate;
-  /*str_gpsdate = QString::number(nYear) + "-" +
-                QString::number(nMonth);  // mw_one->ui->btnSelGpsDate->text();
-  QStringList gpsdateList = str_gpsdate.split("-");
-  if (gpsdateList.count() == 2) {
-    str_year = gpsdateList.at(0).trimmed();
-    str_month = gpsdateList.at(1).trimmed();
-  }*/
-
+  QString str_year, str_month;
   str_year = QString::number(nYear);
   str_month = QString::number(nMonth);
 
