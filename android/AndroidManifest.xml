@@ -240,6 +240,7 @@
         <activity android:name=".MyEventActivity" android:exported="false" />
 
         <activity android:name=".StepListActivity" android:exported="false" />
+        <activity android:name=".SportChartActivity" android:exported="false" />
 
         <activity
             android:name=".MyEventSearchActivity"

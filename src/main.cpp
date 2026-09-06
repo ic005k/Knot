@@ -14,7 +14,6 @@
 #include <QObject>
 #include <QOpenGLContext>
 #include <QProgressBar>
-// #include <QSGRendererInterface>
 #include <QSplashScreen>
 #include <QStyleFactory>
 #include <QSurfaceFormat>
@@ -214,6 +213,8 @@ int main(int argc, char* argv[]) {
   RegJniPublicJavaCallCpp("com/x/NoteRecycleBinActivity");
   RegJniPublicJavaCallCpp("com/x/MyEventSearchActivity");
   RegJniPublicJavaCallCpp("com/x/NoteSearchActivity");
+  RegJniPublicJavaCallCpp("com/x/StepListActivity");
+  RegJniPublicJavaCallCpp("com/x/SportChartActivity");
 
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";

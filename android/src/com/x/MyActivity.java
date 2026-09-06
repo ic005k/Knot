@@ -1600,6 +1600,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openSportChartActivity(ArrayList<String> sportRecordList) {
+        Intent intent = new Intent(this, SportChartActivity.class);
+        intent.putStringArrayListExtra("sport_record_list", sportRecordList);
+        startActivity(intent);
+    }
+
     public void openStepListActivity(ArrayList<String> mList) {
         Intent intent = new Intent(this, StepListActivity.class);
         intent.putStringArrayListExtra("step_list_data", mList);

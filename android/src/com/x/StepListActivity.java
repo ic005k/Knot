@@ -5,8 +5,10 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -17,12 +19,14 @@ import java.util.ArrayList;
 public class StepListActivity extends AppCompatActivity {
 
     public static StepListActivity mInstance = null;
-
     private ListView mListView;
     private StepListAdapter mAdapter;
     private ArrayList<String> mDataList = new ArrayList<>();
     private boolean mIsDark;
     private OnBackPressedCallback mBackCallback;
+
+    // JNI调用声明，确认项目已有该方法
+    private native void PublicJavaCallCpp(String msg);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,26 +57,58 @@ public class StepListActivity extends AppCompatActivity {
         int subColor = mIsDark ? 0xFFAAAAAA : 0xFF666666;
         root.setBackgroundColor(bgColor);
 
+        // 标题行：标题 + AI分析按钮，同一行
+        LinearLayout titleBar = new LinearLayout(this);
+        titleBar.setOrientation(LinearLayout.HORIZONTAL);
+        titleBar.setGravity(Gravity.CENTER_VERTICAL);
+        titleBar.setPadding(dp(16), dp(16), dp(16), dp(8));
+
         TextView tvTitle = new TextView(this);
         tvTitle.setText(MyActivity.zh_cn ? "步数记录" : "Step Records");
         tvTitle.setTextSize(22);
         tvTitle.setTextColor(textColor);
-        tvTitle.setPadding(dp(16), dp(16), dp(16), dp(8));
-        root.addView(tvTitle);
+        tvTitle.setLayoutParams(
+            new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1.0f
+            )
+        );
+
+        Button btnAiAnalyse = new Button(this);
+        btnAiAnalyse.setText(MyActivity.zh_cn ? "AI分析" : "AI Analyse");
+        btnAiAnalyse.setPadding(dp(12), dp(6), dp(12), dp(6));
+        btnAiAnalyse.setOnClickListener(v -> {
+            PublicJavaCallCpp("step_ai_analyse");
+        });
+
+        titleBar.addView(tvTitle);
+        titleBar.addView(btnAiAnalyse);
+        root.addView(titleBar);
 
         LinearLayout headerRow = new LinearLayout(this);
         headerRow.setOrientation(LinearLayout.HORIZONTAL);
         headerRow.setPadding(dp(12), dp(8), dp(12), dp(8));
         headerRow.setBackgroundColor(mIsDark ? 0xFF1E1E1E : Color.WHITE);
+
+        View headerPlaceholder = new View(this);
+        headerPlaceholder.setLayoutParams(
+            new LinearLayout.LayoutParams(
+                dp(4),
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        );
+        headerRow.addView(headerPlaceholder);
+
         String[] heads = MyActivity.zh_cn
-            ? new String[] { "日期", "步数", "公里", "卡路里" }
-            : new String[] { "Date", "Steps", "Km", "Cal" };
+            ? new String[] { "步数", "公里", "卡路里" }
+            : new String[] { "Steps", "Km", "Cal" };
         for (int i = 0; i < heads.length; i++) {
             TextView h = new TextView(this);
             h.setText(heads[i]);
             h.setTextSize(14);
             h.setTextColor(subColor);
-            h.setGravity(i == 0 ? Gravity.CENTER : Gravity.LEFT);
+            h.setGravity(Gravity.CENTER);
             h.setLayoutParams(
                 new LinearLayout.LayoutParams(
                     0,
@@ -80,10 +116,7 @@ public class StepListActivity extends AppCompatActivity {
                     1.0f
                 )
             );
-            // 表头日期列右侧增加间距
-            if (i == 0) {
-                h.setPadding(0, 0, dp(10), 0);
-            }
+            h.setPadding(dp(10), 0, 0, 0);
             headerRow.addView(h);
         }
         root.addView(headerRow);
@@ -121,7 +154,6 @@ public class StepListActivity extends AppCompatActivity {
             mDataList.clear();
             mDataList.addAll(dataList);
             mAdapter.notifyDataSetChanged();
-
             final int count = mDataList.size();
             if (count > 0) {
                 mListView.post(() -> mListView.setSelection(count - 1));
@@ -146,6 +178,8 @@ public class StepListActivity extends AppCompatActivity {
     private static class StepListAdapter extends ArrayAdapter<String> {
 
         private final boolean mIsDark;
+        private final int COLOR_GOOD_LIGHT = 0xFF4CAF50;
+        private final int COLOR_GOOD_DARK = 0xFF66BB6A;
 
         public StepListAdapter(
             android.content.Context ctx,
@@ -164,37 +198,42 @@ public class StepListActivity extends AppCompatActivity {
         ) {
             ViewHolder holder;
             if (convertView == null) {
-                LinearLayout row = new LinearLayout(getContext());
-                row.setOrientation(LinearLayout.HORIZONTAL);
-                row.setPadding(dp(12), dp(12), dp(12), dp(12));
-                row.setGravity(Gravity.CENTER_VERTICAL);
+                LinearLayout rowRoot = new LinearLayout(getContext());
+                rowRoot.setOrientation(LinearLayout.HORIZONTAL);
+                rowRoot.setPadding(dp(12), dp(12), dp(12), dp(12));
+                rowRoot.setGravity(Gravity.CENTER_VERTICAL);
 
-                TextView tvDate = new TextView(getContext());
-                tvDate.setTextSize(15);
-                tvDate.setTypeface(null, Typeface.BOLD);
-                tvDate.setGravity(Gravity.CENTER);
-                // 日期单元格右侧增加10dp空白，解决和步数拥挤
-                tvDate.setPadding(0, 0, dp(10), 0);
+                View markView = new View(getContext());
+                LinearLayout.LayoutParams markLp =
+                    new LinearLayout.LayoutParams(
+                        dp(4),
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    );
+                markView.setLayoutParams(markLp);
 
-                TextView tvSteps = new TextView(getContext());
-                tvSteps.setTextSize(15);
-                tvSteps.setGravity(Gravity.LEFT);
-
-                TextView tvKm = new TextView(getContext());
-                tvKm.setTextSize(15);
-                tvKm.setGravity(Gravity.LEFT);
-
-                TextView tvCal = new TextView(getContext());
-                tvCal.setTextSize(15);
-                tvCal.setGravity(Gravity.LEFT);
-
-                tvDate.setLayoutParams(
+                LinearLayout contentContainer = new LinearLayout(getContext());
+                contentContainer.setOrientation(LinearLayout.VERTICAL);
+                contentContainer.setLayoutParams(
                     new LinearLayout.LayoutParams(
                         0,
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         1.0f
                     )
                 );
+                contentContainer.setPadding(dp(10), 0, 0, 0);
+
+                TextView tvDate = new TextView(getContext());
+                tvDate.setTextSize(15);
+                tvDate.setTypeface(null, Typeface.BOLD);
+                tvDate.setGravity(Gravity.CENTER);
+                tvDate.setPadding(0, 0, 0, dp(8));
+
+                LinearLayout valueRow = new LinearLayout(getContext());
+                valueRow.setOrientation(LinearLayout.HORIZONTAL);
+
+                TextView tvSteps = new TextView(getContext());
+                tvSteps.setTextSize(15);
+                tvSteps.setGravity(Gravity.CENTER);
                 tvSteps.setLayoutParams(
                     new LinearLayout.LayoutParams(
                         0,
@@ -202,6 +241,10 @@ public class StepListActivity extends AppCompatActivity {
                         1.0f
                     )
                 );
+
+                TextView tvKm = new TextView(getContext());
+                tvKm.setTextSize(15);
+                tvKm.setGravity(Gravity.CENTER);
                 tvKm.setLayoutParams(
                     new LinearLayout.LayoutParams(
                         0,
@@ -209,6 +252,10 @@ public class StepListActivity extends AppCompatActivity {
                         1.0f
                     )
                 );
+
+                TextView tvCal = new TextView(getContext());
+                tvCal.setTextSize(15);
+                tvCal.setGravity(Gravity.CENTER);
                 tvCal.setLayoutParams(
                     new LinearLayout.LayoutParams(
                         0,
@@ -217,10 +264,15 @@ public class StepListActivity extends AppCompatActivity {
                     )
                 );
 
-                row.addView(tvDate);
-                row.addView(tvSteps);
-                row.addView(tvKm);
-                row.addView(tvCal);
+                valueRow.addView(tvSteps);
+                valueRow.addView(tvKm);
+                valueRow.addView(tvCal);
+
+                contentContainer.addView(tvDate);
+                contentContainer.addView(valueRow);
+
+                rowRoot.addView(markView);
+                rowRoot.addView(contentContainer);
 
                 int textColor = mIsDark ? Color.WHITE : Color.BLACK;
                 tvDate.setTextColor(textColor);
@@ -228,8 +280,9 @@ public class StepListActivity extends AppCompatActivity {
                 tvKm.setTextColor(textColor);
                 tvCal.setTextColor(textColor);
 
-                convertView = row;
+                convertView = rowRoot;
                 holder = new ViewHolder();
+                holder.markView = markView;
                 holder.tvDate = tvDate;
                 holder.tvSteps = tvSteps;
                 holder.tvKm = tvKm;
@@ -242,14 +295,33 @@ public class StepListActivity extends AppCompatActivity {
             String line = getItem(position);
             String[] parts = line.split("===");
             String date = parts.length >= 1 ? parts[0] : "";
-            String steps = parts.length >= 2 ? parts[1] : "";
+            String stepsStr = parts.length >= 2 ? parts[1] : "0";
             String km = parts.length >= 3 ? parts[2] : "";
             String cal = parts.length >= 4 ? parts[3] : "";
+            String thresholdStr = parts.length >= 5 ? parts[4] : "0";
 
             holder.tvDate.setText(date);
-            holder.tvSteps.setText(steps);
+            holder.tvSteps.setText(stepsStr);
             holder.tvKm.setText(km);
             holder.tvCal.setText(cal);
+
+            boolean isReachGoal = false;
+            try {
+                int stepsVal = Integer.parseInt(stepsStr.trim());
+                int thresholdVal = Integer.parseInt(thresholdStr.trim());
+                if (stepsVal >= thresholdVal) {
+                    isReachGoal = true;
+                }
+            } catch (NumberFormatException ignored) {}
+
+            if (isReachGoal) {
+                holder.markView.setVisibility(View.VISIBLE);
+                holder.markView.setBackgroundColor(
+                    mIsDark ? COLOR_GOOD_DARK : COLOR_GOOD_LIGHT
+                );
+            } else {
+                holder.markView.setVisibility(View.GONE);
+            }
 
             if (mIsDark) {
                 convertView.setBackgroundColor(
@@ -273,6 +345,7 @@ public class StepListActivity extends AppCompatActivity {
 
         private static class ViewHolder {
 
+            View markView;
             TextView tvDate;
             TextView tvSteps;
             TextView tvKm;

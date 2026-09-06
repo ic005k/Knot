@@ -540,7 +540,7 @@ void Steps::setTableSteps(qlonglong steps) {
 
   // 读取步长和阈值（对应原/Steps/Length和/Steps/Threshold）
   QString stepLength = stepsObj["Length"].toString("35");
-  QString stepsThreshold = stepsObj["Threshold"].toString("10000");
+  stepsThreshold = stepsObj["Threshold"].toString("10000");
 
   m_StepsOptions->ui->editStepLength->setText(stepLength);
   m_StepsOptions->ui->editStepsThreshold->setText(stepsThreshold);
@@ -673,7 +673,8 @@ void Steps::appendSteps(QString date, int steps, QString km) {
   //                           Q_ARG(QVariant, strSteps), Q_ARG(QVariant, km),
   //                           Q_ARG(QVariant, strCalorie), Q_ARG(QVariant, 0));
 
-  listSteps.append(date + "===" + strSteps + "===" + km + "===" + strCalorie);
+  listSteps.append(date + "===" + strSteps + "===" + km + "===" + strCalorie +
+                   "===" + stepsThreshold);
 }
 
 int Steps::getCount() { return 0; }
@@ -1466,11 +1467,18 @@ void Steps::loadGpsList(int nYear, int nMonth) {
   // mw_one->ui->btnSelGpsDate->setText(QString::number(nYear) + " - " +
   //                                   QString::number(nMonth));
 
+  QStringList listText;
+  QList<QVariantList> m_Speed;
+  QList<QVariantList> m_Altitude;
+
   QSettings Reg(iniDir + QString::number(nYear) + "-gpslist.ini",
                 QSettings::IniFormat);
 
   QString strYearMonth = QString::number(nYear) + "-" + QString::number(nMonth);
   int count = Reg.value("/" + strYearMonth + "/Count", 0).toInt();
+
+  qInfo() << "count=" << count;
+
   for (int i = 0; i < count; i++) {
     QString str =
         Reg.value("/" + strYearMonth + "/" + QString::number(i + 1), "")
@@ -1501,10 +1509,81 @@ void Steps::loadGpsList(int nYear, int nMonth) {
 
     // insertGpsList(0, t0, t1, t2, t3, t4, t5, t6, t7, speedData,
     // altitudeData);
+
+    listText.append(t0 + "===" + t1 + "===" + t2 + "===" + t3 + "===" + t4 +
+                    "===" + t5 + "===" + t6 + "===" + t7);
+    m_Speed.append(speedData);
+    m_Altitude.append(altitudeData);
   }
 
-  if (count > 0) {
+  refreshSportChart(listText, m_Speed, m_Altitude);
+}
+
+void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
+                              QList<QVariantList> m_Altitude) {
+#ifdef Q_OS_ANDROID
+  // 1. 构建与打开时相同格式的数据列表
+
+  // 2. 构造 Java ArrayList<String>
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+  for (const QString& item : listText) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
+
+  QJniEnvironment env;
+
+  QJniObject jArrayListSpeed("java/util/ArrayList", "()V");
+  for (const QVariantList& item : m_Speed) {
+    jdoubleArray jArr = env->NewDoubleArray(item.size());
+    QVector<double> buffer;
+    buffer.reserve(item.size());
+    for (const QVariant& v : item) {
+      buffer.append(v.toDouble());
+    }
+    env->SetDoubleArrayRegion(jArr, 0, item.size(), buffer.constData());
+    QJniObject jItem = QJniObject::fromLocalRef(jArr);
+    jArrayListSpeed.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+                                     jItem.object());
+  }
+
+  QJniObject jArrayListAlt("java/util/ArrayList", "()V");
+  for (const QVariantList& item : m_Altitude) {
+    jdoubleArray jArr = env->NewDoubleArray(item.size());
+    QVector<double> buffer;
+    buffer.reserve(item.size());
+    for (const QVariant& v : item) {
+      buffer.append(v.toDouble());
+    }
+    env->SetDoubleArrayRegion(jArr, 0, item.size(), buffer.constData());
+    QJniObject jItem = QJniObject::fromLocalRef(jArr);
+    jArrayListAlt.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+                                   jItem.object());
+  }
+
+  // 3. 通过静态实例调用 refreshCardList
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/SportChartActivity", "mInstance", "Lcom/x/SportChartActivity;");
+
+  if (instance.isValid()) {
+    instance.callMethod<void>("refreshAllRecords", "(Ljava/util/ArrayList;)V",
+                              jArrayList.object());
+
+    // 单条（保留）
+    // instance.callMethod<void>("setRecordSpeedData","(I[D)V", idx,
+    // jDoubleArr.object());
+    // instance.callMethod<void>("setRecordAltData","(I[D)V", idx,
+    // jDoubleArr.object());
+
+    // 全量批量刷新
+    instance.callMethod<void>("refreshAllSpeedData", "(Ljava/util/ArrayList;)V",
+                              jArrayListSpeed.object());
+    instance.callMethod<void>("refreshAllAltData", "(Ljava/util/ArrayList;)V",
+                              jArrayListAlt.object());
+  }
+
+  qInfo() << "Sport List=" << listText;
+#endif
 }
 
 void Steps::selGpsListYearMonth() {
@@ -3314,7 +3393,14 @@ void Steps::on_btnAIExerciseSuggestions_clicked() {
   mw_one->on_btnAIExerciseSuggestions_clicked();
 }
 
-void Steps::on_btnList_clicked() {}
+void Steps::on_btnList_clicked() {
+  int y = QDate::currentDate().year();
+  int m = QDate::currentDate().month();
+
+  QStringList listText;
+  m_Method->openActivity("openSportChartActivity", listText);
+  loadGpsList(y, m);
+}
 
 void Steps::on_btnStepCount_clicked() {
   if (isAndroid) {
@@ -3322,6 +3408,7 @@ void Steps::on_btnStepCount_clicked() {
   }
 
   listSteps.clear();
+
   updateHardSensorSteps();
 
   m_Method->openActivity("openStepListActivity", listSteps);

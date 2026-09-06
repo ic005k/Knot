@@ -237,6 +237,8 @@ class Steps : public QDialog {
   void prepareDestroy();
   QString getDirectionText();
   QLabel* getLabelGpsInfoWidget();
+  void refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
+                         QList<QVariantList> m_Altitude);
  public slots:
   void clearAllGpsList();
   void getGpsTrack();
@@ -268,6 +270,7 @@ class Steps : public QDialog {
 
  private:
   QStringList listSteps;
+  QString stepsThreshold;
   QThread* geoThread;
   QString str_type = "";
   bool latValid = false;
