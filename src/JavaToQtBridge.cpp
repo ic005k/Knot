@@ -982,6 +982,24 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->on_btnNoteRecycle_clicked(); });
           }
 
+          // 运动图表 ===================================================
+          if (strType.startsWith("sport_select_ym|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                QString str_ym = list.at(1);
+                QStringList list1 = str_ym.split("-");
+                int y = list1.at(0).toInt();
+                int m = list1.at(1).toInt();
+                m_Steps->nYear = y;
+                m_Steps->nMonth = m;
+                m_Steps->loadGpsList(y, m);
+                m_Steps->refreshSportChart(m_Steps->listText, m_Steps->m_Speed,
+                                           m_Steps->m_Altitude);
+              }
+            });
+          }
           //===========================================================
 
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;

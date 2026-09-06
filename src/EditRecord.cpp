@@ -397,17 +397,7 @@ void EditRecord::on_AddRecord() {
     openAddEventRecord(titleAdd, "", "", "", timeLabel);
   }
 #else
-  mw_one->ui->lblTitleEditRecord->setText(titleAdd);
-  mw_one->ui->hsH->setValue(timeH);
-  mw_one->ui->hsM->setValue(timeM);
-  mw_one->ui->lblTime->setText(timeLabel);
-  mw_one->ui->editDetails->setText(strDeta);
-  mw_one->ui->editCategory->setText(strCate);
-  mw_one->ui->editAmount->setText(strAmount);
 
-  mw_one->ui->frameMain->hide();
-  mw_one->ui->frameEditRecord->show();
-  updateCategoryCompleterList();
 #endif
 }
 

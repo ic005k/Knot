@@ -1301,26 +1301,34 @@ void Steps::refreshMotionData() {
   t5 = str6 + "\n" + str7;
 
   if (m_distance > 0 || isGpsTest) {
-    int nYear = QDate::currentDate().year();
-    int nMonth = QDate::currentDate().month();
+    int cnYear = QDate::currentDate().year();
+    int cnMonth = QDate::currentDate().month();
     QString stry, strm;
-    stry = QString::number(nYear);
-    strm = QString::number(nMonth);
-    QString strTitle = stry + " - " + strm;
-    /*if (mw_one->ui->btnSelGpsDate->text() != strTitle) {
-      clearAllGpsList();
-      loadGpsList(nYear, nMonth);
-      mw_one->ui->btnSelGpsDate->setText(strTitle);
-    }*/
+    stry = QString::number(cnYear);
+    strm = QString::number(cnMonth);
 
-    QString text0, text1, startTime1, startTime2;
-    int countList = 0;  // m_Method->getCountFromQW(mw_one->ui->qwGpsList);
-    if (countList > 0) {
-      // text0 = m_Method->getText0(mw_one->ui->qwGpsList, 0);
-      // text1 = m_Method->getText1(mw_one->ui->qwGpsList, 0);
+    // QString strTitle = stry + " - " + strm;
+    //  if (mw_one->ui->btnSelGpsDate->text() != strTitle) {
+    if (cnYear != nYear && cnMonth != nMonth) {
+      // clearAllGpsList();
+
+      loadGpsList(cnYear, cnMonth);
+
+      nYear = cnYear;
+      nMonth = cnMonth;
+      // mw_one->ui->btnSelGpsDate->setText(strTitle);
     }
-    startTime1 = text1.split("-").at(0);
-    startTime2 = t1.split("-").at(0);
+
+    // QString text0, text1, startTime1, startTime2;
+    // int countList =
+    //     listText.count();  //
+    //     m_Method->getCountFromQW(mw_one->ui->qwGpsList);
+    // if (countList > 0) {
+    //  text0 = m_Method->getText0(mw_one->ui->qwGpsList, 0);
+    //  text1 = m_Method->getText1(mw_one->ui->qwGpsList, 0);
+    // }
+    // startTime1 = text1.split("-").at(0);
+    // startTime2 = t1.split("-").at(0);
 
     // if (text0 == t00 && startTime1 == startTime2) {
     //  updateGpsList(0, t00, t1, t2, t3, t4, t5, strCurrentWeatherIcon);
@@ -1390,7 +1398,7 @@ void Steps::refreshMotionData() {
     Reg1.setValue("/" + stry + "/" + strm,
                   s1 + "-=-" + s2 + "-=-" + s3 + "-=-" + s4);
 
-    // allGpsTotal();
+    allGpsTotal();
   }
 }
 
@@ -1631,9 +1639,8 @@ QString Steps::getGpsListText0(int index) { return ""; }
 QString Steps::getGpsListText2(int index) { return ""; }
 
 void Steps::allGpsTotal() {
-  QString s_y = QString::number(QDate::currentDate().year());
-  QString s_m = QString::number(QDate::currentDate().month());
-  QString title = s_y + "-" + s_m;  // = mw_one->ui->btnSelGpsDate->text();
+  QString title = QString::number(nYear) + "-" +
+                  QString::number(nMonth);  // mui->btnSelGpsDate->text();
   QStringList list = title.split("-");
   QString stry = list.at(0);
   stry = stry.trimmed();

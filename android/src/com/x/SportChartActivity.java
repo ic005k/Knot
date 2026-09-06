@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -271,45 +272,81 @@ public class SportChartActivity extends AppCompatActivity {
     private void showYearSelectDialog() {
         Calendar cal = Calendar.getInstance();
         int currentYear = cal.get(Calendar.YEAR);
-        ArrayList<Integer> yearList = new ArrayList<>();
-        for (int y = currentYear - 10; y <= currentYear; y++) {
-            yearList.add(y);
-        }
-        String[] items = new String[yearList.size()];
-        for (int i = 0; i < items.length; i++) {
-            items[i] = String.valueOf(yearList.get(i));
-        }
-        new AlertDialog.Builder(this)
-            .setTitle(MyActivity.zh_cn ? "选择年份" : "Select Year")
-            .setItems(items, (dialog, which) -> {
-                int selYear = yearList.get(which);
-                mBtnYear.setText(String.valueOf(selYear));
-                PublicJavaCallCpp("sport_select_year|==|" + selYear);
-            })
-            .show();
+        final int minYear = currentYear - 10;
+        final int maxYear = currentYear;
+
+        // 动态构建弹窗内容视图
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setGravity(Gravity.CENTER);
+        container.setPadding(dp(24), dp(16), dp(24), dp(16));
+
+        NumberPicker npYear = new NumberPicker(this);
+        npYear.setMinValue(minYear);
+        npYear.setMaxValue(maxYear);
+        npYear.setValue(currentYear);
+        npYear.setWrapSelectorWheel(false);
+        container.addView(npYear);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(MyActivity.zh_cn ? "选择年份" : "Select Year");
+        builder.setView(container);
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            int selYear = npYear.getValue();
+            mBtnYear.setText(String.valueOf(selYear));
+            PublicJavaCallCpp("sport_select_year|==|" + selYear);
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
     }
 
     private void showYearMonthSelectDialog() {
         Calendar cal = Calendar.getInstance();
         int currentYear = cal.get(Calendar.YEAR);
         int currentMonth = cal.get(Calendar.MONTH) + 1;
-        ArrayList<String> ymList = new ArrayList<>();
-        for (int y = currentYear - 2; y <= currentYear; y++) {
-            for (int m = 1; m <= 12; m++) {
-                if (y == currentYear && m > currentMonth) continue;
-                ymList.add(y + "-" + m);
-            }
-        }
-        String[] items = new String[ymList.size()];
-        ymList.toArray(items);
-        new AlertDialog.Builder(this)
-            .setTitle(MyActivity.zh_cn ? "选择年月" : "Select Year‑Month")
-            .setItems(items, (dialog, which) -> {
-                String selYm = ymList.get(which);
-                mBtnYearMonth.setText(selYm);
-                PublicJavaCallCpp("sport_select_ym|==|" + selYm);
-            })
-            .show();
+        final int minYear = currentYear - 2;
+        final int maxYear = currentYear;
+
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.HORIZONTAL);
+        container.setGravity(Gravity.CENTER);
+        container.setPadding(dp(24), dp(16), dp(24), dp(16));
+
+        NumberPicker npYear = new NumberPicker(this);
+        npYear.setMinValue(minYear);
+        npYear.setMaxValue(maxYear);
+        npYear.setValue(currentYear);
+        npYear.setWrapSelectorWheel(false);
+
+        // 设置右边距，代替 setGap
+        LinearLayout.LayoutParams lpYear = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        lpYear.setMargins(0, 0, dp(16), 0);
+        npYear.setLayoutParams(lpYear);
+
+        NumberPicker npMonth = new NumberPicker(this);
+        npMonth.setMinValue(1);
+        npMonth.setMaxValue(12);
+        npMonth.setValue(currentMonth);
+        npMonth.setWrapSelectorWheel(true);
+
+        container.addView(npYear);
+        container.addView(npMonth);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(MyActivity.zh_cn ? "选择年月" : "Select Year‑Month");
+        builder.setView(container);
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            int y = npYear.getValue();
+            int m = npMonth.getValue();
+            String selYm = y + "-" + m;
+            mBtnYearMonth.setText(selYm);
+            PublicJavaCallCpp("sport_select_ym|==|" + selYm);
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
     }
 
     @Override
