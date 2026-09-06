@@ -9,6 +9,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -23,21 +25,18 @@ import java.util.Calendar;
 public class SportChartActivity extends AppCompatActivity {
 
     public static SportChartActivity mInstance = null;
-
     private Button mBtnYear;
     private Button mBtnYearMonth;
-
-    private HorizontalScrollView mHScrollView;
+    private SnapHorizontalScrollView mHScrollView;
     private LinearLayout mScrollContentContainer;
-
     private boolean mIsDark;
     private OnBackPressedCallback mBackCallback;
+    private int mScreenWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInstance = this;
-
         mBackCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -48,6 +47,7 @@ public class SportChartActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, mBackCallback);
 
         mIsDark = ImmersiveUtil.applyRealImmersive(this);
+        mScreenWidth = getResources().getDisplayMetrics().widthPixels;
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -57,7 +57,6 @@ public class SportChartActivity extends AppCompatActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         );
-
         int bgColor = mIsDark ? 0xFF121212 : 0xFFF5F5F5;
         int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
         int btnBgNormal = mIsDark ? 0xFF303030 : 0xFFE8E8E8;
@@ -68,7 +67,6 @@ public class SportChartActivity extends AppCompatActivity {
         topBtnBar.setOrientation(LinearLayout.HORIZONTAL);
         topBtnBar.setGravity(Gravity.CENTER);
         topBtnBar.setPadding(dp(12), dp(12), dp(12), dp(8));
-
         mBtnYear = new Button(this);
         mBtnYear.setText(MyActivity.zh_cn ? "年汇总" : "Year");
         mBtnYear.setBackgroundColor(btnBgNormal);
@@ -87,11 +85,10 @@ public class SportChartActivity extends AppCompatActivity {
         mBtnYearMonth.setTextColor(textColor);
         topBtnBar.addView(mBtnYearMonth);
         mBtnYearMonth.setOnClickListener(v -> showYearMonthSelectDialog());
-
         root.addView(topBtnBar);
 
-        // ========== 横向滚动容器：每一项占满屏幕宽度 ==========
-        mHScrollView = new HorizontalScrollView(this);
+        // ========== 自定义分页吸附横向滚动容器 ==========
+        mHScrollView = new SnapHorizontalScrollView(this);
         mHScrollView.setLayoutParams(
             new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -108,7 +105,6 @@ public class SportChartActivity extends AppCompatActivity {
 
         setContentView(root);
 
-        //读取Intent传入的ArrayList<String>，每条内部用===分割7个文本
         Intent intent = getIntent();
         ArrayList<String> initRecordList = intent.getStringArrayListExtra(
             "sport_record_list"
@@ -124,15 +120,12 @@ public class SportChartActivity extends AppCompatActivity {
     public void refreshAllRecords(ArrayList<String> recordRawList) {
         runOnUiThread(() -> {
             mScrollContentContainer.removeAllViews();
-            int screenW = getResources().getDisplayMetrics().widthPixels;
+            int screenW = mScreenWidth;
             int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
             int btnBgNormal = mIsDark ? 0xFF303030 : 0xFFE8E8E8;
-
             for (int idx = 0; idx < recordRawList.size(); idx++) {
                 String rawItem = recordRawList.get(idx);
                 String[] sevenTexts = rawItem.split("===");
-
-                // 单条记录整体容器，宽度等于屏幕宽度
                 LinearLayout itemRoot = new LinearLayout(this);
                 itemRoot.setOrientation(LinearLayout.VERTICAL);
                 LinearLayout.LayoutParams itemLp =
@@ -143,7 +136,6 @@ public class SportChartActivity extends AppCompatActivity {
                 itemRoot.setLayoutParams(itemLp);
                 itemRoot.setPadding(dp(12), dp(8), dp(12), dp(8));
 
-                //7个统计文本
                 LinearLayout statContainer = new LinearLayout(this);
                 statContainer.setOrientation(LinearLayout.VERTICAL);
                 for (int t = 0; t < 7; t++) {
@@ -160,7 +152,6 @@ public class SportChartActivity extends AppCompatActivity {
                 }
                 itemRoot.addView(statContainer);
 
-                //图表绘图View
                 SportChartView chartView = new SportChartView(
                     this,
                     mIsDark,
@@ -175,12 +166,10 @@ public class SportChartActivity extends AppCompatActivity {
                 chartView.setLayoutParams(chartLp);
                 itemRoot.addView(chartView);
 
-                //底部内嵌按钮：轨迹、途径（属于当前这条记录）
                 LinearLayout itemBottomBar = new LinearLayout(this);
                 itemBottomBar.setOrientation(LinearLayout.HORIZONTAL);
                 itemBottomBar.setGravity(Gravity.CENTER);
                 itemBottomBar.setPadding(0, dp(6), 0, 0);
-
                 Button btnTrack = new Button(this);
                 btnTrack.setText(MyActivity.zh_cn ? "轨迹" : "Track");
                 btnTrack.setBackgroundColor(btnBgNormal);
@@ -204,21 +193,25 @@ public class SportChartActivity extends AppCompatActivity {
                 btnPath.setOnClickListener(v -> {
                     PublicJavaCallCpp("sport_chart_path|==|" + curIdx);
                 });
-
                 itemBottomBar.addView(btnTrack);
                 itemBottomBar.addView(btnPath);
                 itemRoot.addView(itemBottomBar);
 
                 mScrollContentContainer.addView(itemRoot);
             }
-            //刷新后滚动到最左侧，展示最新记录（下标0）
-            mHScrollView.scrollTo(0, 0);
+            //mHScrollView.scrollTo(0, 0);
+            // 加载完成自动定位到最后一个条目
+            int itemCount = mScrollContentContainer.getChildCount();
+            if (itemCount > 0) {
+                int lastIndex = itemCount - 1;
+                int targetScrollX = lastIndex * mScreenWidth;
+                mHScrollView.post(() -> {
+                    mHScrollView.scrollTo(targetScrollX, 0);
+                });
+            }
         });
     }
 
-    /**
-     * 设置某一条记录的速度double数组（保留原有单条接口）
-     */
     public void setRecordSpeedData(int recordIndex, double[] speedArr) {
         runOnUiThread(() -> {
             View itemView = mScrollContentContainer.getChildAt(recordIndex);
@@ -231,9 +224,6 @@ public class SportChartActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * 设置某一条记录的海拔double数组（保留原有单条接口）
-     */
     public void setRecordAltData(int recordIndex, double[] altArr) {
         runOnUiThread(() -> {
             View itemView = mScrollContentContainer.getChildAt(recordIndex);
@@ -246,10 +236,6 @@ public class SportChartActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * 【新增】批量刷新全部速度数据
-     * @param speedList ArrayList里面每个元素是一条记录的double[]速度数组
-     */
     public void refreshAllSpeedData(ArrayList<double[]> speedList) {
         runOnUiThread(() -> {
             for (int i = 0; i < speedList.size(); i++) {
@@ -266,10 +252,6 @@ public class SportChartActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * 【新增】批量刷新全部海拔数据
-     * @param altList ArrayList里面每个元素是一条记录的double[]海拔数组
-     */
     public void refreshAllAltData(ArrayList<double[]> altList) {
         runOnUiThread(() -> {
             for (int i = 0; i < altList.size(); i++) {
@@ -297,7 +279,6 @@ public class SportChartActivity extends AppCompatActivity {
         for (int i = 0; i < items.length; i++) {
             items[i] = String.valueOf(yearList.get(i));
         }
-
         new AlertDialog.Builder(this)
             .setTitle(MyActivity.zh_cn ? "选择年份" : "Select Year")
             .setItems(items, (dialog, which) -> {
@@ -321,7 +302,6 @@ public class SportChartActivity extends AppCompatActivity {
         }
         String[] items = new String[ymList.size()];
         ymList.toArray(items);
-
         new AlertDialog.Builder(this)
             .setTitle(MyActivity.zh_cn ? "选择年月" : "Select Year‑Month")
             .setItems(items, (dialog, which) -> {
@@ -348,6 +328,129 @@ public class SportChartActivity extends AppCompatActivity {
 
     private native void PublicJavaCallCpp(String msg);
 
+    //======================================================
+    /**
+     * 自定义：分页吸附横向ScrollView
+     * 吸附阈值可通过 SNAP_THRESHOLD_RATIO 自由调整
+     */
+    private class SnapHorizontalScrollView extends HorizontalScrollView {
+
+        // 【可调参数1】距离阈值：慢拖松手时，滑过页面宽度的此比例即翻页
+        // 0.20 = 安卓原生手感, 0.15 = 更灵敏, 0.25 = 偏重
+        private static final float SNAP_THRESHOLD_RATIO = 0.20f;
+
+        // 【可调参数2】速度阈值(px/s)：快甩超过此值直接翻页，无视距离
+        // 300 = 安卓原生手感, 200 = 更灵敏, 500 = 偏重
+        private static final int VELOCITY_FLING_THRESHOLD = 300;
+
+        // 【可调参数3】防抖像素：微小偏移不触发多余动画
+        private static final int ANIMATION_THRESHOLD_PX = 2;
+
+        private boolean mIsUserScrolling = false;
+        private VelocityTracker mVelocityTracker;
+
+        public SnapHorizontalScrollView(Context context) {
+            super(context);
+            setOverScrollMode(OVER_SCROLL_NEVER);
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent ev) {
+            mVelocityTracker.addMovement(ev);
+            int action = ev.getAction();
+
+            if (action == MotionEvent.ACTION_DOWN) {
+                mIsUserScrolling = true;
+                mVelocityTracker.clear();
+            } else if (
+                action == MotionEvent.ACTION_UP ||
+                action == MotionEvent.ACTION_CANCEL
+            ) {
+                mIsUserScrolling = false;
+
+                // 计算松手瞬间的速度
+                mVelocityTracker.computeCurrentVelocity(1000);
+                float velocityX = mVelocityTracker.getXVelocity();
+
+                post(() -> snapToPageIfNeeded(velocityX));
+            }
+            return super.onTouchEvent(ev);
+        }
+
+        @Override
+        protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+            super.onScrollChanged(l, t, oldl, oldt);
+            // 惯性滚动停止后的兜底吸附（此时无速度信息，仅靠距离）
+            if (!mIsUserScrolling && !isScrolling()) {
+                snapToPageIfNeeded(0f);
+            }
+        }
+
+        private boolean isScrolling() {
+            return awakenScrollBars(0, false);
+        }
+
+        /**
+         * @param velocityX 松手时的水平速度(px/s)，>0 向右滑，<0 向左滑
+         *                  传 0 表示仅按距离判断（惯性结束兜底）
+         */
+        private void snapToPageIfNeeded(float velocityX) {
+            if (getChildCount() == 0) return;
+
+            int scrollX = getScrollX();
+            int pageWidth = mScreenWidth;
+            if (pageWidth <= 0) return;
+
+            int currentPage = scrollX / pageWidth; // 当前所在页（向下取整）
+            float fraction = (float) (scrollX % pageWidth) / pageWidth; // 当前页内偏移比例 [0,1)
+
+            int targetPage;
+
+            // ✅ 速度优先：快甩直接翻页，无视距离阈值
+            if (Math.abs(velocityX) > VELOCITY_FLING_THRESHOLD) {
+                if (velocityX < 0) {
+                    // 向左快甩 → 下一页
+                    targetPage = currentPage + 1;
+                } else {
+                    // 向右快甩 → 上一页
+                    targetPage = currentPage;
+                }
+            } else {
+                // ✅ 距离判断：左右完全对称
+                // fraction >= (1 - threshold) → 翻到下一页
+                // fraction <= threshold      → 回到当前页
+                // 中间区域                   → 保持当前页（不会发生，因为 threshold < 0.5）
+                if (fraction >= 1.0f - SNAP_THRESHOLD_RATIO) {
+                    targetPage = currentPage + 1;
+                } else if (fraction <= SNAP_THRESHOLD_RATIO) {
+                    targetPage = currentPage;
+                } else {
+                    // 处于中间地带，四舍五入到最近页（兜底）
+                    targetPage = Math.round((float) scrollX / pageWidth);
+                }
+            }
+
+            int maxIndex = mScrollContentContainer.getChildCount() - 1;
+            targetPage = Math.max(0, Math.min(targetPage, maxIndex));
+
+            int targetX = targetPage * pageWidth;
+
+            if (Math.abs(scrollX - targetX) > ANIMATION_THRESHOLD_PX) {
+                smoothScrollTo(targetX, 0);
+            }
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            if (mVelocityTracker != null) {
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
+            }
+        }
+    }
+
     //==================== 单条目绘图View ====================
     public static class SportChartView extends View {
 
@@ -359,11 +462,9 @@ public class SportChartActivity extends AppCompatActivity {
 
         private double[] mSpeedData;
         private double[] mAltData;
-
         private final Paint mPaintSpeedFill = new Paint();
         private final Paint mPaintAltLine = new Paint();
         private final Paint mPaintGrid = new Paint();
-
         private int mCountUp = 0;
         private int mCountFlat = 0;
         private int mCountDown = 0;
@@ -377,13 +478,11 @@ public class SportChartActivity extends AppCompatActivity {
             mDarkMode = isDark;
             mRecordIndex = recordIndex;
             mDensity = context.getResources().getDisplayMetrics().density;
-
             mPaintSpeedFill.setStyle(Paint.Style.FILL);
             mPaintAltLine.setStyle(Paint.Style.STROKE);
             mPaintAltLine.setStrokeWidth(dpInner(2));
             mPaintGrid.setStyle(Paint.Style.STROKE);
             mPaintGrid.setStrokeWidth(dpInner(1));
-
             if (mDarkMode) {
                 mPaintGrid.setColor(0xFF444444);
                 mPaintAltLine.setColor(0xFF4FC3F7);
@@ -443,19 +542,15 @@ public class SportChartActivity extends AppCompatActivity {
             int w = getWidth();
             int h = getHeight();
             if (w < 10 || h < 10) return;
-
             canvas.drawLine(0, h / 2, w, h / 2, mPaintGrid);
 
-            //速度山丘填充，下标0为本条记录最左侧（最新）
             if (mSpeedData != null && mSpeedData.length > 1) {
                 int sampleCount = mSpeedData.length;
                 int step = Math.max(1, sampleCount / w);
-
                 double maxSp = 0;
                 for (double v : mSpeedData) {
                     if (v > maxSp) maxSp = v;
                 }
-
                 Path path = new Path();
                 path.moveTo(0, h);
                 for (int i = 0; i < sampleCount; i += step) {
@@ -475,11 +570,9 @@ public class SportChartActivity extends AppCompatActivity {
                 canvas.drawPath(path, mPaintSpeedFill);
             }
 
-            //海拔折线
             if (mAltData != null && mAltData.length > 1) {
                 int sampleCount = mAltData.length;
                 int step = Math.max(1, sampleCount / w);
-
                 double minAlt = Double.MAX_VALUE;
                 double maxAlt = -Double.MAX_VALUE;
                 for (double v : mAltData) {
@@ -488,7 +581,6 @@ public class SportChartActivity extends AppCompatActivity {
                 }
                 double rangeAlt = maxAlt - minAlt;
                 if (rangeAlt < 0.1) rangeAlt = 1.0;
-
                 Path altPath = new Path();
                 boolean first = true;
                 for (int i = 0; i < sampleCount; i += step) {

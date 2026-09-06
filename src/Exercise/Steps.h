@@ -181,6 +181,11 @@ class Steps : public QDialog {
  public:
   void closeSteps();
 
+  QStringList listText;
+  QList<QVariantList> m_Speed;
+  QList<QVariantList> m_Altitude;
+  int nYear, nMonth;
+
   QTimer* tmeRefreshSteps;
 
   bool isChkPlayRunVoice = false;

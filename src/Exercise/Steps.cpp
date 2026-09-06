@@ -428,10 +428,10 @@ void Steps::openStepsUI() {
   }
 
   if (getGpsListCount() == 0 && !isGpsRun) {
-    int nYear = QDate::currentDate().year();
-    int nMonth = QDate::currentDate().month();
-    // loadGpsList(nYear, nMonth);
-    // allGpsTotal();
+    nYear = QDate::currentDate().year();
+    nMonth = QDate::currentDate().month();
+    loadGpsList(nYear, nMonth);
+    allGpsTotal();
   }
 
   // Route
@@ -1452,7 +1452,7 @@ void Steps::insertGpsList(int curIndex, QString t0, QString t1, QString t2,
 void Steps::updateGpsList(int curIndex, QString t0, QString t1, QString t2,
                           QString t3, QString t4, QString t5, QString t6) {}
 
-int Steps::getGpsListCount() { return 0; }
+int Steps::getGpsListCount() { return listText.count(); }
 
 void Steps::delGpsListItem(int index) {}
 
@@ -1467,9 +1467,9 @@ void Steps::loadGpsList(int nYear, int nMonth) {
   // mw_one->ui->btnSelGpsDate->setText(QString::number(nYear) + " - " +
   //                                   QString::number(nMonth));
 
-  QStringList listText;
-  QList<QVariantList> m_Speed;
-  QList<QVariantList> m_Altitude;
+  listText.clear();
+  m_Speed.clear();
+  m_Altitude.clear();
 
   QSettings Reg(iniDir + QString::number(nYear) + "-gpslist.ini",
                 QSettings::IniFormat);
@@ -1515,8 +1515,6 @@ void Steps::loadGpsList(int nYear, int nMonth) {
     m_Speed.append(speedData);
     m_Altitude.append(altitudeData);
   }
-
-  refreshSportChart(listText, m_Speed, m_Altitude);
 }
 
 void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
@@ -1633,7 +1631,9 @@ QString Steps::getGpsListText0(int index) { return ""; }
 QString Steps::getGpsListText2(int index) { return ""; }
 
 void Steps::allGpsTotal() {
-  QString title;  // = mw_one->ui->btnSelGpsDate->text();
+  QString s_y = QString::number(QDate::currentDate().year());
+  QString s_m = QString::number(QDate::currentDate().month());
+  QString title = s_y + "-" + s_m;  // = mw_one->ui->btnSelGpsDate->text();
   QStringList list = title.split("-");
   QString stry = list.at(0);
   stry = stry.trimmed();
@@ -2689,12 +2689,16 @@ QString Steps::getGpsListFilePath(const QString& strGpsList) {
   strGpsMapSpeed = st4;
 
   QString str_year, str_month, str_gpsdate;
-  // str_gpsdate = mw_one->ui->btnSelGpsDate->text();
+  /*str_gpsdate = QString::number(nYear) + "-" +
+                QString::number(nMonth);  // mw_one->ui->btnSelGpsDate->text();
   QStringList gpsdateList = str_gpsdate.split("-");
   if (gpsdateList.count() == 2) {
     str_year = gpsdateList.at(0).trimmed();
     str_month = gpsdateList.at(1).trimmed();
-  }
+  }*/
+
+  str_year = QString::number(nYear);
+  str_month = QString::number(nMonth);
 
   QString csvPath = iniDir + "memo/gps/" + str_year + "/" + str_month + "/";
   QString routeFile = csvPath + st1 + "-gps-" + st2;
@@ -3394,12 +3398,10 @@ void Steps::on_btnAIExerciseSuggestions_clicked() {
 }
 
 void Steps::on_btnList_clicked() {
-  int y = QDate::currentDate().year();
-  int m = QDate::currentDate().month();
-
-  QStringList listText;
   m_Method->openActivity("openSportChartActivity", listText);
-  loadGpsList(y, m);
+  loadGpsList(nYear, nMonth);
+  QTimer::singleShot(
+      100, this, [=]() { refreshSportChart(listText, m_Speed, m_Altitude); });
 }
 
 void Steps::on_btnStepCount_clicked() {
