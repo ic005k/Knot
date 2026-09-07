@@ -1701,13 +1701,15 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
   Reg.setValue("/count", count);
 }
 
-void Steps::getGpsTrack() {
+void Steps::getGpsTrack(int index) {
   if (isGpsRun) {
     openMapWindow();
   } else {
     mw_one->showProgress();
 
-    // strGpsList = item.toString();
+    QString str = listText.at(index);
+    strGpsList = str.replace("===", "-=-");
+
     mw_one->myUpdateGpsMapThread->start();
   }
 }
@@ -2606,22 +2608,16 @@ QString Steps::getGpsListFilePath(const QString& strGpsList) {
   return routeFile;
 }
 
-void Steps::getRouteList(const QString& strGpsTime) {
-  strGpsList = strGpsTime;
+void Steps::getRouteList(int index) {
+  QString str = listText.at(index);
+  strGpsList = str.replace("===", "-=-");
 
   QString routeFile = getJsonRouteFile(strGpsList);
 
   qDebug() << "routeFile=" << routeFile;
   if (!QFile::exists(routeFile)) return;
 
-  QObject* routeDialog = NULL;  // root->findChild<QObject*>("routeDialog");
-  if (!routeDialog) {
-    qWarning() << "[C++] 未找到 routeDialog 对象";
-    return;
-  }
-
-  // 清空旧数据
-  QMetaObject::invokeMethod(routeDialog, "clearRouteModel");
+  QStringList list;
 
   QStringList routeList = readRoute(routeFile);
   for (int i = 0; i < routeList.count(); i++) {
@@ -2638,15 +2634,10 @@ void Steps::getRouteList(const QString& strGpsTime) {
     QString latLonStr = parts[1];
     QString addressStr = parts[2];
 
-    // 调用 QML 的 addRouteItem 方法添加数据到弹出窗口
-    // 参数顺序：timeStr, latLonStr, addressStr
-    QMetaObject::invokeMethod(
-        routeDialog, "addRouteItem", Q_ARG(QVariant, timeStr),
-        Q_ARG(QVariant, latLonStr), Q_ARG(QVariant, addressStr));
+    list.append(timeStr + "===" + latLonStr + "===" + addressStr);
   }
 
-  // 显示弹出窗口
-  QMetaObject::invokeMethod(routeDialog, "setVisible", Q_ARG(QVariant, true));
+  m_Method->refreshJavaData("showPathDialog", "SportChartActivity", list);
 }
 
 void Steps::closeRouteDialog() {}

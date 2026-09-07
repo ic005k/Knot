@@ -286,6 +286,8 @@ public class MyActivity
 
     public static native void CallJavaNotify_19();
 
+    public native void PublicJavaCallCpp(String msg);
+
     public static boolean isReadShareData = false;
     public static boolean zh_cn;
 

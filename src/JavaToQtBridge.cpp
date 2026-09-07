@@ -1000,6 +1000,24 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               }
             });
           }
+
+          if (strType.startsWith("sport_chart_track|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              int index = list.at(1).toInt();
+              QTimer::singleShot(0, mw_one,
+                                 [index]() { m_Steps->getGpsTrack(index); });
+            }
+          }
+
+          if (strType.startsWith("sport_chart_path|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              int index = list.at(1).toInt();
+              QTimer::singleShot(0, mw_one,
+                                 [index]() { m_Steps->getRouteList(index); });
+            }
+          }
           //===========================================================
 
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;

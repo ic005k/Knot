@@ -246,9 +246,9 @@ class Steps : public QDialog {
                          QList<QVariantList> m_Altitude);
  public slots:
   void clearAllGpsList();
-  void getGpsTrack();
+  void getGpsTrack(int index);
   void openMapWindow();
-  void getRouteList(const QString& strGpsTime);
+  void getRouteList(int index);
   void getRemarks(const QString& strGpsTime);
   void updateGetGpsData();
  private slots:

@@ -13,9 +13,11 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
@@ -33,6 +35,8 @@ public class SportChartActivity extends AppCompatActivity {
     private boolean mIsDark;
     private OnBackPressedCallback mBackCallback;
     private int mScreenWidth;
+
+    private native void PublicJavaCallCpp(String msg);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -363,7 +367,93 @@ public class SportChartActivity extends AppCompatActivity {
         return (int) (dpVal * density + 0.5f);
     }
 
-    private native void PublicJavaCallCpp(String msg);
+    /**
+     * C++调用：显示途径点弹窗
+     * 每条格式: timeStr===latLonStr===addressStr
+     * @param pathItemList 途径点数组
+     */
+    public void showPathDialog(ArrayList<String> pathItemList) {
+        runOnUiThread(() -> {
+            final SportChartActivity act = SportChartActivity.this;
+            int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+
+            ListView listView = new ListView(act);
+            listView.setBackgroundColor(bgColor);
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                act,
+                0,
+                pathItemList
+            ) {
+                @Override
+                public View getView(
+                    int position,
+                    View convertView,
+                    ViewGroup parent
+                ) {
+                    String raw = getItem(position);
+                    LinearLayout itemLl;
+                    if (convertView instanceof LinearLayout) {
+                        itemLl = (LinearLayout) convertView;
+                    } else {
+                        itemLl = new LinearLayout(act);
+                        itemLl.setOrientation(LinearLayout.VERTICAL);
+                        itemLl.setPadding(dp(12), dp(8), dp(12), dp(8));
+                    }
+                    itemLl.removeAllViews();
+
+                    String[] parts = raw.split("===");
+
+                    // 第0段：时间，粗体
+                    TextView tvTime = new TextView(act);
+                    tvTime.setTextSize(15);
+                    tvTime.setTextColor(textColor);
+                    tvTime.setPadding(0, dp(2), 0, dp(2));
+                    tvTime.getPaint().setFakeBoldText(true);
+                    if (parts.length >= 1) {
+                        tvTime.setText(parts[0]);
+                    } else {
+                        tvTime.setText("");
+                    }
+                    itemLl.addView(tvTime);
+
+                    // 第1段：经纬度
+                    TextView tvLatLon = new TextView(act);
+                    tvLatLon.setTextSize(14);
+                    tvLatLon.setTextColor(textColor);
+                    tvLatLon.setPadding(0, dp(2), 0, dp(2));
+                    if (parts.length >= 2) {
+                        tvLatLon.setText(parts[1]);
+                    } else {
+                        tvLatLon.setText("");
+                    }
+                    itemLl.addView(tvLatLon);
+
+                    // 第2段：地址
+                    TextView tvAddr = new TextView(act);
+                    tvAddr.setTextSize(14);
+                    tvAddr.setTextColor(textColor);
+                    tvAddr.setPadding(0, dp(2), 0, dp(2));
+                    if (parts.length >= 3) {
+                        tvAddr.setText(parts[2]);
+                    } else {
+                        tvAddr.setText("");
+                    }
+                    itemLl.addView(tvAddr);
+
+                    return itemLl;
+                }
+            };
+            listView.setAdapter(adapter);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+            builder.setTitle(MyActivity.zh_cn ? "途径点" : "Path Points");
+            builder.setView(listView);
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
+        });
+    }
 
     //======================================================
     /**
