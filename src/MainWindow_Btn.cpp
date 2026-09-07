@@ -681,7 +681,7 @@ void MainWindow::on_btnViewBookNote_clicked() { m_Reader->viewBookNote(); }
 
 void MainWindow::on_btnMap_clicked() {}
 
-void MainWindow::on_btnSportsChart_clicked() { m_Steps->showSportsChart(); }
+void MainWindow::on_btnSportsChart_clicked() {}
 
 void MainWindow::on_btnSpeak_clicked() {
   isPlayBook = true;

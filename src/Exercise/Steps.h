@@ -48,6 +48,20 @@ class CustomChartView;
 #include <QJniObject>
 #endif
 
+struct MonthData {
+  double cyclingDist = 0.0;
+  int cyclingCount = 0;
+  double hikingDist = 0.0;
+  int hikingCount = 0;
+  double runningDist = 0.0;
+  int runningCount = 0;
+
+  double totalDistance() const {
+    return cyclingDist + hikingDist + runningDist;
+  }
+  int totalCount() const { return cyclingCount + hikingCount + runningCount; }
+};
+
 struct GPSCoordinate {
   double latitude;
   double longitude;
@@ -74,15 +88,6 @@ class Steps : public QDialog {
   explicit Steps(QWidget* parent = nullptr);
   ~Steps();
   Ui::Steps* ui;
-
-  struct MonthData {
-    double cyclingDist = 0.0;
-    int cyclingCount = 0;
-    double hikingDist = 0.0;
-    int hikingCount = 0;
-    double runningDist = 0.0;
-    int runningCount = 0;
-  };
 
   QString strCurrentTemp, strCurrentWeatherIcon;
 
@@ -236,7 +241,7 @@ class Steps : public QDialog {
   void closeRouteDialog();
   bool isRouteShow();
   void setMapKey();
-  void showSportsChart();
+  void showSportsData();
   void updateGpsUI();
 
   void prepareDestroy();
@@ -244,7 +249,10 @@ class Steps : public QDialog {
   QLabel* getLabelGpsInfoWidget();
   void refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
                          QList<QVariantList> m_Altitude);
- public slots:
+  QVector<MonthData> loadSportsData(const QString& year, int month) const;
+  void printSportsDataSummary(const QVector<MonthData> &data, const QString &year);
+  void getMySportData(QString strYear, int m);
+  public slots:
   void clearAllGpsList();
   void getGpsTrack(int index);
   void openMapWindow();
