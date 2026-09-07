@@ -410,7 +410,6 @@ void Steps::openStepsUI() {
   nYear = QDate::currentDate().year();
   nMonth = QDate::currentDate().month();
   loadGpsList(nYear, nMonth);
-  allGpsTotal();
 
   // Route
   if (!isChina) isChina = m_Method->isInChina();
@@ -729,6 +728,7 @@ void Steps::startRecordMotion() {
   oldLat = 0;
   oldLon = 0;
   altitude = 0;
+  curCount = listText.count() + 1;
 
   m_Reader->keepScreenOn();
   emit distanceChanged(m_distance);
@@ -1289,31 +1289,28 @@ void Steps::refreshMotionData() {
 
     QSettings Reg1(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
 
-    int count = getGpsListCount();
-
-    if (isGpsRun) {
-      count = getGpsListCount() + 1;
-    }
-
     QString strYearMonth = stry + "-" + strm;
-    Reg1.setValue("/" + strYearMonth + "/Count", count);
-    Reg1.setValue("/" + strYearMonth + "/" + QString::number(count),
+    Reg1.setValue("/" + strYearMonth + "/Count", curCount);
+    Reg1.setValue("/" + strYearMonth + "/" + QString::number(curCount),
                   t00 + "-=-" + t1 + "-=-" + t2 + "-=-" + t3 + "-=-" + t4 +
                       "-=-" + t5 + "-=-" + strCurrentWeatherIcon + "-=-" +
                       strGpsTerrain);
 
     if (isGpsRun) return;
 
-    double dMonthTotal = 0;  // 里程月总计
+    // 里程月总计
+    double dMonthTotal = 0;
     double dCycling = 0;
     double dHiking = 0;
     double dRunning = 0;
     int countCycling = 0;
     int countHiking = 0;
     int countRunning = 0;
-    for (int i = 0; i < count; i++) {
-      QString strType = getGpsListText0(i).split(" ").at(0);
-      QString str = getGpsListText2(i);
+    for (int i = 0; i < curCount; i++) {
+      QString str0 = listText.at(i).split("===").at(0);
+      QString strType = str0.split(" ").at(0);
+      qInfo() << "strType=" << strType;
+      QString str = listText.at(i).split("===").at(2);
       double jl = 0.00;
       QStringList list = str.split(" ");
       if (list.count() == 3) {
@@ -1339,14 +1336,14 @@ void Steps::refreshMotionData() {
     }
 
     QString s1, s2, s3, s4;
-    s1 = QString::number(dMonthTotal) + "-=-" + QString::number(count);
+    s1 = QString::number(dMonthTotal) + "-=-" + QString::number(curCount);
     s2 = QString::number(dCycling) + "-=-" + QString::number(countCycling);
     s3 = QString::number(dHiking) + "-=-" + QString::number(countHiking);
     s4 = QString::number(dRunning) + "-=-" + QString::number(countRunning);
-    Reg1.setValue("/" + stry + "/" + strm,
-                  s1 + "-=-" + s2 + "-=-" + s3 + "-=-" + s4);
+    QString str_t = s1 + "-=-" + s2 + "-=-" + s3 + "-=-" + s4;
+    Reg1.setValue("/" + stry + "/" + strm, str_t);
 
-    allGpsTotal();
+    qInfo() << "月统计=" << str_t;
   }
 }
 
@@ -1529,131 +1526,6 @@ void Steps::getGpsListDataFromYearMonth() {
   int m = list.at(1).toInt();
 
   loadGpsList(y, m);
-  allGpsTotal();
-}
-
-QString Steps::getGpsListText0(int index) { return ""; }
-
-QString Steps::getGpsListText2(int index) { return ""; }
-
-void Steps::allGpsTotal() {
-  QString title = QString::number(nYear) + "-" +
-                  QString::number(nMonth);  // mui->btnSelGpsDate->text();
-  QStringList list = title.split("-");
-  QString stry = list.at(0);
-  stry = stry.trimmed();
-  QString strm = list.at(1);
-  strm = strm.trimmed();
-
-  QSettings Reg(iniDir + stry + "-gpslist.ini", QSettings::IniFormat);
-
-  double cmTotal, cmTotal_Cycling, cmTotal_Hiking, cmTotal_Running;
-  int cmCount, cmCount_Cycling, cmCount_Hiking, cmCount_Running;
-
-  double yt = 0;
-  int ycount = 0;
-  double monthCyclingKM = 0;
-  double monthHikingKM = 0;
-  double monthRunningKM = 0;
-  double yearCyclingKM = 0;
-  double yearHikingKM = 0;
-  double yearRunningKM = 0;
-  int monthCyclingCount = 0;
-  int monthHikingCount = 0;
-  int monthRunningCount = 0;
-  int yearCyclingCount = 0;
-  int yearHikingCount = 0;
-  int yearRunningCount = 0;
-  for (int i = 0; i < 12; i++) {
-    double mt = 0;
-    int mcount = 0;
-    QString str_mt =
-        Reg.value("/" + stry + "/" + QString::number(i + 1), 0).toString();
-    QStringList list = str_mt.split("-=-");
-    if (list.count() == 2) {
-      mt = list.at(0).toDouble();
-      mcount = list.at(1).toInt();
-    } else if (list.count() == 8) {
-      mt = list.at(0).toDouble();
-      mcount = list.at(1).toInt();
-
-      monthCyclingKM = list.at(2).toDouble();
-      monthCyclingCount = list.at(3).toInt();
-
-      monthHikingKM = list.at(4).toDouble();
-      monthHikingCount = list.at(5).toInt();
-
-      monthRunningKM = list.at(6).toDouble();
-      monthRunningCount = list.at(7).toInt();
-    } else {
-      mt = 0;
-      mcount = 0;
-
-      monthCyclingKM = 0;
-      monthCyclingCount = 0;
-
-      monthHikingKM = 0;
-      monthHikingCount = 0;
-
-      monthRunningKM = 0;
-      monthRunningCount = 0;
-    }
-
-    yt += mt;
-
-    yearCyclingKM += monthCyclingKM;
-    yearCyclingCount += monthCyclingCount;
-
-    yearHikingKM += monthHikingKM;
-    yearHikingCount += monthHikingCount;
-
-    yearRunningKM += monthRunningKM;
-    yearRunningCount += monthRunningCount;
-
-    if (QString::number(i + 1) == strm) {
-      cmTotal = mt;
-      cmCount = mcount;
-
-      cmTotal_Cycling = monthCyclingKM;
-      cmCount_Cycling = monthCyclingCount;
-
-      cmTotal_Hiking = monthHikingKM;
-      cmCount_Hiking = monthHikingCount;
-
-      cmTotal_Running = monthRunningKM;
-      cmCount_Running = monthRunningCount;
-    }
-  }
-
-  QSettings Reg1(iniDir + "gpslist.ini", QSettings::IniFormat);
-
-  double m_td = Reg1.value("/GPS/TotalDistance", 0).toDouble();
-  Q_UNUSED(m_td);
-
-  QString s1_month, s2_month, s3_month, s4_month;
-  s1_month = strm + " " + tr("Month") + ": \n" + QString::number(cmTotal) +
-             " km  " + QString::number(cmCount) + "\n";
-  s2_month = tr("Ride") + ": " + QString::number(cmTotal_Cycling) + " km  " +
-             QString::number(cmCount_Cycling) + "\n";
-  s3_month = tr("Hike") + ": " + QString::number(cmTotal_Hiking) + " km  " +
-             QString::number(cmCount_Hiking) + "\n";
-  s4_month = tr("Run") + ": " + QString::number(cmTotal_Running) + " km  " +
-             QString::number(cmCount_Running);
-
-  QString s1_year, s2_year, s3_year, s4_year;
-  ycount = yearCyclingCount + yearHikingCount + yearRunningCount;
-  s1_year = stry + " " + tr("Year") + ": \n" + QString::number(yt) + " km  " +
-            QString::number(ycount) + "\n";
-  s2_year = tr("Ride") + ": " + QString::number(yearCyclingKM) + " km  " +
-            QString::number(yearCyclingCount) + "\n";
-  s3_year = tr("Hike") + ": " + QString::number(yearHikingKM) + " km  " +
-            QString::number(yearHikingCount) + "\n";
-  s4_year = tr("Run") + ": " + QString::number(yearRunningKM) + " km  " +
-            QString::number(yearRunningCount);
-
-  m_monthlyStatsText = s1_month + s2_month + s3_month + s4_month;
-
-  m_yearlyStatsText = s1_year + s2_year + s3_year + s4_year;
 }
 
 void Steps::appendTrack(double lat, double lon) {

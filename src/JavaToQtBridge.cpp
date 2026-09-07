@@ -1022,7 +1022,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           if (strType.startsWith("sport_select_year|==|")) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
-              QString y = list.at(1);
+              QString y = QString::number(m_Steps->nYear);
               int m = m_Steps->nMonth;
               QTimer::singleShot(0, mw_one,
                                  [y, m]() { m_Steps->getMySportData(y, 0); });

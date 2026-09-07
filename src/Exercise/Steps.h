@@ -215,7 +215,7 @@ class Steps : public QDialog {
   void selGpsListYearMonth();
   void getGpsListDataFromYearMonth();
   void delGpsListItem(int index);
-  void allGpsTotal();
+
   void appendTrack(double lat, double lon);
   void updateGpsMapUi();
   void updateGpsTrack();
@@ -241,7 +241,7 @@ class Steps : public QDialog {
   void closeRouteDialog();
   bool isRouteShow();
   void setMapKey();
-  void showSportsData();
+
   void updateGpsUI();
 
   void prepareDestroy();
@@ -250,9 +250,10 @@ class Steps : public QDialog {
   void refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
                          QList<QVariantList> m_Altitude);
   QVector<MonthData> loadSportsData(const QString& year, int month) const;
-  void printSportsDataSummary(const QVector<MonthData> &data, const QString &year);
+  QStringList getSportsDataSummary(const QVector<MonthData>& data,
+                                   const QString& year);
   void getMySportData(QString strYear, int m);
-  public slots:
+ public slots:
   void clearAllGpsList();
   void getGpsTrack(int index);
   void openMapWindow();
@@ -282,6 +283,7 @@ class Steps : public QDialog {
   void on_chkPlayRunVoice_clicked(bool checked);
 
  private:
+  int curCount;
   QStringList listSteps;
   QString stepsThreshold;
   QThread* geoThread;
@@ -303,9 +305,6 @@ class Steps : public QDialog {
   StepHillChart* m_stepChart;
 
   double bearing1;
-
-  QString m_monthlyStatsText;
-  QString m_yearlyStatsText;
 
   bool isOne = false;
 
@@ -373,8 +372,6 @@ class Steps : public QDialog {
   QString strStartTime, strEndTime;
   QDateTime startDt, endDt;
 
-  QString getGpsListText2(int index);
-
   void clearTrack();
   void writeGpsPos(double lat, double lon, int i, int count);
 
@@ -384,7 +381,6 @@ class Steps : public QDialog {
   bool isGpsMapTrackFile;
   double lastLat, lastLon;
 
-  QString getGpsListText0(int index);
   void refreshMotionData();
   void sendMsg(int CurTableCount);
   qlonglong getAndroidSteps();

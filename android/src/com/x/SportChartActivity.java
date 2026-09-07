@@ -73,7 +73,7 @@ public class SportChartActivity extends AppCompatActivity {
         topBtnBar.setGravity(Gravity.CENTER);
         topBtnBar.setPadding(dp(12), dp(12), dp(12), dp(8));
         mBtnYear = new Button(this);
-        mBtnYear.setText(MyActivity.zh_cn ? "年汇总" : "Year");
+        mBtnYear.setText(MyActivity.zh_cn ? "汇总" : "Total");
         mBtnYear.setBackgroundColor(btnBgNormal);
         mBtnYear.setTextColor(textColor);
         LinearLayout.LayoutParams lpBtnY = new LinearLayout.LayoutParams(
@@ -82,7 +82,10 @@ public class SportChartActivity extends AppCompatActivity {
         );
         lpBtnY.setMargins(0, 0, dp(12), 0);
         topBtnBar.addView(mBtnYear, lpBtnY);
-        mBtnYear.setOnClickListener(v -> showYearSelectDialog());
+        mBtnYear.setOnClickListener(v -> {
+            //showYearSelectDialog();
+            PublicJavaCallCpp("sport_select_year|==|");
+        });
 
         mBtnYearMonth = new Button(this);
         mBtnYearMonth.setText(MyActivity.zh_cn ? "年月" : "Year‑Month");
@@ -365,6 +368,85 @@ public class SportChartActivity extends AppCompatActivity {
     private int dp(int dpVal) {
         float density = getResources().getDisplayMetrics().density;
         return (int) (dpVal * density + 0.5f);
+    }
+
+    /**
+     * C++调用：汇总信息弹窗
+     * 每条格式: title===value
+     * @param summaryList 汇总项数组
+     */
+    public void showSummaryDialog(ArrayList<String> summaryList) {
+        runOnUiThread(() -> {
+            final SportChartActivity act = SportChartActivity.this;
+            int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+
+            ListView listView = new ListView(act);
+            listView.setBackgroundColor(bgColor);
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                act,
+                0,
+                summaryList
+            ) {
+                @Override
+                public View getView(
+                    int position,
+                    View convertView,
+                    ViewGroup parent
+                ) {
+                    String raw = getItem(position);
+                    LinearLayout itemLl;
+                    if (convertView instanceof LinearLayout) {
+                        itemLl = (LinearLayout) convertView;
+                    } else {
+                        itemLl = new LinearLayout(act);
+                        itemLl.setOrientation(LinearLayout.VERTICAL);
+                        // 垂直居中，解决文字靠top的问题
+                        itemLl.setGravity(Gravity.CENTER_VERTICAL);
+                        // 减小上下padding，左右保留，消除过大行高
+                        itemLl.setPadding(dp(12), dp(6), dp(12), dp(6));
+                    }
+                    itemLl.removeAllViews();
+
+                    String[] parts = raw.split("===");
+
+                    // title 粗体
+                    TextView tvTitle = new TextView(act);
+                    tvTitle.setTextSize(15);
+                    tvTitle.setTextColor(textColor);
+                    tvTitle.setPadding(0, 0, 0, dp(2));
+                    tvTitle.getPaint().setFakeBoldText(true);
+                    if (parts.length >= 1) {
+                        tvTitle.setText(parts[0]);
+                    } else {
+                        tvTitle.setText("");
+                    }
+                    itemLl.addView(tvTitle);
+
+                    // value 普通
+                    TextView tvValue = new TextView(act);
+                    tvValue.setTextSize(14);
+                    tvValue.setTextColor(textColor);
+                    tvValue.setPadding(0, 0, 0, 0);
+                    if (parts.length >= 2) {
+                        tvValue.setText(parts[1]);
+                    } else {
+                        tvValue.setText("");
+                    }
+                    itemLl.addView(tvValue);
+
+                    return itemLl;
+                }
+            };
+            listView.setAdapter(adapter);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+            builder.setTitle(MyActivity.zh_cn ? "汇总" : "Summary");
+            builder.setView(listView);
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
+        });
     }
 
     /**

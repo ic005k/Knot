@@ -252,7 +252,6 @@ void MainWindow::importDataDone() {
     m_Steps->clearAllGpsList();
     m_Steps->loadGpsList(QDate::currentDate().year(),
                          QDate::currentDate().month());
-    m_Steps->allGpsTotal();
 
     m_NotesList->startBackgroundTaskUpdateFilesIndex();
   }
