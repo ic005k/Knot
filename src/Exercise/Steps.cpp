@@ -409,7 +409,6 @@ void Steps::openStepsUI() {
 
   nYear = QDate::currentDate().year();
   nMonth = QDate::currentDate().month();
-  loadGpsList(nYear, nMonth);
 
   // Route
   if (!isChina) isChina = m_Method->isInChina();
@@ -665,6 +664,8 @@ void Steps::clearAll() {}
 void Steps::setScrollBarPos(double pos) {}
 
 void Steps::startRecordMotion() {
+  if (isGpsRun) return;
+
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
 
   m_TotalDistance = Reg.value("/GPS/TotalDistance", 0).toDouble();
@@ -728,7 +729,8 @@ void Steps::startRecordMotion() {
   oldLat = 0;
   oldLon = 0;
   altitude = 0;
-  curCount = listText.count() + 1;
+
+  curCount = getCurrentCount() + 1;
 
   m_Reader->keepScreenOn();
   emit distanceChanged(m_distance);
@@ -1189,10 +1191,9 @@ void Steps::stopRecordMotion() {
 
     m_Reader->cancelKeepScreenOn();
 
-    int cnYear = QDate::currentDate().year();
-    int cnMonth = QDate::currentDate().month();
-
-    loadGpsList(cnYear, cnMonth);
+    nYear = QDate::currentDate().year();
+    nMonth = QDate::currentDate().month();
+    loadGpsList(nYear, nMonth);
 
     refreshMotionData();
 
@@ -1277,13 +1278,6 @@ void Steps::refreshMotionData() {
     stry = QString::number(cnYear);
     strm = QString::number(cnMonth);
 
-    if (cnYear != nYear && cnMonth != nMonth) {
-      loadGpsList(cnYear, cnMonth);
-
-      nYear = cnYear;
-      nMonth = cnMonth;
-    }
-
     strGpsMapDateTime = t00 + " " + t1;
     setDateLabelToAndroid(strGpsMapDateTime);
 
@@ -1367,18 +1361,29 @@ void Steps::clearAllGpsList() {
   }
 }
 
-void Steps::loadGpsList(int nYear, int nMonth) {
-  nYear = nYear;
-  nMonth = nMonth;
+int Steps::getCurrentCount() {
+  int y = QDate::currentDate().year();
+  int m = QDate::currentDate().month();
+  QSettings Reg(iniDir + QString::number(y) + "-gpslist.ini",
+                QSettings::IniFormat);
+  QString strYearMonth = QString::number(y) + "-" + QString::number(m);
+  int count = Reg.value("/" + strYearMonth + "/Count", 0).toInt();
+
+  return count;
+}
+
+void Steps::loadGpsList(int n_y, int n_m) {
+  nYear = n_y;
+  nMonth = n_m;
 
   listText.clear();
   m_Speed.clear();
   m_Altitude.clear();
 
-  QSettings Reg(iniDir + QString::number(nYear) + "-gpslist.ini",
+  QSettings Reg(iniDir + QString::number(n_y) + "-gpslist.ini",
                 QSettings::IniFormat);
 
-  QString strYearMonth = QString::number(nYear) + "-" + QString::number(nMonth);
+  QString strYearMonth = QString::number(n_y) + "-" + QString::number(n_m);
   int count = Reg.value("/" + strYearMonth + "/Count", 0).toInt();
 
   qInfo() << "count=" << count;
@@ -1512,22 +1517,6 @@ void Steps::selGpsListYearMonth() {
   mw_one->m_DateSelector->init();
 }
 
-void Steps::getGpsListDataFromYearMonth() {
-  clearAllGpsList();
-
-  QStringList list;
-
-  if (isAndroid)
-    list = m_Method->getDateTimePickerValue();
-  else
-    list = ymdList;
-
-  int y = list.at(0).toInt();
-  int m = list.at(1).toInt();
-
-  loadGpsList(y, m);
-}
-
 void Steps::appendTrack(double lat, double lon) {
   addTrackDataToAndroid(lat, lon);
   appendTrackPointAndroid(lat, lon);
@@ -1613,13 +1602,6 @@ void Steps::updateGpsTrack() {
   strGpsMapSpeed = st4;
 
   QString str_year, str_month;
-
-  // str_gpsdate = mw_one->ui->btnSelGpsDate->text();
-  // QStringList gpsdateList = str_gpsdate.split("-");
-  // if (gpsdateList.count() == 2) {
-  //  str_year = gpsdateList.at(0).trimmed();
-  // str_month = gpsdateList.at(1).trimmed();
-  //}
 
   str_year = QString::number(nYear);
   str_month = QString::number(nMonth);

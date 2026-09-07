@@ -210,10 +210,10 @@ class Steps : public QDialog {
   void startRecordMotion();
   void stopRecordMotion();
 
-  void loadGpsList(int nYear, int nMonth);
+  void loadGpsList(int, int);
   int getGpsListCount();
   void selGpsListYearMonth();
-  void getGpsListDataFromYearMonth();
+
   void delGpsListItem(int index);
 
   void appendTrack(double lat, double lon);
@@ -253,6 +253,7 @@ class Steps : public QDialog {
   QStringList getSportsDataSummary(const QVector<MonthData>& data,
                                    const QString& year);
   void getMySportData(QString strYear, int m);
+  int getCurrentCount();
  public slots:
   void clearAllGpsList();
   void getGpsTrack(int index);

@@ -104,7 +104,6 @@ void DateSelector::on_btnOk_clicked() {
   ymdList.append(d);
 
   if (m_Steps->isVisible()) {
-    m_Steps->getGpsListDataFromYearMonth();
   }
 
   close();

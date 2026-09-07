@@ -231,9 +231,7 @@ void MainWindow::on_btnGPS_clicked() {}
 
 void MainWindow::on_btnSelGpsDate_clicked() { m_Steps->selGpsListYearMonth(); }
 
-void MainWindow::on_btnGetGpsListData_clicked() {
-  m_Steps->getGpsListDataFromYearMonth();
-}
+void MainWindow::on_btnGetGpsListData_clicked() {}
 
 void MainWindow::on_btnBackBakList_clicked() {
   if (!isAndroid) {

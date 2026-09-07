@@ -73,7 +73,7 @@ public class SportChartActivity extends AppCompatActivity {
         topBtnBar.setGravity(Gravity.CENTER);
         topBtnBar.setPadding(dp(12), dp(12), dp(12), dp(8));
         mBtnYear = new Button(this);
-        mBtnYear.setText(MyActivity.zh_cn ? "汇总" : "Total");
+        mBtnYear.setText(MyActivity.zh_cn ? "汇总" : "Summary");
         mBtnYear.setBackgroundColor(btnBgNormal);
         mBtnYear.setTextColor(textColor);
         LinearLayout.LayoutParams lpBtnY = new LinearLayout.LayoutParams(
