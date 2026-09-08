@@ -4366,7 +4366,8 @@ Model ID: %1</source>
     <name>Report</name>
     <message>
         <location filename="Report.cpp" line="235"/>
-        <location filename="Report.cpp" line="330"/>
+        <location filename="Report.cpp" line="340"/>
+        <location filename="Report.cpp" line="460"/>
         <source>Details</source>
         <translation>详细</translation>
     </message>
@@ -4375,11 +4376,16 @@ Model ID: %1</source>
         <translation type="vanished">总计</translation>
     </message>
     <message>
+        <location filename="Report.cpp" line="372"/>
         <source>Freq</source>
-        <translation type="vanished">频次</translation>
+        <translation>频次</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="328"/>
+        <location filename="Report.cpp" line="288"/>
+        <location filename="Report.cpp" line="291"/>
+        <location filename="Report.cpp" line="355"/>
+        <location filename="Report.cpp" line="373"/>
+        <location filename="Report.cpp" line="458"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
@@ -4388,27 +4394,31 @@ Model ID: %1</source>
         <translation type="vanished">月总计</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="289"/>
+        <location filename="Report.cpp" line="419"/>
         <source>View Category</source>
         <translation>查看分类</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="372"/>
+        <location filename="Report.cpp" line="502"/>
         <source>Year-Round</source>
         <translation>全年</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="329"/>
+        <location filename="Report.cpp" line="286"/>
+        <location filename="Report.cpp" line="290"/>
+        <location filename="Report.cpp" line="459"/>
         <source>Category</source>
         <translation>分类</translation>
     </message>
     <message>
+        <location filename="Report.cpp" line="287"/>
         <source>Percent</source>
-        <translation type="vanished">百分比</translation>
+        <translation>百分比</translation>
     </message>
     <message>
+        <location filename="Report.cpp" line="354"/>
         <source>Date</source>
-        <translation type="vanished">日期</translation>
+        <translation>日期</translation>
     </message>
     <message>
         <source>Please turn on the storage permission of the app.</source>
@@ -4431,37 +4441,37 @@ Model ID: %1</source>
         <translation>金额：</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="321"/>
+        <location filename="Report.cpp" line="451"/>
         <source>Time</source>
         <translation>时间</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="358"/>
+        <location filename="Report.cpp" line="488"/>
         <source>Output to Image</source>
         <translation>输出到图片</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="363"/>
+        <location filename="Report.cpp" line="493"/>
         <source>Create Image and Share</source>
         <translation>创建图片并分享</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="368"/>
+        <location filename="Report.cpp" line="498"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="378"/>
+        <location filename="Report.cpp" line="508"/>
         <source>Year Month</source>
         <translation>年  月</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="410"/>
+        <location filename="Report.cpp" line="540"/>
         <source>Tip</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="410"/>
+        <location filename="Report.cpp" line="540"/>
         <source>No data available</source>
         <translation>没有有效的数据</translation>
     </message>
@@ -4470,12 +4480,12 @@ Model ID: %1</source>
         <translation type="vanished">月</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="383"/>
+        <location filename="Report.cpp" line="513"/>
         <source>Start Date</source>
         <translation>起始日期</translation>
     </message>
     <message>
-        <location filename="Report.cpp" line="388"/>
+        <location filename="Report.cpp" line="518"/>
         <source>End Date</source>
         <translation>结束日期</translation>
     </message>

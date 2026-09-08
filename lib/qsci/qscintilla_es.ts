@@ -5491,32 +5491,39 @@
     <name>Report</name>
     <message>
         <location filename="../../src/Report.cpp" line="235"/>
-        <location filename="../../src/Report.cpp" line="330"/>
+        <location filename="../../src/Report.cpp" line="340"/>
+        <location filename="../../src/Report.cpp" line="460"/>
         <source>Details</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="372"/>
+        <location filename="../../src/Report.cpp" line="502"/>
         <source>Year-Round</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="328"/>
+        <location filename="../../src/Report.cpp" line="288"/>
+        <location filename="../../src/Report.cpp" line="291"/>
+        <location filename="../../src/Report.cpp" line="355"/>
+        <location filename="../../src/Report.cpp" line="373"/>
+        <location filename="../../src/Report.cpp" line="458"/>
         <source>Amount</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="289"/>
+        <location filename="../../src/Report.cpp" line="419"/>
         <source>View Category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="329"/>
+        <location filename="../../src/Report.cpp" line="286"/>
+        <location filename="../../src/Report.cpp" line="290"/>
+        <location filename="../../src/Report.cpp" line="459"/>
         <source>Category</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="321"/>
+        <location filename="../../src/Report.cpp" line="451"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5533,42 +5540,57 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="358"/>
+        <location filename="../../src/Report.cpp" line="287"/>
+        <source>Percent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Report.cpp" line="354"/>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Report.cpp" line="372"/>
+        <source>Freq</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Report.cpp" line="488"/>
         <source>Output to Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="363"/>
+        <location filename="../../src/Report.cpp" line="493"/>
         <source>Create Image and Share</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="368"/>
+        <location filename="../../src/Report.cpp" line="498"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="378"/>
+        <location filename="../../src/Report.cpp" line="508"/>
         <source>Year Month</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="383"/>
+        <location filename="../../src/Report.cpp" line="513"/>
         <source>Start Date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="388"/>
+        <location filename="../../src/Report.cpp" line="518"/>
         <source>End Date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="410"/>
+        <location filename="../../src/Report.cpp" line="540"/>
         <source>Tip</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Report.cpp" line="410"/>
+        <location filename="../../src/Report.cpp" line="540"/>
         <source>No data available</source>
         <translation type="unfinished"></translation>
     </message>

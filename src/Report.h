@@ -35,6 +35,9 @@ class Report : public QDialog {
   void getCategoryData(QString strCategory, bool appendTable);
   QStringList listCategorySort;
   QList<double> listD;
+  QStringList listCateDetail;
+  QString cateDetailTitle;
+  QStringList listCateSortDisplay;
   static void getMonthData();
   void updateTable();
   void init();
@@ -80,7 +83,8 @@ class Report : public QDialog {
   void readReportDone();
 
   void getDetail(int index);
-  protected:
+
+ protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void closeEvent(QCloseEvent* event) override;

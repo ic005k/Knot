@@ -527,6 +527,93 @@ public class DataReportActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * C++调用：分类统计弹窗
+     * 单条格式：分类文本===百分比文本===金额文本
+     * @param cateList 分类条目数组
+     */
+    public void showCategoryDialog(ArrayList<String> cateList) {
+        runOnUiThread(() -> {
+            final DataReportActivity act = DataReportActivity.this;
+            int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+            int itemBgSelect = mIsDark ? 0xFF2A2A2A : 0xFFE0EDFB;
+
+            ListView listView = new ListView(act);
+            listView.setBackgroundColor(bgColor);
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                act,
+                0,
+                cateList
+            ) {
+                @Override
+                public View getView(
+                    int position,
+                    View convertView,
+                    ViewGroup parent
+                ) {
+                    LinearLayout itemLl;
+                    if (convertView instanceof LinearLayout) {
+                        itemLl = (LinearLayout) convertView;
+                    } else {
+                        itemLl = new LinearLayout(act);
+                        itemLl.setOrientation(LinearLayout.VERTICAL);
+                        itemLl.setGravity(Gravity.CENTER_VERTICAL);
+                        itemLl.setPadding(dp(12), dp(6), dp(12), dp(6));
+                    }
+                    itemLl.removeAllViews();
+                    itemLl.setBackgroundColor(0x00000000);
+
+                    String raw = getItem(position);
+                    String[] parts = raw.split("===");
+
+                    // 第一行：分类，粗体
+                    TextView tvCate = new TextView(act);
+                    tvCate.setTextSize(15);
+                    tvCate.setTextColor(textColor);
+                    tvCate.getPaint().setFakeBoldText(true);
+                    tvCate.setPadding(0, 0, 0, dp(2));
+                    if (parts.length >= 1) {
+                        tvCate.setText(parts[0]);
+                    }
+                    itemLl.addView(tvCate);
+
+                    // 第二行：百分比
+                    TextView tvPercent = new TextView(act);
+                    tvPercent.setTextSize(14);
+                    tvPercent.setTextColor(textColor);
+                    tvPercent.setPadding(0, 0, 0, dp(2));
+                    if (parts.length >= 2) {
+                        tvPercent.setText(parts[1]);
+                    }
+                    itemLl.addView(tvPercent);
+
+                    // 第三行：金额
+                    TextView tvAmount = new TextView(act);
+                    tvAmount.setTextSize(14);
+                    tvAmount.setTextColor(textColor);
+                    tvAmount.setPadding(0, 0, 0, 0);
+                    if (parts.length >= 3) {
+                        tvAmount.setText(parts[2]);
+                    }
+                    itemLl.addView(tvAmount);
+
+                    return itemLl;
+                }
+            };
+            listView.setAdapter(adapter);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+            builder.setTitle(
+                MyActivity.zh_cn ? "分类统计" : "Category Statistic"
+            );
+            builder.setView(listView);
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
+        });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();

@@ -656,6 +656,12 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.contains("data_report_category")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              mw_one->m_Report->on_btnCategory_clicked();
+            });
+          }
+
           if (strType.contains("open_aifx|==|")) {
             QTimer::singleShot(100, mw_one,
                                [=]() { mw_one->m_Report->aiAnalysis(); });

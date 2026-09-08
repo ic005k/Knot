@@ -243,17 +243,147 @@ void Report::saveYMD() {}
 
 int Report::cmp(const void* a, const void* b) { return *(int*)a < *(int*)b; }
 
-void Report::on_btnCategory_clicked() {}
+void Report::on_btnCategory_clicked() {
+  if (listCategory.count() == 0) return;
+
+  int count = getCount();
+  if (count == 0) {
+    return;
+  }
+
+  if (listCategory.count() > 0) {
+    listCategorySort.clear();
+    listD.clear();
+    for (int i = 0; i < listCategory.count(); i++) {
+      getCategoryData(listCategory.at(i), false);
+    }
+
+    QList<double> listE = listD;
+    std::sort(listE.begin(), listE.end());
+
+    catetext = "";
+    listCateSortDisplay.clear();
+
+    int nListCateSort = listCategorySort.count();
+    int nListECount = listE.count();
+    for (int j = 0; j < nListECount; j++) {
+      for (int i = 0; i < nListCateSort; i++) {
+        QString str1 = listCategorySort.at(i);
+        QStringList l1 = str1.split("-=-");
+        if (l1.count() == 2 && l1.at(0).split("|").at(0).trimmed() != "") {
+          if (QString::number(listE.at(nListECount - 1 - j)) == l1.at(1)) {
+            QString str2 = l1.at(0) + "===" +
+                           QString("%1").arg(
+                               listE.at(nListECount - 1 - j) * 100, 0, 'f', 2) +
+                           " %";
+
+            QString item0 = str2.split("|").at(0);
+
+            QString pre = str2.split("===").at(1);
+
+            QString item1 = str2.split("===").at(0).split("|").at(1);
+
+            listCateSortDisplay.append(tr("Category") + " : " + item0 +
+                                       "===" + tr("Percent") + " : " + pre +
+                                       "===" + tr("Amount") + " : " + item1);
+
+            catetext = catetext + "\n\n" + tr("Category") + " : " + item0 +
+                       "  " + tr("Amount") + " : " + item1;
+
+            listCategorySort.removeOne(str1);
+
+            break;
+          }
+        }
+      }
+    }
+
+    // qDebug() << "listCategorySort=" << listCategorySort.count()
+    //        << listCategorySort;
+    // qDebug() << "listE=" << listE.count() << listE;
+  }
+
+  m_Method->refreshJavaData("showCategoryDialog", "DataReportActivity",
+                            listCateSortDisplay);
+
+  // qInfo() << "catetext=" << catetext;
+  // qInfo() << "listCateSortDisplay=" << listCateSortDisplay;
+}
 
 void Report::on_CateOk() {}
 
-void Report::getCategoryData(QString strCategory, bool appendTable) {}
+void Report::getCategoryData(QString strCategory, bool appendTable) {
+  if (appendTable) {
+    listCateDetail.clear();
+  }
+
+  int freq = 0;
+  double d_amount = 0;
+  QTreeWidget* tw = twOut2Img;
+  for (int i = 0; i < tw->topLevelItemCount(); i++) {
+    QTreeWidgetItem* topItem = tw->topLevelItem(i);
+
+    for (int j = 0; j < topItem->childCount(); j++) {
+      QTreeWidgetItem* childItem = topItem->child(j);
+      QString strClass = childItem->text(2);
+      if (strClass == strCategory && strClass.trimmed() != "") {
+        freq++;
+        QString date, time, details;
+        if (appendTable) {
+          date = topItem->text(3) + "-" + topItem->text(0).split(" ").at(1) +
+                 "-" + topItem->text(0).split(" ").at(2);
+          time = childItem->text(0).split(".").at(1);
+
+          if (j + 1 < topItem->childCount()) {
+            QTreeWidgetItem* nextChild = topItem->child(j + 1);
+
+            if (nextChild->text(0).contains(tr("Details"))) {
+              details = nextChild->text(0);
+            }
+          }
+        }
+        QString amount = childItem->text(1);
+        if (appendTable) {
+          QString str;
+          if (details.trimmed().length() > 0)
+            str = details;
+          else
+            str = "";
+
+          QString text0, text1, text2;
+          text0 = tr("Date") + " : " + date + "  " + time;
+          text1 = tr("Amount") + " : " + amount;
+          text2 = str;
+          listCateDetail.append(text0 + "===" + text1 + "===" + text2);
+        }
+
+        if (amount.length() > 0) {
+          d_amount = d_amount + amount.toDouble();
+        }
+      }
+    }
+  }
+
+  double bfb;
+  if (totalAmount > 0) bfb = d_amount / totalAmount;
+
+  QString ta = QString("%1").arg(d_amount, 0, 'f', 2);
+  if (appendTable) {
+    cateDetailTitle = strCategory + "\n" + tr("Freq") + " : " +
+                      QString::number(freq) + "  " + tr("Amount") + " : " + ta;
+
+  } else {
+    listCategorySort.append(strCategory + "|" + ta + "-=-" +
+                            QString::number(bfb));
+    listD.append(bfb);
+  }
+}
 
 QString Report::Out2Img(bool isShowMessage) { return "picFile"; }
 
 void Report::appendTable(QString date, QString freq, QString amount) {}
 
-int Report::getCount() { return 0; }
+int Report::getCount() { return twOut2Img->topLevelItemCount(); }
 
 void Report::delItem(int index) {}
 
