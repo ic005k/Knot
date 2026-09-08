@@ -78,6 +78,8 @@ class Report : public QDialog {
 
   void getData(int y1, int m1, int d1, int y2, int m2, int d2);
   void readReportDone();
+
+  void getDetail(int index);
   protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
@@ -91,8 +93,6 @@ class Report : public QDialog {
   void on_btnSingleYear_clicked();
 
  private:
-  double t_amount = 0;
-  int freq = 0;
   int indexCategory = 0;
   QStringList listTableSync;
 };

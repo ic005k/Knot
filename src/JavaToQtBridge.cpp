@@ -589,7 +589,70 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
 
           if (strType.contains("open_report|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
-              mw_one->m_Report->getData("2026", "09");
+              QStringList list;
+              m_Method->openActivity("openDataReportActivity", list);
+              QString y, m;
+              y = QString::number(QDate::currentDate().year());
+              m = QString("%1").arg(QDate::currentDate().month(), 2, 10,
+                                    QChar('0'));
+
+              mw_one->m_Report->getData(y, m);
+            });
+          }
+
+          if (strType.contains("data_report_year|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                QString y = list.at(1);
+                mw_one->m_Report->getData(y);
+              }
+            });
+          }
+
+          if (strType.contains("data_report_ym|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                QString ym = list.at(1);
+                QStringList l0 = ym.split("-");
+                mw_one->m_Report->getData(l0.at(0).trimmed(),
+                                          l0.at(1).trimmed());
+              }
+            });
+          }
+
+          if (strType.contains("data_report_range|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 3) {
+                QString q1 = list.at(1);
+                QString q2 = list.at(2);
+                QStringList l1 = q1.split("-");
+                QStringList l2 = q2.split("-");
+                int y1, m1, d1, y2, m2, d2;
+                y1 = l1.at(0).toInt();
+                m1 = l1.at(1).toInt();
+                d1 = l1.at(2).toInt();
+                y2 = l2.at(0).toInt();
+                m2 = l2.at(1).toInt();
+                d2 = l2.at(2).toInt();
+                mw_one->m_Report->getData(y1, m1, d1, y2, m2, d2);
+              }
+            });
+          }
+
+          if (strType.contains("data_report_detail|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int index = list.at(1).toInt();
+                mw_one->m_Report->getDetail(index);
+              }
             });
           }
 

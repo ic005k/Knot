@@ -1572,6 +1572,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openDataReportActivity(ArrayList<String> mList) {
+        Intent intent = new Intent(this, DataReportActivity.class);
+        intent.putStringArrayListExtra("report_extra", mList);
+        startActivity(intent);
+    }
+
     public void openNoteWindow(ArrayList<String> notebookList) {
         Intent intent = new Intent(this, NoteActivity.class);
         intent.putStringArrayListExtra("notebook_list", notebookList);

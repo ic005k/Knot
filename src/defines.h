@@ -62,7 +62,8 @@ inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     btnYearText, btnMonthText, strPage, ebookFile, strTitle, fileName,
     strOpfPath, catalogueFile, strShowMsg, strStartTotalTime, strOpfFile,
     oldOpfPath, strEpubTitle, strPercent, modelFileName, modelStatus,
-    modelFullPath, modelDataBasePath, modelFingerprint;
+    modelFullPath, modelDataBasePath, modelFingerprint, reportTitle1,
+    reportTitle2;
 
 inline QString ver;
 inline QString appName = "Knot";
@@ -77,6 +78,9 @@ inline QList<double> doubleList;
 inline int fontSize, defaultFontSize, red, iPage, sPos, totallines, s_y1, s_m1,
     s_d1, s_y2, s_m2, s_d2, totalPages, currentPage, currentTabIndex, today,
     maxNetConcurrent;
+
+inline double totalAmount = 0;
+inline int totalFreq = 0;
 
 inline int nMainChartType = 0;
 

@@ -55,8 +55,19 @@ void Report::startReport1(QString year, QString month) {}
 void Report::startReport2() {}
 
 void Report::readReportDone() {
+  reportTitle2 = tr("Count:") + QString::number(totalFreq) + "  " +
+                 tr("Amount:") + QString::number(totalAmount, 'f', 2);
+
+  QStringList list;
+  list.append(reportTitle1);
+  list.append(reportTitle2);
+  m_Method->refreshJavaData("refreshTitles", "DataReportActivity", list);
+
+  m_Method->refreshJavaData("refreshReportList", "DataReportActivity", listTop);
+
   qInfo() << "listTop=" << listTop;
   qInfo() << "listCategory=" << listCategory;
+  qInfo() << "title1 2=" << reportTitle1 << reportTitle2;
 }
 
 void Report::updateTable() {}
@@ -70,6 +81,9 @@ void Report::getData(QString y) {
   btnYearText = y;
   btnMonthText = "Year-Round";
 
+  QString tabText = tabData->tabText(tabData->currentIndex());
+  reportTitle1 = tabText + "(" + btnYearText + ")";
+
   mw_one->myReadEBookThread->start();
 }
 
@@ -81,6 +95,9 @@ void Report::getData(QString y, QString m) {
   isDateSection = false;
   btnYearText = y;
   btnMonthText = m;
+
+  QString tabText = tabData->tabText(tabData->currentIndex());
+  reportTitle1 = tabText + "(" + btnYearText + "-" + btnMonthText + ")";
 
   mw_one->myReadEBookThread->start();
 }
@@ -104,9 +121,13 @@ void Report::getData(int y1, int m1, int d1, int y2, int m2, int d2) {
 }
 
 void Report::getMonthData() {
-  QTreeWidget* tw = mw_one->get_tw(tabData->currentIndex());
+  int index = tabData->currentIndex();
+  QTreeWidget* tw = mw_one->get_tw(index);
+  QString tabText = tabData->tabText(index);
 
   twTotalRow = 0;
+  totalFreq = 0;
+  totalAmount = 0;
   listCategory.clear();
   listTop.clear();
   twOut2Img->clear();
@@ -148,6 +169,9 @@ void Report::getMonthData() {
       int secondsDiff1 = startDateTime.secsTo(currentDateTime);
       int secondsDiff2 = currentDateTime.secsTo(endDateTime);
 
+      reportTitle1 = tabText + "(" + startDateTime.toString("yyyy-MM-dd") +
+                     "~" + endDateTime.toString("yyyy-MM-dd") + ")";
+
       if (secondsDiff1 >= 0 && secondsDiff2 >= 0) {
         twTotalRow = twTotalRow + 1;
         QTreeWidgetItem* item;
@@ -177,11 +201,19 @@ void Report::setTWImgData(QTreeWidgetItem* item) {
   newtop->setBackground(1, brush);
   newtop->setBackground(2, brush);
 
-  QString str_0 = item->text(0);
+  QString mstrDate = item->text(0);
+  QString mstrFreq = item->text(1);
+  QString mstrAmount = item->text(2);
+  QString str_0 = mstrDate;
   QString str_1 = str_0.split(" ").at(0).trimmed();
   QString str_2 = str_0.replace(str_1, "").trimmed();
-  listTop.append(item->text(3) + " " + str_2 + "===" + item->text(1) +
-                 "===" + item->text(2));
+  listTop.append(mstrDate + " " + item->text(3) + "===" + tr("Count:") +
+                 mstrFreq + "===" + tr("Amount:") + mstrAmount);
+
+  int m_freq = mstrFreq.toInt();
+  double m_amount = mstrAmount.toDouble();
+  totalFreq = totalFreq + m_freq;
+  totalAmount = totalAmount + m_amount;
 
   for (int z = 0; z < item->childCount(); z++) {
     QTreeWidgetItem* newchild = new QTreeWidgetItem(newtop);
@@ -301,6 +333,22 @@ void Report::loadDetailsQml() {
       }
     }
   }
+}
+
+void Report::getDetail(int index) {
+  QTreeWidgetItem* topitem = twOut2Img->topLevelItem(index);
+  int count = topitem->childCount();
+  QStringList list;
+  for (int i = 0; i < count; i++) {
+    list.append(topitem->child(i)->text(0));
+    list.append(topitem->child(i)->text(1));
+    list.append(topitem->child(i)->text(2));
+    list.append(topitem->child(i)->text(3));
+  }
+
+  m_Method->refreshJavaData("showDetailDialog", "DataReportActivity", list);
+
+  // qInfo() << "listDetail=" << list;
 }
 
 void Report::genReportMenu() {
