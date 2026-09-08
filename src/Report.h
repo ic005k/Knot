@@ -31,7 +31,7 @@ class Report : public QDialog {
 
   bool isSingleYear = false;
   static void saveYMD();
-
+  bool isAiAnalysis;
   void getCategoryData(QString strCategory, bool appendTable);
   QStringList listCategorySort;
   QList<double> listD;

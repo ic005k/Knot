@@ -156,6 +156,13 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
         } else if (isAndroidAIQA) {
           isAndroidAIQA = false;
           m_Notes->appendAIResults(aiReplyText);
+
+        } else if (mw_one->m_Report->isAiAnalysis) {
+          mw_one->m_Report->isAiAnalysis = false;
+          QStringList list;
+          list.append(aiReplyText);
+          m_Method->refreshJavaData("showAiMarkdownDialog", "MyEventActivity",
+                                    list);
         } else
 
         {

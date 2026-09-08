@@ -4,8 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,6 +38,8 @@ public class MyEventActivity extends AppCompatActivity {
     public static native void PublicJavaCallCpp(String type);
 
     private OnBackPressedCallback mBackCallback;
+    // AI加载等待弹窗
+    private androidx.appcompat.app.AlertDialog mAiLoadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +112,8 @@ public class MyEventActivity extends AppCompatActivity {
             PublicJavaCallCpp("open_report|==|");
         });
         myevent_btn_ai.setOnClickListener(v -> {
-            // AI分析
+            // AI分析：先弹出loading，通知C++开始计算
+            showAiLoadingDialog();
             PublicJavaCallCpp("open_aifx|==|");
         });
         myevent_btn_edit.setOnClickListener(v -> {
@@ -263,6 +270,45 @@ public class MyEventActivity extends AppCompatActivity {
         }
 
         myevent_tv_total.setText(totalStr);
+    }
+
+    /**
+     * 显示AI分析等待弹窗，带转圈ProgressBar
+     */
+    public void showAiLoadingDialog() {
+        runOnUiThread(() -> {
+            if (isFinishing()) return;
+            if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
+                return;
+            }
+            // 调用MyActivity公共方法，拿到dialog实例保存到本页面成员
+            mAiLoadingDialog = MyActivity.showAiLoadingDialog(this);
+        });
+    }
+
+    /**
+     * 关闭AI等待弹窗
+     */
+    public void dismissAiLoadingDialog() {
+        runOnUiThread(() -> {
+            MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
+        });
+    }
+
+    /**
+     * C++调用：AI分析结果弹窗，支持简易MD渲染，支持 # ~ #### 标题
+     * @param mdList 数组，仅第0项存放Markdown原始文本
+     */
+    public void showAiMarkdownDialog(ArrayList<String> mdList) {
+        // 先关闭本页面的loading弹窗
+        dismissAiLoadingDialog();
+        // 调用MyActivity公共静态方法，传入当前this作为上下文
+        MyActivity.showAiMarkdownDialog(this, mdList);
+    }
+
+    private int dp(int dpVal) {
+        float density = getResources().getDisplayMetrics().density;
+        return (int) (dpVal * density + 0.5f);
     }
 
     @Override

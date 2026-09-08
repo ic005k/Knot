@@ -2953,4 +2953,157 @@ public class MyActivity
     public static int getMainTabLastSelectedPos() {
         return mainTabLastSelectedPos;
     }
+
+    /**
+     * 公共AI Markdown弹窗，多页面复用
+     * @param ctx 传入当前发起弹窗的Activity上下文（XXXActivity.this）
+     * @param mdList 数组，第0项为markdown文本
+     */
+    public static void showAiMarkdownDialog(
+        Context ctx,
+        ArrayList<String> mdList
+    ) {
+        if (ctx == null || ((Activity) ctx).isFinishing()) {
+            return;
+        }
+        Activity act = (Activity) ctx;
+        act.runOnUiThread(() -> {
+            String mdContent = "";
+            if (mdList != null && mdList.size() > 0) {
+                mdContent = mdList.get(0);
+            }
+            // 读取暗黑模式，沿用你的规则
+            boolean isDark = ImmersiveUtil.applyRealImmersive(act);
+            int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+
+            android.widget.ScrollView scrollView =
+                new android.widget.ScrollView(act);
+            scrollView.setPadding(
+                dp(act, 16),
+                dp(act, 12),
+                dp(act, 16),
+                dp(act, 12)
+            );
+            LinearLayout container = new LinearLayout(act);
+            container.setOrientation(LinearLayout.VERTICAL);
+            container.setGravity(android.view.Gravity.CENTER_VERTICAL);
+
+            String[] lines = mdContent.split("\\n");
+            for (String line : lines) {
+                TextView tv = new TextView(act);
+                tv.setTextColor(textColor);
+                tv.setPadding(0, dp(act, 3), 0, dp(act, 3));
+                tv.setTextSize(14);
+                String showText = line;
+                boolean bold = false;
+                float textSize = 14;
+
+                if (line.startsWith("# ")) {
+                    showText = line.substring(2);
+                    bold = true;
+                    textSize = 18;
+                } else if (line.startsWith("## ")) {
+                    showText = line.substring(3);
+                    bold = true;
+                    textSize = 16;
+                } else if (line.startsWith("### ")) {
+                    showText = line.substring(4);
+                    bold = true;
+                    textSize = 15;
+                } else if (line.startsWith("#### ")) {
+                    showText = line.substring(5);
+                    bold = true;
+                    textSize = 14;
+                } else if (line.startsWith("- ") || line.startsWith("* ")) {
+                    showText = "• " + line.substring(2);
+                }
+                showText = showText.replace("**", "");
+                if (bold) {
+                    tv.getPaint().setFakeBoldText(true);
+                }
+                tv.setTextSize(textSize);
+                tv.setText(showText);
+                container.addView(tv);
+            }
+            scrollView.addView(container);
+
+            androidx.appcompat.app.AlertDialog.Builder builder =
+                new androidx.appcompat.app.AlertDialog.Builder(act);
+            String title = MyActivity.zh_cn
+                ? "AI分析结果"
+                : "AI Analysis Result";
+            builder.setTitle(title);
+            builder.setView(scrollView);
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
+        });
+    }
+
+    /**
+     * 公共：打开AI转圈等待弹窗
+     * @param act 当前发起页面Activity
+     * @return 创建好的AlertDialog实例，页面自行保存引用
+     */
+    public static androidx.appcompat.app.AlertDialog showAiLoadingDialog(
+        Activity act
+    ) {
+        if (act == null || act.isFinishing()) {
+            return null;
+        }
+        boolean isDark = ImmersiveUtil.applyRealImmersive(act);
+        String msg = MyActivity.zh_cn
+            ? "AI分析中，请稍候..."
+            : "AI analyzing, please wait...";
+
+        LinearLayout layout = new LinearLayout(act);
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+        layout.setPadding(dp(act, 24), dp(act, 16), dp(act, 24), dp(act, 16));
+        layout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+
+        android.widget.ProgressBar progressBar = new android.widget.ProgressBar(
+            act
+        );
+        progressBar.setIndeterminate(true);
+        LinearLayout.LayoutParams progressLp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        progressLp.rightMargin = dp(act, 16);
+        progressBar.setLayoutParams(progressLp);
+
+        TextView tvMsg = new TextView(act);
+        tvMsg.setText(msg);
+        tvMsg.setTextSize(14);
+        tvMsg.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
+
+        layout.addView(progressBar);
+        layout.addView(tvMsg);
+
+        androidx.appcompat.app.AlertDialog.Builder builder =
+            new androidx.appcompat.app.AlertDialog.Builder(act);
+        builder.setView(layout);
+        builder.setCancelable(false);
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.show();
+        return dialog;
+    }
+
+    /**
+     * 公共：关闭等待弹窗
+     * @param dialogRef 页面持有的弹窗引用
+     */
+    public static void dismissAiLoadingDialog(
+        androidx.appcompat.app.AlertDialog dialogRef
+    ) {
+        if (dialogRef != null && dialogRef.isShowing()) {
+            dialogRef.dismiss();
+        }
+    }
+
+    // 公共dp工具，给弹窗复用
+    private static int dp(Context ctx, int dpVal) {
+        float density = ctx.getResources().getDisplayMetrics().density;
+        return (int) (dpVal * density + 0.5f);
+    }
 }
