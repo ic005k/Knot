@@ -338,6 +338,22 @@ class Notes : public QDialog {
 
   void on_listNoteBook_itemClicked(QListWidgetItem* item);
 
+  void on_btnNBMenu_clicked();
+
+  void on_btnNoteMenu_clicked();
+
+  void on_btnNewNote_clicked();
+
+  void on_btnSearch_clicked();
+
+  void on_btnDel_clicked();
+
+  void on_btnMove_clicked();
+
+  void on_btnRename_clicked();
+
+  void on_btnRecycleBin_clicked();
+
  private:
   void findAllAndShowResults(const QString& text);
   void updateResultCount(int count);

@@ -275,15 +275,6 @@ void MainWindow::on_btnBackNoteList_clicked() {
 
   m_Notes->saveNotesCounter();
 
-  // ========== 完全异步延迟界面切换，释放渲染资源 ==========
-  QTimer::singleShot(0, this, []() {
-    // 再执行显示/隐藏，此时无活跃离屏渲染任务
-    if (!isAndroid) {
-    } else
-      m_Method->openMainEntranceWindow();
-  });
-  // ========================================================
-
   if (m_Notes->checkAndUpdateCleanDate())
     qDebug() << "已到自动清理服务器文件时间，过去3个月内的文件将被清理";
   else

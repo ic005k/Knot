@@ -402,7 +402,7 @@ void loadTheme(bool isDark) {
     qApp->setPalette(createLightPalette());
   }
 
-  QString themePath =
+  /*QString themePath =
       isDark ? ":/res/theme/MaterialDark.qss" : ":/res/theme/MaterialLight.qss";
 
   QFile f(themePath);
@@ -418,7 +418,9 @@ void loadTheme(bool isDark) {
       QEvent updateEvent(QEvent::UpdateRequest);
       QApplication::sendEvent(mw_one, &updateEvent);
     }
-  }
+  }*/
+
+  if (mw_one) mw_one->init_Theme();
 
   // 字体大小
   QFont font = qApp->font();

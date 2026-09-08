@@ -38,6 +38,7 @@ Preferences::Preferences(QWidget* parent)
   mw_one->ui->chkZip->setStyleSheet(chkStyle);
   ui->chkUIFont->setStyleSheet(chkStyle);
   ui->lblFontSize->setFixedHeight(40);
+  ui->chkAI->setStyleSheet(chkStyle);
 
   QString lbl_style = ui->lblFontSet->styleSheet();
   ui->lblAdditional->setStyleSheet(lbl_style);

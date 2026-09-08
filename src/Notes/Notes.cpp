@@ -1070,3 +1070,19 @@ void Notes::on_listNoteList_currentRowChanged(int currentRow) {
 }
 
 void Notes::on_listNoteBook_itemClicked(QListWidgetItem* item) {}
+
+void Notes::on_btnNBMenu_clicked() {}
+
+void Notes::on_btnNoteMenu_clicked() {}
+
+void Notes::on_btnNewNote_clicked() {}
+
+void Notes::on_btnSearch_clicked() {}
+
+void Notes::on_btnDel_clicked() {}
+
+void Notes::on_btnMove_clicked() {}
+
+void Notes::on_btnRename_clicked() {}
+
+void Notes::on_btnRecycleBin_clicked() {}

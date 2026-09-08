@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1064</width>
+    <width>1264</width>
     <height>458</height>
    </rect>
   </property>
@@ -37,6 +37,29 @@
         <property name="frameShadow">
          <enum>QFrame::Shadow::Raised</enum>
         </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <widget class="QToolButton" name="btnNBMenu">
+           <property name="text">
+            <string>NoteBook</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnNoteMenu">
+           <property name="text">
+            <string>Note</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnNewNote">
+           <property name="text">
+            <string>New</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -45,8 +68,14 @@
          <widget class="QListWidget" name="listNoteBook">
           <property name="minimumSize">
            <size>
-            <width>120</width>
+            <width>110</width>
             <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>135</width>
+            <height>16777215</height>
            </size>
           </property>
          </widget>
@@ -55,8 +84,14 @@
          <widget class="QListWidget" name="listNoteList">
           <property name="minimumSize">
            <size>
-            <width>120</width>
+            <width>110</width>
             <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>135</width>
+            <height>16777215</height>
            </size>
           </property>
          </widget>
@@ -77,6 +112,74 @@
         <property name="frameShadow">
          <enum>QFrame::Shadow::Raised</enum>
         </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <item>
+          <widget class="QToolButton" name="btnSearch">
+           <property name="text">
+            <string>Search</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../res.qrc">
+             <normaloff>:/res/find_l.svg</normaloff>:/res/find_l.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnDel">
+           <property name="text">
+            <string>Del</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../res.qrc">
+             <normaloff>:/res/del_l.svg</normaloff>:/res/del_l.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnMove">
+           <property name="text">
+            <string>Move</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../res.qrc">
+             <normaloff>:/res/move_l.svg</normaloff>:/res/move_l.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnPDF">
+           <property name="text">
+            <string>PDF</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../res.qrc">
+             <normaloff>:/res/topdf_l.svg</normaloff>:/res/topdf_l.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnRename">
+           <property name="text">
+            <string>Rename</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../res.qrc">
+             <normaloff>:/res/rename_l.svg</normaloff>:/res/rename_l.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnRecycleBin">
+           <property name="text">
+            <string>RecycleBin</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../res.qrc">
+             <normaloff>:/res/recycle_l.svg</normaloff>:/res/recycle_l.svg</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -611,6 +714,12 @@ color: rgb(255, 255, 255);</string>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QFrame" name="f_NoteLink">
+            <property name="maximumSize">
+             <size>
+              <width>380</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="frameShape">
              <enum>QFrame::Shape::StyledPanel</enum>
             </property>

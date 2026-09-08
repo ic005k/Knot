@@ -182,6 +182,8 @@ void Steps::initUI() {
   ui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
   ui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
   ui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
+
+  ui->chkPlayRunVoice->setStyleSheet(mw_one->m_Preferences->chkStyle);
   ui->chkPlayRunVoice->setChecked(Reg.value("/GPS/isPlayRunVoice", 0).toBool());
   isChkPlayRunVoice = ui->chkPlayRunVoice->isChecked();
 
@@ -419,12 +421,7 @@ void Steps::openStepsUI() {
 
   this->setGeometry(mw_one->geometry().x(), mw_one->geometry().y(),
                     mw_one->geometry().width(), mw_one->geometry().height());
-
   show();
-
-  if (isAndroid) {
-    mw_one->ui->frameMain->hide();
-  }
 }
 
 void Steps::addRecord(QString date, qlonglong steps, QString km) {
@@ -3167,4 +3164,6 @@ void Steps::on_chkPlayRunVoice_clicked(bool checked) {
     m_Method->stopPlayMyText();
     m_Method->playMyText(ui->lblDirection->text());
   }
+
+  isChkPlayRunVoice = checked;
 }
