@@ -67,8 +67,8 @@ inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
 inline QString ver;
 inline QString appName = "Knot";
 
-inline QStringList readTextList, htmlFiles, listCategory, ncxList, tempHtmlList,
-    listM, ymdList, resultsList, needDelWebDAVFiles;
+inline QStringList readTextList, htmlFiles, listCategory, listTop, ncxList,
+    tempHtmlList, listM, ymdList, resultsList, needDelWebDAVFiles;
 
 inline QList<QPointF> freqPointList;
 inline QList<QPointF> amountList;

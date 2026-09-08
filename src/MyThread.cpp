@@ -176,6 +176,7 @@ void MainWindow::readEBookDone() {
 
     if (!isOpen) {
       on_DelayCloseProgressBar();
+      mw_one->m_Report->readReportDone();
       return;
     }
 
@@ -187,6 +188,9 @@ void MainWindow::readEBookDone() {
       this->m_Report->updateTable();
 
       isReport = false;
+
+      this->m_Report->readReportDone();
+
       safeCloseProgress();
     });
   }

@@ -73,7 +73,12 @@ class Report : public QDialog {
 
   QString Out2Img(bool isShowMessage);
 
- protected:
+  void getData(QString y);
+  void getData(QString y, QString m);
+
+  void getData(int y1, int m1, int d1, int y2, int m2, int d2);
+  void readReportDone();
+  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
   void closeEvent(QCloseEvent* event) override;

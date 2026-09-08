@@ -103,9 +103,11 @@ public class MyEventActivity extends AppCompatActivity {
 
         myevent_btn_report.setOnClickListener(v -> {
             // 报表
+            PublicJavaCallCpp("open_report|==|");
         });
         myevent_btn_ai.setOnClickListener(v -> {
             // AI分析
+            PublicJavaCallCpp("open_aifx|==|");
         });
         myevent_btn_edit.setOnClickListener(v -> {
             // 修改事件

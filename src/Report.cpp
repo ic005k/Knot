@@ -11,11 +11,13 @@ QLabel *lblTotal, *lblDetails;
 QToolButton *btnCategory, *btnMonth, *btnYear;
 int twTotalRow = 0;
 
-Report::Report(QWidget* parent) : QDialog(parent) {}
+Report::Report(QWidget* parent) : QDialog(parent) {
+  twOut2Img = new QTreeWidget(nullptr);
+}
 
 void Report::init() {}
 
-Report::~Report() {}
+Report::~Report() { delete twOut2Img; }
 
 void Report::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event) }
 
@@ -52,14 +54,62 @@ void Report::startReport1(QString year, QString month) {}
 
 void Report::startReport2() {}
 
+void Report::readReportDone() {
+  qInfo() << "listTop=" << listTop;
+  qInfo() << "listCategory=" << listCategory;
+}
+
 void Report::updateTable() {}
+
+void Report::getData(QString y) {
+  mw_one->showProgress();
+  isReport = true;
+
+  isWholeMonth = true;
+  isDateSection = false;
+  btnYearText = y;
+  btnMonthText = "Year-Round";
+
+  mw_one->myReadEBookThread->start();
+}
+
+void Report::getData(QString y, QString m) {
+  mw_one->showProgress();
+  isReport = true;
+
+  isWholeMonth = true;
+  isDateSection = false;
+  btnYearText = y;
+  btnMonthText = m;
+
+  mw_one->myReadEBookThread->start();
+}
+
+void Report::getData(int y1, int m1, int d1, int y2, int m2, int d2) {
+  mw_one->showProgress();
+  isReport = true;
+
+  isWholeMonth = false;
+  isDateSection = true;
+  btnYearText = QString::number(QDate::currentDate().year());
+  btnMonthText = QString::number(QDate::currentDate().month());
+  s_y1 = y1;
+  s_m1 = m1;
+  s_d1 = d1;
+  s_y2 = y2;
+  s_m2 = m2;
+  s_d2 = d2;
+
+  mw_one->myReadEBookThread->start();
+}
 
 void Report::getMonthData() {
   QTreeWidget* tw = mw_one->get_tw(tabData->currentIndex());
 
-  twOut2Img->clear();
   twTotalRow = 0;
   listCategory.clear();
+  listTop.clear();
+  twOut2Img->clear();
 
   for (int i = 0; i < tw->topLevelItemCount(); i++) {
     QString strYear, strMonth;
@@ -68,7 +118,7 @@ void Report::getMonthData() {
     int iDay = mw_one->get_Day(tw->topLevelItem(i)->text(0) + " " + strYear);
 
     if (isWholeMonth) {
-      if (btnMonthText == tr("Year-Round")) {
+      if (btnMonthText == "Year-Round") {
         if (strYear == btnYearText) {
           twTotalRow = twTotalRow + 1;
           QTreeWidgetItem* item;
@@ -126,6 +176,12 @@ void Report::setTWImgData(QTreeWidgetItem* item) {
   newtop->setBackground(0, brush);
   newtop->setBackground(1, brush);
   newtop->setBackground(2, brush);
+
+  QString str_0 = item->text(0);
+  QString str_1 = str_0.split(" ").at(0).trimmed();
+  QString str_2 = str_0.replace(str_1, "").trimmed();
+  listTop.append(item->text(3) + " " + str_2 + "===" + item->text(1) +
+                 "===" + item->text(2));
 
   for (int z = 0; z < item->childCount(); z++) {
     QTreeWidgetItem* newchild = new QTreeWidgetItem(newtop);

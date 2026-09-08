@@ -572,6 +572,8 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          // 主事件////////////////////////////////////////////////////////////
+
           if (strType.contains("get_maindatedetail|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
@@ -583,6 +585,17 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                 m_Method->clickMainDateData(index);
               }
             });
+          }
+
+          if (strType.contains("open_report|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              mw_one->m_Report->getData("2026", "09");
+            });
+          }
+
+          if (strType.contains("open_aifx|==|")) {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { mw_one->m_Report->aiAnalysis(); });
           }
 
           if (strType.contains("refresh_alldata")) {
