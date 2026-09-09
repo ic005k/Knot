@@ -204,6 +204,22 @@ void NotesList::on_actionRename_Note_triggered() {
   on_btnRename_clicked();
 }
 
+void NotesList::renameNoteBook(QString newName, int idx) {
+  QTreeWidgetItem* topItem = pNoteBookItems[idx];
+  tw->setCurrentItem(topItem);
+  topItem->setText(0, newName.trimmed());
+  saveNotesList();
+  loadAllNoteBook();
+}
+
+void NotesList::renameNote(QString newName, int idxNoteBook, int idxNote) {
+  QTreeWidgetItem* item = pNoteItems[idxNote];
+  tw->setCurrentItem(item);
+  item->setText(0, newName.trimmed());
+  saveNotesList();
+  clickNoteBook(idxNoteBook);
+}
+
 void NotesList::on_actionMoveUp_Note_triggered() {
   int indexBook = getNoteBookCurrentIndex();
   int indexNote = getNotesListCurrentIndex();
@@ -641,46 +657,50 @@ void NotesList::refreshRecentOpen() {
 }
 
 void NotesList::slotCreateSubNotebook(int qmlIndex) {
-  // 校验：拿到长按的父笔记本
-  if (qmlIndex < 0 || qmlIndex >= pNoteBookItems.size()) return;
-
-  QTreeWidgetItem* parentItem = pNoteBookItems.at(qmlIndex);
-  if (!parentItem) return;
-
   QInputDialog* dlg = m_Method->inputDialog(
       tr("New Sub Notebook"), tr("Please enter sub notebook name:"), "");
 
   connect(dlg, &QDialog::accepted, this, [=]() {
     // 点击确定：拿到输入内容
     QString inputName = dlg->textValue();
-    if (!inputName.isEmpty()) {
-      //  在当前笔记本下 创建子笔记本
-      QTreeWidgetItem* newItem = new QTreeWidgetItem(parentItem);
-      newItem->setText(0, inputName.trimmed());
-      newItem->setText(2, "#e5e1e1");
-      newItem->setForeground(0, Qt::red);
 
-      // 展开父节点，保证能看到新建的子笔记本
-      parentItem->setExpanded(true);
-      tw->setCurrentItem(newItem);
+    newSubNoteBook(inputName, qmlIndex);
 
-      //  刷新 QML 笔记本列表
-      loadAllNoteBook();
-
-      //  自动选中新建的项
-      int newIndex = pNoteBookItems.indexOf(newItem);
-      if (newIndex >= 0) {
-        setNoteBookCurrentIndex(newIndex);
-        clickNoteBook(newIndex);
-      }
-
-      //  保存数据
-      saveNotesList();
-    }
     dlg->deleteLater();  // 销毁对象
   });
 
   connect(dlg, &QDialog::rejected, this, [=]() { dlg->deleteLater(); });
+}
+
+void NotesList::newSubNoteBook(QString name, int idx) {
+  if (!name.isEmpty()) {
+    //  在当前笔记本下 创建子笔记本
+    if (idx < 0 || idx >= pNoteBookItems.size()) return;
+    QTreeWidgetItem* parentItem = pNoteBookItems.at(idx);
+    if (!parentItem) return;
+
+    QTreeWidgetItem* newItem = new QTreeWidgetItem(parentItem);
+    newItem->setText(0, name.trimmed());
+    newItem->setText(2, "#e5e1e1");
+    newItem->setForeground(0, Qt::red);
+
+    // 展开父节点，保证能看到新建的子笔记本
+    parentItem->setExpanded(true);
+    tw->setCurrentItem(newItem);
+
+    //  刷新 QML 笔记本列表
+    loadAllNoteBook();
+
+    //  自动选中新建的项
+    int newIndex = pNoteBookItems.indexOf(newItem);
+    if (newIndex >= 0) {
+      setNoteBookCurrentIndex(newIndex);
+      clickNoteBook(newIndex);
+    }
+
+    //  保存数据
+    saveNotesList();
+  }
 }
 
 void NotesList::rebuilderNotesVector() {

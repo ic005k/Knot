@@ -636,31 +636,9 @@ void NotesList::moveBy(int ud) {
   saveNotesList();
 }
 
-/*void NotesList::loadAllNoteBook() {
-
-  pNoteBookItems.clear();
-  m_Method->clearAllBakList(mui->qwNoteBook);
-
-  if (!tw) return;
-
-  // 遍历所有顶层节点（根节点）
-  int topCount = tw->topLevelItemCount();
-  for (int i = 0; i < topCount; ++i) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
-    // 根节点：level = 0，父索引 = -1
-    traverseTreeItem(topItem, -1, 0);
-  }
-
-  // 原有代理模型代码保留
-  if (m_treeProxyModel) {
-    // m_treeProxyModel->resetAll();
-  }
-}*/
-
 QStringList NotesList::loadAllNoteBook() {
   // 1. 清空
   pNoteBookItems.clear();
-  // m_Method->clearAllBakList(mui->qwNoteBook);
 
   QStringList result;  // ← 新增：收集结果
 
@@ -673,6 +651,9 @@ QStringList NotesList::loadAllNoteBook() {
     // 把 result 的引用传进去
     traverseTreeItem(topItem, -1, 0, result);
   }
+
+  listNoteBook = result;
+  m_Method->refreshJavaData("setNoteBookList", "NoteActivity", listNoteBook);
 
   return result;
 }
@@ -775,7 +756,9 @@ bool NotesList::moveItem(QTreeWidget* twMain) {
 }
 
 void NotesList::readyNotesData(QTreeWidgetItem* item) {
-  if (!item) return;
+  if (!item) {
+    return;
+  }
 
   // 同步树控件选中
   tw->setCurrentItem(item);
@@ -785,11 +768,13 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
   int child_count = item->childCount();
   // ========== 关键：无子笔记直接返回，避免空容器引发崩溃 ==========
-  if (child_count <= 0) {
-    noteModel->replaceAll({});  // 清空笔记列表
+  if (child_count == 0) {
     pNoteItems.clear();
-    setNoteLabel();
+
     isExecRecentOpen = false;
+
+    listNoteEntry.clear();
+    m_Notes->setNoteEntryList();
     return;
   }
 
@@ -804,6 +789,12 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
     uiDataList.append({child->text(0), child->text(1)});
     childItems.append(child);
+  }
+
+  if (childItems.count() == 0) {
+    listNoteEntry.clear();
+    m_Notes->setNoteEntryList();
+    return;
   }
 
   QString iniDirCopy = iniDir;

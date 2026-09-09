@@ -963,6 +963,30 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               if (list.count() == 3) {
                 QString name = list.at(1);
                 int idx = list.at(2).toInt();
+                m_NotesList->newSubNoteBook(name, idx);
+              }
+            });
+          }
+
+          if (strType.startsWith("book_rename|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 3) {
+                int idx = list.at(1).toInt();
+                QString name = list.at(2);
+
+                m_NotesList->renameNoteBook(name, idx);
+              }
+            });
+          }
+
+          if (strType.startsWith("book_delete|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int idx = list.at(1).toInt();
               }
             });
           }

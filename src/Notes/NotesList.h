@@ -230,6 +230,10 @@ class NotesList : public QDialog {
   void removeNotebookPositionRecord(const QString& notebookId);
 
   void newNoteBook(QString name);
+  void newSubNoteBook(QString, int);
+
+  void renameNoteBook(QString newName, int idx);
+  void renameNote(QString newName, int idxNoteBook, int idxNote);
   protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
