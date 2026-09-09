@@ -509,8 +509,11 @@ void NotesList::addItem(QTreeWidget* tw, QTreeWidgetItem* item) {
 
 void NotesList::resetQML_List() {
   if (tw->topLevelItemCount() == 0) {
-    // m_Method->clearAllBakList(mui->qwNoteBook);
-    // m_Method->clearAllBakList(mui->qwNoteList);
+    listNoteBook.clear();
+    listNoteEntry.clear();
+    m_Method->refreshJavaData("setNoteBookList", "NoteActivity", listNoteBook);
+    m_Method->refreshJavaData("setNoteEntryList", "NoteActivity",
+                              listNoteEntry);
     return;
   }
 

@@ -273,12 +273,14 @@ void NotesList::on_btnDel_clicked() {
   // 判断：笔记本 / 笔记
   QString strFlag = (isNoteBook) ? tr("NoteBook") : tr("Note");
 
-  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-  if (!m_ShowMsg->showMsg("Knot",
-                          tr("Move to the recycle bin?") + "\n\n" + strFlag +
-                              " : " + item->text(0),
-                          2)) {
-    return;
+  if (!isAndroid) {
+    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
+    if (!m_ShowMsg->showMsg("Knot",
+                            tr("Move to the recycle bin?") + "\n\n" + strFlag +
+                                " : " + item->text(0),
+                            2)) {
+      return;
+    }
   }
 
   QStringList delFiles;
@@ -326,17 +328,16 @@ void NotesList::on_btnDel_clicked() {
   // 安全刷新界面
   if (tw->topLevelItemCount() == 0) {
     m_Notes->loadEmptyNote();
-    // mw_one->ui->lblNoteBook->setText("0/0");
-    // mw_one->ui->lblNoteList->setText("0/0");
-  } else {
-    if (tw->currentItem() != nullptr) {
-      m_Notes->loadEmptyNote();
-    }
   }
 
   startBackgroundTaskDelFilesIndex(delFiles);
   saveNotesList();
-  resetQML_List();
+
+  if (isNoteBook) {
+    loadAllNoteBook();
+    listNoteEntry.clear();
+    m_Notes->setNoteEntryList();
+  }
 }
 
 void NotesList::on_btnDown_clicked() {

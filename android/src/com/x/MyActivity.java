@@ -75,6 +75,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -234,6 +235,7 @@ public class MyActivity
 
     public static boolean isDark = false;
     public static MyActivity m_instance = null;
+    public static MyActivity mInstance = null;
     private static Application sAppContext;
 
     public static boolean isScreenOff = false;
@@ -441,6 +443,7 @@ public class MyActivity
         // 轻量初始化（必须同步执行，确保JNI环境基础就绪）
         isZh(this);
         m_instance = this;
+        mInstance = this;
         sAppContext = getApplication();
         Log.d(
             TAG,
@@ -854,6 +857,7 @@ public class MyActivity
         if (!isConfigChangeRecreate) {
             mapActivityInstance = null;
             m_instance = null;
+            mInstance = null;
             sAppContext = null;
         }
 
@@ -2954,6 +2958,10 @@ public class MyActivity
         return mainTabLastSelectedPos;
     }
 
+    public void showAiMarkdownDialog(ArrayList<String> mdList) {
+        showAiMarkdownDialog(MyActivity.mInstance, mdList);
+    }
+
     /**
      * 公共AI Markdown弹窗，多页面复用
      * @param ctx 传入当前发起弹窗的Activity上下文（XXXActivity.this）
@@ -3028,8 +3036,11 @@ public class MyActivity
             }
             scrollView.addView(container);
 
-            androidx.appcompat.app.AlertDialog.Builder builder =
-                new androidx.appcompat.app.AlertDialog.Builder(act);
+            //androidx.appcompat.app.AlertDialog.Builder builder =
+            //    new androidx.appcompat.app.AlertDialog.Builder(act);
+            android.app.AlertDialog.Builder builder =
+                new android.app.AlertDialog.Builder(act);
+
             String title = MyActivity.zh_cn
                 ? "AI分析结果"
                 : "AI Analysis Result";
@@ -3105,5 +3116,73 @@ public class MyActivity
     private static int dp(Context ctx, int dpVal) {
         float density = ctx.getResources().getDisplayMetrics().density;
         return (int) (dpVal * density + 0.5f);
+    }
+
+    // ========== 底层实现：真正渲染弹窗，接收Activity + 消息文本 ==========
+    private void showCommonMsgDialogInner(Activity act, String contentText) {
+        if (act == null || act.isFinishing() || act.isDestroyed()) {
+            return;
+        }
+        act.runOnUiThread(() -> {
+            // 暗黑模式，统一使用ImmersiveUtil获取
+            boolean isDark = ImmersiveUtil.applyRealImmersive(act);
+            int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+            // 外层滚动容器
+            android.widget.ScrollView scrollView =
+                new android.widget.ScrollView(act);
+            scrollView.setPadding(
+                dp(act, 4),
+                dp(act, 4),
+                dp(act, 4),
+                dp(act, 4)
+            );
+            TextView tvContent = new TextView(act);
+            tvContent.setText(contentText);
+            tvContent.setTextSize(15);
+            tvContent.setTextColor(textColor);
+            tvContent.setPadding(
+                dp(act, 20),
+                dp(act, 16),
+                dp(act, 20),
+                dp(act, 16)
+            );
+            tvContent.setBackgroundColor(bgColor);
+            scrollView.addView(tvContent);
+
+            android.app.AlertDialog.Builder builder =
+                new android.app.AlertDialog.Builder(act);
+            builder.setView(scrollView);
+            // 根据全局zh_cn切换按钮文字
+            String okText = MyActivity.zh_cn ? "确定" : "OK";
+            builder.setPositiveButton(okText, null);
+            builder.show();
+        });
+    }
+
+    // ========== 原JNI对外入口，C++调用，保持签名不变 ==========
+    public void showCommonMsgDialog(ArrayList<String> msgList) {
+        Activity act = mInstance;
+        if (act == null) return;
+        String contentText = "";
+        if (msgList != null && msgList.size() > 0) {
+            contentText = msgList.get(0);
+        }
+        showCommonMsgDialogInner(act, contentText);
+    }
+
+    // ========== 重载：其他Activity直接调用（Java层，传入自身Activity + 字符串） ==========
+    public void showCommonMsgDialog(Activity act, String content) {
+        showCommonMsgDialogInner(act, content);
+    }
+
+    // ========== 重载：其他Activity作为发起方，C++调用时传入ArrayList，弹窗在该Activity上弹出 ==========
+    public void showCommonMsgDialog(Activity act, ArrayList<String> msgList) {
+        if (act == null) return;
+        String contentText = "";
+        if (msgList != null && msgList.size() > 0) {
+            contentText = msgList.get(0);
+        }
+        showCommonMsgDialogInner(act, contentText);
     }
 }

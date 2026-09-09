@@ -987,8 +987,14 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
 
               if (list.count() == 2) {
                 int idx = list.at(1).toInt();
+                m_NotesList->delNoteBook(idx);
               }
             });
+          }
+
+          if (strType == "book_statistics") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { m_NotesList->on_actionStatistics(); });
           }
 
           if (strType == "back_note") {

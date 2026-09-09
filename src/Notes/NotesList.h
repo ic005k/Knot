@@ -234,12 +234,16 @@ class NotesList : public QDialog {
 
   void renameNoteBook(QString newName, int idx);
   void renameNote(QString newName, int idxNoteBook, int idxNote);
-  protected:
+  void delNoteBook(int idx);
+  void delNote(int idxNoteBook, int idxNote);
+
+ protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;
 
  public slots:
+  void on_actionStatistics();
   void onSearchTextChanged(const QString& text);
   void showNoteBookMenu(int x, int y);
   void showNotsListMenu(int x, int y);
@@ -290,8 +294,6 @@ class NotesList : public QDialog {
   void onSearchFinished();
 
   void on_actionSetColorFlag();
-
-  void on_actionStatistics();
 
   void onNoteNodeDoubleClicked(const QString& filePath);
 

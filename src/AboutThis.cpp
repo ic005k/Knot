@@ -275,14 +275,18 @@ void AboutThis::on_btnCopyDownLoadLink_clicked() {
 }
 
 void AboutThis::on_btnViewLog_clicked() {
-  mw_one->showProgress();
-
   AppLogger::instance().copyTodayLogToClipboard();
   QString log = AppLogger::instance().getTodayLogText();
   log = log.replace("\n", "\n\n");
   QString res = m_Method->escapeAllHtml(log);
-  QTimer::singleShot(100, this, [this, res]() {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-    m_ShowMsg->showMsg(tr("Log"), res, 1);
+  QTimer::singleShot(100, this, [this, res, log]() {
+    if (!isAndroid) {
+      auto m_ShowMsg = std::make_unique<ShowMessage>(this);
+      m_ShowMsg->showMsg(tr("Log"), res, 1);
+    } else {
+      QStringList list;
+      list.append(log);
+      m_Method->refreshJavaData("showCommonMsgDialog", "MyActivity", list);
+    }
   });
 }

@@ -582,15 +582,21 @@ void NotesList::on_actionStatistics() {
 
     mw_one->safeCloseProgress();
 
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg(localAppName,
-                 tr("NoteBook:") + QString::number(countNoteBook) + "\n\n" +
+    QString strTip = tr("NoteBook:") + QString::number(countNoteBook) + "\n\n" +
                      tr("Local Notes:") + QString::number(*notesCountPtr) +
                      "\n\n" + tr("Remote Notes:") +
                      QString::number(m_CloudBackup->m_currentRemoteNotesCount) +
                      "\n\n" + tr("Images:") + QString::number(*imgCountPtr) +
-                     "\n\n" + strAccessCount,
-                 1);
+                     "\n\n" + strAccessCount;
+
+    if (!isAndroid) {
+      auto msg = std::make_unique<ShowMessage>(mw_one);
+      msg->showMsg(localAppName, strTip, 1);
+    } else {
+      QStringList list;
+      list.append(strTip);
+      m_Method->refreshJavaData("showStatisticDialog", "NoteActivity", list);
+    }
 
     delete imgCountPtr;
     watcher->deleteLater();
@@ -835,4 +841,17 @@ void NotesList::safeExitLlama() {
     qWarning() << "Vector rebuild force-stopped on close";
   }
   mw_one->safeCloseProgress();
+}
+
+void NotesList::delNoteBook(int idx) {
+  QTreeWidgetItem* item = pNoteBookItems[idx];
+  tw->setCurrentItem(item);
+  on_btnDel_clicked();
+}
+
+void NotesList::delNote(int idxNoteBook, int idxNote) {
+  QTreeWidgetItem* item = pNoteItems[idxNote];
+  tw->setCurrentItem(item);
+  on_btnDel_clicked();
+  clickNoteBook(idxNoteBook);
 }

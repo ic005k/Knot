@@ -157,8 +157,8 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
           isAndroidAIQA = false;
           m_Notes->appendAIResults(aiReplyText);
 
-        } else if (mw_one->m_Report->isAiAnalysis) {
-          mw_one->m_Report->isAiAnalysis = false;
+        } else if (mw_one->m_Report->isAiMainEvent) {
+          mw_one->m_Report->isAiMainEvent = false;
           QStringList list;
           list.append(aiReplyText);
           m_Method->refreshJavaData("showAiMarkdownDialog", "MyEventActivity",
@@ -166,7 +166,14 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
         } else
 
         {
-          msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
+          if (isAndroid) {
+            QStringList list;
+            list.append(aiReplyText);
+            m_Method->refreshJavaData("showAiMarkdownDialog", "MyActivity",
+                                      list);
+          } else {
+            msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
+          }
         }
       });
 }

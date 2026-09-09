@@ -528,7 +528,7 @@ void Report::genReportMenu() {
 }
 
 void Report::aiAnalysis() {
-  isAiAnalysis = true;
+  isAiMainEvent = true;
   QString text = mainDataString;
   QString newEvent = mw_one->listMyEventTitle.at(0);
   int pos = text.indexOf('\n');

@@ -566,6 +566,21 @@ public class NoteActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    /**
+     * 统计弹窗入口，复用已有的通用消息弹窗，不重复实现UI
+     * @param msgList JNI传入数组，第0项为统计文本
+     */
+    public void showStatisticDialog(ArrayList<String> msgList) {
+        if (msgList == null || msgList.isEmpty()) {
+            return;
+        }
+        String statContent = msgList.get(0);
+        String titleText = MyActivity.zh_cn ? "统计" : "Statistics";
+
+        String finalText = titleText + "\n\n" + statContent;
+        MyActivity.mInstance.showCommonMsgDialog(this, finalText);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
