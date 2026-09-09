@@ -1,9 +1,13 @@
 package com.x;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -94,19 +98,176 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        mBtnBookMenu.setOnClickListener(v ->
-            PublicJavaCallCpp("note_book_menu")
-        );
+        // ========== 笔记本菜单按钮 ==========
+        mBtnBookMenu.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(NoteActivity.this, mBtnBookMenu);
+            boolean isZh = MyActivity.zh_cn;
+            String item1 = isZh ? "新建笔记本" : "New Notebook";
+            String item2 = isZh ? "新建子笔记本" : "New Sub Notebook";
+            String itemRename = isZh ? "重命名" : "Rename";
+            String itemDeleteBook = isZh ? "删除笔记本" : "Delete Notebook";
+            String item3 = isZh ? "统计" : "Statistics";
+
+            popup.getMenu().add(0, 1, 0, item1);
+            popup.getMenu().add(0, 2, 1, item2);
+            popup.getMenu().add(0, 4, 2, itemRename);
+            popup.getMenu().add(0, 5, 3, itemDeleteBook);
+            popup.getMenu().add(0, 3, 4, item3);
+
+            popup.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id == 1) {
+                    // 新建一级笔记本，无需选中
+                    showBookNameInputDialog(isZh, false);
+                    return true;
+                } else if (id == 2) {
+                    // 新建子笔记本，检查父笔记本选中状态
+                    int selectedBookPos = mBookAdapter.getSelectedPosition();
+                    if (selectedBookPos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一个笔记本"
+                                : "Please select a notebook first"
+                        );
+                        return true;
+                    }
+                    showBookNameInputDialog(isZh, true);
+                    return true;
+                } else if (id == 4) {
+                    // 笔记本重命名
+                    int selectedBookPos = mBookAdapter.getSelectedPosition();
+                    if (selectedBookPos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一个笔记本"
+                                : "Please select a notebook first"
+                        );
+                        return true;
+                    }
+                    showBookRenameDialog(isZh, selectedBookPos);
+                    return true;
+                } else if (id == 5) {
+                    // 删除笔记本
+                    int selectedBookPos = mBookAdapter.getSelectedPosition();
+                    if (selectedBookPos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一个笔记本"
+                                : "Please select a notebook first"
+                        );
+                        return true;
+                    }
+                    String bookRaw = mBookAdapter.getItemAt(selectedBookPos);
+                    String[] parts = bookRaw.split("\\|==\\|");
+                    String bookName = parts.length > 0 ? parts[0] : "";
+                    showBookDeleteConfirmDialog(
+                        isZh,
+                        selectedBookPos,
+                        bookName
+                    );
+                    return true;
+                } else if (id == 3) {
+                    PublicJavaCallCpp("book_statistics");
+                    return true;
+                }
+                return false;
+            });
+            popup.show();
+        });
+
         mBtnFavorite.setOnClickListener(v ->
             PublicJavaCallCpp("note_favorite")
         );
-        mBtnNoteMenu.setOnClickListener(v -> PublicJavaCallCpp("note_menu"));
+
+        // ========== 笔记菜单按钮 ==========
+        mBtnNoteMenu.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(NoteActivity.this, mBtnNoteMenu);
+            boolean isZh = MyActivity.zh_cn;
+            String imp = isZh ? "导入" : "Import";
+            String exp = isZh ? "导出" : "Export";
+            String del = isZh ? "删除" : "Delete";
+            String pdfOut = isZh ? "输出到PDF" : "Export to PDF";
+            String move = isZh ? "移动到" : "Move To";
+            String rename = isZh ? "重命名" : "Rename";
+            popup.getMenu().add(0, 10, 0, imp);
+            popup.getMenu().add(0, 11, 1, exp);
+            popup.getMenu().add(0, 12, 2, del);
+            popup.getMenu().add(0, 13, 3, pdfOut);
+            popup.getMenu().add(0, 14, 4, move);
+            popup.getMenu().add(0, 15, 5, rename);
+            // 预留，暂隐藏，后续打开直接取消注释
+            // String graph    = isZh ? "关系图谱" : "Relation Graph";
+            // String history  = isZh ? "修改历史" : "Revision History";
+            // popup.getMenu().add(0,16,6, graph);
+            // popup.getMenu().add(0,17,7, history);
+            popup.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id == 10) {
+                    PublicJavaCallCpp("note_import");
+                    return true;
+                } else if (id == 11) {
+                    PublicJavaCallCpp("note_export");
+                    return true;
+                } else if (id == 12) {
+                    // 删除笔记
+                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    if (selectedNotePos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一条笔记"
+                                : "Please select a note first"
+                        );
+                        return true;
+                    }
+                    String noteTitle = mNoteAdapter.getItemAt(selectedNotePos);
+                    showNoteDeleteConfirmDialog(
+                        isZh,
+                        selectedNotePos,
+                        noteTitle
+                    );
+                    return true;
+                } else if (id == 13) {
+                    PublicJavaCallCpp("note_export_pdf");
+                    return true;
+                } else if (id == 14) {
+                    // 移动到
+                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    if (selectedNotePos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一条笔记"
+                                : "Please select a note first"
+                        );
+                        return true;
+                    }
+                    PublicJavaCallCpp("note_move|==|" + selectedNotePos);
+                    return true;
+                } else if (id == 15) {
+                    // 笔记重命名
+                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    if (selectedNotePos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一条笔记"
+                                : "Please select a note first"
+                        );
+                        return true;
+                    }
+                    showNoteRenameDialog(isZh, selectedNotePos);
+                    return true;
+                }
+                // 预留项
+                // else if(id ==16) cmd = "note_relation_graph";
+                // else if(id ==17) cmd = "note_modify_history";
+                return false;
+            });
+            popup.show();
+        });
+
         mBtnNewNote.setOnClickListener(v ->
             PublicJavaCallCpp("note_create_new")
         );
-
         mBtnSearch.setOnClickListener(v -> PublicJavaCallCpp("note_search"));
-
         mBtnView.setOnClickListener(v -> {
             int selectedNoteIndex = mNoteAdapter.getSelectedPosition();
             // 没有选中的笔记，直接返回，不调用C++
@@ -117,13 +278,11 @@ public class NoteActivity extends AppCompatActivity {
             String callArg = "note_view|==|" + selectedNoteIndex;
             PublicJavaCallCpp(callArg);
         });
-
         mBtnEdit.setOnClickListener(v -> {
             int selectedNoteIndex = mNoteAdapter.getSelectedPosition();
             if (selectedNoteIndex == -1) return;
             PublicJavaCallCpp("note_edit|==|" + selectedNoteIndex);
         });
-
         mBtnRecycle.setOnClickListener(v ->
             PublicJavaCallCpp("note_open_recycle")
         );
@@ -190,6 +349,221 @@ public class NoteActivity extends AppCompatActivity {
         runOnUiThread(() -> {
             mNoteAdapter.setSelectedPosition(pos);
         });
+    }
+
+    /**
+     * 弹出笔记本名称输入对话框
+     * @param isZh 是否中文
+     * @param isSub true=新建子笔记本；false=新建笔记本
+     */
+    private void showBookNameInputDialog(boolean isZh, boolean isSub) {
+        boolean dark = ImmersiveUtil.applyRealImmersive(this);
+        int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
+
+        EditText etInput = new EditText(this);
+        etInput.setTextColor(textColor);
+
+        String title, hint;
+        if (isSub) {
+            title = isZh ? "新建子笔记本" : "New Sub Notebook";
+            hint = isZh ? "请输入子笔记本名称" : "Input sub notebook name";
+        } else {
+            title = isZh ? "新建笔记本" : "New Notebook";
+            hint = isZh ? "请输入笔记本名称" : "Input notebook name";
+        }
+        etInput.setHint(hint);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setView(etInput);
+        String okText = isZh ? "确定" : "OK";
+        String cancelText = isZh ? "取消" : "Cancel";
+        builder.setPositiveButton(okText, (dialog, which) -> {
+            String name = etInput.getText().toString().trim();
+            if (name.isEmpty()) {
+                return;
+            }
+            String cmd;
+            if (isSub) {
+                int parentIdx = mBookAdapter.getSelectedPosition();
+                cmd = "book_create_sub|==|" + name + "|==|" + parentIdx;
+            } else {
+                cmd = "book_create_new|==|" + name;
+            }
+            PublicJavaCallCpp(cmd);
+        });
+        builder.setNegativeButton(cancelText, (dialog, which) -> {
+            dialog.dismiss();
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /**
+     * 简单提示弹窗，仅信息+确定按钮
+     */
+    private void showTipDialog(String msg) {
+        boolean dark = ImmersiveUtil.applyRealImmersive(this);
+        int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
+        boolean isZh = MyActivity.zh_cn;
+        String okStr = isZh ? "确定" : "OK";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(msg);
+        builder.setPositiveButton(okStr, (dialog, which) -> dialog.dismiss());
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /**
+     * 笔记本重命名弹窗
+     * @param isZh 是否中文
+     * @param selectedPos 当前选中笔记本索引
+     */
+    private void showBookRenameDialog(boolean isZh, int selectedPos) {
+        boolean dark = ImmersiveUtil.applyRealImmersive(this);
+        int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
+
+        EditText etInput = new EditText(this);
+        etInput.setTextColor(textColor);
+
+        // 获取当前笔记本原始名称
+        String rawItem = mBookAdapter.getItemAt(selectedPos);
+        String[] parts = rawItem.split("\\|==\\|");
+        String currentName = parts.length > 0 ? parts[0] : "";
+        etInput.setText(currentName);
+        etInput.setSelection(etInput.getText().length()); //光标放末尾
+
+        String title = isZh ? "重命名笔记本" : "Rename Notebook";
+        String hint = isZh ? "输入笔记本新名称" : "Input new notebook name";
+        etInput.setHint(hint);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setView(etInput);
+        String okText = isZh ? "确定" : "OK";
+        String cancelText = isZh ? "取消" : "Cancel";
+
+        builder.setPositiveButton(okText, (dialog, which) -> {
+            String newName = etInput.getText().toString().trim();
+            if (newName.isEmpty()) {
+                return;
+            }
+            String cmd = "book_rename|==|" + selectedPos + "|==|" + newName;
+            PublicJavaCallCpp(cmd);
+        });
+        builder.setNegativeButton(cancelText, (dialog, which) -> {
+            dialog.dismiss();
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /**
+     * 删除笔记确认弹窗
+     * @param isZh 中英文标记
+     * @param selectedPos 笔记选中索引
+     * @param noteTitle 当前笔记标题
+     */
+    private void showNoteDeleteConfirmDialog(
+        boolean isZh,
+        int selectedPos,
+        String noteTitle
+    ) {
+        boolean dark = ImmersiveUtil.applyRealImmersive(this);
+        int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
+        String title = isZh ? "删除笔记" : "Delete Note";
+        String msg = isZh
+            ? "确定要删除笔记：\n" + noteTitle
+            : "Confirm to delete note:\n" + noteTitle;
+        String okText = isZh ? "确定" : "OK";
+        String cancelText = isZh ? "取消" : "Cancel";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(msg);
+        builder.setPositiveButton(okText, (dialog, which) -> {
+            String cmd = "note_delete|==|" + selectedPos;
+            PublicJavaCallCpp(cmd);
+        });
+        builder.setNegativeButton(cancelText, (dialog, which) -> {
+            dialog.dismiss();
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /**
+     * 笔记重命名弹窗
+     * @param isZh 是否中文
+     * @param selectedPos 当前选中笔记索引
+     */
+    private void showNoteRenameDialog(boolean isZh, int selectedPos) {
+        boolean dark = ImmersiveUtil.applyRealImmersive(this);
+        int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
+        EditText etInput = new EditText(this);
+        etInput.setTextColor(textColor);
+
+        String currentTitle = mNoteAdapter.getItemAt(selectedPos);
+        etInput.setText(currentTitle);
+        etInput.setSelection(etInput.getText().length());
+
+        String title = isZh ? "重命名笔记" : "Rename Note";
+        String hint = isZh ? "输入笔记新名称" : "Input new note name";
+        etInput.setHint(hint);
+
+        String okText = isZh ? "确定" : "OK";
+        String cancelText = isZh ? "取消" : "Cancel";
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setView(etInput);
+        builder.setPositiveButton(okText, (dialog, which) -> {
+            String newName = etInput.getText().toString().trim();
+            if (newName.isEmpty()) {
+                return;
+            }
+            String cmd = "note_rename|==|" + selectedPos + "|==|" + newName;
+            PublicJavaCallCpp(cmd);
+        });
+        builder.setNegativeButton(cancelText, (dialog, which) -> {
+            dialog.dismiss();
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /**
+     * 删除笔记本确认弹窗
+     * @param isZh 是否中文
+     * @param selectedPos 笔记本索引
+     * @param bookName 笔记本名称
+     */
+    private void showBookDeleteConfirmDialog(
+        boolean isZh,
+        int selectedPos,
+        String bookName
+    ) {
+        boolean dark = ImmersiveUtil.applyRealImmersive(this);
+        int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
+        String title = isZh ? "删除笔记本" : "Delete Notebook";
+        String msg = isZh
+            ? "确定要删除笔记本：\n" + bookName
+            : "Confirm to delete notebook:\n" + bookName;
+        String okText = isZh ? "确定" : "OK";
+        String cancelText = isZh ? "取消" : "Cancel";
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(msg);
+        builder.setPositiveButton(okText, (dialog, which) -> {
+            String cmd = "book_delete|==|" + selectedPos;
+            PublicJavaCallCpp(cmd);
+        });
+        builder.setNegativeButton(cancelText, (dialog, which) -> {
+            dialog.dismiss();
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override

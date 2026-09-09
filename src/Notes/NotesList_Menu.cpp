@@ -54,36 +54,39 @@ void NotesList::on_actionAdd_NoteBook_triggered() {
   connect(dlg, &QDialog::accepted, this, [=]() {
     // 点击确定：拿到输入内容
     QString inputName = dlg->textValue();
-    if (!inputName.isEmpty()) {
-      notebookName = inputName;
+    newNoteBook(inputName);
 
-      QTreeWidgetItem* item = new QTreeWidgetItem();
-      item->setText(0, notebookName);
-      item->setText(2, "#FF0000");
-      tw->addTopLevelItem(item);
-      tw->setCurrentItem(item);
-
-      loadAllNoteBook();
-
-      int count =
-          listNoteBook
-              .count();  // m_Method->getCountFromQW(mw_one->ui->qwNoteBook);
-      int index = 0;
-      for (int i = 0; i < count; i++) {
-        if (pNoteBookItems.at(i) == tw->currentItem()) {
-          index = i;
-          break;
-        }
-      }
-      setNoteBookCurrentIndex(index);
-      clickNoteBook(index);
-
-      saveNotesList();
-    }
     dlg->deleteLater();  // 销毁对象
   });
 
   connect(dlg, &QDialog::rejected, this, [=]() { dlg->deleteLater(); });
+}
+
+void NotesList::newNoteBook(QString name) {
+  if (!name.isEmpty()) {
+    notebookName = name;
+
+    QTreeWidgetItem* item = new QTreeWidgetItem();
+    item->setText(0, notebookName);
+    item->setText(2, "#FF0000");
+    tw->addTopLevelItem(item);
+    tw->setCurrentItem(item);
+
+    loadAllNoteBook();
+
+    int count = listNoteBook.count();
+    int index = 0;
+    for (int i = 0; i < count; i++) {
+      if (pNoteBookItems.at(i) == tw->currentItem()) {
+        index = i;
+        break;
+      }
+    }
+    setNoteBookCurrentIndex(index);
+    clickNoteBook(index);
+
+    saveNotesList();
+  }
 }
 
 void NotesList::on_actionDel_NoteBook_triggered() {

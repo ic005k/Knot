@@ -943,7 +943,29 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                []() { mw_one->m_Todo->on_DelAlarm(); });
           }
 
-          // Notes===========================================================
+          // Notes/////////////////////////////////////////////////////////////
+
+          if (strType.startsWith("book_create_new|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                QString name = list.at(1);
+                m_NotesList->newNoteBook(name);
+              }
+            });
+          }
+
+          if (strType.startsWith("book_create_sub|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 3) {
+                QString name = list.at(1);
+                int idx = list.at(2).toInt();
+              }
+            });
+          }
 
           if (strType == "back_note") {
             QTimer::singleShot(100, mw_one, [=]() {

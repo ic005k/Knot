@@ -143,4 +143,11 @@ public class NoteBookAdapter
             tvBookName = itemView.findViewById(R.id.note_tv_book_name);
         }
     }
+
+    public String getItemAt(int pos) {
+        if (pos < 0 || pos >= mRawList.size()) {
+            return "";
+        }
+        return mRawList.get(pos);
+    }
 }

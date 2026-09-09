@@ -128,4 +128,11 @@ public class NoteEntryAdapter
             tvNoteTitle = itemView.findViewById(R.id.note_tv_note_title);
         }
     }
+
+    public String getItemAt(int pos) {
+        if (pos < 0 || pos >= mData.size()) {
+            return "";
+        }
+        return mData.get(pos);
+    }
 }

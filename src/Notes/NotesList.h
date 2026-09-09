@@ -229,7 +229,8 @@ class NotesList : public QDialog {
   QString loadNotePosition(const QString& NoteBookID);
   void removeNotebookPositionRecord(const QString& notebookId);
 
- protected:
+  void newNoteBook(QString name);
+  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;
