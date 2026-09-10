@@ -134,44 +134,24 @@ void NotesList::on_actionAdd_Note_triggered() {
     return;
   }
 
-  newCreateNote(notebookIndex);
+  newCreateNote();
 }
 
-void NotesList::newCreateNote(int idxNoteBook) {
-  if (tw->topLevelItemCount() == 0) return;
-
-  tw->setCurrentItem(pNoteBookItems.at(idxNoteBook));
-
+void NotesList::newCreateNote() {
   QString noteFile = "memo/" + m_Notes->getDateTimeStr() + "_" +
                      m_Method->generateRandom3() + ".md";
   currentMDFile = iniDir + noteFile;
-  QTreeWidgetItem* parentitem = tw->currentItem();
 
-  QTreeWidgetItem* item1 = new QTreeWidgetItem(parentitem);
-  item1->setText(0, tr("Untitled Note"));
-  item1->setText(1, noteFile);
+  MyAllNotes.insert(0, currentMDFile);
+  listNoteEntry.insert(0, tr("Untitled Note"));
 
   QTextEdit edit;
   edit.append("");
-  TextEditToFile(&edit, iniDir + noteFile);
-
-  pNoteItems.append(item1);
-
-  tw->setCurrentItem(item1);
-  QString note_name = item1->text(0);
-  noteTitle = item1->text(0);
-
-  // m_Method->addItemToQW(mw_one->ui->qwNoteList, note_name, "", "", noteFile,
-  // 0);
-
-  int count = getNotesListCount();
-  setNotesListCurrentIndex(count - 1);
-
-  clickNoteList(count - 1);
-
-  m_Notes->updateMDFileToSyncLists();
+  TextEditToFile(&edit, currentMDFile);
 
   saveNotesList();
+
+  m_Notes->setNoteEntryList();
 
   mw_one->on_btnEditNote_clicked();
 }
@@ -207,20 +187,13 @@ void NotesList::on_actionRename_Note_triggered() {
   on_btnRename_clicked();
 }
 
-void NotesList::renameNoteBook(QString newName, int idx) {
-  QTreeWidgetItem* topItem = pNoteBookItems[idx];
-  tw->setCurrentItem(topItem);
-  topItem->setText(0, newName.trimmed());
+void NotesList::renameNote(QString newName, int idxNote) {
+  QString file = MyAllNotes.at(idxNote);
+  m_Notes->m_NoteManager->setNoteTitle(file, newName);
+  listNoteEntry.removeAt(idxNote);
+  listNoteEntry.insert(idxNote, newName);
+  m_Notes->setNoteEntryList();
   saveNotesList();
-  loadAllNoteBook();
-}
-
-void NotesList::renameNote(QString newName, int idxNoteBook, int idxNote) {
-  QTreeWidgetItem* item = pNoteItems[idxNote];
-  tw->setCurrentItem(item);
-  item->setText(0, newName.trimmed());
-  saveNotesList();
-  clickNoteBook(idxNoteBook);
 }
 
 void NotesList::on_actionMoveUp_Note_triggered() {

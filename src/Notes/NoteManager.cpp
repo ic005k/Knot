@@ -7,6 +7,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include "defines.h"
+
 NoteManager::NoteManager(QObject* parent) : QObject(parent) {}
 
 bool NoteManager::loadIndex(const QString& indexPath) {
@@ -144,4 +146,33 @@ QList<QPair<QString, QString>> NoteManager::searchTitleWithPath(
     }
   }
   return result;
+}
+
+// ✅ 线程安全快照：在主线程生成深拷贝，子线程只读遍历
+QHash<QString, NoteMetadata> NoteManager::getMetadataSnapshot() const {
+  return m_metadataMap;  // QHash 值类型拷贝，天然深拷贝
+}
+
+// ✅ 纯内存反序列化，剥离文件 I/O
+void NoteManager::loadMetadataFromJson(const QJsonObject& dataObj) {
+  m_metadataMap.clear();
+
+  QDir baseDir(iniDir);  // ✅ 确保此处能访问到 iniDir
+
+  for (auto it = dataObj.constBegin(); it != dataObj.constEnd(); ++it) {
+    // ✅ 将相对路径还原为绝对路径
+    // 例如: "memo/xxx.md" -> "/storage/emulated/0/KnotData/memo/xxx.md"
+    QString absoluteKey = baseDir.filePath(it.key());
+
+    NoteMetadata meta = NoteMetadata::fromJson(it.value().toObject());
+    m_metadataMap.insert(absoluteKey, meta);
+  }
+
+  emit indexReloaded();
+}
+
+bool NoteManager::hasMetadata(const QString& filePath) const {
+  QString f = filePath;
+  f = f.replace(iniDir, "");
+  return m_metadataMap.contains(f);
 }

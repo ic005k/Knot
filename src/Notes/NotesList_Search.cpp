@@ -3,7 +3,7 @@
 #include "src/MainWindow.h"
 
 // 文件搜索实现
-/*QStringList findMarkdownFiles(const QString& dirPath) {
+QStringList findMarkdownFiles(const QString& dirPath) {
   Q_UNUSED(dirPath);
 
   QList<QString> paths;
@@ -18,9 +18,9 @@
   }
   // 使用 QSet 去重
   return QSet<QString>(paths.begin(), paths.end()).values();
-}*/
+}
 
-QStringList findMarkdownFiles(const QString& dirPath) {
+QStringList findMarkdownFilesToSort(const QString& dirPath) {
   QDir dir(dirPath);
   if (!dir.exists()) return {};
 

@@ -38,6 +38,7 @@
 #include "src/Notes/MoveTo.h"
 #include "src/Notes/NoteGraph.h"
 #include "src/Notes/NoteListModel.h"
+#include "src/Notes/NoteManager.h"
 #include "ui_MoveTo.h"
 #include "ui_NotesList.h"
 
@@ -49,6 +50,7 @@ using ResultsMap = QMap<QString, MySearchResult>;
 MySearchResult searchInFile(const QString& filePath,
                             const QRegularExpression& regex);
 QStringList findMarkdownFiles(const QString& dirPath);
+QStringList findMarkdownFilesToSort(const QString& dirPath);
 void reduceResults(ResultsMap& result, const MySearchResult& partial);
 
 struct ExactMatchResult {
@@ -232,12 +234,15 @@ class NotesList : public QDialog {
   void newNoteBook(QString name);
   void newSubNoteBook(QString, int);
 
-  void renameNoteBook(QString newName, int idx);
-  void renameNote(QString newName, int idxNoteBook, int idxNote);
+  void renameNote(QString newName, int idxNote);
 
   void delNote(int idxNote);
 
-  void newCreateNote(int idxNoteBook);
+  void newCreateNote();
+
+  void initAllFromJson();
+  void initNotesList(const QJsonObject& rootObj);
+  void initRecycle(const QJsonObject& rootObj);
 
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
@@ -383,7 +388,8 @@ class NotesList : public QDialog {
 
   void setColorFlag(QString strColor);
   void setDelNoteFlag(QString mdFile);
-  void saveNotesListToFile();
+  void saveNotesListToFile(
+      const QHash<QString, NoteMetadata>& metadataSnapshot);
   // 递归序列化笔记本节点（包含自身笔记 + 下级子笔记本）
   QJsonObject serializeNotebookItem(QTreeWidgetItem* item);
 

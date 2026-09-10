@@ -37,6 +37,12 @@ class NoteManager : public QObject {
  public:
   explicit NoteManager(QObject* parent = nullptr);
 
+  // 获取元数据快照（主线程调用，传给子线程）
+  QHash<QString, NoteMetadata> getMetadataSnapshot() const;
+
+  // 从 JSON 对象恢复元数据（加载时调用）
+  void loadMetadataFromJson(const QJsonObject& data);
+
   // 模糊搜索标题，返回【标题，文件路径】配对列表
   QList<QPair<QString, QString>> searchTitleWithPath(
       const QString& keyword) const;
@@ -64,7 +70,8 @@ class NoteManager : public QObject {
   // ✅ 批量获取元数据（避免多次加锁/查找）
   QHash<QString, NoteMetadata> getAllMetadata() const { return m_metadataMap; }
 
- signals:
+  bool hasMetadata(const QString &filePath) const;
+  signals:
   void noteMetaChanged(const QString& filePath, const NoteMetadata& meta);
   void noteRemoved(const QString& filePath);
   void indexReloaded();  // 索引整体重载完成

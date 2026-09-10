@@ -161,7 +161,7 @@ void NotesList::renameCurrentItem(QString title) {
 
 void NotesList::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
 
-void NotesList::saveNotesList() {
+/*void NotesList::saveNotesList() {
   // 【高频防抖】如果正在保存，直接跳过，不允许重复触发
   if (m_isSaving) return;
 
@@ -180,6 +180,36 @@ void NotesList::saveNotesList() {
     mw_one->strLatestModify = tr("Modi Notes List");
     m_Notes->isSaveNotesConfig = true;
     m_isSaving = false;  // 保存完成，解锁
+    watcher->deleteLater();
+  });
+  watcher->setFuture(future);
+}*/
+
+void NotesList::saveNotesList() {
+  if (m_isSaving) return;
+  m_isSaving = true;
+
+  // ✅ 【关键】在主线程生成元数据快照，彻底隔离子线程并发访问
+  QHash<QString, NoteMetadata> metadataSnapshot;
+  if (m_Notes && m_Notes->m_NoteManager) {
+    metadataSnapshot = m_Notes->m_NoteManager->getMetadataSnapshot();
+  }
+
+  QPointer<NotesList> self(this);
+  // ✅ lambda 按值捕获 metadataSnapshot（深拷贝，线程安全）
+  QFuture<void> future = QtConcurrent::run([self, metadataSnapshot]() {
+    if (!self) return;
+    QMutexLocker locker(&self->m_saveMutex);
+
+    // ✅ 直接作为参数传递，不再依赖成员变量
+    self->saveNotesListToFile(metadataSnapshot);
+  });
+
+  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+    mw_one->strLatestModify = tr("Modi Notes List");
+    m_Notes->isSaveNotesConfig = true;
+    m_isSaving = false;
     watcher->deleteLater();
   });
   watcher->setFuture(future);
@@ -222,7 +252,8 @@ QJsonObject NotesList::serializeNotebookItem(QTreeWidgetItem* item) {
   return obj;
 }
 
-void NotesList::saveNotesListToFile() {
+void NotesList::saveNotesListToFile(
+    const QHash<QString, NoteMetadata>& metadataSnapshot) {
   // 空指针防护
   if (!tw || !twrb || !m_Method) return;
 
@@ -267,7 +298,25 @@ void NotesList::saveNotesListToFile() {
   }
   rootObj["needDelNotes"] = needDelArray;
 
-  // 写入临时文件
+  // ========== 使用传入的快照序列化索引（零数据竞争 + 相对路径）==========
+  QJsonObject indexData;
+  QDir baseDir1(iniDir);  // ✅ 构造 QDir 对象用于路径转换
+
+  for (auto it = metadataSnapshot.constBegin();
+       it != metadataSnapshot.constEnd(); ++it) {
+    // ✅ 将绝对路径转换为相对于 iniDir 的相对路径
+    // 例如: "/storage/emulated/0/KnotData/memo/xxx.md" -> "memo/xxx.md"
+    QString relativeKey = baseDir1.relativeFilePath(it.key());
+
+    indexData.insert(relativeKey, it.value().toJson());
+  }
+
+  QJsonObject noteNameIndex;
+  noteNameIndex["version"] = 1.0;
+  noteNameIndex["data"] = indexData;
+  rootObj["noteNameIndex"] = noteNameIndex;
+
+  // 写入临时文件==================================================
   QFile tempF(tempFile);
   if (tempF.exists()) tempF.remove();
 
@@ -328,7 +377,11 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
       noteItem->setText(1, noteFile);
 
       QString md = QDir(iniDir).filePath(noteFile);
-      m_Notes->m_NoteManager->setNoteTitle(md, noteName);
+      // ✅ 【过渡期安全写法】：仅当 NoteManager 中没有该笔记的元数据时，
+      // 才从旧的树形节点中恢复 title，避免覆盖已从 noteNameIndex 加载的数据
+      if (!m_Notes->m_NoteManager->hasMetadata(md)) {
+        m_Notes->m_NoteManager->setNoteTitle(md, noteName);
+      }
 
       noteFiles.append(md);
     } else {
@@ -336,6 +389,119 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
       loadSubNotebook(childObj, subBookItem, idx, totalNotes);
     }
   }
+}
+
+void NotesList::initAllFromJson() {
+  const QString jsonFile = QDir(iniDir).filePath("mainnotes.json");
+  if (!QFile::exists(jsonFile)) return;
+
+  QFile f(jsonFile);
+  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+
+  QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
+  f.close();  // ✅ 读完立即关闭，缩短文件句柄占用
+
+  if (doc.isNull() || !doc.isObject()) return;
+
+  QJsonObject rootObj = doc.object();
+
+  // ✅ 【核心改动】先加载全量索引元数据（O(1) 内存操作）
+  if (rootObj.contains("noteNameIndex")) {
+    QJsonObject idxObj = rootObj["noteNameIndex"].toObject();
+    if (idxObj["version"].toDouble() == 1.0) {
+      m_Notes->m_NoteManager->loadMetadataFromJson(idxObj["data"].toObject());
+    }
+  }
+
+  // ✅ 将已解析的 rootObj 传递给各子模块，不再重复读文件
+  initNotesList(rootObj);
+  initRecycle(rootObj);
+}
+
+void NotesList::initNotesList(const QJsonObject& rootObj) {
+  if (!tw) return;
+
+  tw->clear();
+  noteFiles.clear();
+
+  QJsonArray mainNotesArray = rootObj["mainNotes"].toArray();
+  int nNoteBook = mainNotesArray.size();
+  int notesTotal = 0;
+
+  for (int i = 0; i < mainNotesArray.size(); ++i) {
+    QJsonObject topObj = mainNotesArray[i].toObject();
+    QString strTop = topObj["name"].toString();
+    QString strTopColorFlag = topObj["colorFlag"].toString("#FF0000");
+    QString strTopNoteBookID = topObj["notebookID"].toString();
+
+    QTreeWidgetItem* topItem = new QTreeWidgetItem;
+    topItem->setText(0, strTop);
+    topItem->setText(2, strTopColorFlag);
+    topItem->setText(3, strTopNoteBookID);
+
+    QJsonArray childrenArray = topObj["children"].toArray();
+    for (int j = 0; j < childrenArray.size(); ++j) {
+      QJsonObject childObj = childrenArray[j].toObject();
+      if (childObj.isEmpty()) continue;
+
+      if (childObj.contains("file")) {
+        QString str0 = childObj["name"].toString();
+        QString str1 = childObj["file"].toString();
+        if (str1.isEmpty()) continue;
+
+        notesTotal++;
+        QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
+        childItem->setText(0, str0);
+        childItem->setText(1, str1);
+
+        QString md = QDir(iniDir).filePath(str1);
+
+        // ✅ 【过渡期安全写法】：仅当 NoteManager 中没有该笔记的元数据时，
+        // 才从旧的树形节点中恢复 title，避免覆盖已从 noteNameIndex 加载的数据
+        if (!m_Notes->m_NoteManager->hasMetadata(md)) {
+          m_Notes->m_NoteManager->setNoteTitle(md, str0);
+        }
+
+        noteFiles.append(md);
+      } else {
+        loadSubNotebook(childObj, topItem, j, notesTotal);
+      }
+    }
+    tw->addTopLevelItem(topItem);
+  }
+
+  tw->headerItem()->setText(
+      0, tr("Notebook") + " : " + QString::number(nNoteBook) + "  " +
+             tr("Notes") + " : " + QString::number(notesTotal));
+
+  tw->expandAll();
+  initRecentOpen();
+}
+
+void NotesList::initRecycle(const QJsonObject& rootObj) {
+  twrb->clear();
+  recycleFiles.clear();
+
+  QJsonArray recycleBinArray = rootObj["recycleBin"].toArray();
+
+  QTreeWidgetItem* topItem = new QTreeWidgetItem;
+  topItem->setText(0, tr("Notes Recycle Bin"));
+
+  for (const QJsonValue& val : recycleBinArray) {
+    QJsonObject obj = val.toObject();
+    QString str0 = obj["name"].toString();
+    QString str1 = obj["file"].toString();
+
+    QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
+    childItem->setText(0, str0);
+    childItem->setText(1, str1);
+
+    recycleFiles.append(
+        QDir(iniDir).filePath(str1));  // ✅ 使用 QDir 拼接更安全
+  }
+
+  twrb->addTopLevelItem(topItem);
+  twrb->expandAll();
 }
 
 void NotesList::initNotesList() {

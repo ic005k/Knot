@@ -421,23 +421,12 @@ void Notes::buildCleanFileList() {
 }
 
 void Notes::init_all_notes() {
-  m_NotesList->initNotesList();
+  m_NotesList->initAllFromJson();
   m_NotesList->initRecycle();
   m_NotesList->initUnclassified();
 
-  // load note
-  if (!isReceiveRemoteFile) {
-    currentMDFile = m_NotesList->getCurrentMDFile();
-  } else
-    isReceiveRemoteFile = false;
-  qInfo() << "currentMDFile=" << currentMDFile
-          << m_Notes->m_NoteManager->getNoteTitle(currentMDFile);
-  if (!QFile::exists(currentMDFile)) {
-    loadEmptyNote();
-  }
-
   QString dirPath = iniDir + "memo";
-  MyAllNotes = findMarkdownFiles(dirPath);
+  MyAllNotes = findMarkdownFilesToSort(dirPath);
   MyNoteRecycle = m_NotesList->getRecycleNoteFiles();
   MyAllNotes.removeIf(
       [](const QString& f) { return MyNoteRecycle.contains(f); });
@@ -448,8 +437,6 @@ void Notes::init_all_notes() {
     m_NotesList->listNoteEntry.append(
         m_Notes->m_NoteManager->getNoteTitle(file));
   }
-
-  m_Notes->m_NoteManager->getNoteTitle(currentMDFile);
 }
 
 void Notes::openNotes() {

@@ -968,7 +968,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
-          if (strType.startsWith("book_rename|==|")) {
+          if (strType.startsWith("note_rename|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
 
@@ -976,7 +976,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                 int idx = list.at(1).toInt();
                 QString name = list.at(2);
 
-                m_NotesList->renameNoteBook(name, idx);
+                m_NotesList->renameNote(name, idx);
               }
             });
           }
@@ -997,15 +997,9 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { m_NotesList->on_actionStatistics(); });
           }
 
-          if (strType.startsWith("note_create_new|==|")) {
-            QTimer::singleShot(100, mw_one, [=]() {
-              QStringList list = strType.split("|==|");
-
-              if (list.count() == 2) {
-                int idx = list.at(1).toInt();
-                m_NotesList->newCreateNote(idx);
-              }
-            });
+          if (strType == "note_create_new") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { m_NotesList->newCreateNote(); });
           }
 
           if (strType == "back_note") {
