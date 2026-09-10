@@ -59,7 +59,7 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   connect(m_Notes->m_NoteManager, &NoteManager::indexReloaded, this,
           &NotesList::initVectorSearchService);
 
-  // 初始化笔记关系图谱功能，注册控制器到QML引擎
+  // 初始化笔记关系图谱功能
   initNoteGraphView();
 
   // 初始化笔记向量搜索

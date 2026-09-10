@@ -106,28 +106,6 @@ void NoteGraphCache::save(const QString& filePath) const {
 }
 
 // =================================================================================
-// 注册 & 初始化
-// =================================================================================
-void registerNoteGraphTypes() {
-  // qmlRegisterType<NoteGraphModel>("NoteGraph", 1, 0, "NoteGraphModel");
-  // qmlRegisterType<NoteRelationParser>("NoteGraph", 1, 0,
-  // "NoteRelationParser"); qRegisterMetaType<QPointF>("QPointF");
-  // qRegisterMetaType<QVector<NoteNode>>("QVector<NoteNode>");
-  // qRegisterMetaType<QVector<NoteRelation>>("QVector<NoteRelation>");
-}
-
-// static QObject* noteGraphControllerSingletonProvider(QQmlEngine*, QJSEngine*)
-// {
-//  return new NoteGraphController();
-//}
-
-void initializeNoteGraph() {
-  // qmlRegisterSingletonType<NoteGraphController>(
-  //     "NoteGraph", 1, 0, "NoteGraphController",
-  //     noteGraphControllerSingletonProvider);
-}
-
-// =================================================================================
 // NoteGraphModel
 // =================================================================================
 NoteGraphModel::NoteGraphModel(QObject* parent) : QAbstractItemModel(parent) {}
@@ -248,6 +226,8 @@ void NoteRelationParser::parseNoteRelations(NoteGraphModel* model,
   QString currentNoteName =
       m_Notes->m_NoteManager->getNoteTitle(currentNotePath);
   QString currentFileName = QFileInfo(currentNotePath).fileName();
+
+  QMutexLocker locker(&m_cacheMutex);  // ← 加锁
 
   // ====== 缓存命中 ======
   if (!m_cache.isEmpty() && m_cache.forward.contains(currentFileName)) {
@@ -425,6 +405,8 @@ void NoteRelationParser::updateNoteCache(const QString& filePath) {
         }
       }
     }
+
+    QMutexLocker locker(&m_cacheMutex);  // ← 加锁
 
     // 替换 forward
     QVector<CachedLink> old = m_cache.forward.value(fileName);

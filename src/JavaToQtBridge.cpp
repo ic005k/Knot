@@ -203,8 +203,7 @@ static void JavaNotify_5() {
 
 static void JavaNotify_6() {
   QTimer::singleShot(100, mw_one, [=]() {
-    if (m_Notes != nullptr && m_NotesList != nullptr &&
-        m_NotesList->getNoteBookCurrentIndex() >= 0) {
+    if (m_Notes != nullptr && m_NotesList != nullptr) {
       m_Notes->javaNoteToQMLNote();
     }
   });

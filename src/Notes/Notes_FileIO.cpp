@@ -41,15 +41,13 @@ void Notes::saveMDFile() {
 }
 
 void Notes::startBackgroundTaskUpdateNoteGraph(QString mdFile) {
-  // 主线程
+  // ✅ 直接在主线程调用，updateNoteCache 内部自己会开后台线程
+  if (!m_NotesList || !m_NotesList->m_graphController) {
+    qWarning() << "[Graph] Controller 未就绪，跳过缓存更新";
+    return;
+  }
 
-  QFuture<void> future = QtConcurrent::run([=]() {
-    m_NotesList->m_graphController->parser()->updateNoteCache(mdFile);
-  });
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this,
-          [=]() { watcher->deleteLater(); });
-  watcher->setFuture(future);
+  m_NotesList->m_graphController->parser()->updateNoteCache(mdFile);
 }
 
 void Notes::MD2Html(QString mdFile) {

@@ -3,6 +3,8 @@
 
 #include <QAbstractItemModel>
 #include <QJsonObject>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QObject>
 #include <QPointF>
 #include <QPointer>
@@ -158,6 +160,7 @@ class NoteRelationParser : public QObject {
   QPointer<NoteGraphModel> m_model;
   NoteGraphCache m_cache;
   QString m_cachePath;
+  mutable QMutex m_cacheMutex;
 };
 
 // =================================================================================
@@ -189,9 +192,5 @@ class NoteGraphController : public QObject {
   NoteGraphModel* m_model;
   NoteRelationParser* m_parser;
 };
-
-// 初始化入口
-void registerNoteGraphTypes();
-void initializeNoteGraph();
 
 #endif  // NOTEGRAPH_H
