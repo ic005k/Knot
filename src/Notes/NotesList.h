@@ -234,8 +234,10 @@ class NotesList : public QDialog {
 
   void renameNoteBook(QString newName, int idx);
   void renameNote(QString newName, int idxNoteBook, int idxNote);
-  void delNoteBook(int idx);
-  void delNote(int idxNoteBook, int idxNote);
+
+  void delNote(int idxNote);
+
+  void newCreateNote(int idxNoteBook);
 
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;

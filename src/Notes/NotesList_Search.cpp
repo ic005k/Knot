@@ -3,7 +3,7 @@
 #include "src/MainWindow.h"
 
 // 文件搜索实现
-QStringList findMarkdownFiles(const QString& dirPath) {
+/*QStringList findMarkdownFiles(const QString& dirPath) {
   Q_UNUSED(dirPath);
 
   QList<QString> paths;
@@ -18,6 +18,48 @@ QStringList findMarkdownFiles(const QString& dirPath) {
   }
   // 使用 QSet 去重
   return QSet<QString>(paths.begin(), paths.end()).values();
+}*/
+
+QStringList findMarkdownFiles(const QString& dirPath) {
+  QDir dir(dirPath);
+  if (!dir.exists()) return {};
+
+  // 1. 仅获取文件名列表（不依赖 QDir::Time，避免不可靠的目录项排序）
+  const QStringList files =
+      dir.entryList({"*.md"}, QDir::Files | QDir::NoDotAndDotDot,
+                    QDir::Name  // 用 Name 排序作为稳定的初始顺序，开销极低
+      );
+
+  // 2. 【关键】一次性批量获取真实修改时间（O(n) 次 I/O）
+  struct NoteEntry {
+    QString path;
+    qint64 msecs;  // 用毫秒级整数比较，比 QDateTime 快一个数量级
+  };
+
+  QVector<NoteEntry> entries;
+  entries.reserve(files.size());
+
+  for (const QString& file : files) {
+    QString absPath = dir.absoluteFilePath(file);
+    QFileInfo info(absPath);
+    // lastModified() 触发真实的 stat 调用，获取准确时间
+    entries.append({absPath, info.lastModified().toMSecsSinceEpoch()});
+  }
+
+  // 3. 【关键】纯内存排序（零 I/O，O(n log n) 次整数比较）
+  std::sort(entries.begin(), entries.end(),
+            [](const NoteEntry& a, const NoteEntry& b) {
+              return a.msecs > b.msecs;  // 降序：最新的在前
+            });
+
+  // 4. 提取路径返回
+  QStringList result;
+  result.reserve(entries.size());
+  for (const auto& entry : entries) {
+    result.append(entry.path);
+  }
+  qInfo() << "result=" << result.at(0);
+  return result;
 }
 
 MySearchResult searchInFile(const QString& filePath,

@@ -134,12 +134,17 @@ void NotesList::on_actionAdd_Note_triggered() {
     return;
   }
 
+  newCreateNote(notebookIndex);
+}
+
+void NotesList::newCreateNote(int idxNoteBook) {
   if (tw->topLevelItemCount() == 0) return;
 
-  tw->setCurrentItem(pNoteBookItems.at(notebookIndex));
+  tw->setCurrentItem(pNoteBookItems.at(idxNoteBook));
 
   QString noteFile = "memo/" + m_Notes->getDateTimeStr() + "_" +
                      m_Method->generateRandom3() + ".md";
+  currentMDFile = iniDir + noteFile;
   QTreeWidgetItem* parentitem = tw->currentItem();
 
   QTreeWidgetItem* item1 = new QTreeWidgetItem(parentitem);
@@ -162,11 +167,9 @@ void NotesList::on_actionAdd_Note_triggered() {
   int count = getNotesListCount();
   setNotesListCurrentIndex(count - 1);
 
-  // clickNoteList();
+  clickNoteList(count - 1);
 
   m_Notes->updateMDFileToSyncLists();
-
-  setNoteLabel();
 
   saveNotesList();
 
@@ -843,15 +846,19 @@ void NotesList::safeExitLlama() {
   mw_one->safeCloseProgress();
 }
 
-void NotesList::delNoteBook(int idx) {
-  QTreeWidgetItem* item = pNoteBookItems[idx];
-  tw->setCurrentItem(item);
-  on_btnDel_clicked();
-}
+void NotesList::delNote(int idxNote) {
+  QString file = MyAllNotes.at(idxNote);
+  QString title = m_Notes->m_NoteManager->getNoteTitle(file);
+  file = file.replace(iniDir, "");
+  QTreeWidgetItem* recycleItem = new QTreeWidgetItem;
+  recycleItem->setText(0, title);
+  recycleItem->setText(1, file);
+  addItem(twrb, recycleItem);
 
-void NotesList::delNote(int idxNoteBook, int idxNote) {
-  QTreeWidgetItem* item = pNoteItems[idxNote];
-  tw->setCurrentItem(item);
-  on_btnDel_clicked();
-  clickNoteBook(idxNoteBook);
+  saveNotesList();
+
+  MyAllNotes.removeAt(idxNote);
+  listNoteEntry.removeAt(idxNote);
+
+  m_Notes->setNoteEntryList();
 }

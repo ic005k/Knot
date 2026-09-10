@@ -63,11 +63,15 @@ public class NoteActivity extends AppCompatActivity {
             "notebook_list"
         );
         if (notebookList != null) {
-            setNoteBookList(notebookList);
+            //setNoteBookList(notebookList);
+            setNoteEntryList(notebookList);
         }
 
         setupClickListeners();
         applyUiTheme();
+
+        // 隐藏笔记本菜单按钮
+        mBtnBookMenu.setVisibility(View.GONE);
     }
 
     private void bindView() {
@@ -90,6 +94,10 @@ public class NoteActivity extends AppCompatActivity {
         mNoteAdapter = new NoteEntryAdapter();
         mRvNoteList.setLayoutManager(new LinearLayoutManager(this));
         mRvNoteList.setAdapter(mNoteAdapter);
+        // 隐藏左侧笔记本列表
+        mRvBookList.setVisibility(View.GONE);
+        // 隐藏笔记本与笔记之间的竖分隔线
+        findViewById(R.id.note_view_divider_center).setVisibility(View.GONE);
 
         // ✅笔记列表点击回调
         mNoteAdapter.setListener((pos, title) -> {
@@ -98,7 +106,7 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        // ========== 笔记本菜单按钮 ==========
+        // ========== 笔记本菜单按钮（代码保留，按钮已隐藏） ==========
         mBtnBookMenu.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(NoteActivity.this, mBtnBookMenu);
             boolean isZh = MyActivity.zh_cn;
@@ -107,13 +115,11 @@ public class NoteActivity extends AppCompatActivity {
             String itemRename = isZh ? "重命名" : "Rename";
             String itemDeleteBook = isZh ? "删除笔记本" : "Delete Notebook";
             String item3 = isZh ? "统计" : "Statistics";
-
             popup.getMenu().add(0, 1, 0, item1);
             popup.getMenu().add(0, 2, 1, item2);
             popup.getMenu().add(0, 4, 2, itemRename);
             popup.getMenu().add(0, 5, 3, itemDeleteBook);
             popup.getMenu().add(0, 3, 4, item3);
-
             popup.setOnMenuItemClickListener(item -> {
                 int id = item.getItemId();
                 if (id == 1) {
@@ -174,11 +180,9 @@ public class NoteActivity extends AppCompatActivity {
             });
             popup.show();
         });
-
         mBtnFavorite.setOnClickListener(v ->
             PublicJavaCallCpp("note_favorite")
         );
-
         // ========== 笔记菜单按钮 ==========
         mBtnNoteMenu.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(NoteActivity.this, mBtnNoteMenu);
@@ -187,19 +191,18 @@ public class NoteActivity extends AppCompatActivity {
             String exp = isZh ? "导出" : "Export";
             String del = isZh ? "删除" : "Delete";
             String pdfOut = isZh ? "输出到PDF" : "Export to PDF";
-            String move = isZh ? "移动到" : "Move To";
             String rename = isZh ? "重命名" : "Rename";
+            String statItem = isZh ? "统计" : "Statistics";
+
+            // 移除了move（移动到）条目
             popup.getMenu().add(0, 10, 0, imp);
             popup.getMenu().add(0, 11, 1, exp);
             popup.getMenu().add(0, 12, 2, del);
             popup.getMenu().add(0, 13, 3, pdfOut);
-            popup.getMenu().add(0, 14, 4, move);
-            popup.getMenu().add(0, 15, 5, rename);
-            // 预留，暂隐藏，后续打开直接取消注释
-            // String graph    = isZh ? "关系图谱" : "Relation Graph";
-            // String history  = isZh ? "修改历史" : "Revision History";
-            // popup.getMenu().add(0,16,6, graph);
-            // popup.getMenu().add(0,17,7, history);
+            popup.getMenu().add(0, 15, 4, rename);
+            // 统计放到菜单最后一项
+            popup.getMenu().add(0, 20, 5, statItem);
+
             popup.setOnMenuItemClickListener(item -> {
                 int id = item.getItemId();
                 if (id == 10) {
@@ -229,19 +232,6 @@ public class NoteActivity extends AppCompatActivity {
                 } else if (id == 13) {
                     PublicJavaCallCpp("note_export_pdf");
                     return true;
-                } else if (id == 14) {
-                    // 移动到
-                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
-                    if (selectedNotePos == -1) {
-                        showTipDialog(
-                            isZh
-                                ? "请先选择一条笔记"
-                                : "Please select a note first"
-                        );
-                        return true;
-                    }
-                    PublicJavaCallCpp("note_move|==|" + selectedNotePos);
-                    return true;
                 } else if (id == 15) {
                     // 笔记重命名
                     int selectedNotePos = mNoteAdapter.getSelectedPosition();
@@ -255,18 +245,19 @@ public class NoteActivity extends AppCompatActivity {
                     }
                     showNoteRenameDialog(isZh, selectedNotePos);
                     return true;
+                } else if (id == 20) {
+                    // 统计，沿用原来的book_statistics指令
+                    PublicJavaCallCpp("book_statistics");
+                    return true;
                 }
-                // 预留项
-                // else if(id ==16) cmd = "note_relation_graph";
-                // else if(id ==17) cmd = "note_modify_history";
                 return false;
             });
             popup.show();
         });
-
-        mBtnNewNote.setOnClickListener(v ->
-            PublicJavaCallCpp("note_create_new")
-        );
+        mBtnNewNote.setOnClickListener(v -> {
+            // 废弃笔记本，不再校验笔记本选中状态，直接新建笔记
+            PublicJavaCallCpp("note_create_new");
+        });
         mBtnSearch.setOnClickListener(v -> PublicJavaCallCpp("note_search"));
         mBtnView.setOnClickListener(v -> {
             int selectedNoteIndex = mNoteAdapter.getSelectedPosition();

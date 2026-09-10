@@ -166,7 +166,7 @@ void Notes::appendAIResults(QString str) {
 void Notes::openNoteWindow() {
 #ifdef Q_OS_ANDROID
 
-  QStringList list1 = m_NotesList->listNoteBook;
+  QStringList list1 = m_NotesList->listNoteEntry;
 
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list1) {

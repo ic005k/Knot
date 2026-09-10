@@ -191,8 +191,6 @@ class MainWindow : public QMainWindow {
   int days = 45;
   int newHeight;
 
-  bool isMemoVisible;
-  bool isReaderVisible;
   QString treeStyle = "QTreeWidget::item {height: 28;}";
   int mainHeight = 0;
 

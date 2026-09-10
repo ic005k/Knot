@@ -223,9 +223,6 @@ bool Notes::eventFilterQwNote(QObject* watch, QEvent* event) {
 }
 
 void Notes::openEditUI() {
-  int count = m_NotesList->getNoteBookCount();
-  if (count == 0) return;
-
   qInfo() << "currentMDFile=" << currentMDFile
           << m_Notes->m_NoteManager->getNoteTitle(currentMDFile);
 
@@ -303,9 +300,6 @@ void Notes::openEditUI() {
 }
 
 void Notes::previewNote() {
-  int count = m_NotesList->getNoteBookCount();
-  if (count == 0) return;
-
   if (!QFile::exists(currentMDFile)) return;
 
   // if (!isAndroid)
@@ -441,6 +435,21 @@ void Notes::init_all_notes() {
   if (!QFile::exists(currentMDFile)) {
     loadEmptyNote();
   }
+
+  QString dirPath = iniDir + "memo";
+  MyAllNotes = findMarkdownFiles(dirPath);
+  MyNoteRecycle = m_NotesList->getRecycleNoteFiles();
+  MyAllNotes.removeIf(
+      [](const QString& f) { return MyNoteRecycle.contains(f); });
+
+  m_NotesList->listNoteEntry.clear();
+  for (int i = 0; i < MyAllNotes.count(); i++) {
+    QString file = MyAllNotes.at(i);
+    m_NotesList->listNoteEntry.append(
+        m_Notes->m_NoteManager->getNoteTitle(file));
+  }
+
+  m_Notes->m_NoteManager->getNoteTitle(currentMDFile);
 }
 
 void Notes::openNotes() {
@@ -859,26 +868,7 @@ void Notes::showNoteList() {
 void Notes::loadNotesToUI() {
   init_all_notes();
 
-  mw_one->isMemoVisible = true;
-  mw_one->isReaderVisible = false;
-
   m_NotesList->set_memo_dir();
-
-  if (tw->topLevelItemCount() == 0) {
-    return;
-  }
-
-  m_NotesList->listNoteBook.clear();
-  m_NotesList->listNoteBook = m_NotesList->loadAllNoteBook();
-
-  if (m_NotesList->getNoteBookCount() > 0) {
-    if (!m_NotesList->setCurrentItemFromMDFile(currentMDFile)) {
-      qInfo() << "不存在默认的md文件，自动选择第一个笔记本";
-      m_NotesList->activateNoteBook(m_NotesList->pNoteBookItems[0]);
-    }
-
-    m_NotesList->setNoteLabel();
-  }
 
   if (!isAndroid) {
     QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
@@ -891,32 +881,6 @@ void Notes::loadNotesToUI() {
     resize(w, h);
     m_Notes->show();
 
-    ui->listNoteBook->clear();
-    int count = m_NotesList->listNoteBook.count();
-    for (int i = 0; i < count; i++) {
-      QString str = m_NotesList->listNoteBook.at(i);
-      QStringList parts = str.split("|==|");
-
-      // 防御性检查：防止格式异常导致崩溃
-      if (parts.size() < 2) continue;
-
-      QString text = parts.at(0);
-      int indentLevel = parts.at(1).toInt();  // "0" -> 0, "1" -> 1, ...
-
-      QListWidgetItem* item = new QListWidgetItem(text);
-
-      // 按缩进级别设置左边距（每级缩进 20px，可根据需要调整）
-      if (indentLevel > 0) {
-        item->setData(Qt::UserRole, indentLevel);
-
-        QFontMetrics fm(ui->listNoteBook->font());
-        int padding = indentLevel * fm.horizontalAdvance("  ");
-        item->setData(Qt::UserRole + 1, padding);
-      }
-
-      ui->listNoteBook->addItem(item);
-    }
-    qInfo() << "NoteBookUI=" << m_NotesList->listNoteBook;
   } else
     openNoteWindow();
 

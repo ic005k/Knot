@@ -714,8 +714,11 @@ void NotesList::activateNoteBook(QTreeWidgetItem* notebookItem) {
 }
 
 void NotesList::clickNoteList(int index) {
-  // int indexBook = getNoteBookCurrentIndex();
-  // if (indexBook < 0) return;
+  currentMDFile = MyAllNotes.at(index);
+
+  return;
+
+  ////////////////////////////////////////
 
   int indexNote = index;  // getNotesListCurrentIndex();
   if (indexNote < 0) {

@@ -981,13 +981,13 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
-          if (strType.startsWith("book_delete|==|")) {
+          if (strType.startsWith("note_delete|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
 
               if (list.count() == 2) {
                 int idx = list.at(1).toInt();
-                m_NotesList->delNoteBook(idx);
+                m_NotesList->delNote(idx);
               }
             });
           }
@@ -995,6 +995,17 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           if (strType == "book_statistics") {
             QTimer::singleShot(100, mw_one,
                                [=]() { m_NotesList->on_actionStatistics(); });
+          }
+
+          if (strType.startsWith("note_create_new|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int idx = list.at(1).toInt();
+                m_NotesList->newCreateNote(idx);
+              }
+            });
           }
 
           if (strType == "back_note") {
