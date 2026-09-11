@@ -141,9 +141,10 @@ void NotesList::newCreateNote() {
   QString noteFile = "memo/" + m_Notes->getDateTimeStr() + "_" +
                      m_Method->generateRandom3() + ".md";
   currentMDFile = iniDir + noteFile;
+  noteTitle = tr("Untitled Note");
 
   MyAllNotes.insert(0, currentMDFile);
-  listNoteEntry.insert(0, tr("Untitled Note"));
+  listNoteEntry.insert(0, noteTitle);
 
   QTextEdit edit;
   edit.append("");
@@ -192,8 +193,100 @@ void NotesList::renameNote(QString newName, int idxNote) {
   m_Notes->m_NoteManager->setNoteTitle(file, newName);
   listNoteEntry.removeAt(idxNote);
   listNoteEntry.insert(idxNote, newName);
+  noteTitle = newName;
   m_Notes->setNoteEntryList();
   saveNotesList();
+}
+
+void NotesList::restoreToNotes(QStringList list) {
+  for (int i = 0; i < list.count(); i++) {
+    QString str = list.at(i);
+    QString title = str.split("===").at(0);
+    QString filePath = str.split("===").at(1);
+    MyAllNotes.insert(0, filePath);
+    listNoteEntry.insert(0, title);
+  }
+  delNoteRecycleBinItem(list);
+  saveNotesList();
+  m_Notes->setNoteEntryList();
+}
+
+void NotesList::delRecycleBinNotes(QStringList list) {
+  for (int i = 0; i < list.count(); i++) {
+    QString str = list.at(i);
+    QString filePath = str.split("===").at(1);
+
+    QString md = filePath;
+    QStringList imagesInMD = extractLocalImagesFromMarkdown(md);
+    for (int i = 0; i < imagesInMD.count(); i++) {
+      QString image_file = imagesInMD.at(i);
+      image_file = "KnotData/memo/" + image_file;
+      needDelWebDAVFiles.append(image_file);
+    }
+
+    delFile(md);
+
+    // 删除笔记后，更新图谱
+    if (m_graphController) {
+      // 🆕 精确失效该文件的图谱缓存
+      // m_NotesList->m_graphController->parser()->invalidateNoteCache(
+      //    md, NoteRelationParser::CACHE_DELETE);
+    }
+
+    // 删除笔记搜索向量
+    m_Notes->removeNoteVector(md);
+
+    QString json = m_Notes->getCurrentJSON(md);
+    delFile(json);
+
+    QStringList tempList = m_Notes->notes_sync_files;
+    for (int i = 0; i < tempList.count(); i++) {
+      QString file = tempList.at(i);
+      QString baseFlag = m_Method->getBaseFlag(md);
+      if (file.contains(baseFlag)) m_Notes->notes_sync_files.removeOne(file);
+    }
+
+    qDebug() << "删除笔记后的同步文件列表：" << m_Notes->notes_sync_files;
+
+    setDelNoteFlag(filePath.replace(iniDir, ""));
+
+    isDelNoteRecycle = true;
+  }
+
+  delNoteRecycleBinItem(list);
+}
+
+void NotesList::delNoteRecycleBinItem(const QStringList& list) {
+  QTreeWidgetItem* root = twrb->topLevelItem(0);
+  if (!root || list.isEmpty()) return;
+
+  // 预处理：将待匹配路径提取到 HashSet 中，查找复杂度从 O(m) 降为 O(1)
+  QSet<QString> pathSet;
+  for (const QString& entry : list) {
+    int sepIdx = entry.indexOf("===");
+    if (sepIdx != -1) pathSet.insert(entry.mid(sepIdx + 3));
+  }
+
+  // ✅ 必须倒序遍历！正序删除会导致索引错位跳过元素或越界崩溃
+  for (int i = root->childCount() - 1; i >= 0; --i) {
+    QTreeWidgetItem* child = root->child(i);
+    if (!child) continue;
+
+    const QString childPath = child->text(1);
+
+    // 检查传入的 filePath 是否包含子项的 text(1)
+    bool shouldRemove = false;
+    for (const QString& targetPath : pathSet) {
+      if (targetPath.contains(childPath)) {
+        shouldRemove = true;
+        break;
+      }
+    }
+
+    if (shouldRemove) {
+      delete root->takeChild(i);  // takeChild 先安全摘除，再 delete 释放内存
+    }
+  }
 }
 
 void NotesList::on_actionMoveUp_Note_triggered() {
@@ -225,31 +318,7 @@ void NotesList::on_actionMoveDown_Note_triggered() {
   setNotesListCurrentIndex(indexNote + 1);
 }
 
-void NotesList::on_actionImport_Note_triggered() {
-  int indexBook = getNoteBookCurrentIndex();
-  if (indexBook < 0) return;
-
-  QTreeWidgetItem* oldItem = tw->currentItem();
-  bool isNoteBook = pNoteBookItems.contains(oldItem);
-  if (!isNoteBook) {
-    tw->setCurrentItem(oldItem->parent());
-  }
-
-  int fileCount = on_btnImport_clicked();
-
-  while (!isImportFilesEnd) {
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-    QThread::msleep(1);
-  }
-
-  mw_one->safeCloseProgress();
-
-  if (fileCount > 0) {
-    clickNoteBook(indexBook);
-
-    saveNotesList();
-  }
-}
+void NotesList::on_actionImport_Note_triggered() { on_btnImport_clicked(); }
 
 void NotesList::on_actionExport_Note_triggered() {
   int indexBook = getNoteBookCurrentIndex();

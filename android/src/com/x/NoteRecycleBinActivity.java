@@ -186,7 +186,7 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
         mBottomBtnContainer.setBackgroundColor(cardBgColor);
 
         Button btnMove = createBottomTextButton(
-            MyActivity.zh_cn ? "移动" : "Move",
+            MyActivity.zh_cn ? "恢复" : "Restore",
             0xFF3478E8
         );
         btnMove.setOnClickListener(v -> moveSelected());
@@ -238,8 +238,8 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
                 .setTitle(MyActivity.zh_cn ? "未选择笔记" : "No Note Selected")
                 .setMessage(
                     MyActivity.zh_cn
-                        ? "请先选择要移动的笔记。"
-                        : "Please select notes to move first."
+                        ? "请先选择要恢复的笔记。"
+                        : "Please select notes to restore first."
                 )
                 .setPositiveButton(MyActivity.zh_cn ? "确定" : "OK", null)
                 .show();
@@ -250,7 +250,8 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
             if (sb.length() > 0) sb.append("|==|");
             sb.append(item);
         }
-        PublicJavaCallCpp("note_recycle_bin_move|==|" + sb.toString());
+        PublicJavaCallCpp("note_recycle_bin_restore|==|" + sb.toString());
+        finish();
     }
 
     private void deleteSelected() {
@@ -282,6 +283,10 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
                 PublicJavaCallCpp(
                     "note_recycle_bin_delete|==|" + sb.toString()
                 );
+                // ========== 从数据源移除选中条目 ==========
+                for (String delItem : mSelectedItems) {
+                    mAllRawList.remove(delItem);
+                }
                 mSelectedItems.clear();
                 mAdapter.notifyDataSetChanged();
             })

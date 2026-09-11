@@ -18,6 +18,8 @@ public class NoteActivity extends AppCompatActivity {
 
     public static NoteActivity mInstance = null;
 
+    private androidx.appcompat.app.AlertDialog mAiLoadingDialog = null;
+
     private boolean mIsDark = false;
     //顶部按钮
     private ImageView mBtnBookMenu;
@@ -209,7 +211,16 @@ public class NoteActivity extends AppCompatActivity {
                     PublicJavaCallCpp("note_import");
                     return true;
                 } else if (id == 11) {
-                    PublicJavaCallCpp("note_export");
+                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    if (selectedNotePos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一条笔记"
+                                : "Please select a note first"
+                        );
+                        return true;
+                    }
+                    PublicJavaCallCpp("note_export|==|" + selectedNotePos);
                     return true;
                 } else if (id == 12) {
                     // 删除笔记
@@ -340,6 +351,14 @@ public class NoteActivity extends AppCompatActivity {
         runOnUiThread(() -> {
             mNoteAdapter.setSelectedPosition(pos);
         });
+    }
+
+    /**
+     * JNI调用：获取当前选中笔记索引
+     * @return 选中位置，无选中返回 -1
+     */
+    public int getSelectedNote() {
+        return mNoteAdapter.getSelectedPosition();
     }
 
     /**
@@ -572,9 +591,37 @@ public class NoteActivity extends AppCompatActivity {
         MyActivity.mInstance.showCommonMsgDialog(this, finalText);
     }
 
+    /**
+     * C++调用：打开AI等待弹窗，复用MyActivity公共showAiLoadingDialog
+     */
+    public void showLoadingDialog() {
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            if (mAiLoadingDialog == null || !mAiLoadingDialog.isShowing()) {
+                mAiLoadingDialog = MyActivity.showAiLoadingDialog(this);
+            }
+        });
+    }
+
+    /**
+     * C++调用：关闭AI等待弹窗
+     */
+    public void dismissLoadingDialog() {
+        runOnUiThread(() -> {
+            MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
+            mAiLoadingDialog = null;
+        });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mInstance = null;
+
+        // 销毁页面时，强制关闭等待弹窗，防止泄漏
+        runOnUiThread(() -> {
+            MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
+            mAiLoadingDialog = null;
+        });
     }
 }

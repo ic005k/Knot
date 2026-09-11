@@ -128,18 +128,19 @@ void Notes::javaNoteToQMLNote() {
   if (isSetNewNoteTitle()) {
     TitleGenerator generator;
     new_title = generator.genNewTitle(newText);
-    renameTitle(true);
+    int pos = getSelectedNote();
+    if (pos == -1) pos = 0;
+    m_NotesList->renameNote(new_title, pos);
   }
 
   zipNoteToSyncList();
 
-  startBackgroundTaskUpdateNoteGraph(currentMDFile);
+  // startBackgroundTaskUpdateNoteGraph(currentMDFile);
 }
 
 void Notes::refreshNote() {
   QFuture<void> future = QtConcurrent::run([=]() { MD2Html(currentMDFile); });
 
-  // 使用 QFutureWatcher 监控进度
   QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     refreshLocalHtmlFileInAndroid();
@@ -206,5 +207,52 @@ void Notes::setNoteEntryList() {
 
   qInfo() << "listNoteEntry=" << m_NotesList->listNoteEntry;
 
+#endif
+}
+
+int Notes::getSelectedNote() {
+#ifdef Q_OS_ANDROID
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/NoteActivity", "mInstance", "Lcom/x/NoteActivity;");
+
+  if (instance.isValid()) {
+    return instance.callMethod<int>("getSelectedNote", "()I");
+  }
+
+#endif
+  return -1;
+}
+
+void Notes::setSelectedNote(int targetPos) {
+#ifdef Q_OS_ANDROID
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/NoteActivity", "mInstance", "Lcom/x/NoteActivity;");
+
+  if (instance.isValid()) {
+    instance.callMethod<void>("setSelectedNote", "(I)V", targetPos);
+  }
+
+#endif
+}
+
+void Notes::showLoadingDialog() {
+#ifdef Q_OS_ANDROID
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/NoteActivity", "mInstance", "Lcom/x/NoteActivity;");
+  if (instance.isValid()) {
+    instance.callMethod<void>("showLoadingDialog", "()V");
+  }
+#endif
+}
+
+void Notes::dismissLoadingDialog() {
+#ifdef Q_OS_ANDROID
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/NoteActivity", "mInstance", "Lcom/x/NoteActivity;");
+  if (instance.isValid()) {
+    instance.callMethod<void>("dismissLoadingDialog", "()V");
+  }
 #endif
 }

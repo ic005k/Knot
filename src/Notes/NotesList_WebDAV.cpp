@@ -92,8 +92,8 @@ void NotesList::needDelNotes() {
 
     if (isDelMDOk) {
       // 删除笔记后，删除图谱缓存
-      m_NotesList->m_graphController->parser()->invalidateNoteCache(
-          mdFile, NoteRelationParser::CACHE_DELETE);
+      // m_NotesList->m_graphController->parser()->invalidateNoteCache(
+      //    mdFile, NoteRelationParser::CACHE_DELETE);
 
       // 删除笔记搜索向量
       m_Notes->removeNoteVector(mdFile);

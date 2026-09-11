@@ -942,17 +942,34 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                []() { mw_one->m_Todo->on_DelAlarm(); });
           }
 
-          // Notes/////////////////////////////////////////////////////////////
-
-          if (strType.startsWith("book_create_new|==|")) {
+          // Notes Recyclebin ////////////////////////////////////////////////
+          if (strType.startsWith("note_recycle_bin_restore|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
-
-              if (list.count() == 2) {
-                QString name = list.at(1);
-                m_NotesList->newNoteBook(name);
+              QStringList list1;
+              for (int i = 0; i < list.count(); i++) {
+                if (i != 0) list1.append(list.at(i));
               }
+              m_NotesList->restoreToNotes(list1);
             });
+          }
+
+          if (strType.startsWith("note_recycle_bin_delete|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              QStringList list1;
+              for (int i = 0; i < list.count(); i++) {
+                if (i != 0) list1.append(list.at(i));
+              }
+              m_NotesList->delRecycleBinNotes(list1);
+            });
+          }
+
+          // Notes/////////////////////////////////////////////////////////////
+
+          if (strType == "note_import") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { m_NotesList->on_btnImport_clicked(); });
           }
 
           if (strType.startsWith("book_create_sub|==|")) {

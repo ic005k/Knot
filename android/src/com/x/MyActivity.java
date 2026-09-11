@@ -3064,8 +3064,8 @@ public class MyActivity
         }
         boolean isDark = ImmersiveUtil.applyRealImmersive(act);
         String msg = MyActivity.zh_cn
-            ? "AI分析中，请稍候..."
-            : "AI analyzing, please wait...";
+            ? "处理中，请稍后..."
+            : "Processing, please wait...";
 
         LinearLayout layout = new LinearLayout(act);
         layout.setOrientation(LinearLayout.HORIZONTAL);

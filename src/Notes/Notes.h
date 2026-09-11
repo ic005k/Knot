@@ -256,7 +256,11 @@ class Notes : public QDialog {
 
   void setNoteEntryList();
 
- protected:
+  int getSelectedNote();
+  void setSelectedNote(int targetPos);
+  void showLoadingDialog();
+  void dismissLoadingDialog();
+  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;

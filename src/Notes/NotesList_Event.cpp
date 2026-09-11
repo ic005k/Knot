@@ -391,11 +391,9 @@ void NotesList::on_btnExport_clicked() {
 }
 
 int NotesList::on_btnImport_clicked() {
-  if (tw->topLevelItemCount() == 0) return 0;
-
 #ifdef Q_OS_ANDROID
   // 安卓：点击即显示进度条，锁定界面
-  mw_one->showProgress();
+  // m_Notes->showLoadingDialog();
 #endif
 
   QStringList fileNames =
@@ -404,14 +402,13 @@ int NotesList::on_btnImport_clicked() {
 
   if (fileNames.isEmpty()) {
 #ifdef Q_OS_ANDROID
-    mw_one->safeCloseProgress();
+    // m_Notes->dismissLoadingDialog();
 #endif
     isImportFilesEnd = true;
     return 0;
   }
 
   QStringList MDFileList;
-  QTreeWidgetItem* item = tw->currentItem();
 
   for (const QString& fileName : std::as_const(fileNames)) {
     QString strFile = fileName.toLower();
@@ -422,6 +419,10 @@ int NotesList::on_btnImport_clicked() {
     }
   }
 
+#ifdef Q_OS_ANDROID
+  m_Notes->showLoadingDialog();
+#endif
+
 #ifndef Q_OS_ANDROID
   // 桌面：选择完成后显示进度条
   mw_one->showProgress();
@@ -431,28 +432,31 @@ int NotesList::on_btnImport_clicked() {
 
   if (MDFileList.size() > 1000) {
     MDFileList.resize(10);
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg(appName,
-                 tr("A maximum of 10 files can be imported at a time."), 1);
+    if (!isAndroid) {
+      auto msg = std::make_unique<ShowMessage>(mw_one);
+      msg->showMsg(appName,
+                   tr("A maximum of 10 files can be imported at a time."), 1);
+    }
   }
 
   // 后台线程处理所有文件（全部完成才会进入 finished）
-  QFuture<void> future = QtConcurrent::run([MDFileList, item]() {
+  QFuture<void> future = QtConcurrent::run([this, MDFileList]() {
+    qInfo() << "开始后台处理导入的文件...";
     for (int i = 0; i < MDFileList.size(); ++i) {
       const QString& fileName = MDFileList[i];
       if (QFile::exists(fileName)) {
         QFileInfo fi(fileName);
         QString name = fi.completeBaseName();
 
-        QTreeWidgetItem* item1 = new QTreeWidgetItem(item);
-        item1->setText(0, name);
+        listNoteEntry.insert(0, name);
 
         QString a = "memo/" + m_Notes->getDateTimeStr() + "_" +
                     QString::number(i) + m_Method->generateRandom3() + ".md";
         currentMDFile = iniDir + a;
 
         QFile::copy(fileName, currentMDFile);
-        item1->setText(1, a);
+
+        MyAllNotes.insert(0, currentMDFile);
 
         m_Notes->m_NoteManager->setNoteTitle(currentMDFile, name);
 
@@ -474,6 +478,20 @@ int NotesList::on_btnImport_clicked() {
 
             // 统一关闭进度条（双端都在这里关闭）
             mw_one->safeCloseProgress();
+
+            m_Notes->dismissLoadingDialog();
+
+            saveNotesList();
+
+            QMetaObject::invokeMethod(
+                this,
+                [this]() {
+                  qWarning() << "[IMPORT] setNoteEntryList invoked on main "
+                                "thread, list size:"
+                             << listNoteEntry.size();
+                  m_Notes->setNoteEntryList();
+                },
+                Qt::QueuedConnection);
 
             watcher->deleteLater();
           });
@@ -715,6 +733,7 @@ void NotesList::activateNoteBook(QTreeWidgetItem* notebookItem) {
 
 void NotesList::clickNoteList(int index) {
   currentMDFile = MyAllNotes.at(index);
+  noteTitle = listNoteEntry.at(index);
 
   return;
 

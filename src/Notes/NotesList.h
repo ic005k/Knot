@@ -75,6 +75,8 @@ class NotesList : public QDialog {
   Ui::NotesList* ui;
 
   QStringList listNoteBook, listNoteEntry;
+  void on_actionImport_Note_triggered();
+  void on_actionExport_Note_triggered();
 
   void activateNoteBook(QTreeWidgetItem* notebookItem);
 
@@ -244,7 +246,10 @@ class NotesList : public QDialog {
   void initNotesList(const QJsonObject& rootObj);
   void initRecycle(const QJsonObject& rootObj);
 
- protected:
+  void restoreToNotes(QStringList list);
+  void delRecycleBinNotes(QStringList list);
+  void delNoteRecycleBinItem(const QStringList &list);
+  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;
@@ -370,8 +375,6 @@ class NotesList : public QDialog {
   void on_actionRename_Note_triggered();
   void on_actionMoveUp_Note_triggered();
   void on_actionMoveDown_Note_triggered();
-  void on_actionImport_Note_triggered();
-  void on_actionExport_Note_triggered();
 
   bool moveItem(QTreeWidget* tw);
 

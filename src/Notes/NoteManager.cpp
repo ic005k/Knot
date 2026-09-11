@@ -172,7 +172,10 @@ void NoteManager::loadMetadataFromJson(const QJsonObject& dataObj) {
 }
 
 bool NoteManager::hasMetadata(const QString& filePath) const {
-  QString f = filePath;
-  f = f.replace(iniDir, "");
-  return m_metadataMap.contains(f);
+  // ✅ 与其他函数保持一致，统一转为绝对路径/标准路径后查询
+  QString normalized = normalizePath(filePath);
+
+  // qInfo() << "Checking:" << normalized << "Keys:" << m_metadataMap.keys(); //
+  // 调试用
+  return m_metadataMap.contains(normalized);
 }
