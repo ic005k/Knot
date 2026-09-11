@@ -812,6 +812,23 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { mw_one->on_actionAbout(); });
           }
 
+          // Tab Recyclebin //////////////////////////////////////////////
+          if (strType.startsWith("tab_recycle_bin_delete|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              QString tabName = list.at(1);
+              QString tabFilePath = list.at(2);
+            });
+          }
+
+          if (strType.startsWith("tab_recycle_bin_restore|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              QString tabName = list.at(1);
+              QString tabFilePath = list.at(2);
+            });
+          }
+
           // Todo ========================================================
           if (strType == "back_todo") {
             QTimer::singleShot(100, mw_one, [=]() {
@@ -972,14 +989,22 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                [=]() { m_NotesList->on_btnImport_clicked(); });
           }
 
-          if (strType.startsWith("book_create_sub|==|")) {
+          if (strType.startsWith("note_export|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
+              if (list.count() == 2) {
+                int idx = list.at(1).toInt();
+                m_NotesList->on_btnExport_clicked(idx);
+              }
+            });
+          }
 
-              if (list.count() == 3) {
-                QString name = list.at(1);
-                int idx = list.at(2).toInt();
-                m_NotesList->newSubNoteBook(name, idx);
+          if (strType.startsWith("note_export_pdf|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              if (list.count() == 2) {
+                int idx = list.at(1).toInt();
+                m_Notes->on_btnPDF_clicked();
               }
             });
           }
@@ -1008,7 +1033,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
-          if (strType == "book_statistics") {
+          if (strType == "notes_statistics") {
             QTimer::singleShot(100, mw_one,
                                [=]() { m_NotesList->on_actionStatistics(); });
           }

@@ -135,6 +135,8 @@ public class TabRecycleBinActivity extends AppCompatActivity {
                     (d, w) -> {
                         String item = mRawDataList.get(mSelectedPos);
                         PublicJavaCallCpp("tab_recycle_bin_delete|==|" + item);
+                        // 从列表数据源删掉这条
+                        mRawDataList.remove(mSelectedPos);
                         mSelectedPos = -1;
                         mAdapter.notifyDataSetChanged();
                     }
@@ -147,6 +149,7 @@ public class TabRecycleBinActivity extends AppCompatActivity {
             if (mSelectedPos < 0) return;
             String item = mRawDataList.get(mSelectedPos);
             PublicJavaCallCpp("tab_recycle_bin_restore|==|" + item);
+            mRawDataList.remove(mSelectedPos);
             mSelectedPos = -1;
             mAdapter.notifyDataSetChanged();
         });

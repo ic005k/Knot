@@ -138,6 +138,9 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
     if (m_Method) {
       m_Method->closeGrayWindows();
     }
+    if (isAndroid) {
+      openNoteWindow();
+    }
     return false;
   }
 
@@ -145,6 +148,9 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
   if (pageSizeIndex == -1) {
     if (m_Method) {
       m_Method->closeGrayWindows();
+    }
+    if (isAndroid) {
+      openNoteWindow();
     }
     return false;
   }
@@ -168,6 +174,9 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
     if (m_Method) {
       m_Method->closeGrayWindows();
     }
+    if (isAndroid) {
+      openNoteWindow();
+    }
     return false;
   }
 
@@ -175,6 +184,9 @@ bool Notes::selectPDFFormat(QPrinter* printer) {
   if (orientationIndex == -1) {
     if (m_Method) {
       m_Method->closeGrayWindows();
+    }
+    if (isAndroid) {
+      openNoteWindow();
     }
     return false;
   }
@@ -254,6 +266,7 @@ void Notes::on_btnPDF_clicked() {
                                              "*/*");
         }
       }
+      openNoteWindow();
     }
   }
 

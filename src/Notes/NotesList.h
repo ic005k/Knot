@@ -248,8 +248,9 @@ class NotesList : public QDialog {
 
   void restoreToNotes(QStringList list);
   void delRecycleBinNotes(QStringList list);
-  void delNoteRecycleBinItem(const QStringList &list);
-  protected:
+  void delNoteRecycleBinItem(const QStringList& list);
+
+ protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;
@@ -274,7 +275,7 @@ class NotesList : public QDialog {
 
   int on_btnImport_clicked();
 
-  void on_btnExport_clicked();
+  void on_btnExport_clicked(int idx);
 
   void on_btnRecycle();
 

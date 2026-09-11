@@ -254,6 +254,8 @@ void NotesList::delRecycleBinNotes(QStringList list) {
   }
 
   delNoteRecycleBinItem(list);
+
+  saveNotesList();
 }
 
 void NotesList::delNoteRecycleBinItem(const QStringList& list) {
@@ -327,7 +329,7 @@ void NotesList::on_actionExport_Note_triggered() {
   if (indexBook < 0) return;
   if (indexNote < 0) return;
 
-  on_btnExport_clicked();
+  on_btnExport_clicked(indexNote);
 }
 
 void NotesList::show_NoteBookPopMenu(int qmlIndex) {
@@ -627,8 +629,7 @@ void NotesList::on_actionStatistics() {
 
     mw_one->safeCloseProgress();
 
-    QString strTip = tr("NoteBook:") + QString::number(countNoteBook) + "\n\n" +
-                     tr("Local Notes:") + QString::number(*notesCountPtr) +
+    QString strTip = tr("Local Notes:") + QString::number(*notesCountPtr) +
                      "\n\n" + tr("Remote Notes:") +
                      QString::number(m_CloudBackup->m_currentRemoteNotesCount) +
                      "\n\n" + tr("Images:") + QString::number(*imgCountPtr) +

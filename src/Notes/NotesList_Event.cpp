@@ -366,13 +366,8 @@ void NotesList::on_btnUp_clicked() {
   }
 }
 
-void NotesList::on_btnExport_clicked() {
-  if (tw->topLevelItemCount() == 0) return;
-
-  QTreeWidgetItem* item = tw->currentItem();
-  if (item->parent() == NULL) return;
-
-  QString name = item->text(0);
+void NotesList::on_btnExport_clicked(int idx) {
+  QString name = listNoteEntry.at(idx);
   name = name + ".md";
   QString fileName;
   QFileDialog fd;
@@ -380,7 +375,7 @@ void NotesList::on_btnExport_clicked() {
 
   if (fileName == "") return;
 
-  QString mdfile = iniDir + item->text(1);
+  QString mdfile = MyAllNotes.at(idx);
 
   QString str = loadText(mdfile);
   QTextEdit* edit = new QTextEdit();
@@ -388,23 +383,19 @@ void NotesList::on_btnExport_clicked() {
   edit->setPlainText(str);
 
   TextEditToFile(edit, fileName);
+  delete edit;
 }
 
 int NotesList::on_btnImport_clicked() {
-#ifdef Q_OS_ANDROID
-  // 安卓：点击即显示进度条，锁定界面
-  // m_Notes->showLoadingDialog();
-#endif
-
   QStringList fileNames =
       QFileDialog::getOpenFileNames(this, tr("Knot"), "", tr("MD File (*.*)"));
   qDebug() << "Import Files:" << fileNames;
 
   if (fileNames.isEmpty()) {
-#ifdef Q_OS_ANDROID
-    // m_Notes->dismissLoadingDialog();
-#endif
     isImportFilesEnd = true;
+    if (isAndroid) {
+      m_Notes->openNoteWindow();
+    }
     return 0;
   }
 
@@ -419,25 +410,9 @@ int NotesList::on_btnImport_clicked() {
     }
   }
 
-#ifdef Q_OS_ANDROID
-  m_Notes->showLoadingDialog();
-#endif
-
-#ifndef Q_OS_ANDROID
-  // 桌面：选择完成后显示进度条
   mw_one->showProgress();
-#endif
 
   isImportFilesEnd = false;
-
-  if (MDFileList.size() > 1000) {
-    MDFileList.resize(10);
-    if (!isAndroid) {
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg(appName,
-                   tr("A maximum of 10 files can be imported at a time."), 1);
-    }
-  }
 
   // 后台线程处理所有文件（全部完成才会进入 finished）
   QFuture<void> future = QtConcurrent::run([this, MDFileList]() {
@@ -483,15 +458,9 @@ int NotesList::on_btnImport_clicked() {
 
             saveNotesList();
 
-            QMetaObject::invokeMethod(
-                this,
-                [this]() {
-                  qWarning() << "[IMPORT] setNoteEntryList invoked on main "
-                                "thread, list size:"
-                             << listNoteEntry.size();
-                  m_Notes->setNoteEntryList();
-                },
-                Qt::QueuedConnection);
+            if (isAndroid) {
+              m_Notes->openNoteWindow();
+            }
 
             watcher->deleteLater();
           });

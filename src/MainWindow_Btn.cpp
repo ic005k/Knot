@@ -965,6 +965,9 @@ void MainWindow::onAndroidBackHandle() {
   if (m_PrintPDF != nullptr) {
     if (m_PrintPDF->isVisible()) {
       m_PrintPDF->close();
+
+      m_Notes->openNoteWindow();
+
       return;
     }
   }

@@ -209,6 +209,7 @@ public class NoteActivity extends AppCompatActivity {
                 int id = item.getItemId();
                 if (id == 10) {
                     PublicJavaCallCpp("note_import");
+                    finish();
                     return true;
                 } else if (id == 11) {
                     int selectedNotePos = mNoteAdapter.getSelectedPosition();
@@ -241,7 +242,17 @@ public class NoteActivity extends AppCompatActivity {
                     );
                     return true;
                 } else if (id == 13) {
-                    PublicJavaCallCpp("note_export_pdf");
+                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    if (selectedNotePos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一条笔记"
+                                : "Please select a note first"
+                        );
+                        return true;
+                    }
+                    PublicJavaCallCpp("note_export_pdf|==|" + selectedNotePos);
+                    finish();
                     return true;
                 } else if (id == 15) {
                     // 笔记重命名
@@ -258,7 +269,7 @@ public class NoteActivity extends AppCompatActivity {
                     return true;
                 } else if (id == 20) {
                     // 统计，沿用原来的book_statistics指令
-                    PublicJavaCallCpp("book_statistics");
+                    PublicJavaCallCpp("notes_statistics");
                     return true;
                 }
                 return false;
