@@ -719,8 +719,9 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               QString kw = list.at(1);
-              QTimer::singleShot(
-                  0, mw_one, [kw]() { mw_one->on_btnStartSearch_clicked(kw); });
+              QTimer::singleShot(100, mw_one, [kw]() {
+                mw_one->on_btnStartSearch_clicked(kw);
+              });
             }
           }
 
@@ -750,7 +751,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               QString name = list.at(1);
-              QTimer::singleShot(0, mw_one, [name]() {
+              QTimer::singleShot(100, mw_one, [name]() {
                 mw_one->addTab(name);
                 m_Method->refreshMainEntranceCards();
               });
@@ -761,7 +762,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               QString newName = list.at(1);
-              QTimer::singleShot(0, mw_one, [newName]() {
+              QTimer::singleShot(100, mw_one, [newName]() {
                 mw_one->renameTab(newName);
                 m_Method->refreshMainEntranceCards();
               });
@@ -773,7 +774,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             if (list.size() == 3) {
               // QString rawItem = list.at(1);
               // QString flag = list.at(2);
-              QTimer::singleShot(0, mw_one, []() {
+              QTimer::singleShot(100, mw_one, []() {
                 mw_one->delTab();
                 m_Method->refreshMainEntranceCards();
               });
@@ -854,7 +855,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               int index = list.at(1).toInt();
-              QTimer::singleShot(0, mw_one, [index]() {
+              QTimer::singleShot(100, mw_one, [index]() {
                 mw_one->m_Todo->delItemRecycle(index);
               });
             }
@@ -864,7 +865,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               QString todoContent = list.at(1);
-              QTimer::singleShot(0, mw_one, [todoContent]() {
+              QTimer::singleShot(100, mw_one, [todoContent]() {
                 mw_one->m_Todo->addToList(todoContent, false);
               });
             }
@@ -874,7 +875,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               QString todoContent = list.at(1);
-              QTimer::singleShot(0, mw_one, [todoContent]() {
+              QTimer::singleShot(100, mw_one, [todoContent]() {
                 mw_one->m_Todo->addToList(todoContent, true);
               });
             }
@@ -884,8 +885,9 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               int index = list.at(1).toInt();
-              QTimer::singleShot(
-                  0, mw_one, [index]() { mw_one->m_Todo->on_btnHigh(index); });
+              QTimer::singleShot(100, mw_one, [index]() {
+                mw_one->m_Todo->on_btnHigh(index);
+              });
             }
           }
 
@@ -894,7 +896,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             if (list.size() == 2) {
               int index = list.at(1).toInt();
               QTimer::singleShot(
-                  0, mw_one, [index]() { mw_one->m_Todo->on_btnLow(index); });
+                  100, mw_one, [index]() { mw_one->m_Todo->on_btnLow(index); });
             }
           }
 
@@ -903,7 +905,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             if (list.size() == 3) {
               int index = list.at(1).toInt();
               QString strText = list.at(2);
-              QTimer::singleShot(0, mw_one, [index, strText]() {
+              QTimer::singleShot(100, mw_one, [index, strText]() {
                 mw_one->m_Todo->modifyTodoText(index, strText);
               });
             }
@@ -913,7 +915,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               int index = list.at(1).toInt();
-              QTimer::singleShot(0, mw_one, [index]() {
+              QTimer::singleShot(100, mw_one, [index]() {
                 mw_one->m_Todo->addToRecycle(index);
               });
             }
@@ -923,7 +925,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               int index = list.at(1).toInt();
-              QTimer::singleShot(0, mw_one, [index]() {
+              QTimer::singleShot(100, mw_one, [index]() {
                 mw_one->m_Todo->on_btnSetTime(index);
               });
             }
@@ -949,7 +951,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               int m = parts[12].toInt();
 
               // 切到UI线程执行业务接口
-              QTimer::singleShot(0, mw_one, [=]() {
+              QTimer::singleShot(100, mw_one, [=]() {
                 mw_one->m_Todo->on_SetAlarm(w1, w2, w3, w4, w5, w6, w7, y, mon,
                                             d, h, m);
               });
@@ -957,7 +959,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           }
 
           if (strType == "todo_alarm_delete") {
-            QTimer::singleShot(0, mw_one,
+            QTimer::singleShot(100, mw_one,
                                []() { mw_one->m_Todo->on_DelAlarm(); });
           }
 
@@ -1187,7 +1189,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               int index = list.at(1).toInt();
-              QTimer::singleShot(0, mw_one,
+              QTimer::singleShot(100, mw_one,
                                  [index]() { m_Steps->getGpsTrack(index); });
             }
           }
@@ -1196,7 +1198,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               int index = list.at(1).toInt();
-              QTimer::singleShot(0, mw_one,
+              QTimer::singleShot(100, mw_one,
                                  [index]() { m_Steps->getRouteList(index); });
             }
           }
@@ -1206,13 +1208,13 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             if (list.size() == 2) {
               QString y = QString::number(m_Steps->nYear);
               int m = m_Steps->nMonth;
-              QTimer::singleShot(0, mw_one,
+              QTimer::singleShot(100, mw_one,
                                  [y, m]() { m_Steps->getMySportData(y, 0); });
             }
           }
 
           if (strType == "step_ai_analyse") {
-            QTimer::singleShot(0, mw_one,
+            QTimer::singleShot(100, mw_one,
                                []() { mw_one->on_btnAISteps_clicked(); });
           }
           //===========================================================

@@ -210,6 +210,13 @@ public class MyEventSearchActivity extends AppCompatActivity {
         mRootLayout.addView(btnBack);
 
         setContentView(mRootLayout);
+
+        // 加载上次搜索关键词并自动搜索
+        String lastKw = loadLastKeyword();
+        if (!TextUtils.isEmpty(lastKw)) {
+            mEtKeyword.setText(lastKw);
+            triggerSearch();
+        }
     }
 
     /** 触发搜索，调用C++ */
@@ -219,6 +226,12 @@ public class MyEventSearchActivity extends AppCompatActivity {
         //搜索新结果，重置选中状态
         mSelectedPosition = -1;
         mAdapter.setSelectedIndex(-1);
+
+        // ==========发起搜索时，直接清空旧列表，清除上次结果
+        mResultList.clear();
+        mAdapter.notifyDataSetChanged();
+        // 直接显示结果0
+        mTvResultCount.setText(MyActivity.zh_cn ? "结果：0" : "Result: 0");
     }
 
     /** C++回调推送搜索结果：全部有效条目，不再限制5条，仅过滤空字符串 */
@@ -234,12 +247,13 @@ public class MyEventSearchActivity extends AppCompatActivity {
             //收到新搜索结果，重置选中
             mSelectedPosition = -1;
             mAdapter.setSelectedIndex(-1);
-
             mTvResultCount.setText(
                 MyActivity.zh_cn
                     ? "结果：" + mResultList.size()
                     : "Result: " + mResultList.size()
             );
+            // 保证标签一直可见
+            mTvResultCount.setVisibility(View.VISIBLE);
             mAdapter.notifyDataSetChanged();
         });
     }
@@ -251,6 +265,10 @@ public class MyEventSearchActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        // 页面销毁时，保存当前输入框的关键词
+        String currentKw = mEtKeyword.getText().toString().trim();
+        saveLastKeyword(currentKw);
+
         super.onDestroy();
         if (mBackCallback != null) mBackCallback.remove();
         mInstance = null;
@@ -435,5 +453,19 @@ public class MyEventSearchActivity extends AppCompatActivity {
             float density = mCtx.getResources().getDisplayMetrics().density;
             return (int) (dpVal * density + 0.5f);
         }
+    }
+
+    private void saveLastKeyword(String kw) {
+        getSharedPreferences("my_event_search_pref", Context.MODE_PRIVATE)
+            .edit()
+            .putString("last_keyword", kw)
+            .apply();
+    }
+
+    private String loadLastKeyword() {
+        return getSharedPreferences(
+            "my_event_search_pref",
+            Context.MODE_PRIVATE
+        ).getString("last_keyword", "");
     }
 }

@@ -327,7 +327,8 @@ void MainWindow::on_btnStartSearch_clicked(const QString& searchStr) {
 
   if (searchStr.length() == 0) return;
 
-  showProgress();
+  if (!isAndroid) showProgress();
+
   m_Method->data_for_search = m_Method->exportAllDataForSearch();
 
   qDebug() << "ExportAllDataForSearch:" << m_Method->data_for_search.size();
