@@ -394,6 +394,7 @@ class MainWindow : public QMainWindow {
   void showEvent(QShowEvent* event) override;
 
  public slots:
+  void on_btnAISteps_clicked();
   void on_btnRecentOpen_clicked();
 
   void on_btnBackAIAPIList_clicked();
@@ -631,10 +632,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnOkViewCate_clicked();
 
-  void on_btnDelTabRecycle_clicked();
-
-  void on_btnRestoreTab_clicked();
-
   void on_btnDelBakFile_clicked();
 
   void on_btnDelNoteRecycle_clicked();
@@ -668,34 +665,6 @@ class MainWindow : public QMainWindow {
   void on_editCategory_textChanged(const QString& arg1);
 
   void on_editDetails_textChanged();
-
-  void on_hsH_valueChanged(int value);
-
-  void on_hsM_valueChanged(int value);
-
-  void on_btn7_clicked();
-
-  void on_btn8_clicked();
-
-  void on_btn9_clicked();
-
-  void on_btn4_clicked();
-
-  void on_btn5_clicked();
-
-  void on_btn6_clicked();
-
-  void on_btn1_clicked();
-
-  void on_btn2_clicked();
-
-  void on_btn3_clicked();
-
-  void on_btn0_clicked();
-
-  void on_btnDot_clicked();
-
-  void on_btnDel_Number_clicked();
 
   void on_btnOkBookList_clicked();
 
@@ -855,8 +824,6 @@ class MainWindow : public QMainWindow {
   void on_chkAutoStopTTS_clicked(bool checked);
 
   void on_btnAIReportAnalysis_clicked();
-
-  void on_btnAISteps_clicked();
 
   void on_btnAIExplanation_clicked();
 

@@ -4,32 +4,6 @@
 
 SearchWorker* m_searchWorker;
 
-void MainWindow::on_btn7_clicked() { m_EditRecord->on_btn7_clicked(); }
-
-void MainWindow::on_btn8_clicked() { m_EditRecord->on_btn8_clicked(); }
-
-void MainWindow::on_btn9_clicked() { m_EditRecord->on_btn9_clicked(); }
-
-void MainWindow::on_btn4_clicked() { m_EditRecord->on_btn4_clicked(); }
-
-void MainWindow::on_btn5_clicked() { m_EditRecord->on_btn5_clicked(); }
-
-void MainWindow::on_btn6_clicked() { m_EditRecord->on_btn6_clicked(); }
-
-void MainWindow::on_btn1_clicked() { m_EditRecord->on_btn1_clicked(); }
-
-void MainWindow::on_btn2_clicked() { m_EditRecord->on_btn2_clicked(); }
-
-void MainWindow::on_btn3_clicked() { m_EditRecord->on_btn3_clicked(); }
-
-void MainWindow::on_btn0_clicked() { m_EditRecord->on_btn0_clicked(); }
-
-void MainWindow::on_btnDot_clicked() { m_EditRecord->on_btnDot_clicked(); }
-
-void MainWindow::on_btnDel_Number_clicked() {
-  m_EditRecord->on_btnDel_clicked();
-}
-
 void MainWindow::on_btnBackNoteDiff_clicked() { m_NotesList->closeNoteDiff(); }
 
 void MainWindow::on_btnBackBookList_clicked() {
@@ -251,14 +225,6 @@ void MainWindow::on_btnBackTabRecycle_clicked() {
     mw_one->ui->frameMain->show();
   } else
     m_Method->openMainEntranceWindow();
-}
-
-void MainWindow::on_btnDelTabRecycle_clicked() {
-  m_MainHelper->delTabRecycleFile();
-}
-
-void MainWindow::on_btnRestoreTab_clicked() {
-  m_MainHelper->clickBtnRestoreTab();
 }
 
 void MainWindow::on_btnDelBakFile_clicked() { m_MainHelper->delBakFile(); }
@@ -519,10 +485,10 @@ void MainWindow::on_btnAISteps_clicked() {
   QString text = m_Steps->ai_stepstext;
   QString trimText = text.trimmed();
   if (trimText.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Tip"), tr("No consumption record data available"), 0);
     return;
   }
+
+  m_Steps->isAiSteps = true;
 
   // qDebug() << trimText;
 

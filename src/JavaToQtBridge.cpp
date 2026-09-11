@@ -818,6 +818,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               QStringList list = strType.split("|==|");
               QString tabName = list.at(1);
               QString tabFilePath = list.at(2);
+              mw_one->m_MainHelper->delTabRecycleFile(tabFilePath);
             });
           }
 
@@ -826,6 +827,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               QStringList list = strType.split("|==|");
               QString tabName = list.at(1);
               QString tabFilePath = list.at(2);
+              mw_one->m_MainHelper->restoreTabRecycleFile(tabName, tabFilePath);
             });
           }
 
@@ -1207,6 +1209,11 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               QTimer::singleShot(0, mw_one,
                                  [y, m]() { m_Steps->getMySportData(y, 0); });
             }
+          }
+
+          if (strType == "step_ai_analyse") {
+            QTimer::singleShot(0, mw_one,
+                               []() { mw_one->on_btnAISteps_clicked(); });
           }
           //===========================================================
 

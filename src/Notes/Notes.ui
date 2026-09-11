@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1264</width>
+    <width>1385</width>
     <height>458</height>
    </rect>
   </property>
@@ -16,6 +16,12 @@
   <layout class="QHBoxLayout" name="horizontalLayout_7">
    <item>
     <widget class="QFrame" name="f_NoteList">
+     <property name="maximumSize">
+      <size>
+       <width>200</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="frameShape">
       <enum>QFrame::Shape::StyledPanel</enum>
      </property>
@@ -65,22 +71,6 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="QListWidget" name="listNoteBook">
-          <property name="minimumSize">
-           <size>
-            <width>110</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>135</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QListWidget" name="listNoteList">
           <property name="minimumSize">
            <size>
@@ -90,7 +80,7 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>135</width>
+            <width>16777215</width>
             <height>16777215</height>
            </size>
           </property>
@@ -716,7 +706,7 @@ color: rgb(255, 255, 255);</string>
            <widget class="QFrame" name="f_NoteLink">
             <property name="maximumSize">
              <size>
-              <width>380</width>
+              <width>350</width>
               <height>16777215</height>
              </size>
             </property>

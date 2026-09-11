@@ -74,7 +74,8 @@ class MainHelper : public QDialog {
         })";
 
   void clickBtnChart();
-  void clickBtnRestoreTab();
+  void restoreTabRecycleFile(const QString& tabName,
+                             const QString& tabFilePath);
   bool mainEventFilter(QObject* watch, QEvent* evn);
 
   void openTabRecycle();
@@ -82,7 +83,7 @@ class MainHelper : public QDialog {
   void startBackgroundTaskUpdateBakFileList();
 
   void delBakFile();
-  void delTabRecycleFile();
+  void delTabRecycleFile(const QString& tabFilePath);
   void importBakFileList();
 
   void sort_childItem(QTreeWidgetItem* item);
@@ -118,7 +119,8 @@ class MainHelper : public QDialog {
         )";
 
   void selectTab();
-  private:
+
+ private:
   QStringList bakFileList;
 
  signals:

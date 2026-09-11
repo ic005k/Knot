@@ -1080,14 +1080,6 @@ void MainWindow::on_editDetails_textChanged() {
   m_EditRecord->on_editDetails_textChanged();
 }
 
-void MainWindow::on_hsH_valueChanged(int value) {
-  m_EditRecord->on_hsH_valueChanged(value);
-}
-
-void MainWindow::on_hsM_valueChanged(int value) {
-  m_EditRecord->on_hsM_valueChanged(value);
-}
-
 void MainWindow::on_hSlider_sliderReleased() {
   m_ReaderSet->on_hSlider_sliderReleased();
 }

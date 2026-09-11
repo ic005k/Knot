@@ -25,6 +25,8 @@ public class StepListActivity extends AppCompatActivity {
     private boolean mIsDark;
     private OnBackPressedCallback mBackCallback;
 
+    private androidx.appcompat.app.AlertDialog mAiLoadingDialog;
+
     // JNI调用声明，确认项目已有该方法
     private native void PublicJavaCallCpp(String msg);
 
@@ -79,6 +81,7 @@ public class StepListActivity extends AppCompatActivity {
         btnAiAnalyse.setText(MyActivity.zh_cn ? "AI分析" : "AI Analyse");
         btnAiAnalyse.setPadding(dp(12), dp(6), dp(12), dp(6));
         btnAiAnalyse.setOnClickListener(v -> {
+            showAiLoadingDialog();
             PublicJavaCallCpp("step_ai_analyse");
         });
 
@@ -351,5 +354,39 @@ public class StepListActivity extends AppCompatActivity {
             TextView tvKm;
             TextView tvCal;
         }
+    }
+
+    /**
+     * 显示AI分析等待弹窗，带转圈ProgressBar
+     */
+    public void showAiLoadingDialog() {
+        runOnUiThread(() -> {
+            if (isFinishing()) return;
+            if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
+                return;
+            }
+            // 调用MyActivity公共方法，拿到dialog实例保存到本页面成员
+            mAiLoadingDialog = MyActivity.showAiLoadingDialog(this);
+        });
+    }
+
+    /**
+     * 关闭AI等待弹窗
+     */
+    public void dismissAiLoadingDialog() {
+        runOnUiThread(() -> {
+            MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
+        });
+    }
+
+    /**
+     * C++调用：AI分析结果弹窗，支持简易MD渲染，支持 # ~ #### 标题
+     * @param mdList 数组，仅第0项存放Markdown原始文本
+     */
+    public void showAiMarkdownDialog(ArrayList<String> mdList) {
+        // 先关闭本页面的loading弹窗
+        dismissAiLoadingDialog();
+        // 调用MyActivity公共静态方法，传入当前this作为上下文
+        MyActivity.showAiMarkdownDialog(this, mdList);
     }
 }

@@ -49,17 +49,13 @@ void MainHelper::selectTab() {
 
 void MainHelper::clickBtnChart() {}
 
-void MainHelper::clickBtnRestoreTab() {
-  // if (m_Method->getCountFromQW(mw_one->ui->qwTabRecycle) == 0) return;
-
+void MainHelper::restoreTabRecycleFile(const QString& tabName,
+                                       const QString& tabFilePath) {
   int count = mw_one->ui->tabWidget->tabBar()->count();
   QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
 
-  int c_year = QDate::currentDate().year();
-  int iniFileCount = c_year - 2025 + 1 + 1;
-
-  int index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwTabRecycle);
-  QString recycle = "";  // m_Method->getText3(mw_one->ui->qwTabRecycle, index);
+  QString recycle =
+      tabFilePath;  // m_Method->getText3(mw_one->ui->qwTabRecycle, index);
   QStringList recycleList = recycle.split("\n");
 
   if (recycleList.at(0).contains(".json")) {
@@ -89,33 +85,13 @@ void MainHelper::clickBtnRestoreTab() {
         }
       }
     }
-
-  } else {  // ini files
-    QString ini_file;
-    for (int i = 0; i < iniFileCount; i++) {
-      if (i == 0)
-        ini_file = iniDir + twName + ".ini";
-      else {
-        ini_file =
-            iniDir + QString::number(2025 + i - 1) + "-" + twName + ".ini";
-      }
-
-      if (QFile(ini_file).exists()) QFile(ini_file).remove();
-      QString recFile;
-      if (recycleList.count() > 1)
-        recFile = recycleList.at(i);
-      else
-        recFile = recycle;
-      QFile::copy(recFile, ini_file);
-    }
   }
 
   QString tab_name =
-      "";  // m_Method->getText0(mw_one->ui->qwTabRecycle, index);
+      tabName;  // m_Method->getText0(mw_one->ui->qwTabRecycle, index);
   QTreeWidget* tw = mw_one->init_TreeWidget(twName);
   mw_one->ui->tabWidget->addTab(tw, tab_name);
 
-  // mw_one->addItem(tab_name, "", "", "", 0);
   mw_one->setCurrentIndex(count);
 
   mw_one->readData(tw);
@@ -129,8 +105,6 @@ void MainHelper::clickBtnRestoreTab() {
     QFile recycle_file(recycle);
     recycle_file.remove();
   }
-
-  mw_one->on_btnBackTabRecycle_clicked();
 
   mw_one->saveTab();
 
@@ -332,16 +306,9 @@ void MainHelper::delBakFile() {
   if (newIndex < 0) newIndex = 0;
 }
 
-void MainHelper::delTabRecycleFile() {
-  // if (m_Method->getCountFromQW(mw_one->ui->qwTabRecycle) == 0) return;
-  int index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwTabRecycle);
+void MainHelper::delTabRecycleFile(const QString& tabFilePath) {
   QString tab_file =
-      "";  // m_Method->getText3(mw_one->ui->qwTabRecycle, index);
-
-  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-  if (!m_ShowMsg->showMsg("Knot",
-                          tr("Whether to remove") + "  " + tab_file + " ? ", 2))
-    return;
+      tabFilePath;  // m_Method->getText3(mw_one->ui->qwTabRecycle, index);
 
   QStringList list = tab_file.split("\n");
   QString rec_file;

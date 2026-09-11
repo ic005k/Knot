@@ -17,8 +17,6 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   ui->listSearchResults->setItemDelegate(new TextMatchDelegate(this));
 
-  ui->listNoteBook->setItemDelegate(new IndentDelegate(this));
-
   initEditor();
   init_md();
 
@@ -49,7 +47,7 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
     ui->btnAILink->show();
   else
     ui->btnAILink->hide();
-  ui->f_NoteLink->setMaximumWidth(360);
+  ui->f_NoteLink->setMaximumWidth(320);
 
   m_Method->set_ToolButtonStyle(this);
 
@@ -858,6 +856,15 @@ void Notes::loadNotesToUI() {
   m_NotesList->set_memo_dir();
 
   if (!isAndroid) {
+    m_Notes->ui->listNoteList->clear();
+    int count = m_NotesList->listNoteEntry.count();
+    QStringList items;
+    for (int i = 0; i < count; i++) {
+      QString title = m_NotesList->listNoteEntry.at(i);
+      items.append(title);
+    }
+    m_Notes->ui->listNoteList->addItems(items);
+
     QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
     int x, y, w, h;
     x = settings.value("x", 0).toInt();

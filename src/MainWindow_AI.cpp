@@ -163,6 +163,12 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
           list.append(aiReplyText);
           m_Method->refreshJavaData("showAiMarkdownDialog", "MyEventActivity",
                                     list);
+        } else if (m_Steps->isAiSteps) {
+          m_Steps->isAiSteps = false;
+          QStringList list;
+          list.append(aiReplyText);
+          m_Method->refreshJavaData("showAiMarkdownDialog", "StepListActivity",
+                                    list);
         } else
 
         {

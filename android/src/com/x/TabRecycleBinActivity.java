@@ -139,6 +139,14 @@ public class TabRecycleBinActivity extends AppCompatActivity {
                         mRawDataList.remove(mSelectedPos);
                         mSelectedPos = -1;
                         mAdapter.notifyDataSetChanged();
+
+                        // 更新顶部总计
+                        mTvTotalHint.setText(
+                            String.format(
+                                MyActivity.zh_cn ? "总计：%d" : "Total: %d",
+                                mRawDataList.size()
+                            )
+                        );
                     }
                 )
                 .setNegativeButton(MyActivity.zh_cn ? "取消" : "Cancel", null)
@@ -152,6 +160,16 @@ public class TabRecycleBinActivity extends AppCompatActivity {
             mRawDataList.remove(mSelectedPos);
             mSelectedPos = -1;
             mAdapter.notifyDataSetChanged();
+
+            // 更新顶部总计
+            mTvTotalHint.setText(
+                String.format(
+                    MyActivity.zh_cn ? "总计：%d" : "Total: %d",
+                    mRawDataList.size()
+                )
+            );
+
+            finish();
         });
         mBottomBtnContainer.addView(btnBack);
         mBottomBtnContainer.addView(btnDelete);
