@@ -782,7 +782,7 @@ public class NoteEditor
             // 这会强制取消 SmartSelectSprite 动画和 FloatingActionMode
             // 从根源上阻止 onAnimationEnd 中再次 show()
             editNote.clearFocus();
-            editNote.setSelection(0);
+            //editNote.setSelection(0);
 
             // ✅ 第二步：隐藏键盘（此时 ActionMode 已不存在，安全操作）
             hideKeyBoard(NoteEditor.this);
@@ -893,6 +893,8 @@ public class NoteEditor
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        currentMDFile = MyActivity.strMDFile;
 
         // ========== 隐藏标题栏 ==========
         if (getSupportActionBar() != null) {

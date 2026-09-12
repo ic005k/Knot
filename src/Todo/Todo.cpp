@@ -1289,6 +1289,7 @@ void Todo::openTodoUI() {
   if (isAndroid) {
     openTodoListWindow(listTodo);
   } else {
+    ui->listTodo->addItems(listTodo);
     show();
   }
 

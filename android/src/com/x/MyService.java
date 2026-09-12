@@ -456,8 +456,9 @@ public class MyService extends Service {
                 m_notificationManagerAlarm.createNotificationChannel(channel);
             }
 
+            ////////////////////////////////////////////////////////////////////////////////////
             // 保留原来的Intent/PendingIntent逻辑
-            Intent activityIntent = new Intent(context, MyActivity.class);
+            /*Intent activityIntent = new Intent(context, MyActivity.class);
             activityIntent.setFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
             );
@@ -472,7 +473,32 @@ public class MyService extends Service {
                 (int) System.currentTimeMillis(),
                 activityIntent,
                 flags
+            );*/
+
+            Intent activityIntent = new Intent(
+                context,
+                TodoReminderActivity.class
             );
+
+            // 仅做"唤起前台"，不携带任何业务数据
+            activityIntent.setFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK |
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT |
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+            );
+
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                activityIntent,
+                flags
+            );
+            ////////////////////////////////////////////////////////////////////////////////////
 
             // 构建通知（保留呼吸灯，静音系统声音）
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
