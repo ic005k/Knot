@@ -217,6 +217,7 @@ void NotesList::delRecycleBinNotes(QStringList list) {
     QString filePath = str.split("===").at(1);
 
     QString md = filePath;
+    needDelWebDAVFiles.append(md + ".zip");
     QStringList imagesInMD = extractLocalImagesFromMarkdown(md);
     for (int i = 0; i < imagesInMD.count(); i++) {
       QString image_file = imagesInMD.at(i);

@@ -260,8 +260,10 @@ void MainWindow::on_btnBackNoteList_clicked() {
 }
 
 void MainWindow::on_btnBackNoteRecycle_clicked() {
+  qInfo() << "m_NotesList->isDelNoteRecycle=" << m_NotesList->isDelNoteRecycle;
   if (m_NotesList->isDelNoteRecycle) {
-    m_Notes->startBackgroundTaskDelAndClear();
+    // m_NotesList->isDelNoteRecycle = false;
+    // m_NotesList->delRemoteWebDAVFiles();
   }
 }
 
@@ -1077,9 +1079,7 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (m_CategoryList->isVisible()) {
-    m_CategoryList->on_btnCancel_clicked();
-
+  if (mw_one->dlgProg != nullptr || m_Method->infoWindow != nullptr) {
     return;
   }
 
@@ -1090,7 +1090,7 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  if (ui->frameMain->isHidden()) {
+  if (ui->frameMain->isHidden() && !mw_one->dlgProg) {
     m_Method->openMainEntranceWindow();
     return;
   }

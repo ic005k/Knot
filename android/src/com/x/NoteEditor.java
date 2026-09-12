@@ -182,6 +182,10 @@ public class NoteEditor
     implements View.OnClickListener, Application.ActivityLifecycleCallbacks
 {
 
+    private static final String CURSOR_JSON_PATH =
+        "/storage/emulated/0/.Knot/cursor_positions.json";
+    private boolean isCursorSaved = false;
+
     //搜索结果显示TAB================================
     // TAB容器新增
     private View pageSearchContainer;
@@ -1160,30 +1164,26 @@ public class NoteEditor
     }
 
     private void setCursorPos() {
-        // set cursor pos
-        String filename = "/storage/emulated/0/.Knot/note_text.ini";
-        if (fileIsExists(filename)) {
-            String s_cpos = "";
+        if (editNote == null || MyActivity.strMDFile == null) return;
 
-            try {
-                Wini ini = new Wini(new File(filename));
-                currentMDFile = ini.get("cpos", "currentMDFile", String.class);
-                s_cpos = ini.get("cpos", currentMDFile);
-                if (s_cpos == null || s_cpos.isEmpty()) {
-                    s_cpos = ""; // 设置默认值
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        int pos = restoreCursorPos(MyActivity.strMDFile);
+        int len = editNote.getText().length();
+        int safePos = Math.max(0, Math.min(pos, len));
+
+        editNote.requestFocus();
+        editNote.setSelection(safePos);
+
+        // 等Layout完成后滚动到光标位置
+        editNote.post(() -> {
+            if (!mIsDestroyed && editNote.getLayout() != null) {
+                int line = editNote
+                    .getLayout()
+                    .getLineForOffset(editNote.getSelectionStart());
+                int y = editNote.getLayout().getLineTop(line);
+                ScrollView sv = findViewById(R.id.scrollView);
+                if (sv != null) sv.smoothScrollTo(0, Math.max(0, y - 200));
             }
-
-            int cpos = 0;
-            if (!s_cpos.equals("")) cpos = Integer.parseInt(s_cpos);
-            int nLength = editNote.getText().length();
-            if (cpos > nLength) cpos = nLength;
-
-            editNote.requestFocus();
-            editNote.setSelection(cpos);
-        }
+        });
     }
 
     private void initRedoUndo() {
@@ -1223,11 +1223,19 @@ public class NoteEditor
             }
             super.onBackPressed();
         }*/
+
         super.onBackPressed();
     }
 
     @Override
     protected void onDestroy() {
+        int pos = editNote.getSelectionStart();
+        Log.d(
+            "CursorPos",
+            "onDestroy saving: " + MyActivity.strMDFile + " -> " + pos
+        );
+        saveCursorPosAsync(MyActivity.strMDFile, pos);
+
         mIsDestroyed = true;
 
         // 页面销毁强制关闭进度弹窗，避免卡死
@@ -1249,36 +1257,6 @@ public class NoteEditor
         popupRecycler = null;
         adapter = null;
         // ================================================
-
-        // save cursor pos
-        String file2 = "/storage/emulated/0/.Knot/note_text.ini";
-        int cpos = editNote.getSelectionStart();
-
-        int index = editNote.getSelectionStart();
-        String strLeft = getCursorPositionText(index, -5);
-        String strRight = getCursorPositionText(index, 5);
-        String cursorText =
-            String.valueOf(cpos) +
-            "   (" +
-            "\"" +
-            strLeft +
-            "|" +
-            strRight +
-            "\"" +
-            ")";
-
-        String mPath = "/storage/emulated/0/.Knot/cursor_text.txt";
-        writeTextFile(cursorText, mPath);
-
-        try {
-            File file = new File(file2);
-            if (!file.exists()) file.createNewFile();
-            Wini ini = new Wini(file);
-            ini.put("cpos", currentMDFile, String.valueOf(cpos));
-            ini.store();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         if (needRefreshNoteList) {
             try {
@@ -4992,5 +4970,90 @@ public class NoteEditor
         String cancelText = MyActivity.zh_cn ? "取消" : "Cancel";
         builder.setNegativeButton(cancelText, null);
         builder.show();
+    }
+
+    private void saveCursorPosAsync(final String filePath, final int pos) {
+        new Thread(() -> {
+            try {
+                File jsonFile = new File(CURSOR_JSON_PATH);
+
+                // ✅ 用纯 UTF-8 读取，不走 readTextFile 的编码检测
+                JSONObject map;
+                if (jsonFile.exists() && jsonFile.length() > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    try (
+                        BufferedReader br = new BufferedReader(
+                            new InputStreamReader(
+                                new FileInputStream(jsonFile),
+                                StandardCharsets.UTF_8
+                            )
+                        )
+                    ) {
+                        char[] buf = new char[4096];
+                        int len;
+                        while ((len = br.read(buf)) != -1)
+                            sb.append(buf, 0, len);
+                    }
+                    String content = sb.toString().trim();
+                    map = new JSONObject(content.isEmpty() ? "{}" : content);
+                } else {
+                    map = new JSONObject();
+                }
+
+                map.put(filePath, pos);
+
+                // 防膨胀
+                if (map.length() > 200) {
+                    JSONObject trimmed = new JSONObject();
+                    trimmed.put(filePath, pos);
+                    map = trimmed;
+                }
+
+                // ✅ 写入也用纯 UTF-8，确保原子性
+                try (
+                    BufferedWriter bw = new BufferedWriter(
+                        new OutputStreamWriter(
+                            new FileOutputStream(jsonFile),
+                            StandardCharsets.UTF_8
+                        )
+                    )
+                ) {
+                    bw.write(map.toString());
+                    bw.flush();
+                }
+
+                Log.d("CursorPos", "✅ Saved: " + filePath + " -> " + pos);
+            } catch (Exception e) {
+                Log.e("CursorPos", "❌ Save failed: " + e.getMessage(), e);
+            }
+        }).start();
+    }
+
+    private int restoreCursorPos(String filePath) {
+        try {
+            File jsonFile = new File(CURSOR_JSON_PATH);
+            if (!jsonFile.exists() || jsonFile.length() == 0) return 0;
+
+            StringBuilder sb = new StringBuilder();
+            try (
+                BufferedReader br = new BufferedReader(
+                    new InputStreamReader(
+                        new FileInputStream(jsonFile),
+                        StandardCharsets.UTF_8
+                    )
+                )
+            ) {
+                char[] buf = new char[4096];
+                int len;
+                while ((len = br.read(buf)) != -1) sb.append(buf, 0, len);
+            }
+            String content = sb.toString().trim();
+            if (content.isEmpty()) return 0;
+
+            return new JSONObject(content).optInt(filePath, 0);
+        } catch (Exception e) {
+            Log.e("CursorPos", "❌ Restore failed: " + e.getMessage(), e);
+            return 0;
+        }
     }
 }

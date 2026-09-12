@@ -136,11 +136,10 @@ void Notes::startBackgroundTaskDelAndClear() {
 
     QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
     connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-      if (!m_NotesList->isDelNoteRecycle) {
-        m_NotesList->delRemoteWebDAVFiles();
-        loadNotesToUI();
-      } else
-        m_NotesList->isDelNoteRecycle = false;
+      m_NotesList->delRemoteWebDAVFiles();
+
+      loadNotesToUI();
+
       watcher->deleteLater();
       mw_one->safeCloseProgress();
     });

@@ -49,6 +49,7 @@ public class NoteRecycleBinActivity extends AppCompatActivity {
         mBackCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                PublicJavaCallCpp("note_recyclebin_back");
                 finish();
             }
         };

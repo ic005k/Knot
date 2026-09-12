@@ -3017,9 +3017,7 @@ void Method::showInfoWindow(const QString& info) {
   bool isStyle = false;
 
   // 创建无标题窗口，保持原有窗口属性
-  infoWindow =
-      new QDialog(nullptr, Qt::FramelessWindowHint |
-                               Qt::Dialog);  //| Qt::WindowStaysOnTopHint);
+  infoWindow = new QDialog(nullptr, Qt::FramelessWindowHint | Qt::Dialog);
 
   // 注意：目前不采用自动销毁，采用手动销毁
   // infoWindow->setAttribute(Qt::WA_DeleteOnClose);
@@ -3041,7 +3039,7 @@ void Method::showInfoWindow(const QString& info) {
   // --------------------------
   IOSCircularProgress* circularTimer = new IOSCircularProgress(infoWindow);
   // 可根据需要调整大小（如果默认60x60不合适）
-  // circularTimer->setFixedSize(70, 70);
+  circularTimer->setFixedSize(80, 80);
 
   // 设置布局（核心：将圆形组件放在顶部）
   QVBoxLayout* mainLayout = new QVBoxLayout(infoWindow);

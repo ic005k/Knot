@@ -986,6 +986,12 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType == "note_recyclebin_back") {
+            QTimer::singleShot(100, mw_one, [=]() {
+              mw_one->on_btnBackNoteRecycle_clicked();
+            });
+          }
+
           // Notes/////////////////////////////////////////////////////////////
 
           if (strType == "note_import") {
@@ -1052,18 +1058,6 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               if (mw_one->ui->frameMain->isHidden()) {
                 mw_one->on_btnBackNoteList_clicked();
                 m_Method->openMainEntranceWindow();
-              }
-            });
-          }
-
-          if (strType.startsWith("note_book_click|==|")) {
-            QTimer::singleShot(100, mw_one, [=]() {
-              QStringList list = strType.split("|==|");
-
-              if (list.count() == 2) {
-                int index = 0;
-                index = list.at(1).toInt();
-                m_NotesList->clickNoteBook(index);
               }
             });
           }
