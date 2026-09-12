@@ -1,5 +1,6 @@
 #include "Todo.h"
 
+#include "Todo/TodoItemDelegate.h"
 #include "defines.h"
 #include "src/MainWindow.h"
 #include "ui_Todo.h"
@@ -18,6 +19,7 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   this->installEventFilter(this);
 
   this->setModal(true);
+  this->setWindowTitle(tr("Todo"));
 
   QString strTar = "/data/data/com.x/files/msg.mp3";
   QFile::copy(":/res/msg.mp3", strTar);
@@ -29,9 +31,19 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   connect(tmePlayProgress, SIGNAL(timeout()), this,
           SLOT(on_ShowPlayProgress()));
 
-  // QScroller::grabGesture(mw_one->ui->editTodo,
-  // QScroller::LeftMouseButtonGesture);
-  // m_Method->setSCrollPro(mw_one->ui->editTodo);
+  /////////////////////////////////////////////////////////////////////
+  // 1. 设置自定义委托
+  ui->listTodo->setItemDelegate(new TodoItemDelegate(this));
+
+  // 2. 优化 QListWidget 的显示效果
+  ui->listTodo->setSelectionMode(
+      QAbstractItemView::SingleSelection);  // 单选模式
+  ui->listTodo->setSelectionBehavior(
+      QAbstractItemView::SelectRows);  // 整行选中
+  ui->listTodo->setVerticalScrollMode(
+      QAbstractItemView::ScrollPerPixel);  // 平滑滚动
+  ui->listTodo->setHorizontalScrollBarPolicy(
+      Qt::ScrollBarAlwaysOff);  // 隐藏水平滚动条
 }
 
 Todo::~Todo() { delete ui; }
@@ -1286,10 +1298,30 @@ void Todo::openTodoUI() {
 
   init_Todo();
 
+  qInfo() << "listTodo=" << listTodo;
   if (isAndroid) {
     openTodoListWindow(listTodo);
   } else {
-    ui->listTodo->addItems(listTodo);
+    for (const QString& item : listTodo) {
+      QListWidgetItem* listItem = new QListWidgetItem(item);
+      ui->listTodo->addItem(listItem);
+    }
+
+    // 获取当前屏幕可用区域（排除任务栏）
+    QScreen* screen = this->screen();
+    if (!screen) screen = QGuiApplication::primaryScreen();
+    QRect avail = screen->availableGeometry();
+
+    // 默认宽度350（仅作为初始值，用户仍可拖拽调整）
+    int winW = 350;
+    // 高度为屏幕可用高度的85%，稍微小于屏幕
+    int winH = static_cast<int>(avail.height() * 0.85);
+    // 计算居中坐标
+    int winX = avail.x() + (avail.width() - winW) / 2;
+    int winY = avail.y() + (avail.height() - winH) / 2;
+
+    this->setGeometry(winX, winY, winW, winH);
+
     show();
   }
 
