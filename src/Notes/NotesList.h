@@ -250,6 +250,8 @@ class NotesList : public QDialog {
   void delRecycleBinNotes(QStringList list);
   void delNoteRecycleBinItem(const QStringList& list);
 
+  void showNoteList();
+
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
@@ -311,6 +313,20 @@ class NotesList : public QDialog {
   void onNoteNodeDoubleClicked(const QString& filePath);
 
   void on_actionModificationHistory();
+
+  void on_btnRecently_clicked();
+
+  void on_btnNoteMenu_clicked();
+
+  void on_btnNewNote_clicked();
+
+  void on_btnSearch_clicked();
+
+  void on_btnView_clicked();
+
+  void on_btnEdit_clicked();
+
+  void on_btnNoteRecycle_clicked();
 
  signals:
   void rebuildProgressChanged(int current, int total);

@@ -1,5 +1,6 @@
 ﻿#include "NotesList.h"
 
+#include "Notes/NoteListDelegate.h"
 #include "src/AI/EmbeddingEngine.h"
 #include "src/AI/GlobalAI.h"
 #include "src/MainWindow.h"
@@ -19,7 +20,6 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   setModal(true);
   this->layout()->setSpacing(5);
   this->layout()->setContentsMargins(2, 2, 2, 2);
-  ui->frame1->hide();
 
   tw->headerItem()->setText(0, tr("Notebook"));
   tw->setColumnHidden(1, false);
@@ -30,9 +30,6 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   twrb->setColumnWidth(0, 180);
 
   set_memo_dir();
-
-  ui->btnImport->hide();
-  ui->btnExport->hide();
 
   initNotesList();
   initRecycle();
@@ -112,15 +109,7 @@ bool NotesList::eventFilter(QObject* watch, QEvent* evn) {
   if (evn->type() == QEvent::KeyRelease) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
-      if (!ui->frame1->isHidden()) {
-        on_btnBack_clicked();
-        return true;
-      }
-
-      if (!ui->frame0->isHidden()) {
-        on_btnClose_clicked();
-        return true;
-      }
+      return true;
     }
 
     if (keyEvent->key() == Qt::Key_Return) {
@@ -1168,4 +1157,41 @@ int NotesList::calcNoteIndexInsideBook(QTreeWidgetItem* bookItem,
     idx++;
   }
   return -1;
+}
+
+void NotesList::on_btnRecently_clicked() {}
+
+void NotesList::on_btnNoteMenu_clicked() {}
+
+void NotesList::on_btnNewNote_clicked() {}
+
+void NotesList::on_btnSearch_clicked() {}
+
+void NotesList::on_btnView_clicked() {}
+
+void NotesList::on_btnEdit_clicked() {}
+
+void NotesList::on_btnNoteRecycle_clicked() {}
+
+void NotesList::showNoteList() {
+  ui->listNotes->clear();
+
+  // 隐藏水平滚动条，Delegate 的 sizeHint 会自动适配 viewport 宽度
+  ui->listNotes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  ui->listNotes->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+  // 设置自定义代理（自动换行 + 选中状态）
+  ui->listNotes->setItemDelegate(new NoteListDelegate(this));
+
+  for (const QString& note : listNoteEntry) {
+    // 直接以纯文本作为 DisplayRole 数据
+    // Delegate 内部负责自动换行渲染和高度计算
+    QListWidgetItem* listItem = new QListWidgetItem(note, ui->listNotes);
+
+    // sizeHint 由 NoteListDelegate 自动提供，无需手动 setSizeHint
+    ui->listNotes->addItem(listItem);
+  }
+
+  m_Method->setWinPos(this, 350);
+  show();
 }

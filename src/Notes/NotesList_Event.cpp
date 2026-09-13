@@ -15,16 +15,12 @@ void NotesList::onNoteNodeDoubleClicked(const QString& filePath) {
 }
 
 void NotesList::on_btnRecycle() {
-  ui->frame0->hide();
-  ui->frame1->show();
   setWinPos();
   twrb->setFocus();
   twrb->setCurrentItem(twrb->topLevelItem(0));
 }
 
 void NotesList::on_btnBack_clicked() {
-  ui->frame1->hide();
-  ui->frame0->show();
   setWinPos();
   tw->setFocus();
 }
@@ -36,9 +32,6 @@ void NotesList::on_btnRestore_clicked() {
   if (moveItem(twrb)) {
     resetQML_List();
     // clickNoteList();
-    if (!ui->frame1->isHidden()) {
-      on_btnBack_clicked();
-    }
 
   } else
     return;
@@ -100,9 +93,6 @@ void NotesList::on_btnBatchRestore_clicked() {
   if (allMoveSuccess) {
     resetQML_List();
     // clickNoteList();
-    if (!ui->frame1->isHidden()) {
-      on_btnBack_clicked();
-    }
   }
 
   saveNotesList();
