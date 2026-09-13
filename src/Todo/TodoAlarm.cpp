@@ -71,8 +71,6 @@ TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {
   }
 
   ui->dateTimeEdit->setFixedHeight(45);
-  font.setPointSize(20);
-  ui->dateTimeEdit->setFont(font);
 }
 
 TodoAlarm::~TodoAlarm() { delete ui; }
@@ -166,9 +164,28 @@ void TodoAlarm::addBtn(int start, int total, int col, QString flag, bool week) {
 
 void TodoAlarm::onBtnClick(QToolButton* btn, QString flag) {}
 
-void TodoAlarm::on_btnDelDT_clicked() {}
+void TodoAlarm::on_btnDelDT_clicked() {
+  mw_one->m_Todo->on_DelAlarm();
+  close();
+}
 
-void TodoAlarm::on_btnSetDT_clicked() {}
+void TodoAlarm::on_btnSetDT_clicked() {
+  bool w1 = ui->chk1->isChecked();
+  bool w2 = ui->chk2->isChecked();
+  bool w3 = ui->chk3->isChecked();
+  bool w4 = ui->chk4->isChecked();
+  bool w5 = ui->chk5->isChecked();
+  bool w6 = ui->chk6->isChecked();
+  bool w7 = ui->chk7->isChecked();
+
+  int y = ui->dateTimeEdit->date().year();
+  int mon = ui->dateTimeEdit->date().month();
+  int d = ui->dateTimeEdit->date().day();
+  int h = ui->dateTimeEdit->time().hour();
+  int m = ui->dateTimeEdit->time().minute();
+  mw_one->m_Todo->on_SetAlarm(w1, w2, w3, w4, w5, w6, w7, y, mon, d, h, m);
+  close();
+}
 
 void TodoAlarm::addDial(int min, int max, QString flag) {}
 

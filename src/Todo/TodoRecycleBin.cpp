@@ -1,5 +1,7 @@
 #include "TodoRecycleBin.h"
 
+#include "MainWindow.h"
+#include "Todo/Todo.h"
 #include "Todo/TodoRecycleBinDelegate.h"
 #include "defines.h"
 #include "src/Comm/Method.h"
@@ -13,11 +15,32 @@ TodoRecycleBin::TodoRecycleBin(QWidget* parent)
 
 TodoRecycleBin::~TodoRecycleBin() { delete ui; }
 
-void TodoRecycleBin::on_btnClear_clicked() {}
+void TodoRecycleBin::on_btnClear_clicked() {
+  mw_one->m_Todo->clearAllRecycle();
+  ui->listRecycle->clear();
+}
 
-void TodoRecycleBin::on_btnDel_clicked() {}
+void TodoRecycleBin::on_btnDel_clicked() {
+  int index = ui->listRecycle->currentRow();
+  if (index == -1) return;
 
-void TodoRecycleBin::on_btnRestore_clicked() {}
+  mw_one->m_Todo->delItemRecycle(index);
+
+  ui->listRecycle->takeItem(index);
+}
+
+void TodoRecycleBin::on_btnRestore_clicked() {
+  int index = ui->listRecycle->currentRow();
+  if (index == -1) return;
+
+  QString str = mw_one->m_Todo->listRecycle.at(index);
+  QString todoContent = str.split("|==|").at(1).trimmed();
+
+  ui->listRecycle->takeItem(index);
+  mw_one->m_Todo->listRecycle.remove(index);
+
+  mw_one->m_Todo->addToList(todoContent, false);
+}
 
 void TodoRecycleBin::showTodoRecycleBin(QStringList list) {
   qInfo() << "list=" << list;

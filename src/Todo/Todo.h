@@ -28,6 +28,8 @@ class Todo : public QDialog {
   Ui::Todo* ui;
   ~Todo();
 
+  QStringList listTodo, listRecycle;
+
   TodoRecycleBin* m_TodoRecycleBin;
 
   QString strAlarmTime, strAlarmText;
@@ -202,7 +204,7 @@ class Todo : public QDialog {
 
  private:
   int curTodoListIndex = -1;
-  QStringList listTodo, listRecycle;
+
   QDate alarmDate;
   QTime alarmTime;
   QListWidgetItem* editItem;

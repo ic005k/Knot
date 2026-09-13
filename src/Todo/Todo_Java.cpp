@@ -237,6 +237,8 @@ void Todo::cppRefreshTodoCardList() {
 
   activity.callMethod<void>("cppRefreshTodoCardList",
                             "(Ljava/util/ArrayList;)V", jArrayList.object());
+#else
+  setDataToTodoList();
 #endif
 }
 
