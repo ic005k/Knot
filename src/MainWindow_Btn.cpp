@@ -79,12 +79,11 @@ void MainWindow::on_btnRecentOpen_clicked() {
 
   m_Notes->refreshRecentOpenByCounter();
 
-  m_Method->openActivity("openRecentNotesActivity",
-                         m_NotesList->listRecentOpen);
-
-  // 加载最近打开列表推送到QML
-  // QVariantList data = buildRecentList();
-  // setDisplayResult(data);
+  if (isAndroid)
+    m_Method->openActivity("openRecentNotesActivity",
+                           m_NotesList->listRecentOpen);
+  else
+    m_NotesList->m_RecentOpen->showRecentOpen(m_NotesList->listRecentOpen);
 }
 
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }

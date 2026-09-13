@@ -29,6 +29,7 @@
 #include <utility>
 
 #include "DatabaseManager.h"
+#include "Notes/RecentOpen.h"
 #include "QTreeWidgetProxyModel.h"
 #include "SearchModel.h"
 #include "VectorSearchService.h"
@@ -73,6 +74,8 @@ class NotesList : public QDialog {
   explicit NotesList(QWidget* parent = nullptr);
   ~NotesList();
   Ui::NotesList* ui;
+
+  RecentOpen* m_RecentOpen;
 
   QStringList listNoteBook, listNoteEntry;
   void on_actionImport_Note_triggered();
@@ -327,6 +330,8 @@ class NotesList : public QDialog {
   void on_btnEdit_clicked();
 
   void on_btnNoteRecycle_clicked();
+
+  void on_listNotes_itemClicked(QListWidgetItem* item);
 
  signals:
   void rebuildProgressChanged(int current, int total);

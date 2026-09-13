@@ -61,6 +61,12 @@
          <iconset resource="../../res.qrc">
           <normaloff>:/res/high_l.svg</normaloff>:/res/high_l.svg</iconset>
         </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
        </widget>
       </item>
       <item>
@@ -71,6 +77,12 @@
         <property name="icon">
          <iconset resource="../../res.qrc">
           <normaloff>:/res/low_l.svg</normaloff>:/res/low_l.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -83,6 +95,12 @@
          <iconset resource="../../res.qrc">
           <normaloff>:/res/edit_l.svg</normaloff>:/res/edit_l.svg</iconset>
         </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
        </widget>
       </item>
       <item>
@@ -94,6 +112,12 @@
          <iconset resource="../../res.qrc">
           <normaloff>:/res/alarm_l.svg</normaloff>:/res/alarm_l.svg</iconset>
         </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
        </widget>
       </item>
       <item>
@@ -104,6 +128,12 @@
         <property name="icon">
          <iconset resource="../../res.qrc">
           <normaloff>:/res/recycle_l.svg</normaloff>:/res/recycle_l.svg</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
         </property>
        </widget>
       </item>

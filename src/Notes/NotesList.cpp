@@ -10,6 +10,8 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   ui->setupUi(this);
   this->installEventFilter(this);
 
+  m_RecentOpen = new RecentOpen(this);
+
   tw = new QTreeWidget(nullptr);
   twrb = new QTreeWidget(nullptr);
 
@@ -1071,14 +1073,6 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     if (isAndroid)
       m_Notes->setNoteEntryList();
     else {
-      m_Notes->ui->listNoteList->clear();
-      int count = listNoteEntry.count();
-      QStringList items;
-      for (int i = 0; i < count; i++) {
-        QString title = listNoteEntry.at(i);
-        items.append(title);
-      }
-      m_Notes->ui->listNoteList->addItems(items);
     }
 
     watcher->deleteLater();
@@ -1159,19 +1153,21 @@ int NotesList::calcNoteIndexInsideBook(QTreeWidgetItem* bookItem,
   return -1;
 }
 
-void NotesList::on_btnRecently_clicked() {}
+void NotesList::on_btnRecently_clicked() { mw_one->on_btnRecentOpen_clicked(); }
 
 void NotesList::on_btnNoteMenu_clicked() {}
 
-void NotesList::on_btnNewNote_clicked() {}
+void NotesList::on_btnNewNote_clicked() { m_NotesList->newCreateNote(); }
 
 void NotesList::on_btnSearch_clicked() {}
 
-void NotesList::on_btnView_clicked() {}
+void NotesList::on_btnView_clicked() { m_Notes->previewNote(); }
 
-void NotesList::on_btnEdit_clicked() {}
+void NotesList::on_btnEdit_clicked() { m_Notes->openEditUI(); }
 
-void NotesList::on_btnNoteRecycle_clicked() {}
+void NotesList::on_btnNoteRecycle_clicked() {
+  mw_one->on_btnNoteRecycle_clicked();
+}
 
 void NotesList::showNoteList() {
   ui->listNotes->clear();
@@ -1194,4 +1190,10 @@ void NotesList::showNoteList() {
 
   m_Method->setWinPos(this, 350);
   show();
+}
+
+void NotesList::on_listNotes_itemClicked(QListWidgetItem* item) {
+  qInfo() << item->text();
+  int idx = ui->listNotes->currentRow();
+  currentMDFile = MyAllNotes.at(idx);
 }

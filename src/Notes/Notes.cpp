@@ -292,6 +292,8 @@ void Notes::openEditUI() {
     mw_one->isOpenSearchResult = false;
   }
 
+  show();
+
 #endif
 }
 
