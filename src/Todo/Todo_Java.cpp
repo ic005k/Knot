@@ -269,6 +269,8 @@ void Todo::openTodoAlarmWindow(QStringList list) {
 
   activity.callMethod<void>("openTodoAlarmWindow", "(Ljava/util/ArrayList;)V",
                             jArrayList.object());
+#else
+  mw_one->m_TodoAlarm->showAlarmWin(list);
 #endif
 }
 

@@ -13,6 +13,7 @@
 #include <QTimer>
 #include <QToolButton>
 
+#include "Todo/TodoRecycleBin.h"
 #include "src/Comm/TextEditToolbar.h"
 
 namespace Ui {
@@ -26,6 +27,8 @@ class Todo : public QDialog {
   explicit Todo(QWidget* parent = nullptr);
   Ui::Todo* ui;
   ~Todo();
+
+  TodoRecycleBin* m_TodoRecycleBin;
 
   QString strAlarmTime, strAlarmText;
 
@@ -177,10 +180,25 @@ class Todo : public QDialog {
 
   void openTodoAlarmWindow(QStringList list);
   void cppRefreshTodoCardList();
+  void setDataToTodoList();
  private slots:
   void on_ShowRecordTime();
 
   void on_ShowPlayProgress();
+
+  void on_btnHigh_clicked();
+
+  void on_btnLow_clicked();
+
+  void on_btnEdit_clicked();
+
+  void on_btnAlarm_clicked();
+
+  void on_btnRecycleBin_clicked();
+
+  void on_btnDone_clicked();
+
+  void on_btnAddText_clicked();
 
  private:
   int curTodoListIndex = -1;

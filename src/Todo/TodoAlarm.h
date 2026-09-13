@@ -38,7 +38,8 @@ class TodoAlarm : public QDialog {
 
   void setDateTime();
 
- protected:
+  void showAlarmWin(QStringList list);
+  protected:
   bool eventFilter(QObject *obj, QEvent *evn) override;
  public slots:
   void on_btnBack_clicked();

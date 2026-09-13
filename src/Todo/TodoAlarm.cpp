@@ -32,8 +32,6 @@ TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {
 
   initDlg();
 
-  ui->dateTimeEdit->hide();
-  ui->dateTimeEdit->setReadOnly(true);
   ui->lblTodoText->setStyleSheet(mw_one->labelNormalStyleSheet);
   QFont font = this->font();
   font.setBold(true);
@@ -47,6 +45,7 @@ TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {
   ui->btnToday->hide();
   ui->btnTomorrow->hide();
   ui->btnNextWeek->hide();
+  ui->lblTodoText->hide();
 
   QString strStyleChk = mw_one->m_Preferences->chkStyle;
   ui->chk1->setStyleSheet(strStyleChk);
@@ -71,39 +70,9 @@ TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {
     getChkVoice();
   }
 
-  QVBoxLayout* vLayout = new QVBoxLayout();
-  ui->frameSel->setLayout(vLayout);
-  m_timePicker = new Time24Picker(ui->frameSel);
-  m_datePicker = new DatePicker(true, ui->frameSel);
-
-  QLabel* lblYMD = new QLabel();
-  lblYMD->setText(tr("Date:"));
-  lblYMD->setStyleSheet(ui->lblTodoText->styleSheet());
-
-  QLabel* lblTime = new QLabel();
-  lblTime->setText(tr("Time:"));
-  lblTime->setStyleSheet(ui->lblTodoText->styleSheet());
-
-  QSpacerItem* spacer1 =
-      new QSpacerItem(20,                     // 宽度（实际由布局决定）
-                      0,                      // 初始高度
-                      QSizePolicy::Minimum,   // 水平策略
-                      QSizePolicy::Expanding  // 垂直策略（关键）
-      );
-
-  QSpacerItem* spacer2 =
-      new QSpacerItem(20,                     // 宽度（实际由布局决定）
-                      0,                      // 初始高度
-                      QSizePolicy::Minimum,   // 水平策略
-                      QSizePolicy::Expanding  // 垂直策略（关键）
-      );
-
-  vLayout->addWidget(lblYMD);
-  vLayout->addWidget(m_datePicker);
-  vLayout->addSpacerItem(spacer1);
-  vLayout->addWidget(lblTime);
-  vLayout->addWidget(m_timePicker);
-  vLayout->addSpacerItem(spacer2);
+  ui->dateTimeEdit->setFixedHeight(45);
+  font.setPointSize(20);
+  ui->dateTimeEdit->setFont(font);
 }
 
 TodoAlarm::~TodoAlarm() { delete ui; }
@@ -122,25 +91,8 @@ void TodoAlarm::initDlg() {
   h = list2.at(0);
   mm = list2.at(1);
 
-  setBtnTitle();
+  m_Method->setWinPos(this, 350);
 
-  int x, y, w, h;
-  if (isAndroid) {
-    w = mw_one->width();
-    h = mw_one->height();
-  } else {
-    if (mw_one->width() < 500)
-      w = mw_one->width();
-    else
-      w = 500;
-    h = mw_one->height() - 10;
-  }
-  setFixedWidth(w);
-
-  x = mw_one->geometry().x() + (mw_one->width() - w) / 2;
-  y = mw_one->geometry().y() + (mw_one->height() - h) / 2;
-
-  this->setGeometry(x, y, w, h);
   this->setModal(true);
   this->installEventFilter(this);
   if (!isAndroid) on_btnYear_clicked();
@@ -209,246 +161,16 @@ void TodoAlarm::on_btnMinute_clicked() {
 }
 
 void TodoAlarm::addBtn(int start, int total, int col, QString flag, bool week) {
-  return;
 
-  QObjectList lstOfChildren0 =
-      m_Method->getAllToolButton(m_Method->getAllUIControls(ui->frameDT));
-  for (int i = 0; i < lstOfChildren0.count(); i++) {
-    QToolButton* w = (QToolButton*)lstOfChildren0.at(i);
-    if (isDark)
-      w->setStyleSheet(m_Method->btnStyleDark);
-    else
-      w->setStyleSheet(m_Method->btnStyle);
-
-    QStringList list = w->text().split("\n");
-    if (list.at(1) == flag) w->setStyleSheet(btnSelStyle);
-  }
-
-  qDeleteAll(ui->frameSel->findChildren<QObject*>());
-
-  int row = 0;
-  int count = 0;
-
-  QGridLayout* gl = new QGridLayout(this);
-
-  gl->setSpacing(5);
-  gl->setContentsMargins(5, 5, 5, 5);
-  ui->frameSel->setLayout(gl);
-
-  for (int i = 0; i < total - 1; i++) {
-    for (int j = 0; j < col; j++) {
-      QToolButton* btn = new QToolButton(ui->frameSel);
-
-      if (isDark)
-        btn->setStyleSheet(m_Method->btnStyleDark);
-      else
-        btn->setStyleSheet(m_Method->btnStyle);
-      btn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-      btn->setObjectName("btn" + QString::number(count));
-      QString str = QString::number(count + start);
-      if (flag == tr("Hour") || flag == tr("Minute")) {
-        if (str.length() == 1) str = "0" + str;
-      }
-
-      if (week) {
-        QString strWeek;
-        QString sy = ui->btnYear->text().split("\n").at(0);
-        QString sm = ui->btnMonth->text().split("\n").at(0);
-        QString strdate = sy + "-" + sm + "-" + str;
-        QDate date = QDate::fromString(strdate, "yyyy-M-d");
-        int we = date.dayOfWeek();
-        if (we == 1) strWeek = tr("Mon");
-        if (we == 2) strWeek = tr("Tue");
-        if (we == 3) strWeek = tr("Wed");
-        if (we == 4) strWeek = tr("Thur");
-        if (we == 5) strWeek = tr("Fri");
-        if (we == 6) strWeek = tr("Sat");
-        if (we == 7) strWeek = tr("Sun");
-
-        str = str + "\n" + strWeek;
-      }
-      btn->setText(str);
-
-      if (flag == tr("Day")) {
-        if (fontSize > 16) {
-          btn->setFont(font0);
-        }
-      }
-
-      connect(btn, &QToolButton::clicked, [=]() { onBtnClick(btn, flag); });
-
-      gl->addWidget(btn, row, j, 1, 1);
-      count++;
-      total--;
-    }
-    row++;
-  }
-
-  for (int i = 0; i < total; i++) {
-    QToolButton* btn = new QToolButton(ui->frameSel);
-
-    if (isDark)
-      btn->setStyleSheet(m_Method->btnStyleDark);
-    else
-      btn->setStyleSheet(m_Method->btnStyle);
-    btn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    btn->setObjectName("btn" + QString::number(count + i));
-    QString str = QString::number(count + i + start);
-    if (week) {
-      QString strWeek;
-      QString sy = ui->btnYear->text().split("\n").at(0);
-      QString sm = ui->btnMonth->text().split("\n").at(0);
-      QString strdate = sy + "-" + sm + "-" + str;
-      QDate date = QDate::fromString(strdate, "yyyy-M-d");
-      int we = date.dayOfWeek();
-      if (we == 1) strWeek = tr("Mon");
-      if (we == 2) strWeek = tr("Tue");
-      if (we == 3) strWeek = tr("Wed");
-      if (we == 4) strWeek = tr("Thur");
-      if (we == 5) strWeek = tr("Fri");
-      if (we == 6) strWeek = tr("Sat");
-      if (we == 7) strWeek = tr("Sun");
-
-      str = str + "\n" + strWeek;
-    }
-    btn->setText(str);
-
-    if (flag == tr("Day")) {
-      if (fontSize > 16) {
-        btn->setFont(font0);
-      }
-    }
-
-    connect(btn, &QToolButton::clicked, [=]() { onBtnClick(btn, flag); });
-    gl->addWidget(btn, row + 1, i, 1, 1);
-  }
-
-  QObjectList lstOfChildren =
-      m_Method->getAllToolButton(m_Method->getAllUIControls(ui->frameSel));
-  for (int i = 0; i < lstOfChildren.count(); i++) {
-    QToolButton* w = (QToolButton*)lstOfChildren.at(i);
-
-    if (!isDark)
-      w->setStyleSheet(m_Method->btnStyle);
-    else
-      w->setStyleSheet(m_Method->btnStyleDark);
-    if (flag == tr("Year")) {
-      if (w->text() == y) {
-        w->setStyleSheet(btnSelStyle);
-      }
-    }
-    if (flag == tr("Month")) {
-      if (w->text() == m) {
-        w->setStyleSheet(btnSelStyle);
-      }
-    }
-    if (flag == tr("Day")) {
-      if (w->text().split("\n").at(0) == d) {
-        w->setStyleSheet(btnSelStyle);
-      }
-    }
-    if (flag == tr("Hour")) {
-      if (w->text() == h) {
-        w->setStyleSheet(btnSelStyle);
-      }
-    }
-    if (flag == tr("Minute")) {
-      if (w->text() == mm) {
-        w->setStyleSheet(btnSelStyle);
-      }
-    }
-  }
 }
 
-void TodoAlarm::onBtnClick(QToolButton* btn, QString flag) {
-  QObjectList lstOfChildren =
-      m_Method->getAllToolButton(m_Method->getAllUIControls(ui->frameSel));
-  for (int i = 0; i < lstOfChildren.count(); i++) {
-    QToolButton* w = (QToolButton*)lstOfChildren.at(i);
-
-    if (isDark)
-      w->setStyleSheet(m_Method->btnStyleDark);
-    else
-      w->setStyleSheet(m_Method->btnStyle);
-
-    w->setFont(font0);
-  }
-
-  btn->setStyleSheet(btnSelStyle);
-
-  btn->setFont(font0);
-
-  QString title = btn->text();
-
-  if (flag == tr("Year")) {
-    y = title;
-  }
-  if (flag == tr("Month")) {
-    m = title;
-  }
-  if (flag == tr("Day")) {
-    d = title.split("\n").at(0);
-  }
-  if (flag == tr("Hour")) {
-    h = title;
-  }
-  if (flag == tr("Minute")) {
-    mm = title;
-  }
-
-  setBtnTitle();
-}
+void TodoAlarm::onBtnClick(QToolButton* btn, QString flag) {}
 
 void TodoAlarm::on_btnDelDT_clicked() {}
 
 void TodoAlarm::on_btnSetDT_clicked() {}
 
-void TodoAlarm::addDial(int min, int max, QString flag) {
-  return;
-
-  QObjectList lstOfChildren0 =
-      m_Method->getAllToolButton(m_Method->getAllUIControls(ui->frameDT));
-  for (int i = 0; i < lstOfChildren0.count(); i++) {
-    QToolButton* w = (QToolButton*)lstOfChildren0.at(i);
-    if (isDark)
-      w->setStyleSheet(m_Method->btnStyleDark);
-    else
-      w->setStyleSheet(m_Method->btnStyle);
-    QStringList list = w->text().split("\n");
-    if (list.at(1) == flag) w->setStyleSheet(btnSelStyle);
-  }
-
-  qDeleteAll(ui->frameSel->findChildren<QObject*>());
-
-  QGridLayout* gl = new QGridLayout(this);
-
-  gl->setSpacing(5);
-  ui->frameSel->setLayout(gl);
-
-  if (WidgetType == 1) {
-    QDial* btn = new QDial(ui->frameSel);
-    btn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    btn->setObjectName("btn");
-    btn->setMinimum(min);
-    btn->setMaximum(max);
-    btn->setNotchTarget(1.00);
-    btn->setWrapping(false);
-    btn->setNotchesVisible(true);
-    btn->setPageStep(5);
-    if (flag == tr("Hour")) btn->setPageStep(2);
-
-    connect(btn, &QDial::valueChanged, [=]() { onDial(btn, flag); });
-
-    gl->addWidget(btn, 0, 0, 1, 1);
-
-    if (flag == tr("Minute")) {
-      btn->setSliderPosition(mm.toInt());
-    }
-    if (flag == tr("Hour")) {
-      btn->setSliderPosition(h.toInt());
-    }
-  }
-}
+void TodoAlarm::addDial(int min, int max, QString flag) {}
 
 void TodoAlarm::onDial(QDial* btn, QString flag) {
   if (flag == tr("Hour")) {
@@ -570,10 +292,9 @@ void TodoAlarm::showTimePicker() {
     m_Method->setDateTimePickerFlag("hm", y.toInt(), m.toInt(), d.toInt(),
                                     h.toInt(), mm.toInt(), "todo");
     m_Method->openDateTimePicker();
-    ui->frameSel->hide();
+
     return;
-  } else
-    ui->frameSel->show();
+  }
 }
 
 void TodoAlarm::showDatePicker() {
@@ -581,8 +302,28 @@ void TodoAlarm::showDatePicker() {
     m_Method->setDateTimePickerFlag("ymd", y.toInt(), m.toInt(), d.toInt(),
                                     h.toInt(), mm.toInt(), "todo");
     m_Method->openDateTimePicker();
-    ui->frameSel->hide();
+
     return;
-  } else
-    ui->frameSel->show();
+  }
+}
+
+void TodoAlarm::showAlarmWin(QStringList list) {
+  ui->chk1->setChecked(list.at(0).toInt());
+  ui->chk2->setChecked(list.at(1).toInt());
+  ui->chk3->setChecked(list.at(2).toInt());
+  ui->chk4->setChecked(list.at(3).toInt());
+  ui->chk5->setChecked(list.at(4).toInt());
+  ui->chk6->setChecked(list.at(5).toInt());
+  ui->chk7->setChecked(list.at(6).toInt());
+  QString strDate = list.at(7);
+  QString strTime = list.at(8);
+  qInfo() << strDate << strTime;
+  QDate date = QDate::fromString(strDate, "yyyy-M-d");
+  QTime time = QTime::fromString(strTime, "HH:mm");
+  ui->dateTimeEdit->setDate(date);
+  ui->dateTimeEdit->setTime(time);
+
+  this->setFixedHeight(300);
+  m_Method->setWinPos(this, 350);
+  show();
 }

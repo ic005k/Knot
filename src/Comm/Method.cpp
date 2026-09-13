@@ -3438,3 +3438,20 @@ QString Method::escapeAllHtml(const QString& src) {
   res.replace(")", "&#41;");
   return res;
 }
+
+void Method::setWinPos(QWidget* w, int width) {
+  // 获取当前屏幕可用区域（排除任务栏）
+  QScreen* screen = w->screen();
+  if (!screen) screen = QGuiApplication::primaryScreen();
+  QRect avail = screen->availableGeometry();
+
+  // 默认宽度350（仅作为初始值，用户仍可拖拽调整）
+  int winW = width;  // 350;
+  // 高度为屏幕可用高度的85%，稍微小于屏幕
+  int winH = static_cast<int>(avail.height() * 0.85);
+  // 计算居中坐标
+  int winX = avail.x() + (avail.width() - winW) / 2;
+  int winY = avail.y() + (avail.height() - winH) / 2;
+
+  w->setGeometry(winX, winY, winW, winH);
+}

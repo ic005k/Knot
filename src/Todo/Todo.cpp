@@ -21,6 +21,8 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
   this->setModal(true);
   this->setWindowTitle(tr("Todo"));
 
+  m_TodoRecycleBin = new TodoRecycleBin(this);
+
   QString strTar = "/data/data/com.x/files/msg.mp3";
   QFile::copy(":/res/msg.mp3", strTar);
 
@@ -180,7 +182,10 @@ void Todo::addToList(QString str, bool isInsert) {
   setCurrentIndex(0);
   refreshTableLists();
 
-  cppRefreshTodoCardList();
+  if (isAndroid)
+    cppRefreshTodoCardList();
+  else
+    setDataToTodoList();
 
   saveTodo();
 }
@@ -266,7 +271,11 @@ void Todo::on_btnHigh(int index) {
   insertItem(strTime, 1, strText, 0);
   setCurrentIndex(0);
 
-  cppRefreshTodoCardList();
+  if (isAndroid) {
+    cppRefreshTodoCardList();
+  } else {
+    setDataToTodoList();
+  }
 
   refreshAlarm();
 
@@ -315,7 +324,10 @@ void Todo::on_btnLow(int index) {
   delItem(row);
   addItem(strTime, 0, strTodoText);
 
-  cppRefreshTodoCardList();
+  if (isAndroid)
+    cppRefreshTodoCardList();
+  else
+    setDataToTodoList();
 
   refreshAlarm();
 
@@ -600,6 +612,7 @@ void Todo::on_btnRecycle() {
   if (isAndroid) {
     openTodoRecycleWindow(listRecycle);
   } else {
+    m_TodoRecycleBin->showTodoRecycleBin(listRecycle);
   }
 }
 
@@ -904,7 +917,7 @@ void Todo::insertRecycle(QString strTime, int type, QString strText,
   listRecycle.insert(curIndex, strTime + "|==|" + strText);
 }
 
-int Todo::getCurrentIndex() { return 0; }
+int Todo::getCurrentIndex() { return ui->listTodo->currentRow(); }
 
 int Todo::getCurrentIndexRecycle() { return 0; }
 
@@ -989,7 +1002,10 @@ void Todo::modifyTodoText(int index, QString strTodoText) {
     str4 = str1 + "|==|" + str2 + "|==|" + str3;
     listTodo.replace(index, str4);
 
-    cppRefreshTodoCardList();
+    if (isAndroid)
+      cppRefreshTodoCardList();
+    else
+      setDataToTodoList();
 
     saveTodo();
   }
@@ -1293,6 +1309,14 @@ void Todo::goCurrentTodoItem(QString curItem) {
 
 void Todo::on_ShowPlayProgress() {}
 
+void Todo::setDataToTodoList() {
+  ui->listTodo->clear();
+  for (const QString& item : listTodo) {
+    QListWidgetItem* listItem = new QListWidgetItem(item);
+    ui->listTodo->addItem(listItem);
+  }
+}
+
 void Todo::openTodoUI() {
   mw_one->execNeedSyncNotes();
 
@@ -1302,26 +1326,9 @@ void Todo::openTodoUI() {
   if (isAndroid) {
     openTodoListWindow(listTodo);
   } else {
-    for (const QString& item : listTodo) {
-      QListWidgetItem* listItem = new QListWidgetItem(item);
-      ui->listTodo->addItem(listItem);
-    }
+    setDataToTodoList();
 
-    // 获取当前屏幕可用区域（排除任务栏）
-    QScreen* screen = this->screen();
-    if (!screen) screen = QGuiApplication::primaryScreen();
-    QRect avail = screen->availableGeometry();
-
-    // 默认宽度350（仅作为初始值，用户仍可拖拽调整）
-    int winW = 350;
-    // 高度为屏幕可用高度的85%，稍微小于屏幕
-    int winH = static_cast<int>(avail.height() * 0.85);
-    // 计算居中坐标
-    int winX = avail.x() + (avail.width() - winW) / 2;
-    int winY = avail.y() + (avail.height() - winH) / 2;
-
-    this->setGeometry(winX, winY, winW, winH);
-
+    m_Method->setWinPos(this, 350);
     show();
   }
 
@@ -1599,3 +1606,59 @@ void Todo::on_btnTestSpeech() {
 void Todo::setAlarmShowValue(bool value) { isTodoAlarmShow = value; }
 
 void Todo::showInputPanel() {}
+
+void Todo::on_btnHigh_clicked() {
+  int idx = ui->listTodo->currentRow();
+  if (idx == -1) return;
+  on_btnHigh(idx);
+}
+
+void Todo::on_btnLow_clicked() {
+  int idx = ui->listTodo->currentRow();
+  if (idx == -1) return;
+  on_btnLow(idx);
+}
+
+void Todo::on_btnEdit_clicked() {
+  int idx = ui->listTodo->currentRow();
+  if (idx == -1) return;
+  QString strText = getItemTodoText(idx);
+
+  bool ok = false;
+  QString newName = QInputDialog::getText(
+      this, tr("Edit"), tr("Enter new content:"), QLineEdit::Normal,
+      strText,  // 默认填入旧内容，方便用户修改
+      &ok);
+
+  // 用户点击了【确定】且输入内容非空
+  if (ok && !newName.trimmed().isEmpty()) {
+    newName = newName.trimmed();
+    modifyTodoText(idx, newName);
+  } else if (ok) {
+    // 用户点了确定但输入为空，给出提示
+    QMessageBox::warning(this, tr("Edit Failed"),
+                         tr("Content cannot be empty!"));
+  }
+}
+
+void Todo::on_btnAlarm_clicked() {
+  int idx = ui->listTodo->currentRow();
+  if (idx == -1) return;
+
+  on_btnSetTime(idx);
+}
+
+void Todo::on_btnRecycleBin_clicked() { on_btnRecycle(); }
+
+void Todo::on_btnDone_clicked() {
+  int idx = ui->listTodo->currentRow();
+  if (idx == -1) return;
+  addToRecycle(idx);
+}
+
+void Todo::on_btnAddText_clicked() {
+  QString todoContent = ui->editTodoText->text().trimmed();
+  if (todoContent.isEmpty()) return;
+
+  addToList(todoContent, true);
+}
