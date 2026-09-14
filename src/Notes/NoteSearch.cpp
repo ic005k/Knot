@@ -11,11 +11,16 @@ NoteSearch::NoteSearch(QWidget* parent)
     : QDialog(parent), ui(new Ui::NoteSearch) {
   ui->setupUi(this);
   setModal(true);
+  setWindowTitle(tr("Note Search"));
 
   // 隐藏水平滚动条，防止出现不必要的横向滚动
   ui->listSearch->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   NoteSearchDelegate* delegate = new NoteSearchDelegate(ui->listSearch);
   ui->listSearch->setItemDelegate(delegate);
+
+  // 回车键触发搜索
+  connect(ui->editSearch, &QLineEdit::returnPressed, this,
+          &NoteSearch::on_btnSearch_clicked);
 }
 
 NoteSearch::~NoteSearch() { delete ui; }
@@ -30,6 +35,7 @@ void NoteSearch::on_btnSearch_clicked() {
   if (kw.isEmpty()) return;
 
   ui->lblResult->setText(tr("Note Search Results: ") + QString::number(0));
+
   m_NotesList->startFind(kw);
 }
 

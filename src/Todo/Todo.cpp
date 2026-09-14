@@ -46,6 +46,10 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
       QAbstractItemView::ScrollPerPixel);  // 平滑滚动
   ui->listTodo->setHorizontalScrollBarPolicy(
       Qt::ScrollBarAlwaysOff);  // 隐藏水平滚动条
+
+  // 回车键触发添加记录
+  connect(ui->editTodoText, &QLineEdit::returnPressed, this,
+          &Todo::on_btnAddText_clicked);
 }
 
 Todo::~Todo() { delete ui; }
@@ -1667,4 +1671,5 @@ void Todo::on_btnAddText_clicked() {
   if (todoContent.isEmpty()) return;
 
   addToList(todoContent, true);
+  ui->editTodoText->clear();
 }
