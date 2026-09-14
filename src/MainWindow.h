@@ -192,7 +192,6 @@ class MainWindow : public QMainWindow {
   int newHeight;
 
   QString treeStyle = "QTreeWidget::item {height: 28;}";
-  int mainHeight = 0;
 
   QString strText;
   QString strRefreshUrl;

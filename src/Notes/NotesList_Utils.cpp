@@ -254,7 +254,10 @@ void NotesList::loadAllRecycle() {
     list.append(text0 + "===" + text3);
   }
 
-  m_Method->openActivity("openNoteRecycleBinActivity", list);
+  if (isAndroid)
+    m_Method->openActivity("openNoteRecycleBinActivity", list);
+  else
+    m_NoteRecycleBin->showNoteRecycleBin(list);
 }
 
 QVariant NotesList::addQmlTreeTopItem(QString strItem) { return 0; }

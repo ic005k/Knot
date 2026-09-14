@@ -29,6 +29,7 @@
 #include <utility>
 
 #include "DatabaseManager.h"
+#include "Notes/NoteRecycleBin.h"
 #include "Notes/NoteSearch.h"
 #include "Notes/RecentOpen.h"
 #include "SearchModel.h"
@@ -77,6 +78,7 @@ class NotesList : public QDialog {
 
   NoteSearch* m_NoteSearch;
   RecentOpen* m_RecentOpen;
+  NoteRecycleBin* m_NoteRecycleBin;
 
   QStringList listNoteBook, listNoteEntry;
   void on_actionImport_Note_triggered();

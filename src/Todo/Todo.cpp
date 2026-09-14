@@ -204,7 +204,10 @@ int Todo::getEditTextHeight(QTextEdit* edit) {
   return height;
 }
 
-void Todo::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
+void Todo::closeEvent(QCloseEvent* event) {
+  Q_UNUSED(event);
+  closeTodo();
+}
 
 void Todo::closeTodo() {
   mw_one->clearWidgetFocus();

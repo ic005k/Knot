@@ -97,10 +97,6 @@ void Notes::showEvent(QShowEvent* event) {
 }
 
 void Notes::init() {
-  int w = this->width();
-  if (mw_one->width() > w) w = mw_one->width();
-  this->setGeometry(this->x(), mw_one->geometry().y(), w, mw_one->height());
-
   if (isDark) {
     ui->editAnswer->verticalScrollBar()->setStyleSheet(
         m_Method->darkScrollbarStyle);
@@ -238,8 +234,6 @@ void Notes::openEditUI() {
 
   oldText = loadText(currentMDFile);
 
-  // m_NotesList->refreshRecentOpen();
-  // m_NotesList->saveRecentOpen();
   setNotesCounter();
 
   if (isAndroid) {
@@ -251,8 +245,6 @@ void Notes::openEditUI() {
   }
 
 #ifndef Q_OS_ANDROID
-
-  mw_one->mainHeight = mw_one->height();
 
   init();
 
@@ -292,6 +284,7 @@ void Notes::openEditUI() {
     mw_one->isOpenSearchResult = false;
   }
 
+  setWindowTitle(m_Notes->m_NoteManager->getNoteTitle(currentMDFile));
   show();
 
 #endif
@@ -300,8 +293,7 @@ void Notes::openEditUI() {
 void Notes::previewNote() {
   if (!QFile::exists(currentMDFile)) return;
 
-  // if (!isAndroid)
-  mw_one->showProgress();
+  if (!isAndroid) mw_one->showProgress();
 
   QString title = m_NoteManager->getNoteTitle(currentMDFile);
 

@@ -450,7 +450,8 @@ int NotesList::on_btnImport_clicked() {
 
             if (isAndroid) {
               m_Notes->openNoteWindow();
-            }
+            } else
+              setDataToNoteList();
 
             watcher->deleteLater();
           });

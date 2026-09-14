@@ -21,7 +21,7 @@ void NoteListDelegate::paint(QPainter* painter,
   QStyleOptionViewItem opt = option;
   initStyleOption(&opt, index);
 
-  // 【核心修复】保存原始交互状态后，立即清除所有可能触发系统边框的标志
+  // 【核心】保存原始交互状态后，立即清除所有可能触发系统边框的标志
   bool isSelected = opt.state & QStyle::State_Selected;
   bool isMouseOver = opt.state & QStyle::State_MouseOver;
   opt.state &= ~(QStyle::State_Selected | QStyle::State_HasFocus |

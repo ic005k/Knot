@@ -12,6 +12,7 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
 
   m_RecentOpen = new RecentOpen(this);
   m_NoteSearch = new NoteSearch(this);
+  m_NoteRecycleBin = new NoteRecycleBin(this);
 
   // 隐藏水平滚动条，Delegate 的 sizeHint 会自动适配 viewport 宽度
   ui->listNotes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -1167,7 +1168,29 @@ void NotesList::on_btnNoteMenu_clicked() {
     int idx = ui->listNotes->currentRow();
     if (idx == -1) return;
 
-    delNote(idx);
+    QString title = listNoteEntry.at(idx);
+
+    QMessageBox msgBox(this);
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setWindowTitle(tr("Move to Trash"));
+    msgBox.setText(
+        tr("Are you sure you want to move the following note to trash?"));
+    msgBox.setInformativeText(
+        QStringLiteral("<b>%1</b>").arg(title.toHtmlEscaped()));
+
+    QPushButton* trashBtn =
+        msgBox.addButton(tr("Move to Trash"), QMessageBox::AcceptRole);
+    QPushButton* cancelBtn =
+        msgBox.addButton(tr("Cancel"), QMessageBox::RejectRole);
+
+    msgBox.setDefaultButton(cancelBtn);
+    msgBox.setEscapeButton(cancelBtn);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == trashBtn) {
+      delNote(idx);
+    }
   });
 
   menu->addSeparator();

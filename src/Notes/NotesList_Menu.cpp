@@ -907,5 +907,8 @@ void NotesList::delNote(int idxNote) {
   MyAllNotes.removeAt(idxNote);
   listNoteEntry.removeAt(idxNote);
 
-  m_Notes->setNoteEntryList();
+  if (isAndroid)
+    m_Notes->setNoteEntryList();
+  else
+    setDataToNoteList();
 }
