@@ -138,11 +138,6 @@ QString PrintPDF::getItem(QString title, QString lblText, QStringList valueList,
 
   this->setGeometry(x, y, w, h);
 
-  // 显示遮罩层
-  if (m_Method) {
-    m_Method->showGrayWindows();
-  }
-
   // 执行模态对话框
   int result = this->exec();
 

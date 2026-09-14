@@ -241,8 +241,6 @@ void MainWindow::delTab() {
 }
 
 void MainWindow::on_actionBakFileList() {
-  // 【安全】界面切换必须在主线程执行
-
   mw_one->ui->frameMain->hide();
 
   m_MainHelper->startBackgroundTaskUpdateBakFileList();
@@ -273,11 +271,11 @@ void MainWindow::on_actionImport_Data_triggered() {
 
   zipfile = "";
 #ifdef Q_OS_ANDROID
-  QString path = "/storage/emulated/0/KnotBak/";
-  zipfile = QFileDialog::getOpenFileName(this, tr("KnotBak"), path,
+
+  zipfile = QFileDialog::getOpenFileName(this, tr("KnotBak"), bakfileDir,
                                          tr("Zip File (*.*)"));
 #else
-  zipfile = QFileDialog::getOpenFileName(this, tr("KnotBak"), "",
+  zipfile = QFileDialog::getOpenFileName(this, tr("KnotBak"), bakfileDir,
                                          tr("Zip File (*.zip);;All(*.*)"));
 #endif
 
@@ -449,6 +447,7 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
   actShareFile->setVisible(false);
 #else
   actShareFile->setVisible(false);
+  actBakFileList->setVisible(false);
   if (!mw_one->m_Preferences->devMode) {
     actAddTab->setVisible(false);
     actDelTab->setVisible(false);

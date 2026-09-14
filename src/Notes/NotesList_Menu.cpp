@@ -197,8 +197,13 @@ void NotesList::renameNote(QString newName, int idxNote) {
   listNoteEntry.removeAt(idxNote);
   listNoteEntry.insert(idxNote, newName);
   noteTitle = newName;
-  m_Notes->setNoteEntryList();
+
   saveNotesList();
+
+  if (isAndroid)
+    m_Notes->setNoteEntryList();
+  else
+    setDataToNoteList();
 }
 
 void NotesList::restoreToNotes(QStringList list) {

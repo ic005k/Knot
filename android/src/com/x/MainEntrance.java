@@ -482,12 +482,12 @@ public class MainEntrance extends AppCompatActivity {
                 zh ? "云备份与恢复数据" : "Cloud Backup & Restore"
             )
         );
-        items.add(
+        /*items.add(
             new MenuItem(
                 MENU_ID_BACKUP_FILE_LIST,
                 zh ? "备份文件列表" : "Backup File List"
             )
-        );
+        );*/
         items.add(
             new MenuItem(
                 MENU_ID_TAB_RECYCLE_BIN,

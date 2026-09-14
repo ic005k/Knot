@@ -393,7 +393,7 @@ int NotesList::on_btnImport_clicked() {
 
   for (const QString& fileName : std::as_const(fileNames)) {
     QString strFile = fileName.toLower();
-    if (strFile.contains(".md") || strFile.contains(".txt")) {
+    if (strFile.endsWith(".md") || strFile.endsWith(".txt")) {
       MDFileList.append(fileName);
     } else {
       qDebug() << tr("Invalid Markdown file.") << fileName;

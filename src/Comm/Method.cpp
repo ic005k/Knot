@@ -3,7 +3,6 @@
 #include <QKeyEvent>
 
 #include "src/Comm/IOSCircularProgress.h"
-// #include "src/Exercise/ui_Steps.h"
 #include "src/MainWindow.h"
 
 Method::Method(QWidget* parent) : QDialog(parent) {
@@ -3039,7 +3038,10 @@ void Method::showInfoWindow(const QString& info) {
   // --------------------------
   IOSCircularProgress* circularTimer = new IOSCircularProgress(infoWindow);
   // 可根据需要调整大小（如果默认60x60不合适）
-  circularTimer->setFixedSize(80, 80);
+  if (isAndroid)
+    circularTimer->setFixedSize(80, 80);
+  else
+    circularTimer->setFixedSize(60, 60);
 
   // 设置布局（核心：将圆形组件放在顶部）
   QVBoxLayout* mainLayout = new QVBoxLayout(infoWindow);

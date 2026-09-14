@@ -188,10 +188,13 @@ void Notes::closeEvent(QCloseEvent* event) {
   m_Method->Sleep(100);
 
   if (isTextChange) {
-    auto msg = std::make_unique<ShowMessage>(m_Notes);
-    msg->ui->btnOk->setText(tr("Yes") + " (Y)");
-    msg->ui->btnCancel->setText(tr("No") + " (N)");
-    if (msg->showMsg(tr("Notes"), tr("Do you want to save the notes?"), 2)) {
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this, tr("Notes"), tr("Do you want to save the notes?"),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::Yes  // 默认选中 Yes
+    );
+
+    if (reply == QMessageBox::Yes) {
       saveMDFile();
     }
   }
@@ -200,10 +203,9 @@ void Notes::closeEvent(QCloseEvent* event) {
     TitleGenerator generator;
     new_title = generator.genNewTitle(newText);
 
-    int index = m_NotesList->getNotesListCurrentIndex();
-    tw->setCurrentItem(m_NotesList->pNoteItems.at(index));
-
-    renameTitle(true);
+    int idx = m_NotesList->ui->listNotes->currentRow();
+    if (idx == -1) idx = 0;
+    m_NotesList->renameNote(new_title, idx);
   }
 }
 

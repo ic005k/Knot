@@ -1201,16 +1201,29 @@ void NotesList::on_btnNoteMenu_clicked() {
     int idx = ui->listNotes->currentRow();
     if (idx == -1) return;
 
+    currentMDFile = MyAllNotes.at(idx);
     m_Notes->on_btnPDF_clicked();
   });
 
   QAction* actRename = menu->addAction(tr("Rename"));
   connect(actRename, &QAction::triggered, this, [this]() {
-    // TODO: Rename
     int idx = ui->listNotes->currentRow();
     if (idx == -1) return;
-    QString name;
-    renameNote(name, idx);
+
+    QString oldName = listNoteEntry.at(idx);
+
+    // 弹出输入对话框，以旧名称作为默认值
+    bool ok = false;
+    QString newName =
+        QInputDialog::getText(this, tr("Rename Note"), tr("New name:"),
+                              QLineEdit::Normal, oldName, &ok);
+
+    // 用户取消、输入为空、或名称未改变时，均不执行重命名
+    if (!ok || newName.trimmed().isEmpty() || newName == oldName) {
+      return;
+    }
+
+    renameNote(newName.trimmed(), idx);
   });
 
   QAction* actGraph = menu->addAction(tr("Relation Graph"));

@@ -29,10 +29,7 @@ bool Notes::isSetNewNoteTitle() {
 }
 
 void Notes::renameTitle(bool isOk) {
-  if (m_NotesList->getNoteBookCurrentIndex() < 0) return;
-
   if (isOk) {
-    m_NotesList->renameCurrentItem(new_title);
     m_NotesList->saveNotesList();
   } else {
     m_NotesList->on_btnRename_clicked();
