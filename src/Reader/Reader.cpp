@@ -1652,6 +1652,7 @@ void Reader::readBookDone() {
     }
 
     if (isText) {
+      openMyPDF(fileName);
     }
   }
 

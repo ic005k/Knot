@@ -3,6 +3,7 @@ package com.x.artifex.mupdf.mini;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -61,6 +62,9 @@ import java.util.Collections;
 import java.util.Stack;
 
 public class DocumentActivity extends Activity {
+
+    private boolean isTxtFile = false;
+    private android.app.ProgressDialog mConvertProgressDialog = null;
 
     // TTS //////////////////////////////////////////
     private ImageButton ttsButton;
@@ -139,6 +143,9 @@ public class DocumentActivity extends Activity {
     protected boolean toggledUI;
     protected Insets systemInsets = Insets.NONE;
     protected boolean newSearchHitPage;
+
+    // 用来存放C++返回的内存PDF byte[]
+    private byte[] mConvertedPdfBuffer = null;
 
     public static native void CallJavaNotify_0();
 
@@ -236,7 +243,6 @@ public class DocumentActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         // 状态栏和导航栏 //////////////////////////////////////////////////////////
-        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // 刘海屏适配仍需保留（与沉浸模式无关）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -365,25 +371,57 @@ public class DocumentActivity extends Activity {
             if (cursor != null) cursor.close();
         }
 
-        Log.i(APP, "  NAME " + title);
-        Log.i(APP, "  SIZE " + size);
+        // ========== 判断：如果是txt文件，走转换分支 ==========
+        isTxtFile = title.toLowerCase().endsWith(".txt");
+        if (isTxtFile) {
+            Log.i(
+                APP,
+                "This is txt file, request convert to pdf. name=" + title
+            );
 
-        if (mimetype == null || mimetype.equals("application/octet-stream")) {
-            mimetype = getContentResolver().getType(uri);
-            Log.i(APP, "  MAGIC (Resolver) " + mimetype);
-        }
-        if (mimetype == null || mimetype.equals("application/octet-stream")) {
-            mimetype = title;
-            Log.i(APP, "  MAGIC (Filename) " + mimetype);
-        }
+            // 弹出等待转圈框
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                mConvertProgressDialog = new android.app.ProgressDialog(
+                    DocumentActivity.this
+                );
+                mConvertProgressDialog.setMessage(
+                    MyActivity.zh_cn
+                        ? "正在转换，请稍后..."
+                        : "Converting, please wait..."
+                );
+                mConvertProgressDialog.setCancelable(false);
+                mConvertProgressDialog.show();
+            });
 
-        try {
-            openInput(uri, size, mimetype);
-        } catch (Exception x) {
-            Log.e(APP, x.toString());
-            String text = x.getMessage();
-            if (text == null) text = x.getClass().getName();
-            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+            requestConvertTxtToPdf(uri);
+        } else {
+            // ========================================================
+
+            Log.i(APP, "  NAME " + title);
+            Log.i(APP, "  SIZE " + size);
+
+            if (
+                mimetype == null || mimetype.equals("application/octet-stream")
+            ) {
+                mimetype = getContentResolver().getType(uri);
+                Log.i(APP, "  MAGIC (Resolver) " + mimetype);
+            }
+            if (
+                mimetype == null || mimetype.equals("application/octet-stream")
+            ) {
+                mimetype = title;
+                Log.i(APP, "  MAGIC (Filename) " + mimetype);
+            }
+
+            try {
+                openInput(uri, size, mimetype);
+            } catch (Exception x) {
+                Log.e(APP, x.toString());
+                String text = x.getMessage();
+                if (text == null) text = x.getClass().getName();
+                Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+            }
         }
 
         titleLabel = (TextView) findViewById(R.id.title_label);
@@ -702,7 +740,9 @@ public class DocumentActivity extends Activity {
         layoutH = (canvasH * 72) / displayDPI;
         if (!hasLoaded) {
             hasLoaded = true;
-            openDocument();
+            if (!isTxtFile) {
+                openDocument();
+            }
         } else if (isReflowable) {
             relayoutDocument();
         } else {
@@ -826,6 +866,13 @@ public class DocumentActivity extends Activity {
     @Override
     protected void onDestroy() {
         unregisterReceiver(mHomeKeyEvent);
+
+        // 兜底关闭转换等待弹窗，防止页面销毁弹窗残留
+        if (
+            mConvertProgressDialog != null && mConvertProgressDialog.isShowing()
+        ) {
+            mConvertProgressDialog.dismiss();
+        }
 
         // 退出全屏模式
         CallJavaNotify_0();
@@ -1678,4 +1725,57 @@ public class DocumentActivity extends Activity {
             }
         }
     };
+
+    /////////////////////////////////////////////////////////////////////////////////////
+
+    // JNI回调：通知C++，需要把这个Uri对应的txt转为pdf
+    private void requestConvertTxtToPdf(Uri txtUri) {
+        runOnUiThread(() -> {
+            // 调用C++方法，参数是txt的Uri字符串
+            MyActivity.mInstance.PublicJavaCallCpp(
+                "txt_convert_to_pdf|==|" + txtUri.toString()
+            );
+        });
+    }
+
+    /**
+     * 【供C++ JNI调用】C++完成txt转pdf后，回传生成的pdf二进制数组
+     */
+    public void setConvertedPdfBuffer(byte[] pdfBytes) {
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            if (worker == null) return; // 增加保护，防止worker还没初始化完成
+
+            // 关闭等待转圈弹窗
+            if (
+                mConvertProgressDialog != null &&
+                mConvertProgressDialog.isShowing()
+            ) {
+                mConvertProgressDialog.dismiss();
+                mConvertProgressDialog = null;
+            }
+
+            mConvertedPdfBuffer = pdfBytes;
+            buffer = mConvertedPdfBuffer;
+            stream = null;
+            worker.add(
+                new Worker.Task() {
+                    boolean needsPassword;
+
+                    public void work() {
+                        Log.i(APP, "Loaded converted txt->pdf from buffer");
+                        doc = Document.openDocument(buffer, "application/pdf");
+                        needsPassword = doc.needsPassword();
+                    }
+
+                    public void run() {
+                        if (needsPassword) askPassword(
+                            R.string.dlog_password_message
+                        );
+                        else loadDocument();
+                    }
+                }
+            );
+        });
+    }
 }

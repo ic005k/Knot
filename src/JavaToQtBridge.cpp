@@ -1211,6 +1211,18 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             QTimer::singleShot(100, mw_one,
                                []() { mw_one->on_btnAISteps_clicked(); });
           }
+
+          // txt to pdf
+          // /////////////////////////////////////////////////////////////
+          if (strType.startsWith("txt_convert_to_pdf|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              QString file = fileName;  // list.at(1);
+
+              QTimer::singleShot(
+                  100, mw_one, [file]() { m_Reader->setPdfDataToJava(file); });
+            }
+          }
           //===========================================================
 
           qDebug() << "[PublicJavaCallCpp main thread] type:" << strType;
