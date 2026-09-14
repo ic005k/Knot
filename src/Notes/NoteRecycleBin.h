@@ -17,6 +17,7 @@ class NoteRecycleBin : public QDialog {
   void showNoteRecycleBin(QStringList list);
   void setDataToList(QStringList list);
   QStringList getCheckedPaths() const;
+  QStringList getCheckedItems() const;
   private slots:
   void on_btnSelAll_clicked();
 

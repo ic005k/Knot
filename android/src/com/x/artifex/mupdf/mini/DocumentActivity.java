@@ -72,6 +72,7 @@ public class DocumentActivity extends Activity {
     private Matrix mCurrentPageCtm = null;
 
     //////////////////////////////////////////////////
+    private ImageButton minimizeAppButton;
 
     protected boolean mInvertMode = false;
 
@@ -265,6 +266,13 @@ public class DocumentActivity extends Activity {
 
         ttsButton = findViewById(R.id.tts_button);
         ttsButton.setOnClickListener(v -> toggleTts());
+
+        // ===== 最小化APP按钮 =====
+        minimizeAppButton = findViewById(R.id.minimize_app_button);
+        minimizeAppButton.setOnClickListener(v -> {
+            // 将当前Activity任务退后台，最小化APP
+            MyActivity.setMini();
+        });
 
         currentBar = actionBar;
 

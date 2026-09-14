@@ -211,7 +211,11 @@ void NotesList::restoreToNotes(QStringList list) {
   }
   delNoteRecycleBinItem(list);
   saveNotesList();
-  m_Notes->setNoteEntryList();
+
+  if (isAndroid)
+    m_Notes->setNoteEntryList();
+  else
+    setDataToNoteList();
 }
 
 void NotesList::delRecycleBinNotes(QStringList list) {

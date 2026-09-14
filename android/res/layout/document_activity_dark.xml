@@ -173,6 +173,18 @@
             android:padding="12dp"
         />
 
+        <!-- 最小化APP按钮 -->
+        <ImageButton
+            android:id="@+id/minimize_app_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:background="@drawable/button"
+            android:src="@drawable/ic_minimize_white_24dp"
+            android:contentDescription="Minimize"
+            android:padding="12dp"
+        />
+
 		<SeekBar
             android:id="@+id/page_seekbar"
             android:layout_width="0dp"

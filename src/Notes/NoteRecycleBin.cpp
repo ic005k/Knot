@@ -30,13 +30,53 @@ NoteRecycleBin::NoteRecycleBin(QWidget* parent)
 
 NoteRecycleBin::~NoteRecycleBin() { delete ui; }
 
-void NoteRecycleBin::on_btnSelAll_clicked() {}
+void NoteRecycleBin::on_btnSelAll_clicked() {
+  for (int i = 0; i < ui->listNoteRecycle->count(); ++i) {
+    QListWidgetItem* item = ui->listNoteRecycle->item(i);
+    if (!item->data(Qt::UserRole).toBool()) {
+      item->setData(Qt::UserRole, true);
+    }
+  }
+  // 强制刷新整个列表的视口，确保自定义Delegate重绘背景
+  ui->listNoteRecycle->viewport()->update();
+}
 
-void NoteRecycleBin::on_btnDesAll_clicked() {}
+void NoteRecycleBin::on_btnDesAll_clicked() {
+  for (int i = 0; i < ui->listNoteRecycle->count(); ++i) {
+    QListWidgetItem* item = ui->listNoteRecycle->item(i);
+    if (item->data(Qt::UserRole).toBool()) {
+      item->setData(Qt::UserRole, false);
+    }
+  }
+  // 强制刷新整个列表的视口，确保自定义Delegate重绘背景
+  ui->listNoteRecycle->viewport()->update();
+}
 
-void NoteRecycleBin::on_btnRestore_clicked() {}
+void NoteRecycleBin::on_btnRestore_clicked() {
+  QStringList list1 = getCheckedItems();
+  m_NotesList->restoreToNotes(list1);
 
-void NoteRecycleBin::on_btnDel_clicked() {}
+  close();
+}
+
+void NoteRecycleBin::on_btnDel_clicked() {
+  QStringList checkedItems = getCheckedItems();
+
+  // 1. 执行底层数据删除
+  m_NotesList->delRecycleBinNotes(checkedItems);
+
+  // 2. 倒序遍历移除UI列表中对应的条目（防止索引错位）
+  for (int i = ui->listNoteRecycle->count() - 1; i >= 0; --i) {
+    QListWidgetItem* item = ui->listNoteRecycle->item(i);
+    if (item->data(Qt::UserRole).toBool()) {
+      // takeItem 仅移除不销毁，需手动 delete 释放内存
+      delete ui->listNoteRecycle->takeItem(i);
+    }
+  }
+
+  // 3. 强制刷新视口，确保自定义Delegate重绘背景
+  ui->listNoteRecycle->viewport()->update();
+}
 
 void NoteRecycleBin::showNoteRecycleBin(QStringList list) {
   m_Method->setWinPos(this, 350);
@@ -75,4 +115,16 @@ QStringList NoteRecycleBin::getCheckedPaths() const {
     }
   }
   return checkedPaths;
+}
+
+QStringList NoteRecycleBin::getCheckedItems() const {
+  QStringList checkedItems;
+  for (int i = 0; i < ui->listNoteRecycle->count(); ++i) {
+    QListWidgetItem* item = ui->listNoteRecycle->item(i);
+    if (item->data(Qt::UserRole).toBool()) {
+      // 直接获取完整的 DisplayRole 数据，不做 === 分隔处理
+      checkedItems.append(item->data(Qt::DisplayRole).toString());
+    }
+  }
+  return checkedItems;
 }
