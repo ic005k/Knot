@@ -1778,4 +1778,12 @@ public class DocumentActivity extends Activity {
             );
         });
     }
+
+    public static String decodeGbk(byte[] data) {
+        try {
+            return new String(data, "GBK");
+        } catch (java.io.UnsupportedEncodingException e) {
+            return new String(data); // 兜底 UTF-8
+        }
+    }
 }

@@ -1,6 +1,17 @@
+
 #include <QBuffer>
+#include <QByteArray>
+#include <QFile>
+#include <QFont>
+#include <QPageLayout>
+#include <QPageSize>
 #include <QPrinter>
+#include <QString>
 #include <QTemporaryFile>
+#include <QTextDocument>
+#include <QTextStream>
+#include <cerrno>
+#include <cstring>
 
 #include "Reader.h"
 
@@ -50,44 +61,62 @@ void Reader::setPdfDataToJava(QString txtFile) {
 #endif
 }
 
+static QString decodeGbkViaJni(const QByteArray& gbk) {
+#ifdef Q_OS_ANDROID
+
+  // 将 QByteArray 转为 Java byte[]
+  QJniEnvironment env;
+  jbyteArray jBytes = env->NewByteArray(gbk.size());
+  env->SetByteArrayRegion(jBytes, 0, gbk.size(),
+                          reinterpret_cast<const jbyte*>(gbk.constData()));
+
+  QJniObject result = QJniObject::callStaticObjectMethod(
+      "com/x/artifex/mupdf/mini/DocumentActivity", "decodeGbk",
+      "([B)Ljava/lang/String;", jBytes);
+
+  env->DeleteLocalRef(jBytes);
+
+  if (result.isValid()) {
+    return result.toString();
+  }
+
+  qWarning() << "JNI decodeGbk failed, fallback to Latin1";
+
+#endif
+  return QString::fromLatin1(gbk);
+}
+
 QByteArray Reader::txtToPdf(const QString& filePath) {
   QFile file(filePath);
-  if (!file.open(
-          QIODevice::ReadOnly)) {  // ⚠️ 去掉 Text 标志，以二进制读取原始字节
+  if (!file.open(QIODevice::ReadOnly)) {
     qWarning() << "Failed to open txt file:" << filePath << file.errorString();
     return {};
   }
   QByteArray raw = file.readAll();
   file.close();
 
-  // --- 编码处理：优先 UTF-8，回退 GBK ---
   QString txtContent;
 
-  // 1. 先尝试 UTF-8（严格模式）
-  auto utf8Decoder = QStringDecoder(
-      QStringDecoder::Utf8, QStringConverter::Flag::ConvertInvalidToNull);
-  if (utf8Decoder.isValid()) {
-    txtContent = utf8Decoder(raw);
-    // 如果解码结果包含 null 字符，说明不是合法 UTF-8
-    if (!txtContent.contains('\0')) {
-      goto encoding_done;
-    }
-  }
+  // 1. 检查 UTF-8 BOM
+  if (raw.startsWith("\xEF\xBB\xBF")) {
+    txtContent = QString::fromUtf8(raw.mid(3));
+  } else {
+    // 2. 尝试严格 UTF-8 解码
+    auto utf8Dec = QStringDecoder(QStringDecoder::Utf8,
+                                  QStringDecoder::Flag::ConvertInvalidToNull);
+    QString test = utf8Dec(raw);
+    bool isValidUtf8 =
+        utf8Dec.isValid() && !test.contains('\0') && !utf8Dec.hasError();
 
-  // 2. UTF-8 失败，尝试 GBK
-  {
-    auto gbkDecoder = QStringDecoder("GBK");
-    if (gbkDecoder.isValid()) {
-      txtContent = gbkDecoder(raw);
-      qInfo() << "TXT fallback to GBK:" << filePath;
+    if (isValidUtf8) {
+      txtContent = test;
     } else {
-      // 3. GBK 也不可用，使用系统默认（最后兜底）
-      txtContent = QString::fromLocal8Bit(raw);
-      qWarning() << "GBK decoder unavailable, using local8Bit for:" << filePath;
+      // 3. ⭐ 非 UTF-8 → 使用 iconv 解码 GBK（Android NDK 原生支持）
+      txtContent = decodeGbkViaJni(raw);
+      qInfo() << "TXT decoded as GBK via iconv:" << filePath;
     }
   }
 
-encoding_done:
   // --- 文档构建 ---
   auto* doc = new QTextDocument();
   doc->setPlainText(txtContent);
