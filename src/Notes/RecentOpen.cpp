@@ -22,9 +22,23 @@ RecentOpen::RecentOpen(QWidget* parent)
 
 RecentOpen::~RecentOpen() { delete ui; }
 
-void RecentOpen::on_btnView_clicked() {}
+void RecentOpen::on_btnView_clicked() {
+  int idx = ui->listRecentNotes->currentRow();
+  if (idx == -1) return;
 
-void RecentOpen::on_btnEdit_clicked() {}
+  QString str = ui->listRecentNotes->currentItem()->text();
+  currentMDFile = str.split("===").at(1);
+  m_Notes->previewNote();
+}
+
+void RecentOpen::on_btnEdit_clicked() {
+  int idx = ui->listRecentNotes->currentRow();
+  if (idx == -1) return;
+
+  QString str = ui->listRecentNotes->currentItem()->text();
+  currentMDFile = str.split("===").at(1);
+  m_Notes->openEditUI();
+}
 
 void RecentOpen::showRecentOpen(QStringList list) {
   setDataToRecentList(list);

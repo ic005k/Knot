@@ -21,12 +21,20 @@ void NoteListDelegate::paint(QPainter* painter,
   QStyleOptionViewItem opt = option;
   initStyleOption(&opt, index);
 
+  // 【核心修复】保存原始交互状态后，立即清除所有可能触发系统边框的标志
+  bool isSelected = opt.state & QStyle::State_Selected;
+  bool isMouseOver = opt.state & QStyle::State_MouseOver;
+  opt.state &= ~(QStyle::State_Selected | QStyle::State_HasFocus |
+                 QStyle::State_MouseOver);
+
   painter->save();
   painter->setRenderHint(QPainter::Antialiasing);
 
-  // 1. 绘制背景（仅区分选中/未选中）
-  if (opt.state & QStyle::State_Selected) {
+  // 1. 完全手动绘制背景（无任何边框），对齐 TodoItemDelegate 的三态逻辑
+  if (isSelected) {
     painter->fillRect(opt.rect, opt.palette.highlight());
+  } else if (isMouseOver) {
+    painter->fillRect(opt.rect, opt.palette.base().color().darker(105));
   } else {
     painter->fillRect(opt.rect, opt.palette.base());
   }
@@ -45,8 +53,7 @@ void NoteListDelegate::paint(QPainter* painter,
   int textY = rect.top() + Layout::TopMargin;
   int textH = rect.height() - Layout::TopMargin - Layout::BottomMargin;
 
-  // 4. 根据选中状态动态计算颜色
-  bool isSelected = (opt.state & QStyle::State_Selected);
+  // 4. 根据原始选中状态动态计算颜色
   QColor textColor =
       isSelected ? QColor("#FFFFFF") : opt.palette.text().color();
 
@@ -58,7 +65,6 @@ void NoteListDelegate::paint(QPainter* painter,
   painter->setPen(textColor);
 
   QRect textRect(textX, textY, textW, textH);
-  // ✅ 现在：文本垂直居中
   painter->drawText(textRect,
                     Qt::AlignLeft | Qt::AlignVCenter | Qt::TextWordWrap, text);
 

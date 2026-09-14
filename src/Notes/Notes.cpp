@@ -853,15 +853,6 @@ void Notes::loadNotesToUI() {
   m_NotesList->set_memo_dir();
 
   if (!isAndroid) {
-    /*QSettings settings(privateDir + "editor_config.ini",
-    QSettings::IniFormat); int x, y, w, h; x = settings.value("x", 0).toInt();
-    y = settings.value("y", 20).toInt();
-    w = settings.value("w", this->width()).toInt();
-    h = settings.value("h", this->height()).toInt();
-    move(x, y);
-    resize(w, h);*/
-
-    m_Method->setWinPos(m_NotesList, 350);
     m_NotesList->showNoteList();
 
   } else

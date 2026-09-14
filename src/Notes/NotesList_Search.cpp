@@ -207,10 +207,10 @@ void NotesList::onSearchFinished() {
   QStringList list;
 
   if (exactResults.isEmpty()) {
-    m_searchModel.setResults({});
-    // mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
-    // auto msg = std::make_unique<ShowMessage>(mw_one);
-    // msg->showMsg("Knot", tr("No match was found."), 1);
+    // m_searchModel.setResults({});
+    //  mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
+    //  auto msg = std::make_unique<ShowMessage>(mw_one);
+    //  msg->showMsg("Knot", tr("No match was found."), 1);
   } else {
     // ========== 适配层：ExactMatchResult → SearchResult ==========
     QVector<SearchResult> adaptedResults;
@@ -234,7 +234,10 @@ void NotesList::onSearchFinished() {
     m_currentExactMatchIndex = 0;
   }
 
-  m_Method->refreshJavaData("setSearchResult", "NoteSearchActivity", list);
+  if (isAndroid)
+    m_Method->refreshJavaData("setSearchResult", "NoteSearchActivity", list);
+  else
+    m_NoteSearch->setDataToList(list);
 
   watcher->deleteLater();
   watcher = nullptr;
@@ -447,8 +450,11 @@ void NotesList::startVectorSerach(const QString& text) {
                 //      tr("AI Search Results: %1").arg(adaptedResults.size()));
               }
 
-              m_Method->refreshJavaData("setSearchResult", "NoteSearchActivity",
-                                        listJG);
+              if (isAndroid)
+                m_Method->refreshJavaData("setSearchResult",
+                                          "NoteSearchActivity", listJG);
+              else
+                m_NoteSearch->setDataToList(listJG);
 
               isVectorSearchDone = true;
 

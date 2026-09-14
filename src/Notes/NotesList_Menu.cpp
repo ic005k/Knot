@@ -152,7 +152,10 @@ void NotesList::newCreateNote() {
 
   saveNotesList();
 
-  m_Notes->setNoteEntryList();
+  if (isAndroid)
+    m_Notes->setNoteEntryList();
+  else
+    setDataToNoteList();
 
   mw_one->on_btnEditNote_clicked();
 }

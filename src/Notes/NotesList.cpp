@@ -11,6 +11,14 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   this->installEventFilter(this);
 
   m_RecentOpen = new RecentOpen(this);
+  m_NoteSearch = new NoteSearch(this);
+
+  // 隐藏水平滚动条，Delegate 的 sizeHint 会自动适配 viewport 宽度
+  ui->listNotes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  ui->listNotes->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+  // 设置自定义代理（自动换行 + 选中状态）
+  ui->listNotes->setItemDelegate(new NoteListDelegate(this));
 
   tw = new QTreeWidget(nullptr);
   twrb = new QTreeWidget(nullptr);
@@ -150,31 +158,10 @@ void NotesList::renameCurrentItem(QString title) {
   resetQML_List();
 }
 
-void NotesList::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
-
-/*void NotesList::saveNotesList() {
-  // 【高频防抖】如果正在保存，直接跳过，不允许重复触发
-  if (m_isSaving) return;
-
-  m_isSaving = true;
-
-  QPointer<NotesList> self(this);
-  QFuture<void> future = QtConcurrent::run([self]() {
-    // 对象已销毁则直接返回
-    if (!self) return;
-    QMutexLocker locker(&self->m_saveMutex);
-    self->saveNotesListToFile();
-  });
-
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
-    mw_one->strLatestModify = tr("Modi Notes List");
-    m_Notes->isSaveNotesConfig = true;
-    m_isSaving = false;  // 保存完成，解锁
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
-}*/
+void NotesList::closeEvent(QCloseEvent* event) {
+  Q_UNUSED(event);
+  mw_one->on_btnBackNoteList_clicked();
+}
 
 void NotesList::saveNotesList() {
   if (m_isSaving) return;
@@ -1155,30 +1142,110 @@ int NotesList::calcNoteIndexInsideBook(QTreeWidgetItem* bookItem,
 
 void NotesList::on_btnRecently_clicked() { mw_one->on_btnRecentOpen_clicked(); }
 
-void NotesList::on_btnNoteMenu_clicked() {}
+void NotesList::on_btnNoteMenu_clicked() {
+  QMenu* menu = new QMenu(this);
+  menu->setAttribute(Qt::WA_DeleteOnClose);
+
+  QAction* actImport = menu->addAction(tr("Import"));
+  connect(actImport, &QAction::triggered, this, [this]() {
+    // TODO: Import
+    on_btnImport_clicked();
+  });
+
+  QAction* actExport = menu->addAction(tr("Export"));
+  connect(actExport, &QAction::triggered, this, [this]() {
+    // TODO: Export
+    int idx = ui->listNotes->currentRow();
+    if (idx == -1) return;
+
+    on_btnExport_clicked(idx);
+  });
+
+  QAction* actDelete = menu->addAction(tr("Delete"));
+  connect(actDelete, &QAction::triggered, this, [this]() {
+    // TODO: Delete
+    int idx = ui->listNotes->currentRow();
+    if (idx == -1) return;
+
+    delNote(idx);
+  });
+
+  menu->addSeparator();
+
+  QAction* actExportPdf = menu->addAction(tr("Export to PDF"));
+  connect(actExportPdf, &QAction::triggered, this, [this]() {
+    // TODO: Export to PDF
+    int idx = ui->listNotes->currentRow();
+    if (idx == -1) return;
+
+    m_Notes->on_btnPDF_clicked();
+  });
+
+  QAction* actRename = menu->addAction(tr("Rename"));
+  connect(actRename, &QAction::triggered, this, [this]() {
+    // TODO: Rename
+    int idx = ui->listNotes->currentRow();
+    if (idx == -1) return;
+    QString name;
+    renameNote(name, idx);
+  });
+
+  QAction* actGraph = menu->addAction(tr("Relation Graph"));
+  connect(actGraph, &QAction::triggered, this, [this]() {
+    // TODO: Relation Graph
+    int idx = ui->listNotes->currentRow();
+    if (idx == -1) return;
+  });
+
+  QAction* actHistory = menu->addAction(tr("Revision History"));
+  connect(actHistory, &QAction::triggered, this, [this]() {
+    // TODO: Revision History
+    int idx = ui->listNotes->currentRow();
+    if (idx == -1) return;
+  });
+
+  QAction* actStats = menu->addAction(tr("Statistics"));
+  connect(actStats, &QAction::triggered, this, [this]() {
+    // TODO: Statistics
+    m_NotesList->on_actionStatistics();
+  });
+
+  QPoint pos =
+      ui->btnNoteMenu->mapToGlobal(QPoint(0, ui->btnNoteMenu->height()));
+  menu->popup(pos);
+}
 
 void NotesList::on_btnNewNote_clicked() { m_NotesList->newCreateNote(); }
 
-void NotesList::on_btnSearch_clicked() {}
+void NotesList::on_btnSearch_clicked() { m_NoteSearch->showNoteSearch(); }
 
-void NotesList::on_btnView_clicked() { m_Notes->previewNote(); }
+void NotesList::on_btnView_clicked() {
+  int idx = ui->listNotes->currentRow();
+  if (idx == -1) return;
 
-void NotesList::on_btnEdit_clicked() { m_Notes->openEditUI(); }
+  m_Notes->previewNote();
+}
+
+void NotesList::on_btnEdit_clicked() {
+  int idx = ui->listNotes->currentRow();
+  if (idx == -1) return;
+
+  m_Notes->openEditUI();
+}
 
 void NotesList::on_btnNoteRecycle_clicked() {
   mw_one->on_btnNoteRecycle_clicked();
 }
 
 void NotesList::showNoteList() {
+  setDataToNoteList();
+
+  m_Method->setWinPos(this, 350);
+  show();
+}
+
+void NotesList::setDataToNoteList() {
   ui->listNotes->clear();
-
-  // 隐藏水平滚动条，Delegate 的 sizeHint 会自动适配 viewport 宽度
-  ui->listNotes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  ui->listNotes->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
-  // 设置自定义代理（自动换行 + 选中状态）
-  ui->listNotes->setItemDelegate(new NoteListDelegate(this));
-
   for (const QString& note : listNoteEntry) {
     // 直接以纯文本作为 DisplayRole 数据
     // Delegate 内部负责自动换行渲染和高度计算
@@ -1187,9 +1254,6 @@ void NotesList::showNoteList() {
     // sizeHint 由 NoteListDelegate 自动提供，无需手动 setSizeHint
     ui->listNotes->addItem(listItem);
   }
-
-  m_Method->setWinPos(this, 350);
-  show();
 }
 
 void NotesList::on_listNotes_itemClicked(QListWidgetItem* item) {

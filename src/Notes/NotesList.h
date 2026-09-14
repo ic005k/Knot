@@ -29,8 +29,8 @@
 #include <utility>
 
 #include "DatabaseManager.h"
+#include "Notes/NoteSearch.h"
 #include "Notes/RecentOpen.h"
-#include "QTreeWidgetProxyModel.h"
 #include "SearchModel.h"
 #include "VectorSearchService.h"
 #include "defines.h"
@@ -75,6 +75,7 @@ class NotesList : public QDialog {
   ~NotesList();
   Ui::NotesList* ui;
 
+  NoteSearch* m_NoteSearch;
   RecentOpen* m_RecentOpen;
 
   QStringList listNoteBook, listNoteEntry;
@@ -254,6 +255,8 @@ class NotesList : public QDialog {
   void delNoteRecycleBinItem(const QStringList& list);
 
   void showNoteList();
+
+  void setDataToNoteList();
 
  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
