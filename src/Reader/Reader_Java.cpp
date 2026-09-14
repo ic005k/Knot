@@ -122,7 +122,7 @@ QByteArray Reader::txtToPdf(const QString& filePath) {
   doc->setPlainText(txtContent);
 
   // ✅ 字号改为 15
-  QFont font("Noto Sans CJK SC", 15);
+  QFont font("Noto Sans CJK SC", 16);
   font.setStyleStrategy(QFont::PreferAntialias);
   doc->setDefaultFont(font);
 

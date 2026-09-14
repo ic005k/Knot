@@ -214,10 +214,7 @@ void Todo::closeEvent(QCloseEvent* event) {
 }
 
 void Todo::closeTodo() {
-  mw_one->clearWidgetFocus();
-
   stopPlayVoice();
-  saveTodo();
 
   if (isAndroid) {
     m_Method->openMainEntranceWindow();

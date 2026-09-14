@@ -36,8 +36,9 @@ jobs:
       QT_VERSION: ${{ matrix.qt_ver }}
       QT_ARCH: gcc_64
       QT_INSTALL_DIR: /opt/qt/QT_VERSION/gcc_64
-      QT_INSTALL_QML: /opt/qt/QT_VERSION/gcc_64/qml
-      QML2_IMPORT_PATH: ${{ github.workspace }}/qml:/opt/qt/QT_VERSION/gcc_64/qml
+
+      #QT_INSTALL_QML: /opt/qt/QT_VERSION/gcc_64/qml
+      #QML2_IMPORT_PATH: ${{ github.workspace }}/qml:/opt/qt/QT_VERSION/gcc_64/qml
 
     steps:
       - name: Install Qt
@@ -163,11 +164,12 @@ jobs:
 
           ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
                    -unsupported-allow-new-glibc \
-                   -qmldir=/home/runner/work/Knot/Knot/src/qmlsrc \
                    -qmake=/home/runner/work/Knot/Qt/${{ matrix.qt_ver }}/gcc_64/bin/qmake \
                    -appimage \
                    -extra-plugins=platforminputcontexts \
                    -no-strip
+
+                   #-qmldir=/home/runner/work/Knot/Knot/src/qmlsrc
 
       - uses: actions/upload-artifact@v4
         with:

@@ -133,7 +133,6 @@ jobs:
           cp -R -p "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
           QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
           arch -x86_64 macdeployqt "${{ env.targetName }}.app" \
-            -qmldir=. \
             -verbose=1 \
             -dmg \
             -libpath="$QT_ACTUAL_LIB" \

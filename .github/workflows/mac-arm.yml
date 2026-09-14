@@ -105,7 +105,6 @@ jobs:
           # 自动读取 Qt 真实库路径，兼容 Qt6.10 macdeployqt 检索缺陷
           QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
           macdeployqt "${{ env.targetName }}.app" \
-            -qmldir=. \
             -verbose=1 \
             -dmg \
             -libpath="$QT_ACTUAL_LIB" \

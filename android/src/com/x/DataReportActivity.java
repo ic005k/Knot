@@ -8,11 +8,13 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -499,17 +501,19 @@ public class DataReportActivity extends AppCompatActivity {
             int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
             int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
 
+            android.widget.ScrollView scrollView =
+                new android.widget.ScrollView(act);
+            scrollView.setPadding(dp(16), dp(12), dp(16), dp(12));
+
             LinearLayout container = new LinearLayout(act);
             container.setOrientation(LinearLayout.VERTICAL);
             container.setGravity(Gravity.CENTER_VERTICAL);
-            container.setPadding(dp(16), dp(12), dp(16), dp(12));
 
             for (String itemText : detailItems) {
                 TextView tv = new TextView(act);
                 tv.setTextSize(14);
                 tv.setTextColor(textColor);
                 tv.setPadding(0, dp(4), 0, dp(4));
-
                 if (TextUtils.isEmpty(itemText)) {
                     tv.setVisibility(View.GONE);
                 } else {
@@ -518,10 +522,24 @@ public class DataReportActivity extends AppCompatActivity {
                 }
                 container.addView(tv);
             }
+            scrollView.addView(container);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+            // 限制滚动区域最大高度为屏幕高度70%，兼容低版本，替代setMaxHeight
+            int maxH = (int) (act
+                .getResources()
+                .getDisplayMetrics()
+                .heightPixels * 0.7);
+            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            lp.height = maxH;
+            scrollView.setLayoutParams(lp);
+
+            android.app.AlertDialog.Builder builder =
+                new android.app.AlertDialog.Builder(act);
             builder.setTitle(MyActivity.zh_cn ? "详情" : "Detail");
-            builder.setView(container);
+            builder.setView(scrollView);
             builder.setPositiveButton(android.R.string.ok, null);
             builder.show();
         });
