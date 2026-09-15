@@ -621,8 +621,9 @@ QScrollBar::sub-page:horizontal {
   void refreshJavaData(QString callJavaName, QString className,
                        QStringList list);
 
-  void setWinPos(QWidget *w, int width);
-  protected:
+  void setWinPos(QWidget* w, int width, int pos);
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

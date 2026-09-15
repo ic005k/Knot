@@ -42,7 +42,7 @@ void RecentOpen::on_btnEdit_clicked() {
 
 void RecentOpen::showRecentOpen(QStringList list) {
   setDataToRecentList(list);
-  m_Method->setWinPos(this, 350);
+  m_Method->setWinPos(this, 350, 3);
   show();
 }
 

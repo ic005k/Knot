@@ -1335,7 +1335,7 @@ void Todo::openTodoUI() {
   } else {
     setDataToTodoList();
 
-    m_Method->setWinPos(this, 350);
+    m_Method->setWinPos(this, 350, 3);
     show();
   }
 

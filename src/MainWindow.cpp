@@ -78,9 +78,9 @@ MainWindow::MainWindow(QWidget* parent)
 
   if (m_Preferences->devMode) {
     // resetWinPos();
-    m_Method->setWinPos(this, 350);
+    m_Method->setWinPos(this, 350, 3);
   } else {
-    m_Method->setWinPos(this, 350);
+    m_Method->setWinPos(this, 350, 3);
   }
 
   m_Reader->initReader();

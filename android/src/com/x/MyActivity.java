@@ -3023,6 +3023,10 @@ public class MyActivity
                     showText = line.substring(5);
                     bold = true;
                     textSize = 14;
+                } else if (line.startsWith("##### ")) {
+                    showText = line.substring(6);
+                    bold = true;
+                    textSize = 13;
                 } else if (line.startsWith("- ") || line.startsWith("* ")) {
                     showText = "• " + line.substring(2);
                 }

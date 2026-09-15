@@ -1276,7 +1276,7 @@ void NotesList::on_btnNoteRecycle_clicked() {
 void NotesList::showNoteList() {
   setDataToNoteList();
 
-  m_Method->setWinPos(this, 350);
+  m_Method->setWinPos(this, 350, 3);
   show();
 }
 

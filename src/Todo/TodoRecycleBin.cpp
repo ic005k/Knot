@@ -62,6 +62,6 @@ void TodoRecycleBin::showTodoRecycleBin(QStringList list) {
     ui->listRecycle->addItem(listItem);
   }
 
-  m_Method->setWinPos(this, 350);
+  m_Method->setWinPos(this, 350, 3);
   show();
 }

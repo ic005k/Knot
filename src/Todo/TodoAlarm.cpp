@@ -89,7 +89,7 @@ void TodoAlarm::initDlg() {
   h = list2.at(0);
   mm = list2.at(1);
 
-  m_Method->setWinPos(this, 350);
+  m_Method->setWinPos(this, 350, 3);
 
   this->setModal(true);
   this->installEventFilter(this);
@@ -341,6 +341,6 @@ void TodoAlarm::showAlarmWin(QStringList list) {
   ui->dateTimeEdit->setTime(time);
 
   this->setFixedHeight(300);
-  m_Method->setWinPos(this, 350);
+  m_Method->setWinPos(this, 350, 3);
   show();
 }

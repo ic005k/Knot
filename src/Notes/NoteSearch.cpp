@@ -26,7 +26,7 @@ NoteSearch::NoteSearch(QWidget* parent)
 NoteSearch::~NoteSearch() { delete ui; }
 
 void NoteSearch::showNoteSearch() {
-  m_Method->setWinPos(this, 350);
+  m_Method->setWinPos(this, 350, 3);
   show();
 }
 

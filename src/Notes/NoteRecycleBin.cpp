@@ -79,7 +79,7 @@ void NoteRecycleBin::on_btnDel_clicked() {
 }
 
 void NoteRecycleBin::showNoteRecycleBin(QStringList list) {
-  m_Method->setWinPos(this, 350);
+  m_Method->setWinPos(this, 350, 3);
   setDataToList(list);
   show();
 }
