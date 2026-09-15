@@ -27,6 +27,7 @@ jobs:
       orgName: Knot
       ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
       QT_ROOT_DIR: ${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/macos
+      OPENSSL_VERSION: "3.3.2"
 
     steps:
       - name: Checkout code
@@ -45,15 +46,32 @@ jobs:
           source: false
           dir: ${{ github.workspace }}/Qt
 
-      - name: Install Dependencies (arm64 Homebrew)
+      # ✅ 【核心修复】从源码编译纯 x86_64 的 OpenSSL，彻底解决架构不匹配问题
+      - name: Build OpenSSL (x86_64 from source)
         run: |
-          brew install openssl@3 cmake ninja
+          brew install cmake ninja perl
 
-          OPENSSL_ROOT="$(brew --prefix openssl@3)"
-          echo "OPENSSL_ROOT=$OPENSSL_ROOT" >> $GITHUB_ENV
+          OPENSSL_SRC="${{ runner.temp }}/openssl-src"
+          OPENSSL_INSTALL="${{ runner.temp }}/openssl-x86_64"
 
-          echo "=== Verify OpenSSL ==="
-          file "$OPENSSL_ROOT/lib/libssl.dylib" || true
+          curl -fsSL "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" | tar xz -C "${{ runner.temp }}"
+          mv "${{ runner.temp }}/openssl-${OPENSSL_VERSION}" "$OPENSSL_SRC"
+
+          cd "$OPENSSL_SRC"
+          # 强制指定 darwin64-x86_64-cc 目标，确保生成纯 x86_64 二进制
+          ./Configure darwin64-x86_64-cc \
+            --prefix="$OPENSSL_INSTALL" \
+            --openssldir="$OPENSSL_INSTALL/ssl" \
+            no-shared no-tests no-docs
+
+          make -j$(sysctl -n hw.ncpu)
+          make install_sw
+
+          echo "OPENSSL_ROOT=$OPENSSL_INSTALL" >> $GITHUB_ENV
+
+          echo "=== Verify x86_64 OpenSSL ==="
+          file "$OPENSSL_INSTALL/lib/libcrypto.a" || true
+          file "$OPENSSL_INSTALL/lib/libssl.a" || true
 
       - name: Build macOS (x86_64)
         timeout-minutes: 60
@@ -75,6 +93,7 @@ jobs:
             -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
             -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
             -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
+            -DOPENSSL_USE_STATIC_LIBS=TRUE \
             -DGGML_NATIVE=OFF \
             -DLLAMA_NATIVE=OFF \
             -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations" \
@@ -82,7 +101,6 @@ jobs:
 
           echo "=== Build ==="
           set +e
-          # ✅ 【修复点】将 VERBOSE=1 替换为 Ninja 专用的 -v 参数
           cmake --build build --config Release -- -v 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           set -e
