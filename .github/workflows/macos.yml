@@ -48,24 +48,27 @@ jobs:
           source: false
           dir: ${{ github.workspace }}/Qt
 
-      - name: Install OpenSSL & CMake
+      - name: Build OpenSSL for x86_64
         run: |
-          # macos-14 预装 arm64 Homebrew (/opt/homebrew)，直接使用
-          brew install openssl@3 cmake
+          # 下载 OpenSSL 源码
+          OPENSSL_VERSION="3.4.0"
+          curl -LO "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz"
+          tar -xzf "openssl-${OPENSSL_VERSION}.tar.gz"
+          cd "openssl-${OPENSSL_VERSION}"
 
-          OPENSSL_ROOT="$(brew --prefix openssl@3)"
+          # 使用 x86_64 架构编译
+          arch -x86_64 ./Configure darwin64-x86_64-cc --prefix="$PWD/../openssl-x86_64"
+          arch -x86_64 make -j$(sysctl -n hw.ncpu)
+          arch -x86_64 make install_sw
+
+          # 导出编译好的 x86_64 OpenSSL 路径
+          OPENSSL_ROOT="$(pwd)/../openssl-x86_64"
           echo "OPENSSL_ROOT=$OPENSSL_ROOT" >> $GITHUB_ENV
 
-          # 验证是否为 universal binary（必须包含 x86_64）
-          echo "=== Verify OpenSSL Universal Binary ==="
-          LIPO_OUT=$(lipo -archs "$OPENSSL_ROOT/lib/libssl.dylib" 2>/dev/null || echo "single")
-          echo "libssl archs: $LIPO_OUT"
-          if [[ "$LIPO_OUT" != *"x86_64"* ]]; then
-            echo "❌ ERROR: OpenSSL 缺少 x86_64 切片！"
-            file "$OPENSSL_ROOT/lib/libssl.dylib"
-            exit 1
-          fi
-          echo "✅ OpenSSL universal binary 验证通过"
+          # 验证架构
+          echo "=== Verify OpenSSL Architecture ==="
+          file "$OPENSSL_ROOT/lib/libssl.dylib"
+          lipo -archs "$OPENSSL_ROOT/lib/libssl.dylib"
 
       - name: Build macOS (x86_64)
         timeout-minutes: 60
