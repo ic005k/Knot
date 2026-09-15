@@ -161,7 +161,7 @@ void CloudBackup::startBakData() {
   mw_one->showProgress();
 
   mw_one->ui->progressBar->setValue(0);
-  mw_one->ui->progBar->show();
+  // mw_one->ui->progBar->show();
   mw_one->ui->progBar->setMaximum(100);
   mw_one->ui->progBar->setMinimum(0);
   mw_one->ui->progBar->setValue(0);

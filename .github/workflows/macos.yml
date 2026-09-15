@@ -44,28 +44,33 @@ jobs:
           target: desktop
           arch: ${{ matrix.qt_arch }}
           modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
-          #modules: qtcharts qtsensors qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
           source: false
           dir: ${{ github.workspace }}/Qt
 
-      - name: Install Homebrew & OpenSSL (x86_64)
+      - name: Install OpenSSL & CMake
         run: |
-          if [ -d "/opt/homebrew" ]; then
-            sudo rm -rf /opt/homebrew
+          # macos-14 预装 arm64 Homebrew (/opt/homebrew)，直接使用
+          brew install openssl@3 cmake
+
+          OPENSSL_ROOT="$(brew --prefix openssl@3)"
+          echo "OPENSSL_ROOT=$OPENSSL_ROOT" >> $GITHUB_ENV
+
+          # 验证是否为 universal binary（必须包含 x86_64）
+          echo "=== Verify OpenSSL Universal Binary ==="
+          LIPO_OUT=$(lipo -archs "$OPENSSL_ROOT/lib/libssl.dylib" 2>/dev/null || echo "single")
+          echo "libssl archs: $LIPO_OUT"
+          if [[ "$LIPO_OUT" != *"x86_64"* ]]; then
+            echo "❌ ERROR: OpenSSL 缺少 x86_64 切片！"
+            file "$OPENSSL_ROOT/lib/libssl.dylib"
+            exit 1
           fi
-          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
-          source ~/.bash_profile
-          arch -x86_64 brew update
-          arch -x86_64 brew install openssl@3 cmake
-          arch -x86_64 brew link openssl@3 --force
+          echo "✅ OpenSSL universal binary 验证通过"
 
       - name: Build macOS (x86_64)
         timeout-minutes: 60
         run: |
-          export PATH="/usr/local/bin:$PATH"
-          OPENSSL_ROOT="/usr/local/opt/openssl@3"
+          export PATH="/opt/homebrew/bin:$PATH"
           OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
           QT_LIB_PATH="${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/macos/lib"
           if [ ! -d "$QT_LIB_PATH" ]; then
@@ -126,7 +131,7 @@ jobs:
 
       - name: Package DMG
         run: |
-          export PATH="$QT_ROOT_DIR/bin:/usr/local/bin:$PATH"
+          export PATH="$QT_ROOT_DIR/bin:/opt/homebrew/bin:$PATH"
           if [ -f "ExtBin/mac/Info.plist" ]; then
             cp -f ExtBin/mac/Info.plist "bin/release/${{ env.targetName }}.app/Contents/Info.plist"
           fi

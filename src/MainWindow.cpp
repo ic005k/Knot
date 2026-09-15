@@ -76,7 +76,12 @@ MainWindow::MainWindow(QWidget* parent)
 
   qInfo() << "MainWindow加载TW数据完成...";
 
-  resetWinPos();
+  if (m_Preferences->devMode) {
+    // resetWinPos();
+    m_Method->setWinPos(this, 350);
+  } else {
+    m_Method->setWinPos(this, 350);
+  }
 
   m_Reader->initReader();
 

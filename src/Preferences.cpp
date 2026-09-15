@@ -21,6 +21,8 @@ Preferences::Preferences(QWidget* parent)
   this->installEventFilter(this);
   ui->lblFontSize->installEventFilter(this);
 
+  ui->tabOptions->setCurrentIndex(1);
+
   ui->gboxAdditional->hide();
   ui->lblAdditional->hide();
   ui->cboxEndpoint->setVisible(false);
@@ -683,6 +685,11 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
 }
 
 void Preferences::on_btnAISelect_clicked() {
+  ui->cboxEndpoint->showPopup();
+  return;
+
+  ////////////////////////////////////////////////////////////////////////
+
   close();
   mw_one->ui->frameMain->hide();
 

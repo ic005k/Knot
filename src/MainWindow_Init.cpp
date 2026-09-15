@@ -334,7 +334,7 @@ void MainWindow::init_UIWidget() {
   mw_one->ui->lblVectorStatus->setText("");
   mw_one->ui->lblVectorStatus->hide();
 
-  // mw_one->ui->lblStats->hide();
+  mw_one->ui->btnSync->hide();
 
   mw_one->ui->btnSelTab->hide();
 
@@ -350,8 +350,8 @@ void MainWindow::init_UIWidget() {
 
   mw_one->ui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mw_one->ui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
-  mw_one->ui->twCloudBackup->setCurrentIndex(1);
-  mw_one->ui->twCloudBackup->setTabVisible(0, false);
+  mw_one->ui->twCloudBackup->setCurrentIndex(0);
+
   mw_one->ui->chkWebDAV->hide();
   mw_one->ui->lblWebDAV->hide();
 

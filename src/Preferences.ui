@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabOptions">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -258,7 +258,7 @@ QCheckBox::indicator:checked {
           </size>
          </property>
          <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Shadow::Raised</enum>
@@ -307,7 +307,7 @@ QCheckBox::indicator:checked {
           </size>
          </property>
          <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Shadow::Raised</enum>
@@ -404,7 +404,7 @@ QCheckBox::indicator:checked {
           </sizepolicy>
          </property>
          <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
+          <enum>QFrame::Shape::Box</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Shadow::Raised</enum>
