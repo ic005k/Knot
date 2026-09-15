@@ -88,8 +88,6 @@ jobs:
           file "$OPENSSL_ROOT/lib/libcrypto.dylib" || true
 
           echo "=== CMake Configure (x86_64) ==="
-          # 注意：不要加 arch -x86_64！cmake 本身是 arm64 即可，
-          # 通过 -DCMAKE_OSX_ARCHITECTURES=x86_64 告诉它生成 x86_64 构建文件
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
@@ -98,8 +96,8 @@ jobs:
             -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
             -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
             -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
-            -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations" \
-            -DCMAKE_C_FLAGS="-Wno-deprecated-declarations"
+            -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations -march=x86-64" \
+            -DCMAKE_C_FLAGS="-Wno-deprecated-declarations -march=x86-64"
 
           echo "=== Diagnostic: CMake OpenSSL Detection ==="
           grep -E "OPENSSL_(SSL|CRYPTO)_LIBRARY" build/CMakeCache.txt || true
