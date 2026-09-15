@@ -3,13 +3,9 @@ name: MacOS-x86_64 CI
 on:
   push:
     branches: [main]
-    paths:
-      - '**'
-      - '!stats.txt'
-      - '!README.md'
+    paths: ['**', '!stats.txt', '!README.md']
   pull_request:
-    paths:
-      - '**'
+    paths: ['**']
   release:
     types: [published]
 
@@ -49,105 +45,75 @@ jobs:
           source: false
           dir: ${{ github.workspace }}/Qt
 
-      # ✅ 完全恢复老版 x86_64 Homebrew 安装方式
-      - name: Install Homebrew & OpenSSL (x86_64)
+      # ✅ 【关键区别】放弃 x86 Homebrew，改用 arm64 Homebrew 安装依赖
+      - name: Install Dependencies (arm64 Homebrew)
         run: |
-          # 确保 Rosetta 2 已就绪
-          softwareupdate --install-rosetta --agree-to-license || true
+          # 使用 macos-14 预装的 arm64 Homebrew，绝对不会报 "Apple Silicon only" 错误
+          brew install openssl@3 cmake ninja
 
-          # 清理 arm64 homebrew 避免 PATH 污染
-          if [ -d "/opt/homebrew" ]; then
-            sudo rm -rf /opt/homebrew
-          fi
+          OPENSSL_ROOT="$(brew --prefix openssl@3)"
+          echo "OPENSSL_ROOT=$OPENSSL_ROOT" >> $GITHUB_ENV
 
-          # 安装 Intel 版 Homebrew 及依赖
-          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
-          source ~/.bash_profile
-          arch -x86_64 brew update
-          arch -x86_64 brew install openssl@3 cmake
-          arch -x86_64 brew link openssl@3 --force
+          echo "=== Verify OpenSSL ==="
+          file "$OPENSSL_ROOT/lib/libssl.dylib" || true
 
       - name: Build macOS (x86_64)
         timeout-minutes: 60
         run: |
-          export PATH="/usr/local/bin:$PATH"
-          OPENSSL_ROOT="/usr/local/opt/openssl@3"
+          export PATH="/opt/homebrew/bin:$PATH"
           OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
-          QT_LIB_PATH="${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/macos/lib"
-          if [ ! -d "$QT_LIB_PATH" ]; then
-            QT_LIB_PATH="$QT_ROOT_DIR/lib"
-          fi
+          QT_LIB_PATH="${QT_ROOT_DIR}/lib"
 
           echo "=== Environment Info ==="
           echo "OpenSSL Root: $OPENSSL_ROOT"
-          echo "macOS SDK:    $OSX_SYSROOT"
           echo "Runner Arch:  $(uname -m)"
-          echo "Rosetta:      $(arch)"
           echo "Qt Lib Path:  $QT_LIB_PATH"
-          echo "QT_ROOT_DIR:  $QT_ROOT_DIR"
 
-          echo "=== Diagnostic: Qt Core Architecture ==="
-          file "$QT_LIB_PATH/QtCore.framework/QtCore" || true
-
-          echo "=== Diagnostic: OpenSSL Architecture ==="
-          file "$OPENSSL_ROOT/lib/libssl.dylib" || true
-          file "$OPENSSL_ROOT/lib/libcrypto.dylib" || true
-
-          echo "=== CMake Configure (x86_64) ==="
-          arch -x86_64 cmake -B build \
+          echo "=== CMake Configure (x86_64 Cross-Compile) ==="
+          # ✅ 【关键区别】不使用 arch -x86_64 运行 cmake
+          # 而是用 arm64 cmake + CMAKE_OSX_ARCHITECTURES 进行交叉编译
+          # 同时通过 GGML_NATIVE=OFF 彻底关闭 llama.cpp 的本机 CPU 探测
+          cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
             -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
             -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
+            -DGGML_NATIVE=OFF \
+            -DLLAMA_NATIVE=OFF \
             -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations" \
             -DCMAKE_C_FLAGS="-Wno-deprecated-declarations"
 
-          echo "=== Diagnostic: CMake OpenSSL Detection ==="
-          grep -E "OPENSSL_(SSL|CRYPTO)_LIBRARY" build/CMakeCache.txt || true
-
-          echo "=== Build (parallel, warnings suppressed) ==="
+          echo "=== Build ==="
           set +e
-          arch -x86_64 cmake --build build --config Release \
-            -- VERBOSE=1 2>&1 | tee build.log
+          cmake --build build --config Release -- VERBOSE=1 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           set -e
 
           if [ "$BUILD_EXIT_CODE" -ne 0 ]; then
-            echo ""
             echo "========== REAL ERRORS FOUND =========="
             grep -iE "error:|fatal error:|undefined reference|ld: |symbol not found" build.log | head -50
             echo "========================================="
             exit 1
           fi
 
-          echo "=== Align Output ==="
           mkdir -p bin/release
-          if [ ! -d "bin/release/${{ env.targetName }}.app" ]; then
-            cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
-          fi
-
-          echo "=== Verify Binary Architecture ==="
-          file "bin/release/${{ env.targetName }}.app/Contents/MacOS/${{ env.targetName }}"
+          [ ! -d "bin/release/${targetName}.app" ] && cp -R "build/${targetName}.app" "bin/release/${targetName}.app"
+          file "bin/release/${targetName}.app/Contents/MacOS/${targetName}"
 
       - name: Package DMG
         run: |
-          export PATH="$QT_ROOT_DIR/bin:/usr/local/bin:$PATH"
-          if [ -f "ExtBin/mac/Info.plist" ]; then
-            cp -f ExtBin/mac/Info.plist "bin/release/${{ env.targetName }}.app/Contents/Info.plist"
-          fi
-          cp -R -p "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
+          export PATH="$QT_ROOT_DIR/bin:/opt/homebrew/bin:$PATH"
+          [ -f "ExtBin/mac/Info.plist" ] && cp -f ExtBin/mac/Info.plist "bin/release/${targetName}.app/Contents/Info.plist"
+          cp -R -p "bin/release/${targetName}.app" "${targetName}.app"
+
           QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
-          arch -x86_64 macdeployqt "${{ env.targetName }}.app" \
-            -qmldir=. \
-            -verbose=1 \
-            -dmg \
-            -libpath="$QT_ACTUAL_LIB" \
-            -libpath="./lib"
-          cp "${{ env.targetName }}.dmg" "bin/release/${{ env.targetName }}.dmg"
-          ls -lh "bin/release/${{ env.targetName }}.dmg"
+          macdeployqt "${targetName}.app" -verbose=1 -dmg \
+            -libpath="$QT_ACTUAL_LIB" -libpath="./lib"
+
+          cp "${targetName}.dmg" "bin/release/${targetName}.dmg"
+          ls -lh "bin/release/${targetName}.dmg"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
