@@ -94,6 +94,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DCMAKE_APPLE_SILICON_PROCESSOR=x86_64 \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
             -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
             -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
@@ -101,7 +102,7 @@ jobs:
             -DCMAKE_C_FLAGS="-Wno-deprecated-declarations"
 
           echo "=== Diagnostic: CMake OpenSSL Detection ==="
-          grep -E "OPENSSL_(SSL|CRYPTO)_LIBRARY" buildCMakeCache.txt || true
+          grep -E "OPENSSL_(SSL|CRYPTO)_LIBRARY" build/CMakeCache.txt || true
 
           echo "=== Build (parallel, warnings suppressed) ==="
           set +e
