@@ -45,10 +45,8 @@ jobs:
           source: false
           dir: ${{ github.workspace }}/Qt
 
-      # ✅ 【关键区别】放弃 x86 Homebrew，改用 arm64 Homebrew 安装依赖
       - name: Install Dependencies (arm64 Homebrew)
         run: |
-          # 使用 macos-14 预装的 arm64 Homebrew，绝对不会报 "Apple Silicon only" 错误
           brew install openssl@3 cmake ninja
 
           OPENSSL_ROOT="$(brew --prefix openssl@3)"
@@ -70,9 +68,6 @@ jobs:
           echo "Qt Lib Path:  $QT_LIB_PATH"
 
           echo "=== CMake Configure (x86_64 Cross-Compile) ==="
-          # ✅ 【关键区别】不使用 arch -x86_64 运行 cmake
-          # 而是用 arm64 cmake + CMAKE_OSX_ARCHITECTURES 进行交叉编译
-          # 同时通过 GGML_NATIVE=OFF 彻底关闭 llama.cpp 的本机 CPU 探测
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
@@ -87,7 +82,8 @@ jobs:
 
           echo "=== Build ==="
           set +e
-          cmake --build build --config Release -- VERBOSE=1 2>&1 | tee build.log
+          # ✅ 【修复点】将 VERBOSE=1 替换为 Ninja 专用的 -v 参数
+          cmake --build build --config Release -- -v 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           set -e
 
