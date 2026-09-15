@@ -30,6 +30,7 @@ jobs:
       VERSION: Mac-x86_64
       orgName: Knot
       ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
+      QT_ROOT_DIR: ${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/macos
 
     steps:
       - name: Checkout code
@@ -48,27 +49,18 @@ jobs:
           source: false
           dir: ${{ github.workspace }}/Qt
 
-      - name: Build OpenSSL for x86_64
+      - name: Install OpenSSL & CMake
         run: |
-          # 下载 OpenSSL 源码
-          OPENSSL_VERSION="3.4.0"
-          curl -LO "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz"
-          tar -xzf "openssl-${OPENSSL_VERSION}.tar.gz"
-          cd "openssl-${OPENSSL_VERSION}"
+          # macos-14 预装 arm64 Homebrew (/opt/homebrew)，直接使用
+          brew install openssl@3 cmake
 
-          # 使用 x86_64 架构编译
-          arch -x86_64 ./Configure darwin64-x86_64-cc --prefix="$PWD/../openssl-x86_64"
-          arch -x86_64 make -j$(sysctl -n hw.ncpu)
-          arch -x86_64 make install_sw
-
-          # 导出编译好的 x86_64 OpenSSL 路径
-          OPENSSL_ROOT="$(pwd)/../openssl-x86_64"
+          OPENSSL_ROOT="$(brew --prefix openssl@3)"
           echo "OPENSSL_ROOT=$OPENSSL_ROOT" >> $GITHUB_ENV
 
-          # 验证架构
-          echo "=== Verify OpenSSL Architecture ==="
-          file "$OPENSSL_ROOT/lib/libssl.dylib"
-          lipo -archs "$OPENSSL_ROOT/lib/libssl.dylib"
+          # 验证 OpenSSL 是否可用
+          echo "=== Verify OpenSSL ==="
+          echo "OpenSSL prefix: $OPENSSL_ROOT"
+          ls "$OPENSSL_ROOT/lib/" || true
 
       - name: Build macOS (x86_64)
         timeout-minutes: 60
@@ -86,6 +78,7 @@ jobs:
           echo "Runner Arch:  $(uname -m)"
           echo "Rosetta:      $(arch)"
           echo "Qt Lib Path:  $QT_LIB_PATH"
+          echo "QT_ROOT_DIR:  $QT_ROOT_DIR"
 
           echo "=== Diagnostic: Qt Core Architecture ==="
           file "$QT_LIB_PATH/QtCore.framework/QtCore" || true
@@ -95,7 +88,9 @@ jobs:
           file "$OPENSSL_ROOT/lib/libcrypto.dylib" || true
 
           echo "=== CMake Configure (x86_64) ==="
-          arch -x86_64 cmake -B build \
+          # 注意：不要加 arch -x86_64！cmake 本身是 arm64 即可，
+          # 通过 -DCMAKE_OSX_ARCHITECTURES=x86_64 告诉它生成 x86_64 构建文件
+          cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
             -DCMAKE_OSX_ARCHITECTURES=x86_64 \
@@ -106,11 +101,14 @@ jobs:
             -DCMAKE_C_FLAGS="-Wno-deprecated-declarations"
 
           echo "=== Diagnostic: CMake OpenSSL Detection ==="
-          grep -E "OPENSSL_(SSL|CRYPTO)_LIBRARY" build/CMakeCache.txt || true
+          grep -E "OPENSSL_(SSL|CRYPTO)_LIBRARY" buildCMakeCache.txt || true
 
           echo "=== Build (parallel, warnings suppressed) ==="
           set +e
-          arch -x86_64 cmake --build build --config Release \
+          # 注意：不要加 arch -x86_64！
+          # cmake --build 会调用 make，make 会调用 clang -arch x86_64
+          # Xcode 的 clang 是 universal binary，在 arm64 上可直接编译 x86_64
+          cmake --build build --config Release \
             -- VERBOSE=1 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           set -e
@@ -140,7 +138,8 @@ jobs:
           fi
           cp -R -p "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
           QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
-          arch -x86_64 macdeployqt "${{ env.targetName }}.app" \
+          # macdeployqt 不需要 arch -x86_64，它只读取二进制并拷贝文件
+          macdeployqt "${{ env.targetName }}.app" \
             -verbose=1 \
             -dmg \
             -libpath="$QT_ACTUAL_LIB" \
