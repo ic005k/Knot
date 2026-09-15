@@ -166,8 +166,6 @@ class Notes : public QDialog {
 
   QString insertImage(QString fileName, bool isToAndroidView);
 
-  bool eventFilterQwNote(QObject* watch, QEvent* event);
-
   void openAndroidNoteEditor();
 
   void appendNote(QString str);

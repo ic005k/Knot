@@ -649,8 +649,7 @@ void NotesList::on_actionStatistics() {
                      "\n\n" + strAccessCount;
 
     if (!isAndroid) {
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg(localAppName, strTip, 1);
+      QMessageBox::information(this, localAppName, strTip);
     } else {
       QStringList list;
       list.append(strTip);

@@ -214,10 +214,6 @@ void Notes::paintEvent(QPaintEvent* event) {
   return;
 }
 
-bool Notes::eventFilterQwNote(QObject* watch, QEvent* event) {
-  return QWidget::eventFilter(watch, event);
-}
-
 void Notes::openEditUI() {
   qInfo() << "currentMDFile=" << currentMDFile
           << m_Notes->m_NoteManager->getNoteTitle(currentMDFile);

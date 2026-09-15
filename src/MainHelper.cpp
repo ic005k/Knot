@@ -5,33 +5,6 @@
 
 MainHelper::MainHelper(QWidget* parent) : QDialog{parent} {}
 
-bool MainHelper::mainEventFilter(QObject* watch, QEvent* evn) {
-  QMouseEvent* event = static_cast<QMouseEvent*>(evn);
-
-  if (evn->type() == QEvent::ToolTip) {
-    QToolTip::hideText();
-    evn->ignore();
-    return true;
-  }
-
-  if (watch == mw_one->ui->lblStats) {
-    if (event->type() == QEvent::MouseButtonDblClick) {
-      mw_one->on_btnSelTab_clicked();
-      return true;
-    }
-  }
-
-  m_Reader->eventFilterReader(watch, evn);
-
-  m_Notes->eventFilterQwNote(watch, evn);
-
-  if (evn->type() == QEvent::KeyPress) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
-  }
-
-  return true;
-}
-
 void MainHelper::selectTab() {
   QString title = mw_one->m_EditRecord->titleAdd;
   title = title.mid(0, 4);

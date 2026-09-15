@@ -754,8 +754,6 @@ void MainWindow::clickMainDate(int index) {
 bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
   if (loading) return QWidget::eventFilter(watch, evn);
 
-  m_MainHelper->mainEventFilter(watch, evn);
-
   /*if (evn->type() == QEvent::KeyPress) {
     QKeyEvent* key = static_cast<QKeyEvent*>(evn);
     if (key->key() == Qt::Key_Back) {

@@ -76,7 +76,6 @@ class MainHelper : public QDialog {
   void clickBtnChart();
   void restoreTabRecycleFile(const QString& tabName,
                              const QString& tabFilePath);
-  bool mainEventFilter(QObject* watch, QEvent* evn);
 
   void openTabRecycle();
 
