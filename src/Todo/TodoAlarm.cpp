@@ -47,16 +47,6 @@ TodoAlarm::TodoAlarm(QWidget* parent) : QDialog(parent), ui(new Ui::TodoAlarm) {
   ui->btnNextWeek->hide();
   ui->lblTodoText->hide();
 
-  QString strStyleChk = mw_one->m_Preferences->chkStyle;
-  ui->chk1->setStyleSheet(strStyleChk);
-  ui->chk2->setStyleSheet(strStyleChk);
-  ui->chk3->setStyleSheet(strStyleChk);
-  ui->chk4->setStyleSheet(strStyleChk);
-  ui->chk5->setStyleSheet(strStyleChk);
-  ui->chk6->setStyleSheet(strStyleChk);
-  ui->chk7->setStyleSheet(strStyleChk);
-  ui->chkDaily->setStyleSheet(strStyleChk);
-  ui->chkSpeech->setStyleSheet(strStyleChk);
   ui->frameDaily->setContentsMargins(10, 1, 10, 1);
   ui->lblSelByWeek->setStyleSheet(ui->lblTodoText->styleSheet());
 

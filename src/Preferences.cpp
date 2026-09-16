@@ -19,12 +19,10 @@ Preferences::Preferences(QWidget* parent)
   m_Method->set_ToolButtonStyle(this);
 
   this->installEventFilter(this);
-  ui->lblFontSize->installEventFilter(this);
+  ui->lblNetCon->installEventFilter(this);
 
   ui->tabOptions->setCurrentIndex(1);
 
-  ui->gboxAdditional->hide();
-  ui->lblAdditional->hide();
   ui->cboxEndpoint->setVisible(false);
   ui->cboxModel->setVisible(false);
 
@@ -33,23 +31,7 @@ Preferences::Preferences(QWidget* parent)
                         "\n"
                         R"((~\.Knot\model))");
 
-  ui->lblFontSize->setText(tr("Font Size") + " : " + QString::number(fontSize));
   isFontChange = false;
-
-  chkStyle = ui->chkDark->styleSheet();
-  mw_one->ui->chkZip->setStyleSheet(chkStyle);
-  ui->chkUIFont->setStyleSheet(chkStyle);
-  ui->lblFontSize->setFixedHeight(40);
-  ui->chkAI->setStyleSheet(chkStyle);
-
-  QString lbl_style = ui->lblFontSet->styleSheet();
-  ui->lblAdditional->setStyleSheet(lbl_style);
-  mw_one->ui->lblDataEnc->setStyleSheet(lbl_style);
-  mw_one->ui->lblWebDAVUrl->setStyleSheet(lbl_style);
-
-  ui->btnCustomFont->adjustSize();
-  int hei = m_Method->getFontHeight();
-  ui->btnCustomFont->setFixedHeight(4 * hei);
 
   // 只能输入 1~50 的整数，彻底禁止输入超过 50 的数字
   QRegularExpression rx("^(?:[1-9]|[1-4][0-9]|50)$");
@@ -63,16 +45,6 @@ Preferences::Preferences(QWidget* parent)
   mw_one->ui->editPassword->setEchoMode(QLineEdit::EchoMode::Password);
   mw_one->ui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
   // ui->editAIKey->setEchoMode(QLineEdit::EchoMode::Password);
-
-  if (isAndroid) {
-    ui->sliderFontSize->setMinimum(10);
-    ui->sliderFontSize->setMaximum(16);
-    ui->sliderFontSize->setValue(12);
-  } else {
-    ui->sliderFontSize->setMinimum(8);
-    ui->sliderFontSize->setMaximum(14);
-    ui->sliderFontSize->setValue(10);
-  }
 
   initLocalModelList();
 
@@ -122,7 +94,7 @@ bool Preferences::eventFilter(QObject* watch, QEvent* evn) {
     }
   }
 
-  if (watch == ui->lblFontSize) {
+  if (watch == ui->lblNetCon) {
     if (event->type() == QEvent::MouseButtonDblClick) {
       if (devMode)
         devMode = false;
@@ -145,9 +117,6 @@ void Preferences::on_btnBack_clicked() {
 
 void Preferences::saveOptions() {
   if (this->isVisible()) {
-    iniPreferences->setValue("/Options/FontSize", ui->sliderFontSize->value());
-    iniPreferences->setValue("/Options/Dark", ui->chkDark->isChecked());
-    iniPreferences->setValue("/Options/chkUIFont", ui->chkUIFont->isChecked());
     iniPreferences->setValue("/Options/maxcon", ui->editConcurrency->text());
 
     iniPreferences->setValue("/Options/ai", ui->chkAI->isChecked());
@@ -167,67 +136,6 @@ void Preferences::saveOptions() {
     encPassword = password;
   else
     encPassword = "";
-}
-
-void Preferences::on_sliderFontSize_sliderMoved(int position) {
-  if (isVisible()) {
-    QFont font;
-
-    font.setPointSize(position * fontScale);
-
-    ui->lblFontSize->setFont(font);
-    isFontChange = true;
-
-    qApp->setFont(font);
-
-    iniPreferences->setValue("/Options/FontSize", position);
-    fontSize = position * fontScale;
-
-    getCheckStatusChange();
-  }
-
-  // ======================= 超级简化版 =======================
-  // 自动计算 0~6 级：0=极小 1=小 2=默认 3=大 4=超大 5=特大 6=最大
-  int min = ui->sliderFontSize->minimum();
-  int max = ui->sliderFontSize->maximum();
-  int totalLevels = 7;  // 固定7档：极小~最大
-
-  // 自动计算当前是第几档
-  int level = 0;
-  if (max > min) {
-    level = (position - min) * totalLevels / (max - min);
-    level = qBound(0, level, totalLevels - 1);  // 限制 0~6
-  }
-
-  // 自动匹配文字
-  QStringList levels = {tr("ExtraSmall"), tr("Small"),  tr("Default"),
-                        tr("Large"),      tr("XLarge"), tr("XXLarge"),
-                        tr("XXXLarge")};
-
-  QString sizeLevel = levels[level];
-  // ==========================================================
-
-  ui->lblFontSize->setText(tr("Font Size") + " : " + sizeLevel);
-}
-
-void Preferences::on_btnCustomFont_clicked() {
-  QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, tr("Font"), "",
-                                          tr("Font Files (*.*)"));
-  if (fileName == "") return;
-
-  QString fontName =
-      setFontDemoUI(fileName, ui->btnCustomFont, ui->sliderFontSize->value());
-  isFontChange = true;
-
-  iniPreferences->setValue("/Options/CustomFont", fileName);
-  iniPreferences->setValue("/Options/CustomFontName", fontName);
-
-  QFont font = this->font();
-  font.setFamily(fontName);
-  if (ui->chkUIFont->isChecked()) qApp->setFont(font);
-
-  getCheckStatusChange();
 }
 
 QString Preferences::setFontDemoUI(QString customFontPath, QToolButton* btn,
@@ -279,18 +187,9 @@ QString Preferences::setFontDemoUI(QString customFontPath, QToolButton* btn,
   return fontName;
 }
 
-void Preferences::on_chkUIFont_clicked() {
-  if (ui->btnCustomFont->text() == tr("Custom Font")) {
-    ui->chkUIFont->setChecked(false);
-    return;
-  }
-  isFontChange = true;
-  getCheckStatusChange();
-}
+void Preferences::on_chkUIFont_clicked() { getCheckStatusChange(); }
 
-void Preferences::on_sliderFontSize_valueChanged(int value) {
-  on_sliderFontSize_sliderMoved(value);
-}
+void Preferences::on_sliderFontSize_valueChanged(int value) {}
 
 void Preferences::setDefaultFont(QString fontFamily) {
   iniPreferences->setValue("/Options/DefaultFont", fontFamily);
@@ -312,12 +211,6 @@ bool Preferences::isOverReaderFont() {
 }
 
 void Preferences::initOptions() {
-  bool chkUIFont = iniPreferences->value("/Options/chkUIFont", false).toBool();
-  ui->chkUIFont->setChecked(chkUIFont);
-
-  ui->chkDark->setChecked(
-      iniPreferences->value("/Options/Dark", false).toBool());
-
   ui->chkAI->setChecked(iniPreferences->value("/Options/ai", false).toBool());
   isChkAI = ui->chkAI->isChecked();
 
@@ -370,13 +263,6 @@ void Preferences::initOptions() {
     mw_one->ui->btnNotes->setIconSize(QSize(qs, qs));
   }
 #endif
-
-  QString customFontFile =
-      iniPreferences->value("/Options/CustomFont").toString();
-  setFontDemoUI(customFontFile, ui->btnCustomFont, ui->sliderFontSize->value());
-
-  QString readerFontFile =
-      iniPreferences->value("/Options/ReaderFont").toString();
 }
 
 void Preferences::on_btnReStart_clicked() {
@@ -474,34 +360,10 @@ void Preferences::on_chkDark_clicked(bool checked) {
 void Preferences::initCheckStatus() {
   if (isVisible()) {
     listCheckStatus.clear();
-    listCheckStatus.append(ui->chkUIFont->isChecked());
-
-    listCheckStatus.append(ui->chkDark->isChecked());
-
-    listCheckStatus.append(ui->sliderFontSize->value());
-
-    orgCustomFontText = ui->btnCustomFont->text().trimmed();
   }
 }
 
-void Preferences::getCheckStatusChange() {
-  isChanged = false;
-  if (ui->chkUIFont->isChecked() != static_cast<bool>(listCheckStatus.at(0)))
-    isChanged = true;
-
-  if (ui->chkDark->isChecked() != static_cast<bool>(listCheckStatus.at(1)))
-    isChanged = true;
-
-  if (ui->sliderFontSize->value() != listCheckStatus.at(2)) isChanged = true;
-
-  if (orgCustomFontText != ui->btnCustomFont->text().trimmed())
-    isChanged = true;
-
-  if (isChanged)
-    ui->btnReStart->hide();
-  else
-    ui->btnReStart->hide();
-}
+void Preferences::getCheckStatusChange() { isChanged = false; }
 
 void Preferences::on_chkZip_clicked() {
   if (mw_one->ui->editPassword->text().trimmed() == "" ||
@@ -628,12 +490,6 @@ void Preferences::openPreferences() {
   setGeometry(x, y, width(), height());
   setModal(true);
 
-  // ui->sliderFontSize->setStyleSheet(mw_one->ui->hsM->styleSheet());
-
-  int savedPosition =
-      iniPreferences->value("/Options/FontSize", defaultFontSize).toInt();
-  ui->sliderFontSize->setValue(savedPosition);
-
   ui->lblModelStatus->setText(modelStatus);
   QString text = ui->cboxModel->currentText();
   if (text.isEmpty()) {
@@ -673,14 +529,13 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
   if (!checked) {
     font.setFamily(defaultFontFamily);
     qApp->setFont(font);
-    ui->chkUIFont->setChecked(false);
+
   } else {
     QString fontName =
         iniPreferences->value("/Options/CustomFontName", defaultFontFamily)
             .toString();
     font.setFamily(fontName);
     qApp->setFont(font);
-    ui->chkUIFont->setChecked(true);
   }
 }
 

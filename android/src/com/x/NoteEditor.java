@@ -568,7 +568,7 @@ public class NoteEditor
         recyclerView = findViewById(R.id.recyclerView);
 
         editNote = (EditText) findViewById(R.id.editNote);
-        editNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, MyActivity.myFontSize);
+        //editNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, MyActivity.myFontSize);
 
         if (myMethod == 2) {
             scrollView.setVisibility(View.GONE);

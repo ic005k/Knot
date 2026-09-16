@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
 
   QApplication app(argc, argv);
 
-  QApplication::setStyle(QStyleFactory::create("Fusion"));
+  // QApplication::setStyle(QStyleFactory::create("Fusion"));
 
   loadLocal();
 
@@ -267,57 +267,6 @@ int main(int argc, char* argv[]) {
       iniPreferences->value("/Options/localmodel", defaultModel).toString();
   modelFingerprint = computeModelFingerprint(modelFullPath + modelFileName);
 
-  fontScale = m_Method->getSystemFontScale();
-  int m_fontSize =
-      iniPreferences->value("/Options/FontSize", defaultFontSize).toInt();
-  fontSize = m_fontSize * fontScale;
-  bool isOverUIFont =
-      iniPreferences->value("/Options/chkUIFont", false).toBool();
-  QString customFontPath =
-      iniPreferences->value("/Options/CustomFont").toString();
-
-#ifdef Q_OS_WIN
-  defaultFontFamily = "Microsoft YaHei UI";
-
-#endif
-
-#ifdef Q_OS_ANDROID
-  defaultFontFamily = "sans-serif";
-
-#endif
-
-#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-  defaultFontFamily = "Noto Sans CJK SC";  //"Sans";
-
-#endif
-
-  if (isOverUIFont) {
-    if (QFile(customFontPath).exists()) {
-      int loadedFontID = QFontDatabase::addApplicationFont(customFontPath);
-      QStringList loadedFontFamilies =
-          QFontDatabase::applicationFontFamilies(loadedFontID);
-      if (!loadedFontFamilies.empty()) {
-        customFontFamily = loadedFontFamilies.at(0);
-      }
-    }
-  } else
-    customFontFamily = defaultFontFamily;
-
-  // Set Font
-  QFont m_font;
-  if (isOverUIFont) {
-    if (customFontFamily.length() > 0) {
-      m_font.setFamily(customFontFamily);
-    }
-  } else {
-    if (defaultFontFamily.length() > 0) {
-      m_font.setFamily(defaultFontFamily);
-    }
-  }
-
-  m_font.setPointSize(fontSize);
-  app.setFont(m_font);
-
   isLocalAIModel = false;
 #ifdef VECTOR_SEARCH
   // 执行ORT引擎、向量库完整初始化
@@ -397,9 +346,9 @@ void loadTheme(bool isDark) {
   isInitThemeEnd = false;
   // 设置调色板
   if (isDark) {
-    qApp->setPalette(createDarkPalette());
+    // qApp->setPalette(createDarkPalette());
   } else {
-    qApp->setPalette(createLightPalette());
+    // qApp->setPalette(createLightPalette());
   }
 
   /*QString themePath =
@@ -421,49 +370,6 @@ void loadTheme(bool isDark) {
   }*/
 
   if (mw_one) mw_one->init_Theme();
-
-  // 字体大小
-  QFont font = qApp->font();
-  font.setPointSize(fontSize);
-  qApp->setFont(font);
-
-  // 遍历控件刷新字体（仅字体大小变化时执行）
-  if (qApp) {
-    SliderButton* m_sliderButton;
-    if (mw_one) {
-      m_sliderButton = mw_one->m_MainHelper->sliderButton;
-    } else
-      return;
-
-    foreach (QWidget* widget, qApp->allWidgets()) {
-      if (widget != mw_one->ui->btnMenu && widget != mw_one->ui->btnHome &&
-          widget != mw_one->ui->btnAdd && widget != mw_one->ui->btnDel &&
-          widget != mw_one->ui->btnSync && widget != mw_one->ui->btnFind &&
-          widget != mw_one->ui->btnSelTab && widget != mw_one->ui->btnReader &&
-          widget != mw_one->ui->btnTodo && widget != mw_one->ui->btnNotes &&
-          widget != mw_one->ui->btnSteps &&
-          widget != m_Steps->getLabelGpsInfoWidget() &&
-          widget != m_Steps->m_speedometer && widget != m_sliderButton &&
-
-          widget != mw_one->ui->lblSyncNote &&
-          widget != mw_one->ui->lblVectorStatus) {
-        widget->setFont(qApp->font());
-
-        font.setBold(true);
-
-        if (mw_one->ui && mw_one->ui->lblSyncNote) {
-          QFont mFont = font;
-          if (!isAndroid)
-            mFont.setPointSize(9);
-          else
-            mFont.setPointSize(12);
-          mw_one->ui->lblSyncNote->setFont(mFont);
-        }
-        widget->updateGeometry();
-        widget->repaint();
-      }
-    }
-  }
 
   // 空指针校验：避免崩溃
   if (mw_one) {

@@ -29,10 +29,6 @@ CategoryList::CategoryList(QWidget* parent)
   ui->listWidget->setStyleSheet(m_Method->listStyleMain);
   ui->listWidget->setSpacing(12);
 
-  QFont font;
-  font.setPointSize(fontSize + 3);
-  ui->listWidget->setFont(font);
-
   ui->btnRename->setFixedHeight(ui->editRename->height() + 2);
 }
 

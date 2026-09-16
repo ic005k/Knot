@@ -428,8 +428,6 @@ QScrollBar::sub-page:horizontal {
 
   void setSCrollPro(QObject* obj);
 
-  void showDelMsgBox(QString title, QString info);
-
   void saveRecycleTabName(QString keyStr, QString tabName);
   QString getRecycleTabName(QString keyStr);
 

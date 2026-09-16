@@ -496,13 +496,6 @@ void NoteRelationParser::onParsedDataReady(
 
   qDebug() << "[Graph] 节点:" << nodes.size() << "关系:" << relations.size();
 
-  QFont font = mw_one->font();
-  font.setPointSize(fontSize - 1);
-  // mui->lblNoteGraphView->setFont(font);
-  // mui->lblNoteGraphView->setText(
-  //     tr("Nodes") + ": " + QString::number(nodes.size()) + "  " +
-  //     tr("Relations") + ": " + QString::number(relations.size()));
-
   arrangeNodes(m_model);
   emit parsingCompleted();
 }

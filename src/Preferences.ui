@@ -25,225 +25,6 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QGroupBox" name="gboxFont">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="title">
-          <string/>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QLabel" name="lblFontSet">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="font">
-             <font>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">/* 动态适配明暗模式 */
-QLabel {
-    background-color: qlineargradient(
-        x1:0, y1:0, x2:1, y2:0, 
-        stop:0 palette(light),  /* 明色端 */
-        stop:1 palette(mid)     /* 过渡色 */
-    );
-    color: palette(window-text); /* 跟随系统文本色 */
-    padding: 5px;
-    border-radius: 4px;         /* 可选：增加圆角提升质感 */
-}</string>
-            </property>
-            <property name="text">
-             <string>Font:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblFontSize">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>42</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>42</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Font Size</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="sliderFontSize">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>35</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
-            <property name="minimum">
-             <number>9</number>
-            </property>
-            <property name="maximum">
-             <number>21</number>
-            </property>
-            <property name="pageStep">
-             <number>1</number>
-            </property>
-            <property name="value">
-             <number>16</number>
-            </property>
-            <property name="tracking">
-             <bool>false</bool>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="btnCustomFont">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>45</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Custom Font</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chkUIFont">
-            <property name="styleSheet">
-             <string notr="true">QCheckBox::indicator {
-    /* 选择框尺寸 */
-    width:22px;
-    height:22px;
-}</string>
-            </property>
-            <property name="text">
-             <string>Override UI Fonts</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="lblAdditional">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>Additional Options:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="gboxAdditional">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="title">
-          <string/>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QCheckBox" name="chkDark">
-            <property name="styleSheet">
-             <string notr="true">/* 核心修复：使用 border-image + background 组合 */
-QCheckBox::indicator {
-    width: 32px;
-    height: 18px;
-    border: none; 
-    background: transparent; /* 清除默认背景 */
-}
-
-QCheckBox::indicator:unchecked {
-    border-image: url(:/res/chk00.svg) 0 0 0 0 stretch stretch;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-QCheckBox::indicator:checked {
-    border-image: url(:/res/chk11.svg) 0 0 0 0 stretch stretch;
-    background-position: center;
-    background-repeat: no-repeat;
-}</string>
-            </property>
-            <property name="text">
-             <string>Dark Theme</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="btnReStart">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>35</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Restart the App to take effect</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QFrame" name="frame">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -267,7 +48,7 @@ QCheckBox::indicator:checked {
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="lblNetCon">
               <property name="text">
                <string>Network Concurrency</string>
               </property>
@@ -315,6 +96,9 @@ QCheckBox::indicator:checked {
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QCheckBox" name="chkAI">
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
             <property name="text">
              <string>Enable AI</string>
             </property>

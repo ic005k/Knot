@@ -26,9 +26,6 @@ PrintPDF::PrintPDF(QWidget* parent) : QDialog(parent), ui(new Ui::PrintPDF) {
   int fixedHeight = screenRect.height() * 0.8;
   setFixedHeight(fixedHeight);
 
-  QFont font = this->font();
-  font.setPointSize(fontSize);
-  ui->listWidget->setFont(font);
   ui->listWidget->setFocus();
   QScroller::grabGesture(ui->listWidget, QScroller::LeftMouseButtonGesture);
 

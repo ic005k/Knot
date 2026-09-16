@@ -15,8 +15,6 @@ void MainWindow::init_TotalData() {
   QSettings RegTab(ini_file, QSettings::IniFormat);
   int TabCount = RegTab.value("TabCount", 0).toInt();
 
-  clearAll();
-
   for (int i = 0; i < TabCount; i++) {
     QString name;
     name = RegTab.value("twName" + QString::number(i)).toString();
@@ -222,20 +220,6 @@ void MainWindow::init_ButtonStyle() {
   if (isDark) {
   } else {
   }
-
-  /*mw_one->ui->btnPages->setStyleSheet(
-    "color: rgb(255, 255, 255);background-color: #FF9933;border: "
-    "0px solid "
-    "rgb(255,0,0);border-radius: 4px;"
-    "font-weight: bold;");*/
-
-  QString style =
-      "QToolButton {background-color: rgb(255, 0, 0); color: "
-      "rgb(255,255,255); "
-      "border-radius:10px; "
-      "border:0px solid gray; } QToolButton:pressed { background-color: "
-      "rgb(220,220,230); color: black}";
-  mw_one->m_Preferences->ui->btnReStart->setStyleSheet(style);
 }
 
 void MainWindow::initMainQW() {}
@@ -318,6 +302,8 @@ void MainWindow::init_UIWidget() {
     mw_one->ui->tabWidget->hide();
   }
 
+  fontSize = this->font().pointSize();
+
   mw_one->loginTime = m_Method->setCurrentDateTimeValue();
   strDate = m_Method->setCurrentDateValue();
   isReadEnd = true;
@@ -348,8 +334,6 @@ void MainWindow::init_UIWidget() {
   mw_one->ui->frameOne->hide();
   mw_one->ui->btnDel->hide();
 
-  mw_one->ui->chkWebDAV->setStyleSheet(mw_one->m_Preferences->chkStyle);
-  mw_one->ui->chkAutoSync->setStyleSheet(mw_one->m_Preferences->chkStyle);
   mw_one->ui->twCloudBackup->setCurrentIndex(0);
 
   mw_one->ui->chkWebDAV->hide();
@@ -405,20 +389,23 @@ void MainWindow::init_UIWidget() {
   mw_one->ui->btnFind->setFont(f);
 
   mw_one->ui->btnFind->setFont(f);
+
+  f.setPointSize(fontSize - 2);
+  f.setBold(true);
+  ui->lblSyncNote->setFont(f);
+
+  if (isAndroid) {
+    mw_one->m_Preferences->ui->chkAI->setStyleSheet(strStyle);
+    ui->chkAutoSync->setStyleSheet(strStyle);
+    ui->chkWebDAV->setStyleSheet(strStyle);
+    ui->chkZip->setStyleSheet(strStyle);
+  }
 }
 
 QTreeWidget* MainWindow::init_TreeWidget(QString name) {
   QTreeWidget* tw = new QTreeWidget(mw_one);
   // tw->setFixedHeight(0);
   tw->setObjectName(name);
-
-  QFont font;
-  font.setPointSize(fontSize);
-  tw->setFont(font);
-  font.setBold(true);
-  tw->header()->setFont(font);
-
-  font.setPointSize(fontSize + 1);
 
   tw->setColumnCount(4);
   tw->headerItem()->setText(0, "  " + tr("Date") + "  ");
@@ -482,5 +469,4 @@ void MainWindow::init_Options() {
         RegTime.value("/TimeLines/Files" + QString::number(i)).toString());
 
   m_Preferences->initOptions();
-  m_Preferences->ui->btnReStart->hide();
 }

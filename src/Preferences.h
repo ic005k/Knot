@@ -54,7 +54,7 @@ class Preferences : public QDialog {
   bool isTestBtnClicked = false;
   void saveAIConfig();
   bool devMode = false;
-  QString chkStyle;
+
   bool isFontChange = false;
   void saveOptions();
 
@@ -107,10 +107,6 @@ class Preferences : public QDialog {
 
  private slots:
   void on_btnBack_clicked();
-
-  void on_sliderFontSize_sliderMoved(int position);
-
-  void on_btnCustomFont_clicked();
 
   void on_chkUIFont_clicked();
 

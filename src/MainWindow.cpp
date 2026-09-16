@@ -91,8 +91,6 @@ MainWindow::MainWindow(QWidget* parent)
     updateMainTab();
   });
 
-  m_Method->setAndroidFontSize(fontSize);
-
   m_CloudBackup->init_CloudBacup();
   m_Preferences->setEncSyncStatusTip();
 
