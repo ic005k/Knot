@@ -685,154 +685,78 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
 }
 
 void Preferences::on_btnAISelect_clicked() {
+  // 如果列表为空，直接提示并返回
+  if (ui->cboxEndpoint->count() == 0) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Warning"), tr("No AI configurations available."), 1);
+    return;
+  }
+
+  {
+    QMenu* menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    menu->setFocusPolicy(Qt::StrongFocus);
+    menu->setFocus();
+
+    for (int i = 0; i < ui->cboxEndpoint->count(); ++i) {
+      QString rawText = ui->cboxEndpoint->itemText(i);
+      QStringList parts = rawText.split("||", Qt::SkipEmptyParts);
+
+      // ✅ 仅取 || 后面的内容作为显示文本，无分隔符时兜底使用原文本
+      QString displayText = parts.size() > 1 ? parts.mid(1).join("||").trimmed()
+                                             : rawText.trimmed();
+
+      QAction* action = menu->addAction(displayText);
+
+      if (i == ui->cboxEndpoint->currentIndex()) {
+        action->setCheckable(true);
+        action->setChecked(true);
+      }
+
+      connect(action, &QAction::triggered, this,
+              [this, i]() { ui->cboxEndpoint->setCurrentIndex(i); });
+    }
+
+    menu->popup(ui->f_aiapi->mapToGlobal(QPoint(0, ui->f_aiapi->y())));
+    return;
+  }
+
+  ///////////////////////////////////////////////////////////////////////
   ui->cboxEndpoint->showPopup();
   return;
 
   ////////////////////////////////////////////////////////////////////////
+  {
+    close();
+    mw_one->ui->frameMain->hide();
 
-  close();
-  mw_one->ui->frameMain->hide();
+    QVariantList result;
+    for (int i = 0; i < ui->cboxEndpoint->count(); ++i) {
+      QString rawText = ui->cboxEndpoint->itemText(i);
+      QStringList parts = rawText.split("||", Qt::SkipEmptyParts);
 
-  QVariantList result;
-  for (int i = 0; i < ui->cboxEndpoint->count(); ++i) {
-    QString rawText = ui->cboxEndpoint->itemText(i);
-    QStringList parts = rawText.split("||", Qt::SkipEmptyParts);
+      QString title = parts.value(0).trimmed();
+      QString subtitle;
 
-    QString title = parts.value(0).trimmed();
-    QString subtitle;
+      // 解析副标题逻辑
+      if (parts.size() >= 3) {
+        QString path = parts.value(1).trimmed();
+        QString key = parts.value(2).trimmed();
+        // 简单的 Key 脱敏处理
+        QString maskedKey = key.length() > 4 ? key.left(4) + "••••••" : key;
+        subtitle = QString("%1 | %2").arg(path, maskedKey);
+      } else {
+        subtitle = parts.mid(1).join("||").trimmed();
+      }
 
-    // 解析副标题逻辑
-    if (parts.size() >= 3) {
-      QString path = parts.value(1).trimmed();
-      QString key = parts.value(2).trimmed();
-      // 简单的 Key 脱敏处理
-      QString maskedKey = key.length() > 4 ? key.left(4) + "••••••" : key;
-      subtitle = QString("%1 | %2").arg(path, maskedKey);
-    } else {
-      subtitle = parts.mid(1).join("||").trimmed();
+      QVariantMap row;
+      row["title"] = title;
+      row["subtitle"] = subtitle;
+
+      result.append(row);
     }
-
-    QVariantMap row;
-    row["title"] = title;
-    row["subtitle"] = subtitle;
-
-    result.append(row);
   }
-
-  return;
-
   /////////////////////////////////////////////////////////////////////
-
-  // 1. 创建菜单
-  QMenu* menu = new QMenu(this);
-  menu->setAttribute(Qt::WA_DeleteOnClose);
-
-  // 确保菜单获取焦点，以便 Android 返回键可用
-  menu->setFocusPolicy(Qt::StrongFocus);
-  menu->setFocus();
-
-  // 基础样式：隐藏勾选框，优化滚动条
-  menu->setStyleSheet(R"(
-        QMenu {
-            padding: 5px;
-            border: 1px solid #cccccc;
-            border-radius: 8px;
-        }
-        QMenu::scroller {
-            width: 4px;
-            background: transparent;
-        }
-        QMenu::indicator {
-            width: 0px;
-        }
-    )");
-
-  // 2. 准备颜色变量 (循环外获取，提升性能)
-  QPalette pal = ui->cboxEndpoint->palette();
-  QString textColor = pal.color(QPalette::Text).name();
-  QString placeholderColor = pal.color(QPalette::PlaceholderText).name();
-  QString highlightBg = pal.color(QPalette::Highlight).name();
-  QString highlightText = pal.color(QPalette::HighlightedText).name();
-  QString highlightSub =
-      pal.color(QPalette::HighlightedText).darker(120).name();
-
-  // 3. 遍历并添加条目
-  for (int i = 0; i < ui->cboxEndpoint->count(); ++i) {
-    QString rawText = ui->cboxEndpoint->itemText(i);
-    QStringList parts = rawText.split("||", Qt::SkipEmptyParts);
-
-    QString title = parts.value(0).trimmed();
-    QString subtitle;
-
-    // 解析副标题逻辑
-    if (parts.size() >= 3) {
-      QString path = parts.value(1).trimmed();
-      QString key = parts.value(2).trimmed();
-      // 简单的 Key 脱敏处理
-      QString maskedKey = key.length() > 4 ? key.left(4) + "••••••" : key;
-      subtitle = QString("%1 | %2").arg(path, maskedKey);
-    } else {
-      subtitle = parts.mid(1).join("||").trimmed();
-    }
-
-    // 根据是否选中，决定文字颜色
-    bool isSelected = (i == ui->cboxEndpoint->currentIndex());
-    QString currentTitleColor = isSelected ? highlightText : textColor;
-    QString currentSubColor = isSelected ? highlightSub : placeholderColor;
-
-    // 构建 HTML 内容
-    QString html =
-        QString(
-            "<div style='line-height:1.4; padding: 4px 0;'>"
-            "  <div style='font-size:15px; font-weight:600; color:%1;'>%2</div>"
-            "  <div style='font-size:12px; color:%3; margin-top:2px;'>%4</div>"
-            "</div>")
-            .arg(currentTitleColor, title.toHtmlEscaped(), currentSubColor,
-                 subtitle.toHtmlEscaped());
-
-    // 创建 Label 容器
-    QLabel* label = new QLabel(html);
-    label->setTextFormat(Qt::RichText);
-    label->setWordWrap(true);
-    label->setContentsMargins(15, 10, 15, 10);  // 设置内边距，增加点击区域感
-
-    // 如果是选中项，给 Label 设置一个背景色块 (静态高亮)
-    if (isSelected) {
-      label->setStyleSheet(QString("background-color: %1; border-radius: 6px;")
-                               .arg(highlightBg));
-    } else {
-      label->setStyleSheet("background: transparent; border-radius: 6px;");
-    }
-
-    // 使用 QWidgetAction 将 Label 放入菜单
-    QWidgetAction* widgetAction = new QWidgetAction(menu);
-    widgetAction->setDefaultWidget(label);
-
-    // 绑定点击事件
-    connect(widgetAction, &QWidgetAction::triggered, this, [this, i]() {
-      ui->cboxEndpoint->setCurrentIndex(i);
-      // 这里可以添加额外的保存逻辑，如果需要的话
-    });
-
-    menu->addAction(widgetAction);
-  }
-
-  // 4. 计算弹出位置 (兼容 Qt6)
-  QPoint pos =
-      ui->btnAISelect->mapToGlobal(QPoint(0, ui->btnAISelect->height()));
-
-  // 防止菜单超出屏幕底部 (简单处理)
-  // 注意：Qt6 中去掉了 qApp->desktop()，改用 screenAt 或 primaryScreen
-  if (QScreen* screen = QGuiApplication::screenAt(pos)) {
-    QRect screenGeom = screen->availableGeometry();
-    int maxH = screenGeom.height() * 0.6;
-    // 如果位置太靠下，尝试向上弹出 (可选)
-    if (pos.y() + maxH > screenGeom.bottom()) {
-      pos.setY(screenGeom.bottom() - maxH);
-    }
-  }
-
-  menu->popup(pos);
 }
 
 void Preferences::on_btnAITest_clicked() {
@@ -1131,5 +1055,78 @@ void Preferences::on_btnSelectModel_clicked() {
 
   // 以按钮为锚点弹出
   menu->popup(
-      ui->btnSelectModel->mapToGlobal(QPoint(0, ui->btnSelectModel->height())));
+      ui->f_localai->mapToGlobal(QPoint(0, ui->btnSelectModel->height())));
+}
+
+void Preferences::on_btnDel_clicked() {
+  // 1. 获取当前选中的真实记录下标
+  int curComboIdx = ui->cboxEndpoint->currentIndex();
+  if (curComboIdx < 0) {
+    auto msg = std::make_unique<ShowMessage>(this);
+    msg->showMsg(tr("Warning"), tr("No configuration selected to delete."), 1);
+    return;
+  }
+
+  int recordIdx = ui->cboxEndpoint->itemData(curComboIdx).toInt();
+  if (recordIdx < 0 || recordIdx >= m_aiAllRecords.size()) {
+    return;
+  }
+
+  // 2. 二次确认
+  QString displayName = m_aiAllRecords[recordIdx].displayText();
+  auto ret = QMessageBox::question(
+      this, tr("Confirm Delete"),
+      tr("Are you sure to delete this configuration?\n\n%1").arg(displayName),
+      QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+  if (ret != QMessageBox::Yes) {
+    return;
+  }
+
+  // 3. 从内存列表中移除
+  m_aiAllRecords.removeAt(recordIdx);
+
+  // 4. 写回 JSON 文件（复用 saveAIConfig 的序列化逻辑）
+  QJsonArray arr;
+  for (const auto& rec : m_aiAllRecords) {
+    QJsonObject obj;
+    obj["endpoint"] = rec.endpoint;
+    obj["apiKey"] = rec.apiKey;
+    obj["modelId"] = rec.modelId;
+    obj["temperature"] = rec.temperature;
+    obj["timeoutSec"] = rec.timeoutSec;
+    obj["maxTokens"] = rec.maxTokens;
+    arr.append(obj);
+  }
+  QJsonObject root;
+  root["all_records"] = arr;
+
+  QString filePath = privateDir + "/" + ai_config_json;
+  QFile file(filePath);
+  if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+    file.close();
+  }
+
+  // 5. 刷新下拉框并自动加载第一个配置
+  ui->cboxEndpoint->clear();
+  for (int i = 0; i < m_aiAllRecords.size(); ++i) {
+    const auto& rec = m_aiAllRecords[i];
+    ui->cboxEndpoint->addItem(rec.displayText());
+    ui->cboxEndpoint->setItemData(i, i);
+  }
+
+  // 6. 自动选中第一个；若列表为空则清空输入框
+  if (!m_aiAllRecords.isEmpty()) {
+    ui->cboxEndpoint->setCurrentIndex(0);
+    // setCurrentIndex 会触发 on_cboxEndpoint_currentIndexChanged 自动回填
+  } else {
+    ui->editEndpoint->clear();
+    ui->editAIKey->clear();
+    ui->editAIModelID->clear();
+  }
+
+  // 7. 同步更新 ini 中保存的 aiindex
+  iniPreferences->setValue("/Options/aiindex",
+                           ui->cboxEndpoint->currentIndex());
 }

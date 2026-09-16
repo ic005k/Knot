@@ -360,17 +360,17 @@
 <context>
     <name>MainHelper</name>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="116"/>
+        <location filename="../../src/MainHelper.cpp" line="89"/>
         <source>Restore Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="299"/>
+        <location filename="../../src/MainHelper.cpp" line="272"/>
         <source>Whether to remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="339"/>
+        <location filename="../../src/MainHelper.cpp" line="312"/>
         <source>Import this data?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -952,7 +952,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow.cpp" line="824"/>
+        <location filename="../../src/MainWindow.cpp" line="822"/>
         <source>An error occurred while compressing the file.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1480,29 +1480,29 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="229"/>
+        <location filename="../../src/Notes/Notes.cpp" line="225"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="453"/>
+        <location filename="../../src/Notes/Notes.cpp" line="449"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="447"/>
+        <location filename="../../src/Notes/Notes.cpp" line="443"/>
         <source>Processing...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="600"/>
+        <location filename="../../src/Notes/Notes.cpp" line="596"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="681"/>
-        <location filename="../../src/Notes/Notes.cpp" line="725"/>
-        <location filename="../../src/Notes/Notes.cpp" line="773"/>
+        <location filename="../../src/Notes/Notes.cpp" line="677"/>
+        <location filename="../../src/Notes/Notes.cpp" line="721"/>
+        <location filename="../../src/Notes/Notes.cpp" line="769"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1764,17 +1764,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Menu.cpp" line="726"/>
+        <location filename="../../src/Notes/NotesList_Menu.cpp" line="725"/>
         <source>New Sub Notebook</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Menu.cpp" line="726"/>
+        <location filename="../../src/Notes/NotesList_Menu.cpp" line="725"/>
         <source>Please enter sub notebook name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/NotesList_Menu.cpp" line="823"/>
+        <location filename="../../src/Notes/NotesList_Menu.cpp" line="822"/>
         <source>Vector Update:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1860,15 +1860,15 @@
     </message>
     <message>
         <location filename="../../src/Preferences.ui" line="85"/>
-        <location filename="../../src/Preferences.cpp" line="34"/>
-        <location filename="../../src/Preferences.cpp" line="208"/>
+        <location filename="../../src/Preferences.cpp" line="36"/>
+        <location filename="../../src/Preferences.cpp" line="210"/>
         <source>Font Size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Preferences.ui" line="144"/>
-        <location filename="../../src/Preferences.cpp" line="275"/>
-        <location filename="../../src/Preferences.cpp" line="281"/>
+        <location filename="../../src/Preferences.cpp" line="277"/>
+        <location filename="../../src/Preferences.cpp" line="283"/>
         <source>Custom Font</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1898,69 +1898,74 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="321"/>
+        <location filename="../../src/Preferences.ui" line="319"/>
         <source>Enable AI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="328"/>
+        <location filename="../../src/Preferences.ui" line="382"/>
         <source>Select</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="335"/>
+        <location filename="../../src/Preferences.ui" line="389"/>
+        <source>Del</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.ui" line="396"/>
         <source>Test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="356"/>
+        <location filename="../../src/Preferences.ui" line="338"/>
         <source>Endpoint:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="377"/>
+        <location filename="../../src/Preferences.ui" line="359"/>
         <source>Paste your API key here</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="384"/>
+        <location filename="../../src/Preferences.ui" line="366"/>
         <source>Model Endpoint ID:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="418"/>
-        <location filename="../../src/Preferences.cpp" line="30"/>
+        <location filename="../../src/Preferences.ui" line="425"/>
+        <location filename="../../src/Preferences.cpp" line="32"/>
         <source>Local Model List:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="425"/>
+        <location filename="../../src/Preferences.ui" line="432"/>
         <source>Download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="440"/>
-        <location filename="../../src/Preferences.cpp" line="638"/>
+        <location filename="../../src/Preferences.ui" line="447"/>
+        <location filename="../../src/Preferences.cpp" line="640"/>
         <source>Select Model</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="450"/>
+        <location filename="../../src/Preferences.ui" line="457"/>
         <source>Model Status:No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="457"/>
+        <location filename="../../src/Preferences.ui" line="464"/>
         <source>After selecting the model, please restart the App.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="348"/>
+        <location filename="../../src/Preferences.ui" line="330"/>
         <source>https://ark.cn-beijing.volces.com/api/v3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="370"/>
+        <location filename="../../src/Preferences.ui" line="352"/>
         <source>API Key:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1975,7 +1980,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="201"/>
+        <location filename="../../src/Preferences.cpp" line="203"/>
         <source>Default</source>
         <translation type="unfinished">Padrão</translation>
     </message>
@@ -1984,80 +1989,104 @@
         <translation type="obsolete">Copiar</translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="486"/>
+        <location filename="../../src/Preferences.ui" line="493"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="59"/>
+        <location filename="../../src/Preferences.cpp" line="61"/>
         <source>Enter 1~50</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="201"/>
+        <location filename="../../src/Preferences.cpp" line="203"/>
         <source>ExtraSmall</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="201"/>
+        <location filename="../../src/Preferences.cpp" line="203"/>
         <source>Small</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="202"/>
+        <location filename="../../src/Preferences.cpp" line="204"/>
         <source>Large</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="202"/>
+        <location filename="../../src/Preferences.cpp" line="204"/>
         <source>XLarge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="202"/>
+        <location filename="../../src/Preferences.cpp" line="204"/>
         <source>XXLarge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="203"/>
+        <location filename="../../src/Preferences.cpp" line="205"/>
         <source>XXXLarge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="213"/>
+        <location filename="../../src/Preferences.cpp" line="215"/>
         <source>Font</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="214"/>
+        <location filename="../../src/Preferences.cpp" line="216"/>
         <source>Font Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="514"/>
+        <location filename="../../src/Preferences.cpp" line="516"/>
         <source>Password validation error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="848"/>
-        <location filename="../../src/Preferences.cpp" line="874"/>
+        <location filename="../../src/Preferences.cpp" line="691"/>
+        <location filename="../../src/Preferences.cpp" line="773"/>
+        <location filename="../../src/Preferences.cpp" line="799"/>
+        <location filename="../../src/Preferences.cpp" line="1065"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="849"/>
-        <location filename="../../src/Preferences.cpp" line="875"/>
+        <location filename="../../src/Preferences.cpp" line="691"/>
+        <source>No AI configurations available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.cpp" line="774"/>
+        <location filename="../../src/Preferences.cpp" line="800"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="918"/>
+        <location filename="../../src/Preferences.cpp" line="843"/>
         <source>Save Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="918"/>
+        <location filename="../../src/Preferences.cpp" line="843"/>
         <source>Cannot open config file to write</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.cpp" line="1065"/>
+        <source>No configuration selected to delete.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.cpp" line="1077"/>
+        <source>Confirm Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.cpp" line="1078"/>
+        <source>Are you sure to delete this configuration?
+
+%1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2144,7 +2173,7 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../src/MainHelper.cpp" line="38"/>
+        <location filename="../../src/MainHelper.cpp" line="11"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6689,7 +6718,7 @@
 <context>
     <name>SliderButton</name>
     <message>
-        <location filename="../../src/MainHelper.h" line="139"/>
+        <location filename="../../src/MainHelper.h" line="138"/>
         <source>Slide Right to Start.</source>
         <translation type="unfinished"></translation>
     </message>

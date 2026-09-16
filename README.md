@@ -1,6 +1,6 @@
 # Knot - Minimalist Cross-Scenario Recording Tool
 
-![Android Version](https://img.shields.io/badge/Android-12.0%2B-brightgreen)
+![Android Version](https://img.shields.io/badge/Android-9.0%2B-brightgreen)
 ![Platforms](https://img.shields.io/badge/Platform-Android%20|%20Win%20|%20Mac%20|%20Linux-blue)
 
 > ### 📖 [👉 Click Here for Wiki Help & Documentation 👈](https://github.com/ic005k/Knot/wiki)

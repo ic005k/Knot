@@ -586,7 +586,7 @@
 <context>
     <name>MainHelper</name>
     <message>
-        <location filename="MainHelper.cpp" line="116"/>
+        <location filename="MainHelper.cpp" line="89"/>
         <source>Restore Tab</source>
         <translation>恢复标签页</translation>
     </message>
@@ -668,12 +668,12 @@
         <translation type="vanished">滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="299"/>
+        <location filename="MainHelper.cpp" line="272"/>
         <source>Whether to remove</source>
         <translation>是否删除</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="339"/>
+        <location filename="MainHelper.cpp" line="312"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
@@ -1965,7 +1965,7 @@
         <translation>只允许修改当前年的数据。</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="824"/>
+        <location filename="MainWindow.cpp" line="822"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
@@ -2773,17 +2773,17 @@
         <translation type="vanished">笔记列表</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="229"/>
+        <location filename="Notes/Notes.cpp" line="225"/>
         <source>The current note does not exist. Please select another note or create a new note.</source>
         <translation>当前笔记不存在。请选择其它笔记或新建笔记。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="453"/>
+        <location filename="Notes/Notes.cpp" line="449"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="447"/>
+        <location filename="Notes/Notes.cpp" line="443"/>
         <source>Processing...</source>
         <translation>处理中...</translation>
     </message>
@@ -2792,14 +2792,14 @@
         <translation type="vanished">关闭</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="600"/>
+        <location filename="Notes/Notes.cpp" line="596"/>
         <source>Synchronization failed. Please try again later.</source>
         <translation>同步失败，请稍后再试。</translation>
     </message>
     <message>
-        <location filename="Notes/Notes.cpp" line="681"/>
-        <location filename="Notes/Notes.cpp" line="725"/>
-        <location filename="Notes/Notes.cpp" line="773"/>
+        <location filename="Notes/Notes.cpp" line="677"/>
+        <location filename="Notes/Notes.cpp" line="721"/>
+        <location filename="Notes/Notes.cpp" line="769"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>
@@ -3267,17 +3267,17 @@
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Menu.cpp" line="726"/>
+        <location filename="Notes/NotesList_Menu.cpp" line="725"/>
         <source>New Sub Notebook</source>
         <translation>新建子笔记本</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Menu.cpp" line="726"/>
+        <location filename="Notes/NotesList_Menu.cpp" line="725"/>
         <source>Please enter sub notebook name:</source>
         <translation>请输入子笔记本名称：</translation>
     </message>
     <message>
-        <location filename="Notes/NotesList_Menu.cpp" line="823"/>
+        <location filename="Notes/NotesList_Menu.cpp" line="822"/>
         <source>Vector Update:</source>
         <translation>向量更新：</translation>
     </message>
@@ -3441,55 +3441,81 @@
         <translation>偏好设置</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="59"/>
+        <location filename="Preferences.cpp" line="61"/>
         <source>Enter 1~50</source>
         <translation>输入1-50</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="201"/>
+        <location filename="Preferences.cpp" line="203"/>
         <source>ExtraSmall</source>
         <translation>极小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="201"/>
+        <location filename="Preferences.cpp" line="203"/>
         <source>Small</source>
         <translation>小</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="201"/>
+        <location filename="Preferences.cpp" line="203"/>
         <source>Default</source>
         <translation>正常（默认）</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="202"/>
+        <location filename="Preferences.cpp" line="204"/>
         <source>Large</source>
         <translation>大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="202"/>
+        <location filename="Preferences.cpp" line="204"/>
         <source>XLarge</source>
         <translation>超大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="202"/>
+        <location filename="Preferences.cpp" line="204"/>
         <source>XXLarge</source>
         <translation>特大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="203"/>
+        <location filename="Preferences.cpp" line="205"/>
         <source>XXXLarge</source>
         <translation>最大</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="213"/>
+        <location filename="Preferences.cpp" line="215"/>
         <source>Font</source>
         <translation>字体</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="848"/>
-        <location filename="Preferences.cpp" line="874"/>
+        <location filename="Preferences.cpp" line="691"/>
+        <location filename="Preferences.cpp" line="773"/>
+        <location filename="Preferences.cpp" line="799"/>
+        <location filename="Preferences.cpp" line="1065"/>
         <source>Warning</source>
         <translation>警告</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="691"/>
+        <source>No AI configurations available.</source>
+        <translation>暂无可用的AI配置</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="1065"/>
+        <source>No configuration selected to delete.</source>
+        <translation>未选择要删除的配置</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="1077"/>
+        <source>Confirm Delete</source>
+        <translation>确认删除</translation>
+    </message>
+    <message>
+        <location filename="Preferences.cpp" line="1078"/>
+        <source>Are you sure to delete this configuration?
+
+%1</source>
+        <translation>你确定要删除此配置吗？
+
+%1</translation>
     </message>
     <message>
         <source>Network Error</source>
@@ -3592,18 +3618,18 @@ Model ID: %1</source>
         <translation type="vanished">连接测试通过！模型 ID：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="849"/>
-        <location filename="Preferences.cpp" line="875"/>
+        <location filename="Preferences.cpp" line="774"/>
+        <location filename="Preferences.cpp" line="800"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation>接入地址 / API 密钥 / 模型 ID 不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="918"/>
+        <location filename="Preferences.cpp" line="843"/>
         <source>Save Failed</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="918"/>
+        <location filename="Preferences.cpp" line="843"/>
         <source>Cannot open config file to write</source>
         <translation>无法打开配置文件写入数据</translation>
     </message>
@@ -3613,8 +3639,8 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="85"/>
-        <location filename="Preferences.cpp" line="34"/>
-        <location filename="Preferences.cpp" line="208"/>
+        <location filename="Preferences.cpp" line="36"/>
+        <location filename="Preferences.cpp" line="210"/>
         <source>Font Size</source>
         <translation>字体大小</translation>
     </message>
@@ -3624,8 +3650,8 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="144"/>
-        <location filename="Preferences.cpp" line="275"/>
-        <location filename="Preferences.cpp" line="281"/>
+        <location filename="Preferences.cpp" line="277"/>
+        <location filename="Preferences.cpp" line="283"/>
         <source>Custom Font</source>
         <translation>自选字体</translation>
     </message>
@@ -3641,64 +3667,69 @@ Model ID: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="321"/>
+        <location filename="Preferences.ui" line="319"/>
         <source>Enable AI</source>
         <translation>开启AI</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="328"/>
+        <location filename="Preferences.ui" line="382"/>
         <source>Select</source>
         <translation>选取</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="335"/>
+        <location filename="Preferences.ui" line="396"/>
         <source>Test</source>
         <translation>测试</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="356"/>
+        <location filename="Preferences.ui" line="338"/>
         <source>Endpoint:</source>
         <translation>接入地址：</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="377"/>
+        <location filename="Preferences.ui" line="359"/>
         <source>Paste your API key here</source>
         <translation>粘贴你的API密钥</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="384"/>
+        <location filename="Preferences.ui" line="366"/>
         <source>Model Endpoint ID:</source>
         <translation>模型接入点ID：</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="418"/>
-        <location filename="Preferences.cpp" line="30"/>
+        <location filename="Preferences.ui" line="389"/>
+        <source>Del</source>
+        <translation>删除</translation>
+    </message>
+    <message>
+        <location filename="Preferences.ui" line="425"/>
+        <location filename="Preferences.cpp" line="32"/>
         <source>Local Model List:</source>
         <translation>本地模型列表：</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="425"/>
+        <location filename="Preferences.ui" line="432"/>
         <source>Download</source>
         <translation>下载</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="440"/>
-        <location filename="Preferences.cpp" line="638"/>
+        <location filename="Preferences.ui" line="447"/>
+        <location filename="Preferences.cpp" line="640"/>
         <source>Select Model</source>
         <translation>选择模型</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="450"/>
+        <location filename="Preferences.ui" line="457"/>
         <source>Model Status:No</source>
         <translation>模型状态：No</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="457"/>
+        <location filename="Preferences.ui" line="464"/>
         <source>After selecting the model, please restart the App.</source>
         <translation>选择模型后请重启App</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="348"/>
+        <location filename="Preferences.ui" line="330"/>
         <source>https://ark.cn-beijing.volces.com/api/v3</source>
         <translation></translation>
     </message>
@@ -3708,7 +3739,7 @@ Model ID: %1</source>
         <translation>通用</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="370"/>
+        <location filename="Preferences.ui" line="352"/>
         <source>API Key:</source>
         <translation>API Key：</translation>
     </message>
@@ -3808,12 +3839,12 @@ Model ID: %1</source>
         <translation type="vanished">重启APP使设置生效</translation>
     </message>
     <message>
-        <location filename="Preferences.ui" line="486"/>
+        <location filename="Preferences.ui" line="493"/>
         <source>Back</source>
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="214"/>
+        <location filename="Preferences.cpp" line="216"/>
         <source>Font Files (*.*)</source>
         <translation>字体文件 (*.*)</translation>
     </message>
@@ -3822,7 +3853,7 @@ Model ID: %1</source>
         <translation type="vanished">自动备份</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="514"/>
+        <location filename="Preferences.cpp" line="516"/>
         <source>Password validation error.</source>
         <translation>密码验证错误</translation>
     </message>
@@ -3982,7 +4013,7 @@ Model ID: %1</source>
         <translation type="vanished">加载中，请稍候...</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="38"/>
+        <location filename="MainHelper.cpp" line="11"/>
         <source>Add</source>
         <translation>增加</translation>
     </message>
@@ -8762,7 +8793,7 @@ Model ID: %1</source>
 <context>
     <name>SliderButton</name>
     <message>
-        <location filename="MainHelper.h" line="139"/>
+        <location filename="MainHelper.h" line="138"/>
         <source>Slide Right to Start.</source>
         <translation>滑动到右边启动</translation>
     </message>

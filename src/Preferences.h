@@ -140,6 +140,8 @@ class Preferences : public QDialog {
 
   void on_btnSelectModel_clicked();
 
+  void on_btnDel_clicked();
+
  private:
   bool isChanged;
 
