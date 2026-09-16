@@ -381,8 +381,32 @@ public class SportChartActivity extends AppCompatActivity {
             int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
             int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
 
+            // 整个弹窗根容器
+            LinearLayout rootContainer = new LinearLayout(act);
+            rootContainer.setOrientation(LinearLayout.VERTICAL);
+            rootContainer.setBackgroundColor(bgColor);
+
+            // 自定义标题
+            TextView tvTitle = new TextView(act);
+            tvTitle.setText(MyActivity.zh_cn ? "汇总" : "Summary");
+            tvTitle.setTextSize(18);
+            tvTitle.setTextColor(textColor);
+            tvTitle.setPadding(dp(12), dp(16), dp(12), dp(12));
+            LinearLayout.LayoutParams lpTitle = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            tvTitle.setLayoutParams(lpTitle);
+            rootContainer.addView(tvTitle);
+
+            // 列表
             ListView listView = new ListView(act);
             listView.setBackgroundColor(bgColor);
+            LinearLayout.LayoutParams lpList = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            listView.setLayoutParams(lpList);
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 act,
@@ -395,55 +419,31 @@ public class SportChartActivity extends AppCompatActivity {
                     View convertView,
                     ViewGroup parent
                 ) {
-                    String raw = getItem(position);
+                    String lineText = getItem(position);
                     LinearLayout itemLl;
                     if (convertView instanceof LinearLayout) {
                         itemLl = (LinearLayout) convertView;
                     } else {
                         itemLl = new LinearLayout(act);
                         itemLl.setOrientation(LinearLayout.VERTICAL);
-                        // 垂直居中，解决文字靠top的问题
-                        itemLl.setGravity(Gravity.CENTER_VERTICAL);
-                        // 减小上下padding，左右保留，消除过大行高
-                        itemLl.setPadding(dp(12), dp(6), dp(12), dp(6));
+                        itemLl.setPadding(dp(12), dp(14), dp(12), dp(14));
                     }
                     itemLl.removeAllViews();
 
-                    String[] parts = raw.split("===");
-
-                    // title 粗体
-                    TextView tvTitle = new TextView(act);
-                    tvTitle.setTextSize(15);
-                    tvTitle.setTextColor(textColor);
-                    tvTitle.setPadding(0, 0, 0, dp(2));
-                    tvTitle.getPaint().setFakeBoldText(true);
-                    if (parts.length >= 1) {
-                        tvTitle.setText(parts[0]);
-                    } else {
-                        tvTitle.setText("");
-                    }
-                    itemLl.addView(tvTitle);
-
-                    // value 普通
-                    TextView tvValue = new TextView(act);
-                    tvValue.setTextSize(14);
-                    tvValue.setTextColor(textColor);
-                    tvValue.setPadding(0, 0, 0, 0);
-                    if (parts.length >= 2) {
-                        tvValue.setText(parts[1]);
-                    } else {
-                        tvValue.setText("");
-                    }
-                    itemLl.addView(tvValue);
+                    TextView tvLine = new TextView(act);
+                    tvLine.setTextSize(15);
+                    tvLine.setTextColor(textColor);
+                    tvLine.setText(lineText);
+                    itemLl.addView(tvLine);
 
                     return itemLl;
                 }
             };
             listView.setAdapter(adapter);
+            rootContainer.addView(listView);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(act);
-            builder.setTitle(MyActivity.zh_cn ? "汇总" : "Summary");
-            builder.setView(listView);
+            builder.setView(rootContainer); // 传入自己组装的完整视图
             builder.setPositiveButton(android.R.string.ok, null);
             builder.show();
         });
@@ -460,8 +460,33 @@ public class SportChartActivity extends AppCompatActivity {
             int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
             int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
 
+            // 弹窗根容器
+            LinearLayout rootContainer = new LinearLayout(act);
+            rootContainer.setOrientation(LinearLayout.VERTICAL);
+            rootContainer.setBackgroundColor(bgColor);
+
+            // 自定义标题：途径点 / Path Points
+            TextView tvTitle = new TextView(act);
+            tvTitle.setText(MyActivity.zh_cn ? "途径点" : "Path Points");
+            tvTitle.setTextSize(18);
+            tvTitle.setTextColor(textColor);
+            // 标题上下padding，实现垂直居中观感，和汇总弹窗保持一致
+            tvTitle.setPadding(dp(12), dp(16), dp(12), dp(12));
+            LinearLayout.LayoutParams lpTitle = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            tvTitle.setLayoutParams(lpTitle);
+            rootContainer.addView(tvTitle);
+
+            // ListView
             ListView listView = new ListView(act);
             listView.setBackgroundColor(bgColor);
+            LinearLayout.LayoutParams lpList = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            listView.setLayoutParams(lpList);
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 act,
@@ -484,9 +509,7 @@ public class SportChartActivity extends AppCompatActivity {
                         itemLl.setPadding(dp(12), dp(8), dp(12), dp(8));
                     }
                     itemLl.removeAllViews();
-
                     String[] parts = raw.split("===");
-
                     // 第0段：时间，粗体
                     TextView tvTime = new TextView(act);
                     tvTime.setTextSize(15);
@@ -499,7 +522,6 @@ public class SportChartActivity extends AppCompatActivity {
                         tvTime.setText("");
                     }
                     itemLl.addView(tvTime);
-
                     // 第1段：经纬度
                     TextView tvLatLon = new TextView(act);
                     tvLatLon.setTextSize(14);
@@ -511,7 +533,6 @@ public class SportChartActivity extends AppCompatActivity {
                         tvLatLon.setText("");
                     }
                     itemLl.addView(tvLatLon);
-
                     // 第2段：地址
                     TextView tvAddr = new TextView(act);
                     tvAddr.setTextSize(14);
@@ -523,15 +544,15 @@ public class SportChartActivity extends AppCompatActivity {
                         tvAddr.setText("");
                     }
                     itemLl.addView(tvAddr);
-
                     return itemLl;
                 }
             };
             listView.setAdapter(adapter);
+            rootContainer.addView(listView);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(act);
-            builder.setTitle(MyActivity.zh_cn ? "途径点" : "Path Points");
-            builder.setView(listView);
+            // 移除builder.setTitle，改用我们自己的标题控件
+            builder.setView(rootContainer);
             builder.setPositiveButton(android.R.string.ok, null);
             builder.show();
         });
