@@ -7,12 +7,6 @@
 #include <QTextCursor>
 #include <QTextDocument>
 
-// 选中状态的淡蓝背景色
-static const QColor SELECTED_BG_COLOR(214, 232, 250);  // #D6E8FA
-// 选中状态的统一黑色文字
-static const QColor SELECTED_TEXT_COLOR(30, 30,
-                                        30);  // 接近纯黑，比 #000 更柔和
-
 NoteSearchDelegate::NoteSearchDelegate(QObject* parent)
     : QStyledItemDelegate(parent) {}
 

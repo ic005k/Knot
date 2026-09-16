@@ -21,6 +21,10 @@ Preferences::Preferences(QWidget* parent)
   this->installEventFilter(this);
   ui->lblNetCon->installEventFilter(this);
 
+  ui->f_aiapi->setFrameShape(QFrame::NoFrame);
+  ui->f_localai->setFrameShape(QFrame::NoFrame);
+  ui->f_General->setFrameShape(QFrame::NoFrame);
+
   ui->tabOptions->setCurrentIndex(1);
 
   ui->cboxEndpoint->setVisible(false);

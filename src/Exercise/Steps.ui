@@ -440,7 +440,6 @@ QRadioButton:disabled {
        <widget class="QLabel" name="lblGpsInfo">
         <property name="font">
          <font>
-          <pointsize>20</pointsize>
           <bold>true</bold>
          </font>
         </property>

@@ -2969,7 +2969,7 @@ void Method::showInfoWindow(const QString& info) {
   // 中间：原有信息标签
   mainLayout->addWidget(lblInfo);
 
-  // 底部：进度条（保持原有逻辑）
+  // 底部：进度条
   QHBoxLayout* bottomLayout = new QHBoxLayout();
   mainLayout->addLayout(bottomLayout);
 
@@ -2982,7 +2982,7 @@ void Method::showInfoWindow(const QString& info) {
   if (isAndroid)
     infoWindow->setFixedWidth(mw_one->width() - 10);
   else
-    infoWindow->setFixedWidth(350);
+    infoWindow->setFixedWidth(340);
 
   lblInfo->setMaximumWidth(infoWindow->width() - 10);
 

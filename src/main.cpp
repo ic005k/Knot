@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
 
   QApplication app(argc, argv);
 
-  // QApplication::setStyle(QStyleFactory::create("Fusion"));
+  QApplication::setStyle(QStyleFactory::create("Fusion"));
 
   loadLocal();
 
@@ -346,30 +346,39 @@ void loadTheme(bool isDark) {
   isInitThemeEnd = false;
   // 设置调色板
   if (isDark) {
-    // qApp->setPalette(createDarkPalette());
+    qApp->setPalette(createDarkPalette());
   } else {
-    // qApp->setPalette(createLightPalette());
+    qApp->setPalette(createLightPalette());
   }
 
-  /*QString themePath =
-      isDark ? ":/res/theme/MaterialDark.qss" : ":/res/theme/MaterialLight.qss";
+  /*{
+    QString themePath = isDark ? ":/res/theme/MaterialDark.qss"
+                               : ":/res/theme/MaterialLight.qss";
 
-  QFile f(themePath);
-  if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    QString styleSheet = QTextStream(&f).readAll();
-    styleSheet.prepend(
-        QString("[color-scheme=\"%1\"] ").arg(isDark ? "dark" : "light"));
-    qApp->setStyleSheet(styleSheet);
+    QFile f(themePath);
+    if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      QString styleSheet = QTextStream(&f).readAll();
+      styleSheet.prepend(
+          QString("[color-scheme=\"%1\"] ").arg(isDark ? "dark" : "light"));
+      qApp->setStyleSheet(styleSheet);
 
-    // 强制窗口重绘
-    if (mw_one) {
-      mw_one->init_Theme();
-      QEvent updateEvent(QEvent::UpdateRequest);
-      QApplication::sendEvent(mw_one, &updateEvent);
     }
   }*/
 
-  if (mw_one) mw_one->init_Theme();
+  // 必须遍历所有顶层窗口及其子控件，执行 unpolish -> polish
+  for (QWidget* widget : QApplication::allWidgets()) {
+    widget->style()->unpolish(widget);
+    widget->style()->polish(widget);
+
+    widget->update();
+  }
+
+  // 强制窗口重绘
+  if (mw_one) {
+    mw_one->init_Theme();
+    QEvent updateEvent(QEvent::UpdateRequest);
+    QApplication::sendEvent(mw_one, &updateEvent);
+  }
 
   // 空指针校验：避免崩溃
   if (mw_one) {

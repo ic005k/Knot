@@ -61,10 +61,13 @@ Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
 
   initUI();
 
-  QFont font1 = m_Method->getNewFont(17);
-  font1.setBold(true);
+  if (isAndroid) {
+    QFont font1 = this->font();
+    font1.setPointSize(15);
+    font1.setBold(true);
+    ui->lblGpsInfo->setFont(font1);
+  }
   ui->lblGpsInfo->setStyleSheet(lblStyle);
-  ui->lblGpsInfo->setFont(font1);
 
   tmeRefreshSteps = new QTimer(this);
   connect(tmeRefreshSteps, &QTimer::timeout, this, &Steps::refreshSteps);

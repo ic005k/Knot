@@ -69,6 +69,7 @@ void MainWindow::init_TotalData() {
 void MainWindow::init_Instance() {
   CurrentYear = QString::number(QDate::currentDate().year());
   tabData = ui->tabWidget;
+  fontSize = this->font().pointSize();
 
   m_Method = new Method(this);
 
@@ -302,8 +303,6 @@ void MainWindow::init_UIWidget() {
     mw_one->ui->tabWidget->hide();
   }
 
-  fontSize = this->font().pointSize();
-
   mw_one->loginTime = m_Method->setCurrentDateTimeValue();
   strDate = m_Method->setCurrentDateValue();
   isReadEnd = true;
@@ -341,6 +340,9 @@ void MainWindow::init_UIWidget() {
 
   mw_one->ui->editWebDAVPassword->setEchoMode(QLineEdit::EchoMode::Password);
   mw_one->ui->lblWebDAV->setStyleSheet(mw_one->labelNormalStyleSheet);
+
+  ui->f_DataEnc->setFrameShape(QFrame::NoFrame);
+  ui->f_WebDAV->setFrameShape(QFrame::NoFrame);
 
   mw_one->ui->tabWidget->tabBar()->installEventFilter(mw_one);
   mw_one->ui->tabWidget->installEventFilter(mw_one);
