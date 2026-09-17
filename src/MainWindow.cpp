@@ -678,14 +678,7 @@ void MainWindow::on_twItemDoubleClicked() {
 void MainWindow::clickMainTab(int index) {
   tabData->setCurrentIndex(index);
 
-  QString eventName = mw_one->ui->tabWidget->tabBar()->tabText(index);
-
   mw_one->ui->frameMain->hide();
-
-  listMyEventTitle.clear();
-
-  listMyEventTitle.append(eventName);
-  listMyEventTitle.append(strStats);
 
   if (isSelectTab) {
     on_btnAdd_clicked();

@@ -160,6 +160,14 @@ void Method::refreshMainEntranceCards() {
 
 void Method::openMyEventWindow() {
 #ifdef Q_OS_ANDROID
+  mw_one->listMyEventTitle.clear();
+  int index = tabData->currentIndex();
+  if (index >= 0) {
+    QString eventName = tabData->tabBar()->tabText(index);
+    mw_one->listMyEventTitle.append(eventName);
+    mw_one->listMyEventTitle.append(strStats);
+  }
+
   QStringList list1, list2, list3;
   list1 = mw_one->listMyEventTitle;
   list2 = mw_one->listMainDate;
