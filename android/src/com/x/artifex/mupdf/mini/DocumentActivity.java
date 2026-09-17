@@ -64,6 +64,7 @@ import java.util.Stack;
 public class DocumentActivity extends Activity {
 
     private boolean isTxtFile = false;
+    private String mConvertedPlainText = null;
     private android.app.ProgressDialog mConvertProgressDialog = null;
 
     // TTS //////////////////////////////////////////
@@ -1518,7 +1519,7 @@ public class DocumentActivity extends Activity {
     }
 
     /** 高亮搜索 — 使用实时版本号 */
-    protected void highlightCurrentSentence(String sentence) {
+    /*protected void highlightCurrentSentence(String sentence) {
         if (sentence == null || sentence.trim().isEmpty()) return;
 
         // ✅ 关键：将 \n 替换为空格，使搜索字符串变为单行
@@ -1583,7 +1584,274 @@ public class DocumentActivity extends Activity {
                 }
             }
         );
+    }*/
+    /////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * 从 StructuredText 中提取所有行的文本及其 bbox
+     * MuPDF 1.28 asJSON() 只提供行级信息，无字符级 quad
+     */
+    private java.util.ArrayList<LineInfo> extractLines(StructuredText stext) {
+        final java.util.ArrayList<LineInfo> result =
+            new java.util.ArrayList<>();
+        try {
+            String json = stext.asJSON();
+            if (json == null || json.isEmpty()) return result;
+
+            org.json.JSONObject root = new org.json.JSONObject(json);
+            org.json.JSONArray blocks = root.optJSONArray("blocks");
+            if (blocks == null) return result;
+
+            for (int b = 0; b < blocks.length(); b++) {
+                org.json.JSONObject block = blocks.getJSONObject(b);
+                if (!"text".equals(block.optString("type"))) continue;
+
+                org.json.JSONArray lines = block.optJSONArray("lines");
+                if (lines == null) continue;
+
+                for (int l = 0; l < lines.length(); l++) {
+                    org.json.JSONObject line = lines.getJSONObject(l);
+                    String text = line.optString("text", "");
+                    org.json.JSONObject bbox = line.optJSONObject("bbox");
+
+                    if (!text.isEmpty() && bbox != null) {
+                        Rect rect = new Rect(
+                            (float) bbox.getDouble("x"),
+                            (float) bbox.getDouble("y"),
+                            (float) bbox.getDouble("x") +
+                                (float) bbox.getDouble("w"),
+                            (float) bbox.getDouble("y") +
+                                (float) bbox.getDouble("h")
+                        );
+                        result.add(new LineInfo(text, rect));
+                    }
+                }
+            }
+            Log.d(APP, "extractLines: extracted " + result.size() + " lines");
+        } catch (Exception e) {
+            Log.e(APP, "extractLines failed: " + e.getMessage());
+        }
+        return result;
     }
+
+    /** 辅助类：存储单行信息 */
+    private static class LineInfo {
+
+        String text;
+        Rect bbox;
+
+        LineInfo(String text, Rect bbox) {
+            this.text = text;
+            this.bbox = bbox;
+        }
+    }
+
+    /**
+     * 使用 Unicode NFKC 归一化 + 去标点空白
+     * 彻底替代手动 CJK 映射表，覆盖所有编码变体
+     */
+    private static String stripForCompare(String s) {
+        if (s == null || s.isEmpty()) return "";
+        // NFKC 自动处理 CJK 兼容部首(⾃→自)、全角(Ａ→A) 等
+        String normalized = java.text.Normalizer.normalize(
+            s,
+            java.text.Normalizer.Form.NFKC
+        );
+        // 去除所有标点、空白、特殊符号
+        return normalized.replaceAll(
+            "[\\p{Punct}\\p{Space}\\u2014\\u2013\\u2015\\uFF0D\\u30FC]+",
+            ""
+        );
+    }
+
+    /**
+     * 高亮当前朗读句子 — 屏幕空间完美矩形 + NFKC 归一化
+     */
+    protected void highlightCurrentSentence(String sentence) {
+        if (sentence == null || sentence.trim().isEmpty()) return;
+
+        final int capturedVersion = pageView.getPageVersion();
+        final Matrix ctm = mCurrentPageCtm;
+        if (ctm == null) return;
+
+        final String targetRaw = sentence.trim().replaceAll("\\n+", " ");
+        final String targetClean = stripForCompare(targetRaw);
+        if (targetClean.isEmpty()) return;
+
+        worker.add(
+            new Worker.Task() {
+                Quad[] quads;
+
+                public void work() {
+                    try {
+                        Page page = doc.loadPage(mTtsReadingPage);
+                        StructuredText stext = page.toStructuredText(
+                            "preserve-whitespace"
+                        );
+                        java.util.ArrayList<LineInfo> lines = extractLines(
+                            stext
+                        );
+
+                        if (lines.isEmpty()) {
+                            stext.destroy();
+                            page.destroy();
+                            return;
+                        }
+
+                        // 构建归一化后的页面纯文本，并记录每行在纯文本中的索引范围
+                        StringBuilder pageClean = new StringBuilder();
+                        java.util.ArrayList<int[]> lineRanges =
+                            new java.util.ArrayList<>();
+
+                        for (LineInfo li : lines) {
+                            String cleaned = stripForCompare(li.text);
+                            int start = pageClean.length();
+                            pageClean.append(cleaned);
+                            lineRanges.add(new int[] {
+                                start,
+                                pageClean.length(),
+                            });
+                        }
+
+                        String pageText = pageClean.toString();
+                        int idx = pageText.indexOf(targetClean);
+
+                        // 降级：前缀匹配（至少4个字符）
+                        if (idx < 0 && targetClean.length() > 4) {
+                            String prefix = targetClean.substring(
+                                0,
+                                Math.min(8, targetClean.length())
+                            );
+                            idx = pageText.indexOf(prefix);
+                        }
+
+                        if (idx >= 0) {
+                            int matchEnd = idx + targetClean.length();
+
+                            // ⭐ 核心修复：在屏幕坐标系中计算包围盒，彻底避免 PDF 坐标系 Y 轴反转导致的形变
+                            float screenX0 = Float.MAX_VALUE;
+                            float screenY0 = Float.MAX_VALUE;
+                            float screenX1 = -Float.MAX_VALUE;
+                            float screenY1 = -Float.MAX_VALUE;
+                            boolean hasMatch = false;
+
+                            for (int i = 0; i < lineRanges.size(); i++) {
+                                int[] range = lineRanges.get(i);
+                                if (range[0] < matchEnd && range[1] > idx) {
+                                    Rect bbox = lines.get(i).bbox;
+
+                                    // 将 bbox 四角分别变换到屏幕坐标 (Android 屏幕 Y 轴向下)
+                                    Point p1 = new Point(
+                                        bbox.x0,
+                                        bbox.y0
+                                    ).transform(ctm);
+                                    Point p2 = new Point(
+                                        bbox.x1,
+                                        bbox.y0
+                                    ).transform(ctm);
+                                    Point p3 = new Point(
+                                        bbox.x1,
+                                        bbox.y1
+                                    ).transform(ctm);
+                                    Point p4 = new Point(
+                                        bbox.x0,
+                                        bbox.y1
+                                    ).transform(ctm);
+
+                                    // 在屏幕空间中取包围盒
+                                    float minX = Math.min(
+                                        Math.min(p1.x, p2.x),
+                                        Math.min(p3.x, p4.x)
+                                    );
+                                    float maxX = Math.max(
+                                        Math.max(p1.x, p2.x),
+                                        Math.max(p3.x, p4.x)
+                                    );
+                                    float minY = Math.min(
+                                        Math.min(p1.y, p2.y),
+                                        Math.min(p3.y, p4.y)
+                                    );
+                                    float maxY = Math.max(
+                                        Math.max(p1.y, p2.y),
+                                        Math.max(p3.y, p4.y)
+                                    );
+
+                                    if (!hasMatch) {
+                                        screenX0 = minX;
+                                        screenX1 = maxX;
+                                        screenY0 = minY;
+                                        screenY1 = maxY;
+                                        hasMatch = true;
+                                    } else {
+                                        screenX0 = Math.min(screenX0, minX);
+                                        screenX1 = Math.max(screenX1, maxX);
+                                        screenY0 = Math.min(screenY0, minY);
+                                        screenY1 = Math.max(screenY1, maxY);
+                                    }
+                                }
+                            }
+
+                            if (hasMatch) {
+                                // 强制取整，消除亚像素渲染导致的视觉形变
+                                float sx0 = Math.round(screenX0);
+                                float sy0 = Math.round(screenY0);
+                                float sx1 = Math.round(screenX1);
+                                float sy1 = Math.round(screenY1);
+
+                                // ⭐ 直接在屏幕坐标系构造轴对齐 Quad，不再经过 ctm
+                                // 注意：屏幕空间 Y 轴向下，所以 sy0 是顶边，sy1 是底边
+                                Quad q = new Quad(
+                                    sx0,
+                                    sy1, // ll (左下)
+                                    sx1,
+                                    sy1, // lr (右下)
+                                    sx1,
+                                    sy0, // ur (右上)
+                                    sx0,
+                                    sy0 // ul (左上)
+                                );
+                                quads = new Quad[] { q };
+
+                                Log.d(
+                                    APP,
+                                    String.format(
+                                        "TTS highlight: screen rect (%.0f,%.0f)-(%.0f,%.0f)",
+                                        sx0,
+                                        sy0,
+                                        sx1,
+                                        sy1
+                                    )
+                                );
+                            }
+                        } else {
+                            Log.w(
+                                APP,
+                                "TTS search failed. target=[" +
+                                    targetClean.substring(
+                                        0,
+                                        Math.min(30, targetClean.length())
+                                    ) +
+                                    "]"
+                            );
+                        }
+
+                        stext.destroy();
+                        page.destroy();
+                    } catch (Throwable x) {
+                        Log.e(APP, "highlight error: " + x.getMessage());
+                    }
+                }
+
+                public void run() {
+                    if (quads != null && mIsTtsReading) {
+                        pageView.setTtsHighlight(quads, capturedVersion);
+                    }
+                }
+            }
+        );
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////
 
     /** 切换 TTS 播放/停止 */
     private void toggleTts() {
@@ -1612,6 +1880,38 @@ public class DocumentActivity extends Activity {
      * MuPDF 1.28.0 兼容版 - 不使用 StructuredTextWalker
      */
     private String extractPageText(int pageNumber) {
+        // ⭐ 优先使用 C++ 传来的原始纯文本
+        if (
+            isTxtFile &&
+            mConvertedPlainText != null &&
+            !mConvertedPlainText.isEmpty()
+        ) {
+            // 需要根据页码估算文本范围
+            // 简单策略：按总页数等比分割（对于TTS朗读足够精确）
+            int totalLen = mConvertedPlainText.length();
+            int start = (int) (((long) pageNumber * totalLen) / pageCount);
+            int end = (int) (((long) (pageNumber + 1) * totalLen) / pageCount);
+
+            // 边界安全处理
+            start = Math.max(0, Math.min(start, totalLen));
+            end = Math.max(start, Math.min(end, totalLen));
+
+            String pageText = mConvertedPlainText.substring(start, end).trim();
+            Log.i(
+                APP,
+                "extractPageText from raw buffer: page=" +
+                    pageNumber +
+                    ", range=[" +
+                    start +
+                    "," +
+                    end +
+                    "], len=" +
+                    pageText.length()
+            );
+            return pageText;
+        }
+        /////////////////////////////////////////////////////////////
+
         try {
             Page page = doc.loadPage(pageNumber);
             StructuredText stext = page.toStructuredText("preserve-whitespace");
@@ -1686,24 +1986,6 @@ public class DocumentActivity extends Activity {
             Log.e(APP, "extractPageText failed: " + e.getMessage());
             return "";
         }
-    }
-
-    /** 获取文本中最后一个有意义的句子 */
-    private String getLastSentence(String text) {
-        if (text == null || text.isEmpty()) return "";
-        // 按句号、问号、感叹号、换行分割，取最后一个非空片段
-        String[] parts = text.split("[。！？!?\\n]+");
-        for (int i = parts.length - 1; i >= 0; i--) {
-            String s = parts[i].trim();
-            if (!s.isEmpty()) return s;
-        }
-        return text.trim();
-    }
-
-    /** 归一化字符串用于比对（去标点、去空白、转小写） */
-    private String normalizeForCompare(String s) {
-        if (s == null) return "";
-        return s.replaceAll("[\\p{Punct}\\s]", "").toLowerCase();
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1785,5 +2067,19 @@ public class DocumentActivity extends Activity {
         } catch (java.io.UnsupportedEncodingException e) {
             return new String(data); // 兜底 UTF-8
         }
+    }
+
+    /**
+     * 【供C++ JNI调用】接收转换后的纯文本
+     */
+    public void setConvertedPlainText(String plainText) {
+        runOnUiThread(() -> {
+            mConvertedPlainText = plainText;
+            Log.i(
+                APP,
+                "Received converted plain text, length=" +
+                    (plainText != null ? plainText.length() : 0)
+            );
+        });
     }
 }

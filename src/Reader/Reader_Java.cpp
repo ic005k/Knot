@@ -19,48 +19,6 @@
 #include <QJniEnvironment>
 #endif
 
-void Reader::openReadListWindow(QStringList list) {
-#ifdef Q_OS_ANDROID
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  // 构造 Java ArrayList<String>
-  QJniObject jArrayList("java/util/ArrayList", "()V");
-
-  for (const QString& item : list) {
-    QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
-  }
-
-  // 调用Java方法 openReadListWindow(ArrayList<String>)
-  activity.callMethod<void>("openReadListWindow", "(Ljava/util/ArrayList;)V",
-                            jArrayList.object());
-#endif
-}
-
-void Reader::setPdfDataToJava(QString txtFile) {
-#ifdef Q_OS_ANDROID
-  QByteArray pdfData = txtToPdf(txtFile);
-  if (pdfData.isEmpty()) {
-    return;
-  }
-
-  QJniObject instance = QJniObject::getStaticObjectField(
-      "com/x/artifex/mupdf/mini/DocumentActivity", "mPdfActivity",
-      "Lcom/x/artifex/mupdf/mini/DocumentActivity;");
-
-  if (instance.isValid()) {
-    QJniEnvironment env;
-    // 创建byte数组
-    jbyteArray jPdfArray = env->NewByteArray(pdfData.size());
-    // 填充二进制数据
-    env->SetByteArrayRegion(
-        jPdfArray, 0, pdfData.size(),
-        reinterpret_cast<const jbyte*>(pdfData.constData()));
-
-    instance.callMethod<void>("setConvertedPdfBuffer", "([B)V", jPdfArray);
-  }
-#endif
-}
-
 static QString decodeGbkViaJni(const QByteArray& gbk) {
 #ifdef Q_OS_ANDROID
 
@@ -84,6 +42,96 @@ static QString decodeGbkViaJni(const QByteArray& gbk) {
 
 #endif
   return QString::fromLatin1(gbk);
+}
+
+void Reader::openReadListWindow(QStringList list) {
+#ifdef Q_OS_ANDROID
+  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  // 构造 Java ArrayList<String>
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+
+  for (const QString& item : list) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  // 调用Java方法 openReadListWindow(ArrayList<String>)
+  activity.callMethod<void>("openReadListWindow", "(Ljava/util/ArrayList;)V",
+                            jArrayList.object());
+#endif
+}
+
+/*void Reader::setPdfDataToJava(QString txtFile) {
+#ifdef Q_OS_ANDROID
+  QByteArray pdfData = txtToPdf(txtFile);
+  if (pdfData.isEmpty()) {
+    return;
+  }
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/artifex/mupdf/mini/DocumentActivity", "mPdfActivity",
+      "Lcom/x/artifex/mupdf/mini/DocumentActivity;");
+
+  if (instance.isValid()) {
+    QJniEnvironment env;
+    // 创建byte数组
+    jbyteArray jPdfArray = env->NewByteArray(pdfData.size());
+    // 填充二进制数据
+    env->SetByteArrayRegion(
+        jPdfArray, 0, pdfData.size(),
+        reinterpret_cast<const jbyte*>(pdfData.constData()));
+
+    instance.callMethod<void>("setConvertedPdfBuffer", "([B)V", jPdfArray);
+  }
+#endif
+}*/
+
+void Reader::setPdfDataToJava(QString txtFile) {
+#ifdef Q_OS_ANDROID
+  QByteArray pdfData = txtToPdf(txtFile);
+  if (pdfData.isEmpty()) return;
+
+  // ⭐ 新增：重新读取并解码一次纯文本（复用现有解码逻辑）
+  QFile file(txtFile);
+  QString plainText;
+  if (file.open(QIODevice::ReadOnly)) {
+    QByteArray raw = file.readAll();
+    file.close();
+    // 复用你已有的解码逻辑（简化示意，实际请抽取为公共函数）
+    if (raw.startsWith("\xEF\xBB\xBF")) {
+      plainText = QString::fromUtf8(raw.mid(3));
+    } else {
+      auto utf8Dec = QStringDecoder(QStringDecoder::Utf8,
+                                    QStringDecoder::Flag::ConvertInvalidToNull);
+      QString test = utf8Dec(raw);
+      if (utf8Dec.isValid() && !test.contains('\0') && !utf8Dec.hasError()) {
+        plainText = test;
+      } else {
+        plainText = decodeGbkViaJni(raw);
+      }
+    }
+  }
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      "com/x/artifex/mupdf/mini/DocumentActivity", "mPdfActivity",
+      "Lcom/x/artifex/mupdf/mini/DocumentActivity;");
+
+  if (instance.isValid()) {
+    QJniEnvironment env;
+
+    // 传递 PDF 数据
+    jbyteArray jPdfArray = env->NewByteArray(pdfData.size());
+    env->SetByteArrayRegion(
+        jPdfArray, 0, pdfData.size(),
+        reinterpret_cast<const jbyte*>(pdfData.constData()));
+    instance.callMethod<void>("setConvertedPdfBuffer", "([B)V", jPdfArray);
+
+    // ⭐ 新增：传递纯文本数据
+    QJniObject jPlainText = QJniObject::fromString(plainText);
+    instance.callMethod<void>("setConvertedPlainText", "(Ljava/lang/String;)V",
+                              jPlainText.object());
+  }
+#endif
 }
 
 QByteArray Reader::txtToPdf(const QString& filePath) {

@@ -473,7 +473,7 @@ public class PageView
         }
 
         // ✅ TTS 高亮绘制 —— 修正缩放比
-        if (ttsQuads != null && ttsQuads.length > 0) {
+        /*if (ttsQuads != null && ttsQuads.length > 0) {
             // ttsQuads 是在 pageScale 下用基础ctm变换的
             // 当前实际缩放是 viewScale，需要补一个比值
             float scaleRatio = viewScale / pageScale;
@@ -486,6 +486,36 @@ public class PageView
                 path.lineTo(x + q.ur_x * scaleRatio, y + q.ur_y * scaleRatio);
                 path.close();
                 canvas.drawPath(path, ttsPaint);
+            }
+        }*/
+
+        // ✅ TTS 高亮绘制 — 绝对安全的 drawRect
+        if (ttsQuads != null && ttsQuads.length > 0) {
+            float ratio = viewScale / pageScale;
+
+            for (Quad q : ttsQuads) {
+                // 1. 计算四个角在 canvas 上的绝对坐标
+                float x1 = x + q.ul_x * ratio;
+                float y1 = y + q.ul_y * ratio;
+                float x2 = x + q.ll_x * ratio;
+                float y2 = y + q.ll_y * ratio;
+                float x3 = x + q.lr_x * ratio;
+                float y3 = y + q.lr_y * ratio;
+                float x4 = x + q.ur_x * ratio;
+                float y4 = y + q.ur_y * ratio;
+
+                // 2. 取极值，强制保证 left < right 且 top < bottom
+                float left = Math.min(Math.min(x1, x2), Math.min(x3, x4));
+                float top = Math.min(Math.min(y1, y2), Math.min(y3, y4));
+                float right = Math.max(Math.max(x1, x2), Math.max(x3, x4));
+                float bottom = Math.max(Math.max(y1, y2), Math.max(y3, y4));
+
+                // 3. 增加一点最小尺寸保护，防止高度为0导致不绘制
+                if (right - left < 1f) right = left + 1f;
+                if (bottom - top < 1f) bottom = top + 1f;
+
+                // 4. 绘制！
+                canvas.drawRect(left, top, right, bottom, ttsPaint);
             }
         }
     }
