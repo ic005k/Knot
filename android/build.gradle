@@ -56,6 +56,7 @@ repositories {
 }
 
 dependencies {
+    // MuPDF
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
 
     // 改为AndroidX版本：
@@ -69,10 +70,6 @@ dependencies {
     // PDF
     //pdfium 核心依赖（pdfviewer 的底层引擎）
     //implementation 'com.github.barteksc:pdfium-android:1.9.0'
-
-    // MuPDF
-    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-
 
     // Markwon
     implementation 'io.noties.markwon:core:4.6.2'

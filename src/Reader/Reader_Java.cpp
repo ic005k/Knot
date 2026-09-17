@@ -91,27 +91,6 @@ void Reader::setPdfDataToJava(QString txtFile) {
   QByteArray pdfData = txtToPdf(txtFile);
   if (pdfData.isEmpty()) return;
 
-  // ⭐ 新增：重新读取并解码一次纯文本（复用现有解码逻辑）
-  QFile file(txtFile);
-  QString plainText;
-  if (file.open(QIODevice::ReadOnly)) {
-    QByteArray raw = file.readAll();
-    file.close();
-    // 复用你已有的解码逻辑（简化示意，实际请抽取为公共函数）
-    if (raw.startsWith("\xEF\xBB\xBF")) {
-      plainText = QString::fromUtf8(raw.mid(3));
-    } else {
-      auto utf8Dec = QStringDecoder(QStringDecoder::Utf8,
-                                    QStringDecoder::Flag::ConvertInvalidToNull);
-      QString test = utf8Dec(raw);
-      if (utf8Dec.isValid() && !test.contains('\0') && !utf8Dec.hasError()) {
-        plainText = test;
-      } else {
-        plainText = decodeGbkViaJni(raw);
-      }
-    }
-  }
-
   QJniObject instance = QJniObject::getStaticObjectField(
       "com/x/artifex/mupdf/mini/DocumentActivity", "mPdfActivity",
       "Lcom/x/artifex/mupdf/mini/DocumentActivity;");
@@ -125,11 +104,6 @@ void Reader::setPdfDataToJava(QString txtFile) {
         jPdfArray, 0, pdfData.size(),
         reinterpret_cast<const jbyte*>(pdfData.constData()));
     instance.callMethod<void>("setConvertedPdfBuffer", "([B)V", jPdfArray);
-
-    // ⭐ 新增：传递纯文本数据
-    QJniObject jPlainText = QJniObject::fromString(plainText);
-    instance.callMethod<void>("setConvertedPlainText", "(Ljava/lang/String;)V",
-                              jPlainText.object());
   }
 #endif
 }

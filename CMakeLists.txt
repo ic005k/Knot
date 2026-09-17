@@ -28,7 +28,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 # 1. Qt 模块查找
 # ============================================================
 find_package(Qt6 REQUIRED COMPONENTS
-    Core Gui Widgets Network PrintSupport Charts Sensors Sql
+    Core Gui Widgets Network PrintSupport Sensors Sql
     Xml Svg Concurrent LinguistTools Core5Compat Positioning
 )
 
@@ -362,7 +362,7 @@ endif()
 # 全平台公共链接
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::PrintSupport
-    Qt6::Charts Qt6::Sensors Qt6::Sql
+    Qt6::Sensors Qt6::Sql
     Qt6::Xml Qt6::Svg Qt6::Concurrent
     Qt6::Positioning
     Qt6::Core5Compat

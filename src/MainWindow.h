@@ -20,11 +20,6 @@
 
 #endif
 
-#include <QBarCategoryAxis>
-#include <QBarSeries>
-#include <QBarSet>
-#include <QChart>
-#include <QChartView>
 #include <QComboBox>
 #include <QDateTime>
 #include <QDebug>
@@ -44,12 +39,10 @@
 #include <QPropertyAnimation>
 #include <QPushButton>
 #include <QRandomGenerator>
-#include <QScatterSeries>
 #include <QScrollBar>
 #include <QScroller>
 #include <QSensorManager>
 #include <QSettings>
-#include <QSplineSeries>
 #include <QSplitter>
 #include <QStringList>
 #include <QTextEdit>
@@ -57,7 +50,6 @@
 #include <QTimer>
 #include <QToolTip>
 #include <QTreeWidgetItem>
-#include <QValueAxis>
 
 #include "Comm/ui_ShowMessage.h"
 #include "Exercise/ui_StepsOptions.h"
