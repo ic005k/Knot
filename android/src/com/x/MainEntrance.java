@@ -128,11 +128,8 @@ public class MainEntrance extends AppCompatActivity {
         };
         getOnBackPressedDispatcher().addCallback(this, mBackCallback);
 
-        // if (MyActivity.isDark) {
-        setContentView(R.layout.activity_main_entrance_dark);
-        //} else {
-        // setContentView(R.layout.activity_main_entrance);
-        //}
+        setContentView(R.layout.activity_main_entrance);
+
         isDark = ImmersiveUtil.applyRealImmersive(this);
 
         mSelfWeakRef = new WeakReference<>(this);

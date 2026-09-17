@@ -317,9 +317,9 @@ public class MyActivity
 
     public void setDark(boolean dark) {
         isDark = dark;
-        //updateSystemBars();
         // 使用重载版本，传入当前应用的暗黑状态
         ImmersiveUtil.applyRealImmersive(this, isDark);
+        updateSystemBars();
     }
 
     // ------------------------------------------------------------------------
@@ -533,7 +533,7 @@ public class MyActivity
         }
     }
 
-    // ===== 新增：处理共享Intent的简化方法 =====
+    // ===== 处理共享Intent的简化方法 =====
     private void handleSharedIntent(Intent intent) {
         try {
             String sharedData = processViewIntent(intent);
@@ -553,7 +553,7 @@ public class MyActivity
         }
     }
 
-    // ===== 新增：启动服务的封装方法 =====
+    // ===== 启动服务的封装方法 =====
     private void startMyService() {
         try {
             Intent serviceIntent = new Intent(this, MyService.class);
@@ -594,35 +594,6 @@ public class MyActivity
         }
     };
 
-    /*@Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            // 检查当前是否有对话框正在显示
-            if (isDialogShowing()) {
-                // 有对话框时，让系统默认处理（关闭对话框）
-                return super.onKeyDown(keyCode, event);
-            } else {
-                // 无对话框时，执行自定义返回逻辑
-                CallJavaNotify_15();
-                return true; // 事件已处理
-            }
-        }
-        return super.onKeyDown(keyCode, event);
-    }*/
-
-    /*@Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (isDialogShowing()) {
-                return super.onKeyUp(keyCode, event);
-            } else {
-                CallJavaNotify_15();
-                return true;
-            }
-        }
-        return super.onKeyUp(keyCode, event);
-    }*/
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -655,40 +626,6 @@ public class MyActivity
             WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
         );
     }
-
-    // 成员变量
-    // private boolean m_backConsumedByAndroid = false;
-
-    /*@Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                // --------------------------
-                // 第一步：让系统先处理返回（关闭输入法、悬浮窗、弹窗、菜单...）
-                // --------------------------
-                boolean handledBySystem = super.dispatchKeyEvent(event);
-
-                // 如果系统处理了（关闭了东西）
-                if (handledBySystem) {
-                    m_backConsumedByAndroid = true;
-                    return true; // 吃掉 DOWN
-                }
-
-                // 系统没东西可关 → 放行
-                m_backConsumedByAndroid = false;
-            }
-
-            if (event.getAction() == KeyEvent.ACTION_UP) {
-                if (m_backConsumedByAndroid) {
-                    m_backConsumedByAndroid = false;
-                    return true; // 吃掉 UP → Qt 收不到
-                }
-            }
-        }
-
-        // 无处理 → 正常给 Qt
-        return super.dispatchKeyEvent(event);
-    }*/
 
     @Override
     public void onBackPressed() {
