@@ -171,6 +171,9 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks
 {
 
+    private boolean isConfigChangeRecreate = false;
+    private static boolean isQtMainEnd = false;
+
     // 记录maintab卡片上次选中索引，-1 = 无选中
     public static int mainTabLastSelectedPos = -1;
 
@@ -183,10 +186,6 @@ public class MyActivity
     public static boolean mAIAPIEnabled = false;
 
     private OnBackInvokedCallback mBackCallback;
-    private boolean mIsQtActive = true;
-
-    // 标记是否是配置变更导致的重构 =====
-    private boolean isConfigChangeRecreate = false;
 
     // 标记Service是否已启动（静态，跨Activity实例共享）
     private static boolean isServiceStarted = false;
@@ -215,8 +214,6 @@ public class MyActivity
     public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
     public static String lblDate = "Date";
     public static String lblInfo = "Speed";
-
-    private static boolean isQtMainEnd = false;
 
     public static final String ACTION_TODO_ALARM = "com.x.Knot.TODO_ALARM";
 
@@ -569,19 +566,6 @@ public class MyActivity
         }
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // 只做一件事：暗黑模式切换时，锁定Qt交互
-        int nightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        if (
-            nightMode == Configuration.UI_MODE_NIGHT_YES ||
-            nightMode == Configuration.UI_MODE_NIGHT_NO
-        ) {
-            QtStateManager.getInstance().lockQtInteraction();
-        }
-    }
-
     private static ServiceConnection mCon = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder arg1) {
@@ -647,27 +631,24 @@ public class MyActivity
         ImmersiveUtil.applyRealImmersive(this, isDark);
 
         forceRestoreSystemBars();
-
-        // ✅ 新增：延迟触发 Qt 重绘，确保 GL 上下文恢复
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            View content = findViewById(android.R.id.content);
-            if (content != null) {
-                content.requestLayout();
-                content.invalidate();
-            }
-
-            // 强制 Qt SurfaceView 重绘（如果使用了 SurfaceView）
-            View qtSurface = findViewById(android.R.id.content);
-            if (qtSurface != null) {
-                qtSurface.postInvalidate();
-            }
-        }, 150); // 150ms 延迟，等待系统完成窗口切换
     }
 
     @Override
     public void onStop() {
         System.out.println("onStop...");
         super.onStop();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        int nightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean newIsDark = nightMode == Configuration.UI_MODE_NIGHT_YES;
+        if (isDark != newIsDark) {
+            isDark = newIsDark;
+            ImmersiveUtil.applyRealImmersive(this, isDark);
+            updateSystemBars(); // 核心：立刻刷新状态栏、导航栏颜色
+        }
     }
 
     @Override
@@ -708,48 +689,6 @@ public class MyActivity
         // ========== 优化点1：仅在非配置变更销毁时，注销Activity生命周期回调 ==========
         if (!isConfigChangeRecreate) {
             getApplication().unregisterActivityLifecycleCallbacks(this); // 注销回调
-        }
-
-        // ========== Qt接收器注销逻辑 ==========
-        try {
-            // 处理音频接收器：跳过不存在的方法，直接尝试注销
-            Class<?> qtAudioDeviceManagerClass = Class.forName(
-                "org.qtproject.qt.android.multimedia.QtAudioDeviceManager"
-            );
-            // 直接调用注销方法，不先判断是否注册（避免依赖不存在的方法）
-            Method unregisterAudioMethod = null;
-            try {
-                unregisterAudioMethod = qtAudioDeviceManagerClass.getMethod(
-                    "unregisterAudioHeadsetStateReceiver",
-                    Context.class
-                );
-                unregisterAudioMethod.invoke(null, this);
-                Log.d(TAG, "Qt音频接收器注销成功");
-            } catch (NoSuchMethodException e) {
-                Log.w(TAG, "Qt音频接收器注销方法不存在，跳过", e);
-            } catch (Exception e) {
-                Log.w(TAG, "Qt音频接收器注销失败（非致命）", e);
-            }
-
-            // 新增：处理网络代理接收器（修复第二个泄漏）
-            Class<?> qtNetworkClass = Class.forName(
-                "org.qtproject.qt.android.network.QtNetwork"
-            );
-            Method unregisterNetworkMethod = null;
-            try {
-                unregisterNetworkMethod = qtNetworkClass.getMethod(
-                    "unregisterReceiver",
-                    Context.class
-                );
-                unregisterNetworkMethod.invoke(null, this);
-                Log.d(TAG, "Qt网络接收器注销成功");
-            } catch (NoSuchMethodException e) {
-                Log.w(TAG, "Qt网络接收器注销方法不存在，跳过", e);
-            } catch (Exception e) {
-                Log.w(TAG, "Qt网络接收器注销失败（非致命）", e);
-            }
-        } catch (ClassNotFoundException e) {
-            Log.w(TAG, "Qt相关类未找到，跳过接收器注销", e);
         }
 
         // ========== 优化点2：仅在非配置变更销毁时，注销自己的广播接收器 ==========
