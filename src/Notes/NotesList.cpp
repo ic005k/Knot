@@ -13,6 +13,7 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   m_RecentOpen = new RecentOpen(this);
   m_NoteSearch = new NoteSearch(this);
   m_NoteRecycleBin = new NoteRecycleBin(this);
+  m_MyNoteDiff = new MyNoteDiff(this);
 
   // 隐藏水平滚动条，Delegate 的 sizeHint 会自动适配 viewport 宽度
   ui->listNotes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -1238,6 +1239,8 @@ void NotesList::on_btnNoteMenu_clicked() {
     // TODO: Revision History
     int idx = ui->listNotes->currentRow();
     if (idx == -1) return;
+
+    on_actionModificationHistory();
   });
 
   QAction* actStats = menu->addAction(tr("Statistics"));

@@ -530,7 +530,11 @@ void NotesList::on_actionModificationHistory() {
     noteDiffPatch.append(patch);
   }
 
-  setNoteDiffHtmlToQML("");
+  qInfo() << noteDiffTime << noteDiffHtml << noteDiffPatch;
+
+  if (isAndroid) {
+  } else
+    m_MyNoteDiff->showDiff();
 }
 
 void NotesList::on_actionCopyNoteLink() {

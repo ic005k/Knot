@@ -29,6 +29,7 @@
 #include <utility>
 
 #include "DatabaseManager.h"
+#include "Notes/MyNoteDiff.h"
 #include "Notes/NoteRecycleBin.h"
 #include "Notes/NoteSearch.h"
 #include "Notes/RecentOpen.h"
@@ -79,6 +80,7 @@ class NotesList : public QDialog {
   NoteSearch* m_NoteSearch;
   RecentOpen* m_RecentOpen;
   NoteRecycleBin* m_NoteRecycleBin;
+  MyNoteDiff* m_MyNoteDiff;
 
   QStringList listNoteBook, listNoteEntry;
   void on_actionImport_Note_triggered();
@@ -304,7 +306,7 @@ class NotesList : public QDialog {
   void qmlOpenEdit();
 
   void getNoteDiffHtml();
-  void newtextToOldtextFromDiffStr();
+  void newtextToOldtextFromDiffStr(int targetIndex);
 
   void slotCreateSubNotebook(int qmlIndex);
   void show_NoteBookPopMenu(int qmlIndex);
@@ -361,8 +363,6 @@ class NotesList : public QDialog {
 
   QMutex m_saveMutex;       // 保存锁
   bool m_isSaving = false;  // 保存状态
-
-  QStringList noteDiffTime, noteDiffHtml, noteDiffPatch;
 
   QString notebookName;
 

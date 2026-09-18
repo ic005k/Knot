@@ -1,8 +1,7 @@
 #include "NotesList.h"
 #include "src/MainWindow.h"
 
-void NotesList::newtextToOldtextFromDiffStr() {
-  int targetIndex = getSelectedVersionIndex();
+void NotesList::newtextToOldtextFromDiffStr(int targetIndex) {
   if (targetIndex < 0) {
     qDebug() << "无效的版本索引";
     return;
