@@ -1589,7 +1589,10 @@ QString Reader::getSkipText(QString htmlFile, QString skipID) {
   return "";
 }
 
-void Reader::removeBookList() {}
+void Reader::removeBookList(int idx) {
+  bookList.remove(idx);
+  saveReader("", false);
+}
 
 void Reader::readBookDone() {
   if (isEpubError) {

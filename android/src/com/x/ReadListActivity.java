@@ -1,6 +1,7 @@
 package com.x;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
@@ -54,6 +55,7 @@ public class ReadListActivity extends AppCompatActivity {
         btnShare = findViewById(R.id.btnShare);
         btnRemove = findViewById(R.id.btnRemove);
         btnClear = findViewById(R.id.btnClear);
+        btnClear.setVisibility(View.GONE);
 
         int iconColor;
         if (MyActivity.isDark) {
@@ -181,6 +183,10 @@ public class ReadListActivity extends AppCompatActivity {
             int index = bookList.indexOf(sel);
             bookList.remove(index);
             bookAdapter.notifyItemRemoved(index);
+
+            MyActivity.mInstance.PublicJavaCallCpp(
+                "remove_read_list|==|" + index
+            );
 
             // 如果删掉的就是当前选中，清空选择
             if (bookAdapter.getSelectedPosition() == index) {

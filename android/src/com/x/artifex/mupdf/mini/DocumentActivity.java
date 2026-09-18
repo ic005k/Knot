@@ -68,7 +68,7 @@ public class DocumentActivity extends Activity {
     private boolean isTxtFile = false;
     private android.app.ProgressDialog mConvertProgressDialog = null;
 
-    // TTS //////////////////////////////////////////
+    // TTS /////////////////////////////////////////////////
     private ImageButton ttsButton;
     protected boolean mIsTtsReading = false;
     protected int mTtsReadingPage = -1;
@@ -76,6 +76,30 @@ public class DocumentActivity extends Activity {
     private String mCurrentPageText = "";
     /** 缓存当前页的变换矩阵，供高亮搜索使用 */
     private Matrix mCurrentPageCtm = null;
+
+    // TTS睡眠定时//////////////////////////////////////////////
+    private ImageButton sleepTimerButton;
+    private boolean mSleepTimerEnabled = false;
+    private final android.os.Handler mSleepTimerHandler =
+        new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable mSleepStopTtsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // 2小时到，停止朗读
+            stopTtsReading();
+            mSleepTimerEnabled = false;
+            updateSleepTimerButtonState();
+            runOnUiThread(() -> {
+                Toast.makeText(
+                    DocumentActivity.this,
+                    MyActivity.zh_cn
+                        ? "睡眠定时已结束，朗读停止"
+                        : "Sleep timer expired, reading stopped",
+                    Toast.LENGTH_SHORT
+                ).show();
+            });
+        }
+    };
 
     //////////////////////////////////////////////////
     private ImageButton minimizeAppButton;
@@ -258,11 +282,7 @@ public class DocumentActivity extends Activity {
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         displayDPI = metrics.densityDpi;
 
-        //if (MyActivity.mPdfInvertMode) {
-        setContentView(R.layout.document_activity_dark);
-        //} else {
-        //setContentView(R.layout.document_activity);
-        //}
+        setContentView(R.layout.document_activity);
 
         //ImmersiveUtil.applyRealImmersive(this);
 
@@ -274,6 +294,23 @@ public class DocumentActivity extends Activity {
 
         ttsButton = findViewById(R.id.tts_button);
         ttsButton.setOnClickListener(v -> toggleTts());
+
+        // 睡眠定时器按钮
+        sleepTimerButton = findViewById(R.id.sleep_timer_button);
+        sleepTimerButton.setOnClickListener(v -> {
+            mSleepTimerEnabled = !mSleepTimerEnabled;
+            updateSleepTimerButtonState();
+            // 如果当前正在朗读，立刻重置倒计时
+            if (mIsTtsReading) {
+                mSleepTimerHandler.removeCallbacks(mSleepStopTtsRunnable);
+                if (mSleepTimerEnabled) {
+                    mSleepTimerHandler.postDelayed(
+                        mSleepStopTtsRunnable,
+                        2 * 60 * 60 * 1000
+                    );
+                }
+            }
+        });
 
         // ===== 最小化APP按钮 =====
         minimizeAppButton = findViewById(R.id.minimize_app_button);
@@ -440,6 +477,10 @@ public class DocumentActivity extends Activity {
         currentPage = prefs.getInt(key, 0);
         searchHitPage = -1;
         hasLoaded = false;
+
+        // 读取睡眠定时状态
+        mSleepTimerEnabled = prefs.getBoolean("sleep_timer_enabled", false);
+        updateSleepTimerButtonState();
 
         pageView = (PageView) findViewById(R.id.page_view);
         pageView.setActionListener(this);
@@ -846,6 +887,8 @@ public class DocumentActivity extends Activity {
             editor.putFloat("layoutEm", layoutEm);
             editor.putBoolean("fitPage", fitPage);
             editor.putInt(key, currentPage);
+            // 保存睡眠定时开关
+            editor.putBoolean("sleep_timer_enabled", mSleepTimerEnabled);
             editor.apply();
         }
     }
@@ -868,6 +911,9 @@ public class DocumentActivity extends Activity {
     @Override
     protected void onDestroy() {
         unregisterReceiver(mHomeKeyEvent);
+
+        // 睡眠定时任务清理
+        mSleepTimerHandler.removeCallbacks(mSleepStopTtsRunnable);
 
         // 兜底关闭转换等待弹窗，防止页面销毁弹窗残留
         if (
@@ -1426,7 +1472,7 @@ public class DocumentActivity extends Activity {
         };
 
     /** 开始朗读 */
-    public void startTtsReading() {
+    /*public void startTtsReading() {
         if (mIsTtsReading) {
             stopTtsReading();
             return;
@@ -1437,16 +1483,46 @@ public class DocumentActivity extends Activity {
         updateTtsButtonState();
         updateTtsButtonState(); // ✅ 切换为停止图标
         readCurrentPage();
+    }*/
+    public void startTtsReading() {
+        if (mIsTtsReading) {
+            stopTtsReading();
+            return;
+        }
+        mIsTtsReading = true;
+        mTtsReadingPage = currentPage;
+        updateTtsButtonState();
+        // =========睡眠定时逻辑=========
+        if (mSleepTimerEnabled) {
+            // 先移除旧任务，重新开始2小时倒计时
+            mSleepTimerHandler.removeCallbacks(mSleepStopTtsRunnable);
+            mSleepTimerHandler.postDelayed(
+                mSleepStopTtsRunnable,
+                2 * 60 * 60 * 1000
+            );
+        }
+        // =============================
+        readCurrentPage();
     }
 
     /** 停止朗读 */
-    public void stopTtsReading() {
+    /*public void stopTtsReading() {
         mIsTtsReading = false;
         mTtsReadingPage = -1;
         MyService.stopTextPlay();
         pageView.clearTtsHighlight();
         updateTtsButtonState();
         updateTtsButtonState(); // ✅ 切换为播放图标
+    }*/
+    public void stopTtsReading() {
+        mIsTtsReading = false;
+        mTtsReadingPage = -1;
+        MyService.stopTextPlay();
+        pageView.clearTtsHighlight();
+        updateTtsButtonState();
+        // =========睡眠定时：停止朗读就取消倒计时=========
+        mSleepTimerHandler.removeCallbacks(mSleepStopTtsRunnable);
+        // 不自动取消睡眠开关，用户可以继续保持开启，下次播放自动重新计时
     }
 
     /** 读取并播放当前页 */
@@ -1850,6 +1926,16 @@ public class DocumentActivity extends Activity {
             return new String(data, "GBK");
         } catch (java.io.UnsupportedEncodingException e) {
             return new String(data); // 兜底 UTF-8
+        }
+    }
+
+    /** 更新睡眠按钮图标状态：开启时图标高亮 */
+    private void updateSleepTimerButtonState() {
+        if (sleepTimerButton == null) return;
+        if (mSleepTimerEnabled) {
+            sleepTimerButton.setColorFilter(0xFF42A5F5); //蓝色高亮，表示睡眠定时已启用
+        } else {
+            sleepTimerButton.clearColorFilter();
         }
     }
 }

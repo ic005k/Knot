@@ -94,7 +94,7 @@ void MainWindow::on_btnShowBookmark_clicked() {
   m_Reader->showOrHideBookmark();
 }
 
-void MainWindow::on_btnRemoveBookList_clicked() { m_Reader->removeBookList(); }
+void MainWindow::on_btnRemoveBookList_clicked() {}
 
 void MainWindow::on_btnShareImage_clicked() {
   m_ReceiveShare->shareImage(tr("Share to"), bookimgFileName, "image/png");

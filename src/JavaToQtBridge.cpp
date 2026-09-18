@@ -473,7 +473,8 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
       mw_one,
       [strType]() {
         try {
-          // 打开书籍文件 ===========================================
+          // 打开书籍文件
+          // ////////////////////////////////////////////////////////
           if (strType == "open_book_file") {
             QTimer::singleShot(100, mw_one, [=]() {
               QString bookfile = m_Method->getTempSwapStr();
@@ -486,12 +487,25 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.contains("remove_read_list|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int index = 0;
+                index = list.at(1).toInt();
+
+                m_Reader->removeBookList(index);
+              }
+            });
+          }
+
           if (strType == "clear_reader_records") {
             QString c_name = m_Method->getTempSwapStr();
             m_Reader->clearReaderRecords(c_name);
           }
 
-          // 增加事件记录 ==============================================
+          // 增加事件记录////////////////////////////////////////////////////////////
           if (strType == "add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {
               if (mw_one && mw_one->m_EditRecord) {

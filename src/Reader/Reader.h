@@ -144,7 +144,7 @@ class Reader : public QDialog {
   void on_hSlider_sliderReleased(int position);
   void setHtmlSkip(QString htmlFile, QString skipID);
 
-  void removeBookList();
+  void removeBookList(int idx);
   void readBookDone();
   void setStatusBarHide();
   void setStatusBarShow();
@@ -203,9 +203,9 @@ class Reader : public QDialog {
   void openReadListWindow(QStringList list);
   void clearReaderRecords(const QString& c_name);
 
-  QByteArray txtToPdf(const QString &filePath);
+  QByteArray txtToPdf(const QString& filePath);
   void setPdfDataToJava(QString txtFile);
-  public slots:
+ public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();
