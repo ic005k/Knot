@@ -19,7 +19,9 @@
 #include <QMutex>
 #include <QRandomGenerator>
 #include <QRegularExpression>
+#include <QSortFilterProxyModel>
 #include <QStringList>
+#include <QStringListModel>
 #include <QTextStream>
 #include <QTreeWidgetItem>
 #include <QVariantList>
@@ -263,7 +265,10 @@ class NotesList : public QDialog {
   void setDataToNoteList();
 
   void showJavaDiff(int idx);
-  protected:
+
+  int getNoteListOrgIndex() const;
+
+ protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;
@@ -340,10 +345,17 @@ class NotesList : public QDialog {
 
   void on_listNotes_itemClicked(QListWidgetItem* item);
 
+  void on_editKeyWord_textChanged(const QString& arg1);
+
+  void on_listNotes_clicked(const QModelIndex& index);
+
  signals:
   void rebuildProgressChanged(int current, int total);
 
  private:
+  QStringListModel* m_stringListModel;
+  QSortFilterProxyModel* m_proxyModel;
+
   // 精准搜索导航缓存（与 m_searchModel 平行存在）
   QVector<ExactMatchResult> m_exactMatchCache;
   int m_currentExactMatchIndex = -1;

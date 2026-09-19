@@ -22,6 +22,19 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   // 设置自定义代理（自动换行 + 选中状态）
   ui->listNotes->setItemDelegate(new NoteListDelegate(this));
 
+  // 初始化过滤代理模型
+  // ✅ 创建内置的 QStringListModel，直接吃 QStringList
+  m_stringListModel = new QStringListModel(this);
+
+  // ✅ Proxy 绑定到 QStringListModel
+  m_proxyModel = new QSortFilterProxyModel(this);
+  m_proxyModel->setSourceModel(m_stringListModel);
+  m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+  m_proxyModel->setFilterRole(Qt::DisplayRole);
+
+  // ✅ View 绑定 Proxy + Delegate
+  ui->listNotes->setModel(m_proxyModel);
+
   tw = new QTreeWidget(nullptr);
   twrb = new QTreeWidget(nullptr);
 
@@ -1157,7 +1170,7 @@ void NotesList::on_btnNoteMenu_clicked() {
   QAction* actExport = menu->addAction(tr("Export"));
   connect(actExport, &QAction::triggered, this, [this]() {
     // TODO: Export
-    int idx = ui->listNotes->currentRow();
+    int idx = getNoteListOrgIndex();
     if (idx == -1) return;
 
     on_btnExport_clicked(idx);
@@ -1166,7 +1179,7 @@ void NotesList::on_btnNoteMenu_clicked() {
   QAction* actDelete = menu->addAction(tr("Delete"));
   connect(actDelete, &QAction::triggered, this, [this]() {
     // TODO: Delete
-    int idx = ui->listNotes->currentRow();
+    int idx = getNoteListOrgIndex();
     if (idx == -1) return;
 
     QString title = listNoteEntry.at(idx);
@@ -1199,7 +1212,7 @@ void NotesList::on_btnNoteMenu_clicked() {
   QAction* actExportPdf = menu->addAction(tr("Export to PDF"));
   connect(actExportPdf, &QAction::triggered, this, [this]() {
     // TODO: Export to PDF
-    int idx = ui->listNotes->currentRow();
+    int idx = getNoteListOrgIndex();
     if (idx == -1) return;
 
     currentMDFile = MyAllNotes.at(idx);
@@ -1208,7 +1221,7 @@ void NotesList::on_btnNoteMenu_clicked() {
 
   QAction* actRename = menu->addAction(tr("Rename"));
   connect(actRename, &QAction::triggered, this, [this]() {
-    int idx = ui->listNotes->currentRow();
+    int idx = getNoteListOrgIndex();
     if (idx == -1) return;
 
     QString oldName = listNoteEntry.at(idx);
@@ -1230,14 +1243,14 @@ void NotesList::on_btnNoteMenu_clicked() {
   QAction* actGraph = menu->addAction(tr("Relation Graph"));
   connect(actGraph, &QAction::triggered, this, [this]() {
     // TODO: Relation Graph
-    int idx = ui->listNotes->currentRow();
+    int idx = getNoteListOrgIndex();
     if (idx == -1) return;
   });
 
   QAction* actHistory = menu->addAction(tr("Revision History"));
   connect(actHistory, &QAction::triggered, this, [this]() {
     // TODO: Revision History
-    int idx = ui->listNotes->currentRow();
+    int idx = getNoteListOrgIndex();
     if (idx == -1) return;
 
     on_actionModificationHistory();
@@ -1259,14 +1272,14 @@ void NotesList::on_btnNewNote_clicked() { m_NotesList->newCreateNote(); }
 void NotesList::on_btnSearch_clicked() { m_NoteSearch->showNoteSearch(); }
 
 void NotesList::on_btnView_clicked() {
-  int idx = ui->listNotes->currentRow();
+  int idx = getNoteListOrgIndex();
   if (idx == -1) return;
 
   m_Notes->previewNote();
 }
 
 void NotesList::on_btnEdit_clicked() {
-  int idx = ui->listNotes->currentRow();
+  int idx = getNoteListOrgIndex();
   if (idx == -1) return;
 
   m_Notes->openEditUI();
@@ -1284,7 +1297,7 @@ void NotesList::showNoteList() {
 }
 
 void NotesList::setDataToNoteList() {
-  ui->listNotes->clear();
+  /*ui->listNotes->clear();
   for (const QString& note : listNoteEntry) {
     // 直接以纯文本作为 DisplayRole 数据
     // Delegate 内部负责自动换行渲染和高度计算
@@ -1292,11 +1305,59 @@ void NotesList::setDataToNoteList() {
 
     // sizeHint 由 NoteListDelegate 自动提供，无需手动 setSizeHint
     ui->listNotes->addItem(listItem);
-  }
+  }*/
+
+  // ✅ QStringListModel 原生支持直接设置 QStringList
+  // 内部自动触发 beginResetModel/endResetModel，View 自动刷新
+  m_stringListModel->setStringList(listNoteEntry);
 }
 
 void NotesList::on_listNotes_itemClicked(QListWidgetItem* item) {
-  qInfo() << item->text();
-  int idx = ui->listNotes->currentRow();
-  currentMDFile = MyAllNotes.at(idx);
+  Q_UNUSED(item);
+}
+
+void NotesList::on_editKeyWord_textChanged(const QString& arg1) {
+  if (!m_proxyModel) return;
+
+  if (arg1.trimmed().isEmpty()) {
+    // 关键词为空时清除过滤，显示全部
+    m_proxyModel->setFilterFixedString(QString());
+  } else {
+    // 使用正则表达式支持模糊匹配（可选）
+    // 如果只需精确子串匹配，用 setFilterFixedString(arg1) 即可
+    QRegularExpression regex(QRegularExpression::escape(arg1),
+                             QRegularExpression::CaseInsensitiveOption);
+    m_proxyModel->setFilterRegularExpression(regex);
+  }
+
+  // 过滤后自动滚动到顶部，避免停留在不可见区域
+  ui->listNotes->scrollToTop();
+}
+
+int NotesList::getNoteListOrgIndex() const {
+  // 1. 获取当前 View 中的代理索引
+  QModelIndex proxyIndex = ui->listNotes->currentIndex();
+  if (!proxyIndex.isValid()) {
+    return -1;
+  }
+
+  // 2. 通过代理模型映射回原始模型行号
+  if (m_proxyModel) {
+    return m_proxyModel->mapToSource(proxyIndex).row();
+  }
+
+  // 3. 兜底：如果没有代理模型（理论上不应发生），直接返回原始行
+  return proxyIndex.row();
+}
+
+void NotesList::on_listNotes_clicked(const QModelIndex& index) {
+  Q_UNUSED(index);
+
+  int originalRow = getNoteListOrgIndex();
+
+  // 3. 使用原始索引访问原始数据
+  if (originalRow >= 0 && originalRow < MyAllNotes.size()) {
+    currentMDFile = MyAllNotes.at(originalRow);
+    qInfo() << "打开笔记:" << currentMDFile;
+  }
 }

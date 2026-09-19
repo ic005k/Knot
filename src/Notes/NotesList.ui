@@ -53,6 +53,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QLineEdit" name="editKeyWord">
+        <property name="placeholderText">
+         <string>Input note title keyword</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="btnNoteMenu">
         <property name="text">
          <string>...</string>
@@ -90,7 +97,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QListWidget" name="listNotes"/>
+    <widget class="QListView" name="listNotes"/>
    </item>
    <item>
     <widget class="QFrame" name="frame1">

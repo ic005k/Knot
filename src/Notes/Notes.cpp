@@ -203,7 +203,7 @@ void Notes::closeEvent(QCloseEvent* event) {
     TitleGenerator generator;
     new_title = generator.genNewTitle(newText);
 
-    int idx = m_NotesList->ui->listNotes->currentRow();
+    int idx = m_NotesList->getNoteListOrgIndex();
     if (idx == -1) idx = 0;
     m_NotesList->renameNote(new_title, idx);
   }
