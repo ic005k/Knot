@@ -262,12 +262,14 @@ class NotesList : public QDialog {
 
   void setDataToNoteList();
 
- protected:
+  void showJavaDiff(int idx);
+  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;
 
  public slots:
+  void on_actionModificationHistory();
   void on_actionStatistics();
   void onSearchTextChanged(const QString& text);
   void showNoteBookMenu(int x, int y);
@@ -321,8 +323,6 @@ class NotesList : public QDialog {
   void on_actionSetColorFlag();
 
   void onNoteNodeDoubleClicked(const QString& filePath);
-
-  void on_actionModificationHistory();
 
   void on_btnRecently_clicked();
 

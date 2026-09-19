@@ -1488,6 +1488,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openNoteHistoryActivity(ArrayList<String> timeArrayList) {
+        Intent intent = new Intent(this, NoteHistoryActivity.class);
+        intent.putStringArrayListExtra("timeList", timeArrayList);
+        startActivity(intent);
+    }
+
     public void openSportChartActivity(ArrayList<String> sportRecordList) {
         Intent intent = new Intent(this, SportChartActivity.class);
         intent.putStringArrayListExtra("sport_record_list", sportRecordList);
@@ -2856,8 +2862,8 @@ public class MyActivity
             if (mdList != null && mdList.size() > 0) {
                 mdContent = mdList.get(0);
             }
-            // 读取暗黑模式，沿用你的规则
-            boolean isDark = ImmersiveUtil.applyRealImmersive(act);
+            // 读取暗黑模式
+            //boolean isDark = ImmersiveUtil.applyRealImmersive(act);
             int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
             int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
 
@@ -3005,7 +3011,7 @@ public class MyActivity
         }
         act.runOnUiThread(() -> {
             // 暗黑模式，统一使用ImmersiveUtil获取
-            boolean isDark = ImmersiveUtil.applyRealImmersive(act);
+            //boolean isDark = ImmersiveUtil.applyRealImmersive(act);
             int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
             int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
             // 外层滚动容器

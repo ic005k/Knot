@@ -104,3 +104,10 @@ void NotesList::getNoteDiffHtml() {
 }
 
 void NotesList::setNoteDiffHtmlToQML(const QString& html) {}
+
+void NotesList::showJavaDiff(int idx) {
+  QStringList list;
+  list.append(noteDiffHtml.at(idx));
+  m_Method->refreshJavaData("refreshNoteHistoryHtml", "NoteHistoryActivity",
+                            list);
+}

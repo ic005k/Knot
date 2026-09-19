@@ -226,6 +226,12 @@
         </activity>
 
         <activity
+            android:name=".NoteHistoryActivity"
+            android:exported="false"
+        />
+
+
+        <activity
             android:name="com.x.MDActivity"
             android:label="Knot"
             android:launchMode="standard"

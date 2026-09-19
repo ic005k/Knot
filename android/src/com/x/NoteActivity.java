@@ -186,6 +186,7 @@ public class NoteActivity extends AppCompatActivity {
             PublicJavaCallCpp("note_favorite")
         );
         // ========== 笔记菜单按钮 ==========
+        // ========== 笔记菜单按钮 ==========
         mBtnNoteMenu.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(NoteActivity.this, mBtnNoteMenu);
             boolean isZh = MyActivity.zh_cn;
@@ -194,16 +195,20 @@ public class NoteActivity extends AppCompatActivity {
             String del = isZh ? "删除" : "Delete";
             String pdfOut = isZh ? "输出到PDF" : "Export to PDF";
             String rename = isZh ? "重命名" : "Rename";
+            String graphItem = isZh ? "关系图谱" : "Relation Graph";
+            String historyItem = isZh ? "修改历史" : "Revision History";
             String statItem = isZh ? "统计" : "Statistics";
 
-            // 移除了move（移动到）条目
             popup.getMenu().add(0, 10, 0, imp);
             popup.getMenu().add(0, 11, 1, exp);
             popup.getMenu().add(0, 12, 2, del);
             popup.getMenu().add(0, 13, 3, pdfOut);
             popup.getMenu().add(0, 15, 4, rename);
-            // 统计放到菜单最后一项
-            popup.getMenu().add(0, 20, 5, statItem);
+            // 新增两项，放在统计上方
+            popup.getMenu().add(0, 18, 5, graphItem);
+            popup.getMenu().add(0, 19, 6, historyItem);
+            // 统计放到最后
+            popup.getMenu().add(0, 20, 7, statItem);
 
             popup.setOnMenuItemClickListener(item -> {
                 int id = item.getItemId();
@@ -267,6 +272,36 @@ public class NoteActivity extends AppCompatActivity {
                     }
                     showNoteRenameDialog(isZh, selectedNotePos);
                     return true;
+                } else if (id == 18) {
+                    // 关系图谱
+                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    if (selectedNotePos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一条笔记"
+                                : "Please select a note first"
+                        );
+                        return true;
+                    }
+                    PublicJavaCallCpp(
+                        "note_relation_graph|==|" + selectedNotePos
+                    );
+                    return true;
+                } else if (id == 19) {
+                    // 修改历史（打开刚才写的NoteHistoryActivity）
+                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    if (selectedNotePos == -1) {
+                        showTipDialog(
+                            isZh
+                                ? "请先选择一条笔记"
+                                : "Please select a note first"
+                        );
+                        return true;
+                    }
+                    PublicJavaCallCpp(
+                        "note_open_history|==|" + selectedNotePos
+                    );
+                    return true;
                 } else if (id == 20) {
                     // 统计，沿用原来的book_statistics指令
                     PublicJavaCallCpp("notes_statistics");
@@ -276,10 +311,12 @@ public class NoteActivity extends AppCompatActivity {
             });
             popup.show();
         });
+
         mBtnNewNote.setOnClickListener(v -> {
             // 废弃笔记本，不再校验笔记本选中状态，直接新建笔记
             PublicJavaCallCpp("note_create_new");
         });
+
         mBtnSearch.setOnClickListener(v -> PublicJavaCallCpp("note_search"));
         mBtnView.setOnClickListener(v -> {
             int selectedNoteIndex = mNoteAdapter.getSelectedPosition();

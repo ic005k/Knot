@@ -533,6 +533,7 @@ void NotesList::on_actionModificationHistory() {
   qInfo() << noteDiffTime << noteDiffHtml << noteDiffPatch;
 
   if (isAndroid) {
+    m_Method->openActivity("openNoteHistoryActivity", noteDiffTime);
   } else
     m_MyNoteDiff->showDiff();
 }

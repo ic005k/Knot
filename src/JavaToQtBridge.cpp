@@ -1057,6 +1057,49 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.startsWith("note_relation_graph|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int idx = list.at(1).toInt();
+              }
+            });
+          }
+
+          if (strType.startsWith("note_open_history|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int idx = list.at(1).toInt();
+                m_NotesList->on_actionModificationHistory();
+              }
+            });
+          }
+
+          if (strType.startsWith("note_history_oldtext|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int idx = list.at(1).toInt();
+                m_NotesList->newtextToOldtextFromDiffStr(idx);
+              }
+            });
+          }
+
+          if (strType.startsWith("note_history_select|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int idx = list.at(1).toInt();
+                m_NotesList->showJavaDiff(idx);
+              }
+            });
+          }
+
           if (strType == "notes_statistics") {
             QTimer::singleShot(100, mw_one,
                                [=]() { m_NotesList->on_actionStatistics(); });
