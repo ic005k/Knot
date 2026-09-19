@@ -9,7 +9,7 @@
 #include <QtConcurrent>
 
 #include "defines.h"
-#include "src/MainWindow.h"  // 假设 m_Notes 在这里定义
+#include "src/MainWindow.h"
 
 // 链接正则：[显示文本](memo/文件名.md)
 static const QRegularExpression linkRegex(
@@ -120,15 +120,26 @@ QString NoteRelationParser::generateGraphJson(const QString& currentNotePath) {
       !m_cache.isEmpty() && m_cache.forward.contains(currentFileName);
 
   if (cacheHit) {
-    // ★ 直接用缓存中的 displayText，不再调用 resolveDisplayName
     for (const auto& link : m_cache.forward.value(currentFileName)) {
-      linkMap[link.fileName] = {link.displayText, "out"};
+      // ★ 缓存中的标题可能为空，需要回退解析
+      QString displayText = link.displayText;
+      if (displayText.isEmpty()) {
+        QString fullPath = iniDir + "memo/" + link.fileName;
+        displayText = resolveDisplayName("", fullPath, link.fileName);
+      }
+      linkMap[link.fileName] = {displayText, "out"};
     }
     for (const auto& link : m_cache.backward.value(currentFileName)) {
+      QString displayText = link.displayText;
+      if (displayText.isEmpty()) {
+        QString fullPath = iniDir + "memo/" + link.fileName;
+        displayText = resolveDisplayName("", fullPath, link.fileName);
+      }
+
       if (linkMap.contains(link.fileName)) {
         linkMap[link.fileName].second = "both";
       } else {
-        linkMap[link.fileName] = {link.displayText, "in"};
+        linkMap[link.fileName] = {displayText, "in"};
       }
     }
   }
@@ -238,9 +249,11 @@ void NoteRelationParser::buildCacheFromMap(
 
 // ---------- 缓存管理 (保持原有逻辑，略作精简) ----------
 void NoteRelationParser::updateNoteCache(const QString& filePath) {
-  QtConcurrent::run([=]() {
-    // ★ 子线程只做纯文本正则匹配，不碰 m_Notes
-    QMap<QString, QString> rawLinks;  // fileName -> linkText
+  QPointer<NoteRelationParser> safeThis(this);  // ★ 安全守卫
+
+  QtConcurrent::run([safeThis, filePath]() {
+    // 子线程只做纯文本正则匹配
+    QMap<QString, QString> rawLinks;
     QFile file(filePath);
     if (file.open(QIODevice::ReadOnly)) {
       QString content = file.readAll();
@@ -252,37 +265,41 @@ void NoteRelationParser::updateNoteCache(const QString& filePath) {
       }
     }
 
-    // ★ 回到主线程处理标题和缓存更新
-    QMetaObject::invokeMethod(
-        this,
-        [this, filePath, rawLinks]() {
-          QString fileName = QFileInfo(filePath).fileName();
-          QMutexLocker locker(&m_cacheMutex);
+    // ★ 回到主线程前检查对象是否还活着
+    if (!safeThis) return;
 
-          QVector<CachedLink> old = m_cache.forward.take(fileName);
+    QMetaObject::invokeMethod(
+        safeThis.data(),  // 使用安全指针
+        [safeThis, filePath, rawLinks]() {
+          if (!safeThis) return;  // ★ 双重检查
+
+          QString fileName = QFileInfo(filePath).fileName();
+          QMutexLocker locker(&safeThis->m_cacheMutex);
+
+          QVector<CachedLink> old = safeThis->m_cache.forward.take(fileName);
           QVector<CachedLink> newOutgoing;
 
           for (auto it = rawLinks.begin(); it != rawLinks.end(); ++it) {
             QString fullPath = iniDir + "memo/" + it.key();
-            QString title = resolveDisplayName(it.value(), fullPath, it.key());
+            QString title =
+                safeThis->resolveDisplayName(it.value(), fullPath, it.key());
             newOutgoing.append({it.key(), title});
           }
 
-          m_cache.forward[fileName] = newOutgoing;
+          safeThis->m_cache.forward[fileName] = newOutgoing;
 
-          // 更新 backward（保持原有逻辑）
           for (const CachedLink& link : old)
-            NoteGraphCache::removeByFileName(m_cache.backward[link.fileName],
-                                             fileName);
+            NoteGraphCache::removeByFileName(
+                safeThis->m_cache.backward[link.fileName], fileName);
           for (const CachedLink& link : newOutgoing) {
-            auto& bwdList = m_cache.backward[link.fileName];
+            auto& bwdList = safeThis->m_cache.backward[link.fileName];
             if (!std::any_of(bwdList.begin(), bwdList.end(),
                              [&fileName](const CachedLink& l) {
                                return l.fileName == fileName;
                              }))
               bwdList.append({fileName, {}});
           }
-          m_cache.save(m_cachePath);
+          safeThis->m_cache.save(safeThis->m_cachePath);
         },
         Qt::QueuedConnection);
   });
@@ -338,14 +355,17 @@ QString NoteGraphController::currentNotePath() const {
 }
 
 void NoteGraphController::setCurrentNotePath(const QString& path) {
-  // if (m_currentNotePath == path) return; //防重复（没必要）
-
   m_currentNotePath = path;
   emit currentNotePathChanged();
 
-  // ★ 只触发解析，不手动赋值/发信号
-  // 无论缓存命中还是异步解析，都由 parser 的 graphJsonReady 信号统一回调
-  m_parser->generateGraphJson(m_currentNotePath);
+  // ★ 确保解析始终在主线程执行，避免与 invokeMethod 回调产生竞态
+  if (QThread::currentThread() == m_parser->thread()) {
+    m_parser->generateGraphJson(m_currentNotePath);
+  } else {
+    QMetaObject::invokeMethod(
+        m_parser, [this]() { m_parser->generateGraphJson(m_currentNotePath); },
+        Qt::QueuedConnection);
+  }
 }
 
 QString NoteGraphController::graphJson() const { return m_graphJson; }

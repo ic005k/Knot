@@ -1361,6 +1361,7 @@ void NotesList::on_listNotes_clicked(const QModelIndex& index) {
   // 3. 使用原始索引访问原始数据
   if (originalRow >= 0 && originalRow < MyAllNotes.size()) {
     currentMDFile = MyAllNotes.at(originalRow);
-    qInfo() << "打开笔记:" << currentMDFile;
+    noteTitle = listNoteEntry.at(originalRow);
+    qInfo() << "当前笔记:" << noteTitle << currentMDFile;
   }
 }

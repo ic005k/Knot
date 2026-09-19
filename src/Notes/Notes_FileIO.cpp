@@ -26,7 +26,7 @@ void Notes::saveMDFile() {
         QFile::remove(currentMDFile + ".bak");
         updateDiff(oldText, newText);
         updateMDFileToSyncLists();
-        // startBackgroundTaskUpdateNoteGraph(currentMDFile);
+        startBackgroundTaskUpdateNoteGraph(currentMDFile);
       } else {
         qWarning() << "重命名失败，清理临时文件";
         QFile::remove(tempFile);

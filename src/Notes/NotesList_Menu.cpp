@@ -242,8 +242,8 @@ void NotesList::delRecycleBinNotes(QStringList list) {
     // 删除笔记后，更新图谱
     if (m_graphController) {
       // 🆕 精确失效该文件的图谱缓存
-      // m_NotesList->m_graphController->parser()->invalidateNoteCache(
-      //    md, NoteRelationParser::CACHE_DELETE);
+      m_NotesList->m_graphController->parser()->invalidateNoteCache(
+          md, NoteRelationParser::CACHE_DELETE);
     }
 
     // 删除笔记搜索向量

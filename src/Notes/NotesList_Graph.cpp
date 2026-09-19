@@ -15,15 +15,15 @@ void NotesList::initNoteGraphView() {
               QString jsonData = m_graphController->graphJson();
 
               qInfo() << "图谱jsonData=" << jsonData;
+
               listNoteGraph.clear();
-              int idx = getNoteListOrgIndex();
-              QString mainTitle = listNoteEntry.at(idx);
-              listNoteGraph.append(mainTitle);
+              listNoteGraph.append(noteTitle);
               listNoteGraph.append(jsonData);
 
               if (isAndroid) {
-              } else
+              } else {
                 m_NoteGraphView->showNoteGraph();
+              }
             });
   }
 }
