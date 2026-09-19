@@ -1060,9 +1060,29 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           if (strType.startsWith("note_relation_graph|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
-
               if (list.count() == 2) {
                 int idx = list.at(1).toInt();
+                m_NotesList->on_actionRelationshipGraph();
+              }
+            });
+          }
+
+          if (strType.startsWith("note_view_graph|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              if (list.count() == 2) {
+                currentMDFile = iniDir + list.at(1);
+                m_Notes->previewNote();
+              }
+            });
+          }
+
+          if (strType.startsWith("note_edit_graph|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              if (list.count() == 2) {
+                currentMDFile = iniDir + list.at(1);
+                m_Notes->openEditUI();
               }
             });
           }

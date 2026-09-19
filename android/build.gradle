@@ -71,6 +71,10 @@ dependencies {
     //pdfium 核心依赖（pdfviewer 的底层引擎）
     //implementation 'com.github.barteksc:pdfium-android:1.9.0'
 
+    // 解析json
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+
     // Markwon
     implementation 'io.noties.markwon:core:4.6.2'
     implementation 'io.noties.markwon:ext-strikethrough:4.6.2'

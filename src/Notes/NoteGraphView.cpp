@@ -39,6 +39,9 @@ void NoteGraphView::onNodeClicked(const QString& filePath) {
   currentMDFile = iniDir + filePath;
 
   qDebug() << "Node clicked:" << filePath;
+
+  ui->graphicsView->update();
+  ui->graphicsView->repaint();
 }
 
 void NoteGraphView::showNoteGraph() {

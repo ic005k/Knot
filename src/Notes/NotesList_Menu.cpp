@@ -590,6 +590,11 @@ void NotesList::on_actionMoveUp_NoteBook_triggered() {
 }
 
 void NotesList::on_actionRelationshipGraph() {
+  // if (!m_graphController) initNoteGraphView();
+
+  qDebug() << "on_actionRelationshipGraph called, m_graphController ptr:"
+           << m_graphController;
+
   QFileInfo fi(currentMDFile);
   if (!fi.exists()) return;
 

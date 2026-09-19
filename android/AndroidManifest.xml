@@ -230,6 +230,7 @@
             android:exported="false"
         />
 
+        <activity android:name=".NoteGraphActivity" android:exported="false" />
 
         <activity
             android:name="com.x.MDActivity"

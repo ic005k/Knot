@@ -1488,6 +1488,12 @@ public class MyActivity
         startActivity(intent);
     }
 
+    public void openNoteGraphActivity(ArrayList<String> gArrayList) {
+        Intent intent = new Intent(this, NoteGraphActivity.class);
+        intent.putStringArrayListExtra("graph_data", gArrayList);
+        startActivity(intent);
+    }
+
     public void openNoteHistoryActivity(ArrayList<String> timeArrayList) {
         Intent intent = new Intent(this, NoteHistoryActivity.class);
         intent.putStringArrayListExtra("timeList", timeArrayList);
