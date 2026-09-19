@@ -43,7 +43,7 @@ void MyNoteDiffDelegate::paint(QPainter* painter,
   painter->setPen(textColor);
 
   QFont font = painter->font();
-  font.setPointSize(11);
+  font.setPointSize(10);
   painter->setFont(font);
   painter->drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, timeText);
 

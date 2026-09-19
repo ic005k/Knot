@@ -70,7 +70,7 @@ inline QString appName = "Knot";
 
 inline QStringList readTextList, htmlFiles, listCategory, listTop, ncxList,
     tempHtmlList, listM, ymdList, resultsList, needDelWebDAVFiles, MyAllNotes,
-    MyNoteRecycle, noteDiffTime, noteDiffHtml, noteDiffPatch;
+    MyNoteRecycle, noteDiffTime, noteDiffHtml, noteDiffPatch, listNoteGraph;
 
 inline QList<QPointF> freqPointList;
 inline QList<QPointF> amountList;

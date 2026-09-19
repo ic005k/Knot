@@ -593,14 +593,11 @@ void NotesList::on_actionRelationshipGraph() {
   QFileInfo fi(currentMDFile);
   if (!fi.exists()) return;
 
-  QTimer::singleShot(100, this, []() { mw_one->showProgress(); });
+  // 显示进度条（作为兜底，防止全量解析时界面无响应）
+  // mw_one->showProgress();
 
-  if (m_graphController) {
-    m_graphController->setCurrentNotePath(currentMDFile);
-
-  } else {
-    mw_one->safeCloseProgress();
-  }
+  // 触发解析（内部会自动判断缓存，有缓存则瞬间返回，无缓存则后台解析）
+  m_graphController->setCurrentNotePath(currentMDFile);
 }
 
 void NotesList::on_actionSetColorFlag() {

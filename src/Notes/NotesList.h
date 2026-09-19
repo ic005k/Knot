@@ -32,6 +32,7 @@
 
 #include "DatabaseManager.h"
 #include "Notes/MyNoteDiff.h"
+#include "Notes/NoteGraphView.h"
 #include "Notes/NoteRecycleBin.h"
 #include "Notes/NoteSearch.h"
 #include "Notes/RecentOpen.h"
@@ -83,6 +84,7 @@ class NotesList : public QDialog {
   RecentOpen* m_RecentOpen;
   NoteRecycleBin* m_NoteRecycleBin;
   MyNoteDiff* m_MyNoteDiff;
+  NoteGraphView* m_NoteGraphView;
 
   QStringList listNoteBook, listNoteEntry;
   void on_actionImport_Note_triggered();

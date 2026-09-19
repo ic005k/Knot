@@ -2,14 +2,28 @@
 #include "src/MainWindow.h"
 
 void NotesList::initNoteGraphView() {
-  // 纯 C++ 初始化：直接 new 即可，无需任何 QML 注册
   if (!m_graphController) {
-    m_graphController = new NoteGraphController(mw_one);
+    m_graphController = new NoteGraphController(this);
 
-    // 重新绑定原本在 QML 阶段绑定的信号
-    connect(m_graphController, &NoteGraphController::nodeDoubleClicked, this,
-            &NotesList::onNoteNodeDoubleClicked);
+    // ★ 监听 JSON 数据就绪信号
+    connect(m_graphController, &NoteGraphController::graphJsonChanged, this,
+            [this]() {
+              // 数据准备好了，关闭进度条
+              // mw_one->safeCloseProgress();
 
-    qDebug() << "[Graph] 纯C++模式初始化完成:" << m_graphController;
+              // 获取中性 JSON 字符串
+              QString jsonData = m_graphController->graphJson();
+
+              qInfo() << "图谱jsonData=" << jsonData;
+              listNoteGraph.clear();
+              int idx = getNoteListOrgIndex();
+              QString mainTitle = listNoteEntry.at(idx);
+              listNoteGraph.append(mainTitle);
+              listNoteGraph.append(jsonData);
+
+              if (isAndroid) {
+              } else
+                m_NoteGraphView->showNoteGraph();
+            });
   }
 }

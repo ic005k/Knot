@@ -14,6 +14,7 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   m_NoteSearch = new NoteSearch(this);
   m_NoteRecycleBin = new NoteRecycleBin(this);
   m_MyNoteDiff = new MyNoteDiff(this);
+  m_NoteGraphView = new NoteGraphView(this);
 
   // 隐藏水平滚动条，Delegate 的 sizeHint 会自动适配 viewport 宽度
   ui->listNotes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -1245,6 +1246,8 @@ void NotesList::on_btnNoteMenu_clicked() {
     // TODO: Relation Graph
     int idx = getNoteListOrgIndex();
     if (idx == -1) return;
+
+    on_actionRelationshipGraph();
   });
 
   QAction* actHistory = menu->addAction(tr("Revision History"));

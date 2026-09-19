@@ -1,113 +1,38 @@
 #ifndef NOTEGRAPH_H
 #define NOTEGRAPH_H
 
-#include <QAbstractItemModel>
 #include <QJsonObject>
 #include <QMutex>
-#include <QMutexLocker>
 #include <QObject>
-#include <QPointF>
-#include <QPointer>
 #include <QString>
 #include <QVector>
 
 // =================================================================================
-// 缓存链接条目（唯一数据载体）
+// 1. 缓存数据结构 (纯数据，无 UI 依赖)
 // =================================================================================
 struct CachedLink {
-  QString fileName;     // 目标/来源文件名（如 "20250813_210313.md"）
-  QString displayText;  // [] 中的原始链接文本，空串表示需运行时回退
+  QString fileName;     // 文件名 (如 "project_a.md")
+  QString displayText;  // 链接显示文本 (如 "项目A计划")
 
   QJsonObject toJson() const;
   static CachedLink fromJson(const QJsonObject& obj);
 };
 
-// =================================================================================
-// 图谱缓存（纯数据 + 序列化，不含任何业务逻辑）
-// =================================================================================
 class NoteGraphCache {
  public:
-  QMap<QString, QVector<CachedLink>> forward;   // 我引用谁
-  QMap<QString, QVector<CachedLink>> backward;  // 谁引用我
+  QMap<QString, QVector<CachedLink>> forward;   // 我引用谁 (出链)
+  QMap<QString, QVector<CachedLink>> backward;  // 谁引用我 (入链)
 
   void load(const QString& filePath);
   void save(const QString& filePath) const;
   bool isEmpty() const;
   void clear();
-
-  // 按 fileName 精确移除条目（供 Parser 调用）
   static void removeByFileName(QVector<CachedLink>& links,
                                const QString& fileName);
 };
 
 // =================================================================================
-// 图谱节点 & 关系
-// =================================================================================
-struct NoteNode {
-  QString name;
-  QString filePath;
-  QPointF position;
-  bool isCurrentNote;
-
-  NoteNode(const QString& n = {}, const QString& path = {},
-           bool current = false)
-      : name(n), filePath(path), position(0, 0), isCurrentNote(current) {}
-};
-
-struct NoteRelation {
-  int sourceIndex;
-  int targetIndex;
-
-  NoteRelation(int src = -1, int tgt = -1)
-      : sourceIndex(src), targetIndex(tgt) {}
-};
-
-Q_DECLARE_METATYPE(QVector<NoteNode>)
-Q_DECLARE_METATYPE(QVector<NoteRelation>)
-
-// =================================================================================
-// NoteGraphModel
-// =================================================================================
-class NoteGraphModel : public QAbstractItemModel {
-  Q_OBJECT
-  Q_ENUMS(NodeRoles)
- public:
-  enum NodeRoles {
-    NameRole = Qt::UserRole + 1,
-    FilePathRole,
-    PositionRole,
-    IsCurrentNoteRole
-  };
-
-  explicit NoteGraphModel(QObject* parent = nullptr);
-
-  QModelIndex index(int row, int column,
-                    const QModelIndex& parent = {}) const override;
-  QModelIndex parent(const QModelIndex& child) const override;
-  int rowCount(const QModelIndex& parent = {}) const override;
-  int columnCount(const QModelIndex& parent = {}) const override;
-  QVariant data(const QModelIndex& index,
-                int role = Qt::DisplayRole) const override;
-  QHash<int, QByteArray> roleNames() const override;
-
-  Q_INVOKABLE QVariantList getRelations() const;
-  Q_INVOKABLE void setNodePosition(int index, qreal x, qreal y);
-  void addNode(const NoteNode& node);
-  void addRelation(const NoteRelation& relation);
-  int findNodeIndex(const QString& filePath) const;
-  void clear();
-
- signals:
-  void nodePositionChanged(int index, qreal x, qreal y);
-  void modelCleared();
-
- private:
-  QVector<NoteNode> m_nodes;
-  QVector<NoteRelation> m_relations;
-};
-
-// =================================================================================
-// NoteRelationParser
+// 2. 图谱解析引擎 (核心：只产出 JSON 字符串)
 // =================================================================================
 class NoteRelationParser : public QObject {
   Q_OBJECT
@@ -116,80 +41,73 @@ class NoteRelationParser : public QObject {
 
   explicit NoteRelationParser(QObject* parent = nullptr);
 
-  Q_INVOKABLE void parseNoteRelations(NoteGraphModel* model,
-                                      const QString& currentNotePath);
-  Q_INVOKABLE void invalidateCache();
+  // ★ 核心接口：生成跨平台中性 JSON 字符串
+  // 返回格式: { "current": "memo/xxx.md", "links": [ { "file": "...", "title":
+  // "...", "dir": "out|in|both" } ] }
+  QString generateGraphJson(const QString& currentNotePath);
 
+  // 缓存管理接口 (供外部笔记保存/删除时调用)
   void updateNoteCache(const QString& filePath);
   void deleteNoteCache(const QString& filePath);
   void invalidateNoteCache(const QString& filePath, CacheAction action);
+  void invalidateCache();
 
  signals:
-  void parsingCompleted();
-  void parsedDataReady(const QVector<NoteNode>& nodes,
-                       const QVector<NoteRelation>& relations);
-
- private slots:
-  void onParsedDataReady(const QVector<NoteNode>& nodes,
-                         const QVector<NoteRelation>& relations);
+  void graphJsonReady(const QString& jsonData);
 
  private:
-  // 解析引擎
-  void parseNoteReferences(QVector<NoteNode>& nodes,
-                           QVector<NoteRelation>& relations,
-                           const QString& notePath, int sourceIndex);
-  void findReferencingNotes(QVector<NoteNode>& nodes,
-                            QVector<NoteRelation>& relations,
-                            const QString& dirPath,
-                            const QString& currentNotePath,
-                            int currentNoteIndex);
+  // 内部解析逻辑
+  void parseOutLinks(const QString& notePath,
+                     QMap<QString, QPair<QString, QString>>& linkMap);
+  void parseInLinks(const QString& dirPath, const QString& currentNotePath,
+                    const QString& currentFileName,
+                    QMap<QString, QPair<QString, QString>>& linkMap);
 
   // 缓存构建
-  void buildCacheFromNodes(const QVector<NoteNode>& nodes,
-                           const QVector<NoteRelation>& relations,
-                           const QString& currentFileName);
+  void buildCacheFromMap(const QMap<QString, QPair<QString, QString>>& linkMap,
+                         const QString& currentFileName);
 
-  // 布局
-  void arrangeNodes(NoteGraphModel* model);
+  // 工具方法
+  QString resolveDisplayName(const QString& linkText, const QString& fullPath,
+                             const QString& fileName) const;
 
-  // 工具
-  static int findNodeIndex(const QVector<NoteNode>& nodes, const QString& path);
-  QString resolveDisplayName(const CachedLink& link,
-                             const QString& fullPath) const;
-
-  QPointer<NoteGraphModel> m_model;
   NoteGraphCache m_cache;
   QString m_cachePath;
   mutable QMutex m_cacheMutex;
 };
 
 // =================================================================================
-// NoteGraphController
+// 3. 控制器 (极简：仅负责触发和传递数据)
 // =================================================================================
 class NoteGraphController : public QObject {
   Q_OBJECT
   Q_PROPERTY(QString currentNotePath READ currentNotePath WRITE
                  setCurrentNotePath NOTIFY currentNotePathChanged)
-  Q_PROPERTY(NoteGraphModel* model READ model NOTIFY modelChanged)
+  Q_PROPERTY(QString graphJson READ graphJson NOTIFY graphJsonChanged)
+
  public:
   explicit NoteGraphController(QObject* parent = nullptr);
 
   QString currentNotePath() const;
   void setCurrentNotePath(const QString& path);
-  NoteGraphModel* model() const;
+
+  QString graphJson() const;  // ★ 供 QML 或 C++ 直接读取
   NoteRelationParser* parser() const;
 
  signals:
   void currentNotePathChanged();
-  void nodeDoubleClicked(const QString& filePath);
-  void modelChanged();
+  void graphJsonChanged();                          // ★ 数据就绪信号
+  void nodeDoubleClicked(const QString& filePath);  // 保留供桌面端使用
 
  public slots:
   void handleNodeDoubleClick(const QString& filePath);
 
+ private slots:
+  void onGraphJsonReady(const QString& jsonData);
+
  private:
   QString m_currentNotePath;
-  NoteGraphModel* m_model;
+  QString m_graphJson;
   NoteRelationParser* m_parser;
 };
 
