@@ -3,6 +3,8 @@ package com.x;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -20,12 +22,19 @@ public class NoteActivity extends AppCompatActivity {
 
     private androidx.appcompat.app.AlertDialog mAiLoadingDialog = null;
 
+    // 保存原始全部笔记数据，用于本地过滤
+    private ArrayList<String> mOriginNoteList = new ArrayList<>();
+    // 过滤后，每一项对应的原始索引映射
+    private ArrayList<Integer> mFilterOriginIndexList = new ArrayList<>();
+
     private boolean mIsDark = false;
     //顶部按钮
     private ImageView mBtnBookMenu;
     private ImageView mBtnFavorite;
     private ImageView mBtnNoteMenu;
     private ImageView mBtnNewNote;
+    private EditText mEtFilter;
+
     //列表
     private RecyclerView mRvBookList;
     private RecyclerView mRvNoteList;
@@ -79,6 +88,7 @@ public class NoteActivity extends AppCompatActivity {
     private void bindView() {
         mBtnBookMenu = findViewById(R.id.note_btn_book_menu);
         mBtnFavorite = findViewById(R.id.note_btn_favorite);
+        mEtFilter = findViewById(R.id.note_et_filter);
         mBtnNoteMenu = findViewById(R.id.note_btn_note_menu);
         mBtnNewNote = findViewById(R.id.note_btn_new_note);
         mRvBookList = findViewById(R.id.note_rv_book_list);
@@ -102,8 +112,11 @@ public class NoteActivity extends AppCompatActivity {
         findViewById(R.id.note_view_divider_center).setVisibility(View.GONE);
 
         // ✅笔记列表点击回调
-        mNoteAdapter.setListener((pos, title) -> {
-            PublicJavaCallCpp("note_click|==|" + pos);
+        mNoteAdapter.setListener((displayPos, title) -> {
+            if (displayPos >= 0 && displayPos < mFilterOriginIndexList.size()) {
+                int realOriginIndex = mFilterOriginIndexList.get(displayPos);
+                PublicJavaCallCpp("note_click|==|" + realOriginIndex);
+            }
         });
     }
 
@@ -185,7 +198,7 @@ public class NoteActivity extends AppCompatActivity {
         mBtnFavorite.setOnClickListener(v ->
             PublicJavaCallCpp("note_favorite")
         );
-        // ========== 笔记菜单按钮 ==========
+
         // ========== 笔记菜单按钮 ==========
         mBtnNoteMenu.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(NoteActivity.this, mBtnNoteMenu);
@@ -217,7 +230,7 @@ public class NoteActivity extends AppCompatActivity {
                     finish();
                     return true;
                 } else if (id == 11) {
-                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    int selectedNotePos = getSelectedOriginNoteIndex();
                     if (selectedNotePos == -1) {
                         showTipDialog(
                             isZh
@@ -230,7 +243,7 @@ public class NoteActivity extends AppCompatActivity {
                     return true;
                 } else if (id == 12) {
                     // 删除笔记
-                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    int selectedNotePos = getSelectedOriginNoteIndex();
                     if (selectedNotePos == -1) {
                         showTipDialog(
                             isZh
@@ -239,7 +252,10 @@ public class NoteActivity extends AppCompatActivity {
                         );
                         return true;
                     }
-                    String noteTitle = mNoteAdapter.getItemAt(selectedNotePos);
+                    //String noteTitle = mNoteAdapter.getItemAt(selectedNotePos);
+                    int originIndex = getSelectedOriginNoteIndex();
+                    String noteTitle = mOriginNoteList.get(originIndex);
+
                     showNoteDeleteConfirmDialog(
                         isZh,
                         selectedNotePos,
@@ -247,7 +263,7 @@ public class NoteActivity extends AppCompatActivity {
                     );
                     return true;
                 } else if (id == 13) {
-                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    int selectedNotePos = getSelectedOriginNoteIndex();
                     if (selectedNotePos == -1) {
                         showTipDialog(
                             isZh
@@ -261,7 +277,7 @@ public class NoteActivity extends AppCompatActivity {
                     return true;
                 } else if (id == 15) {
                     // 笔记重命名
-                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    int selectedNotePos = getSelectedOriginNoteIndex();
                     if (selectedNotePos == -1) {
                         showTipDialog(
                             isZh
@@ -270,11 +286,12 @@ public class NoteActivity extends AppCompatActivity {
                         );
                         return true;
                     }
+
                     showNoteRenameDialog(isZh, selectedNotePos);
                     return true;
                 } else if (id == 18) {
                     // 关系图谱
-                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    int selectedNotePos = getSelectedOriginNoteIndex();
                     if (selectedNotePos == -1) {
                         showTipDialog(
                             isZh
@@ -289,7 +306,7 @@ public class NoteActivity extends AppCompatActivity {
                     return true;
                 } else if (id == 19) {
                     // 修改历史（打开刚才写的NoteHistoryActivity）
-                    int selectedNotePos = mNoteAdapter.getSelectedPosition();
+                    int selectedNotePos = getSelectedOriginNoteIndex();
                     if (selectedNotePos == -1) {
                         showTipDialog(
                             isZh
@@ -319,7 +336,7 @@ public class NoteActivity extends AppCompatActivity {
 
         mBtnSearch.setOnClickListener(v -> PublicJavaCallCpp("note_search"));
         mBtnView.setOnClickListener(v -> {
-            int selectedNoteIndex = mNoteAdapter.getSelectedPosition();
+            int selectedNoteIndex = getSelectedOriginNoteIndex();
             // 没有选中的笔记，直接返回，不调用C++
             if (selectedNoteIndex == -1) {
                 return;
@@ -329,12 +346,63 @@ public class NoteActivity extends AppCompatActivity {
             PublicJavaCallCpp(callArg);
         });
         mBtnEdit.setOnClickListener(v -> {
-            int selectedNoteIndex = mNoteAdapter.getSelectedPosition();
+            int selectedNoteIndex = getSelectedOriginNoteIndex();
             if (selectedNoteIndex == -1) return;
             PublicJavaCallCpp("note_edit|==|" + selectedNoteIndex);
         });
         mBtnRecycle.setOnClickListener(v ->
             PublicJavaCallCpp("note_open_recycle")
+        );
+
+        mEtFilter.addTextChangedListener(
+            new TextWatcher() {
+                @Override
+                public void beforeTextChanged(
+                    CharSequence s,
+                    int start,
+                    int count,
+                    int after
+                ) {}
+
+                @Override
+                public void onTextChanged(
+                    CharSequence s,
+                    int start,
+                    int before,
+                    int count
+                ) {}
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    String keyword = s.toString().trim();
+                    ArrayList<String> filteredList = new ArrayList<>();
+                    mFilterOriginIndexList.clear();
+
+                    if (keyword.isEmpty()) {
+                        // 关键词为空：展示全部原始笔记
+                        filteredList.addAll(mOriginNoteList);
+                        for (int i = 0; i < mOriginNoteList.size(); i++) {
+                            mFilterOriginIndexList.add(i);
+                        }
+                    } else {
+                        // 本地过滤，包含匹配，不区分大小写
+                        String lowerKey = keyword.toLowerCase();
+                        for (
+                            int originIdx = 0;
+                            originIdx < mOriginNoteList.size();
+                            originIdx++
+                        ) {
+                            String title = mOriginNoteList.get(originIdx);
+                            if (title.toLowerCase().contains(lowerKey)) {
+                                filteredList.add(title);
+                                mFilterOriginIndexList.add(originIdx); //存入原始索引
+                            }
+                        }
+                    }
+                    // 更新列表适配器
+                    mNoteAdapter.setData(filteredList);
+                }
+            }
         );
     }
 
@@ -345,14 +413,17 @@ public class NoteActivity extends AppCompatActivity {
         int rootBg;
         int dividerColor;
         int iconTint;
+        int textColor;
         if (mIsDark) {
             rootBg = 0xFF1E1E1E;
             dividerColor = 0xFF444444;
             iconTint = 0xFFFFFFFF;
+            textColor = 0xFFFFFFFF; //暗黑模式文字白色
         } else {
             rootBg = 0xFFFFFFFF;
             dividerColor = 0xFFCCCCCC;
             iconTint = 0xFF000000;
+            textColor = 0xFF000000; //亮色模式文字黑色
         }
         findViewById(R.id.note_layout_root).setBackgroundColor(rootBg);
         findViewById(R.id.note_view_divider_center).setBackgroundColor(
@@ -369,6 +440,16 @@ public class NoteActivity extends AppCompatActivity {
         mBtnRecycle.setColorFilter(iconTint);
         mBookAdapter.setDarkMode(mIsDark);
         mNoteAdapter.setDarkMode(mIsDark);
+
+        mEtFilter.setTextColor(textColor);
+        mEtFilter.setHintTextColor(mIsDark ? 0xFFAAAAAA : 0xFF777777);
+        // 直接代码设置hint文本，不使用string资源
+        boolean isZh = MyActivity.zh_cn;
+        if (isZh) {
+            mEtFilter.setHint("输入笔记标题关键字");
+        } else {
+            mEtFilter.setHint("Input note title keyword");
+        }
     }
 
     public void setDark(boolean dark) {
@@ -385,7 +466,18 @@ public class NoteActivity extends AppCompatActivity {
 
     public void setNoteEntryList(ArrayList<String> noteList) {
         runOnUiThread(() -> {
+            // 保存原始完整数据
+            mOriginNoteList.clear();
+            mFilterOriginIndexList.clear();
+            if (noteList != null) {
+                mOriginNoteList.addAll(noteList);
+                // 初始无过滤：映射就是0,1,2,3...
+                for (int i = 0; i < noteList.size(); i++) {
+                    mFilterOriginIndexList.add(i);
+                }
+            }
             mNoteAdapter.setData(noteList);
+            mNoteAdapter.setSelectedPosition(-1); //清空选中
         });
     }
 
@@ -406,7 +498,7 @@ public class NoteActivity extends AppCompatActivity {
      * @return 选中位置，无选中返回 -1
      */
     public int getSelectedNote() {
-        return mNoteAdapter.getSelectedPosition();
+        return getSelectedOriginNoteIndex();
     }
 
     /**
@@ -562,7 +654,9 @@ public class NoteActivity extends AppCompatActivity {
         EditText etInput = new EditText(this);
         etInput.setTextColor(textColor);
 
-        String currentTitle = mNoteAdapter.getItemAt(selectedPos);
+        // String currentTitle = mNoteAdapter.getItemAt(selectedPos);
+        String currentTitle = mOriginNoteList.get(selectedPos);
+
         etInput.setText(currentTitle);
         etInput.setSelection(etInput.getText().length());
 
@@ -659,6 +753,15 @@ public class NoteActivity extends AppCompatActivity {
             MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
             mAiLoadingDialog = null;
         });
+    }
+
+    // 根据adapter选中的显示位置，返回原始索引，无有效选中返回-1
+    private int getSelectedOriginNoteIndex() {
+        int displayPos = mNoteAdapter.getSelectedPosition();
+        if (displayPos < 0 || displayPos >= mFilterOriginIndexList.size()) {
+            return -1;
+        }
+        return mFilterOriginIndexList.get(displayPos);
     }
 
     @Override
