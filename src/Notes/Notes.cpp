@@ -220,11 +220,8 @@ void Notes::openEditUI() {
 
   if (!isAndroid) {
     if (!QFile::exists(currentMDFile)) {
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg(appName,
-                   tr("The current note does not exist. Please select another "
-                      "note or create a new note."),
-                   0);
+      QMessageBox::information(mw_one, appName,
+                               tr("The note file does not exist."));
 
       return;
     }
