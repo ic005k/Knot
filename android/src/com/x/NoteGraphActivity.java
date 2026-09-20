@@ -17,11 +17,13 @@ public class NoteGraphActivity extends AppCompatActivity {
     public static NoteGraphActivity mInstance = null;
     private GraphView mGraphView;
     private String mSelectedFilePath = null;
+    private boolean isDark;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInstance = this;
+        isDark = ImmersiveUtil.applyRealImmersive(this);
         // 外层垂直布局：绘图区 + 底部按钮栏
         LinearLayout rootLayout = new LinearLayout(this);
         rootLayout.setOrientation(LinearLayout.VERTICAL);
@@ -44,10 +46,8 @@ public class NoteGraphActivity extends AppCompatActivity {
         LinearLayout bottomBar = new LinearLayout(this);
         bottomBar.setOrientation(LinearLayout.HORIZONTAL);
         bottomBar.setPadding(dp(16), dp(8), dp(16), dp(8));
-        // ========== 修复：按钮水平居中 ==========
         bottomBar.setGravity(Gravity.CENTER_HORIZONTAL);
         bottomBar.setWeightSum(2);
-
         Button btnView = new Button(this);
         Button btnEdit = new Button(this);
         boolean isZh = MyActivity.zh_cn;
@@ -60,7 +60,6 @@ public class NoteGraphActivity extends AppCompatActivity {
         );
         btnView.setLayoutParams(btnLp);
         btnEdit.setLayoutParams(btnLp);
-
         btnView.setOnClickListener(v -> {
             if (
                 mSelectedFilePath == null || mSelectedFilePath.isEmpty()
@@ -86,10 +85,10 @@ public class NoteGraphActivity extends AppCompatActivity {
             "graph_data"
         );
         if (args != null && args.size() >= 2) {
+            String centerTitle = args.get(0);
             String jsonStr = args.get(1);
             GraphData graphData = new Gson().fromJson(jsonStr, GraphData.class);
-            mGraphView.setGraphData(graphData);
-            // 节点选中回调
+            mGraphView.setGraphData(graphData, centerTitle);
             mGraphView.setOnNodeSelectListener(filePath -> {
                 mSelectedFilePath = filePath;
             });
@@ -129,33 +128,31 @@ public class NoteGraphActivity extends AppCompatActivity {
         public String title;
     }
 
-    // ========== 自定义绘图View，支持拖拽、点击选中节点 ==========
+    // ========== 自定义绘图View ==========
     public static class GraphView extends View {
 
         private GraphData mData;
+        private String mCenterTitle;
         private OnNodeSelectListener mNodeSelectListener;
-        // 画布偏移（拖拽）
         private float mOffsetX = 0f;
         private float mOffsetY = 0f;
         private float mLastTouchX;
         private float mLastTouchY;
         private boolean mIsDragging;
 
-        // 保存节点 + 对应link方向
         private static class Node {
 
             float x;
             float y;
             String title;
             String filePath;
-            String dir; // in / out / both
+            String dir;
         }
 
         private final List<Node> mNodeList = new ArrayList<>();
         private Node mSelectedNode = null;
         private final float mNodeRadius = dpRaw(24);
         private final float arrowSize = dpRaw(8);
-        // 标记：数据是否等待布局完成后重新排布
         private boolean mNeedLayoutNodes = false;
 
         public interface OnNodeSelectListener {
@@ -171,14 +168,14 @@ public class NoteGraphActivity extends AppCompatActivity {
             setBackgroundColor(0xFF1E1E1E);
         }
 
-        public void setGraphData(GraphData data) {
+        public void setGraphData(GraphData data, String centerTitle) {
             mData = data;
+            mCenterTitle = centerTitle;
             mNeedLayoutNodes = true;
             mNodeList.clear();
             invalidate();
         }
 
-        // 节点布局计算：在onLayout拿到真实宽高后执行
         private void layoutNodes() {
             if (mData == null) return;
             mNodeList.clear();
@@ -186,20 +183,19 @@ public class NoteGraphActivity extends AppCompatActivity {
             int h = getHeight();
             float centerX = w / 2f;
             float centerY = h / 2f;
-
             // 中心节点
             Node centerNode = new Node();
             centerNode.x = centerX;
             centerNode.y = centerY;
-            centerNode.title = mData.current;
+            centerNode.title = mCenterTitle;
             centerNode.filePath = mData.current;
             centerNode.dir = "";
             mNodeList.add(centerNode);
 
-            // 环绕排布关联节点，环形布局，radius放大
             if (mData.links != null) {
                 int count = mData.links.size();
-                float radius = 420; // 调大这个值，图谱整体放大，320→420
+                // 动态半径，节点越多圆环越大
+                float radius = 80 + count * 45f;
                 for (int i = 0; i < count; i++) {
                     GraphLink link = mData.links.get(i);
                     Node nd = new Node();
@@ -230,30 +226,34 @@ public class NoteGraphActivity extends AppCompatActivity {
             }
         }
 
-        // 绘制箭头工具函数
-        private void drawArrow(
+        /**
+         * 沿着二次贝塞尔曲线终点切线绘制箭头
+         * p0起点，p1控制点，p2终点
+         */
+        private void drawArrowOnCurveEnd(
             android.graphics.Canvas canvas,
             android.graphics.Paint paint,
-            float fromX,
-            float fromY,
-            float toX,
-            float toY,
-            boolean reverse
+            float p0x,
+            float p0y,
+            float p1x,
+            float p1y,
+            float p2x,
+            float p2y
         ) {
-            float dx = toX - fromX;
-            float dy = toY - fromY;
+            // 取t=0.98，获取曲线末端切线向量
+            float t = 0.98f;
+            float dx = 2 * (1 - t) * (p1x - p0x) + 2 * t * (p2x - p1x);
+            float dy = 2 * (1 - t) * (p1y - p0y) + 2 * t * (p2y - p1y);
             float len = (float) Math.hypot(dx, dy);
-            if (len < 1) return;
+            if (len < 1e-6f) return;
             float nx = dx / len;
             float ny = dy / len;
-            float tipX, tipY;
-            if (reverse) {
-                tipX = fromX + nx * mNodeRadius;
-                tipY = fromY + ny * mNodeRadius;
-            } else {
-                tipX = toX - nx * mNodeRadius;
-                tipY = toY - ny * mNodeRadius;
-            }
+
+            // 箭头顶点：往曲线起点方向回退，停靠在目标节点圆周上
+            float tipX = p2x - nx * mNodeRadius;
+            float tipY = p2y - ny * mNodeRadius;
+
+            // 箭头两翼，垂直于切线
             float ax = -ny * arrowSize;
             float ay = nx * arrowSize;
             canvas.drawLine(
@@ -287,58 +287,90 @@ public class NoteGraphActivity extends AppCompatActivity {
             textPaint.setTextSize(36);
             textPaint.setTextAlign(android.graphics.Paint.Align.CENTER);
             Node center = mNodeList.get(0);
-            // 绘制连接线，区分 dir
+            android.graphics.Path path = new android.graphics.Path();
+
             for (int i = 1; i < mNodeList.size(); i++) {
                 Node nd = mNodeList.get(i);
                 String dir = nd.dir;
+                // 贝塞尔控制点向外偏移
+                float dx = nd.x - center.x;
+                float dy = nd.y - center.y;
+                float len = (float) Math.hypot(dx, dy);
+                float ctrlX, ctrlY;
+                if (len > 0) {
+                    float nx = -dy / len;
+                    float ny = dx / len;
+                    float curveOffset = 55f;
+                    ctrlX = (center.x + nd.x) / 2f + nx * curveOffset;
+                    ctrlY = (center.y + nd.y) / 2f + ny * curveOffset;
+                } else {
+                    ctrlX = (center.x + nd.x) / 2f;
+                    ctrlY = (center.y + nd.y) / 2f;
+                }
+
                 if ("out".equals(dir)) {
-                    linePaint.setColor(0xFF4CAF50); //绿色：中心向外
-                    canvas.drawLine(center.x, center.y, nd.x, nd.y, linePaint);
-                    drawArrow(
+                    linePaint.setColor(0xFF4CAF50);
+                    path.reset();
+                    path.moveTo(center.x, center.y);
+                    path.quadTo(ctrlX, ctrlY, nd.x, nd.y);
+                    canvas.drawPath(path, linePaint);
+                    // 起点center，控制点ctrlX/ctrlY，终点nd
+                    drawArrowOnCurveEnd(
                         canvas,
                         linePaint,
                         center.x,
                         center.y,
+                        ctrlX,
+                        ctrlY,
                         nd.x,
-                        nd.y,
-                        false
+                        nd.y
                     );
                 } else if ("in".equals(dir)) {
-                    linePaint.setColor(0xFFF44336); //红色：指向中心
-                    canvas.drawLine(nd.x, nd.y, center.x, center.y, linePaint);
-                    drawArrow(
+                    linePaint.setColor(0xFFF44336);
+                    path.reset();
+                    path.moveTo(nd.x, nd.y);
+                    path.quadTo(ctrlX, ctrlY, center.x, center.y);
+                    canvas.drawPath(path, linePaint);
+                    // 起点nd，控制点ctrlX/ctrlY，终点center
+                    drawArrowOnCurveEnd(
                         canvas,
                         linePaint,
                         nd.x,
                         nd.y,
+                        ctrlX,
+                        ctrlY,
                         center.x,
-                        center.y,
-                        false
+                        center.y
                     );
                 } else if ("both".equals(dir)) {
-                    linePaint.setColor(0xFFFFEB3B); //黄色双向
-                    canvas.drawLine(center.x, center.y, nd.x, nd.y, linePaint);
-                    drawArrow(
+                    linePaint.setColor(0xFFFFEB3B);
+                    path.reset();
+                    path.moveTo(center.x, center.y);
+                    path.quadTo(ctrlX, ctrlY, nd.x, nd.y);
+                    canvas.drawPath(path, linePaint);
+                    drawArrowOnCurveEnd(
                         canvas,
                         linePaint,
                         center.x,
                         center.y,
+                        ctrlX,
+                        ctrlY,
                         nd.x,
-                        nd.y,
-                        false
+                        nd.y
                     );
-                    drawArrow(
+                    drawArrowOnCurveEnd(
                         canvas,
                         linePaint,
                         nd.x,
                         nd.y,
+                        ctrlX,
+                        ctrlY,
                         center.x,
-                        center.y,
-                        false
+                        center.y
                     );
                 }
             }
-            // 绘制所有节点
+            // 绘制节点
             for (Node nd : mNodeList) {
                 if (nd == mSelectedNode) {
                     nodePaint.setColor(0xFF42A5F5);
@@ -348,7 +380,6 @@ public class NoteGraphActivity extends AppCompatActivity {
                     nodePaint.setColor(0xFF444444);
                 }
                 canvas.drawCircle(nd.x, nd.y, mNodeRadius, nodePaint);
-                // 节点文字（截断）
                 String displayText = nd.title;
                 if (displayText.length() > 10) displayText =
                     displayText.substring(0, 9) + "…";
@@ -366,7 +397,6 @@ public class NoteGraphActivity extends AppCompatActivity {
                     mLastTouchX = x;
                     mLastTouchY = y;
                     mIsDragging = false;
-                    // 点击检测节点
                     mSelectedNode = null;
                     for (Node nd : mNodeList) {
                         float nx = nd.x + mOffsetX;

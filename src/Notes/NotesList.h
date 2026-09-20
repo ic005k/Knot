@@ -270,7 +270,8 @@ class NotesList : public QDialog {
 
   int getNoteListOrgIndex() const;
 
- protected:
+  void closeNoteActivityLoadingDlg();
+  protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;

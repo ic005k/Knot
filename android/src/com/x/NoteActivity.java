@@ -300,6 +300,7 @@ public class NoteActivity extends AppCompatActivity {
                         );
                         return true;
                     }
+                    showLoadingDialog();
                     PublicJavaCallCpp(
                         "note_relation_graph|==|" + selectedNotePos
                     );

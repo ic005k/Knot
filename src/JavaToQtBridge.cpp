@@ -1082,6 +1082,9 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               QStringList list = strType.split("|==|");
               if (list.count() == 2) {
                 currentMDFile = iniDir + list.at(1);
+                QFileInfo fi(currentMDFile);
+                if (!fi.exists()) return;
+
                 m_Notes->openEditUI();
               }
             });
