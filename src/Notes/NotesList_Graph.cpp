@@ -7,8 +7,7 @@ void NotesList::initNoteGraphView() {
   // ★ 监听 JSON 数据就绪信号
   connect(m_graphController, &NoteGraphController::graphJsonChanged, this,
           [this]() {
-            // 数据准备好了，关闭进度条
-            // mw_one->safeCloseProgress();
+            if (!isAndroid) mw_one->safeCloseProgress();
 
             // 获取中性 JSON 字符串
             QString jsonData = m_graphController->graphJson();

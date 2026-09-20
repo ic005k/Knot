@@ -18,6 +18,9 @@ public class NoteGraphActivity extends AppCompatActivity {
     private GraphView mGraphView;
     private String mSelectedFilePath = null;
     private boolean isDark;
+    // 提升为成员变量
+    private Button btnView;
+    private Button btnEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +51,16 @@ public class NoteGraphActivity extends AppCompatActivity {
         bottomBar.setPadding(dp(16), dp(8), dp(16), dp(8));
         bottomBar.setGravity(Gravity.CENTER_HORIZONTAL);
         bottomBar.setWeightSum(2);
-        Button btnView = new Button(this);
-        Button btnEdit = new Button(this);
+        btnView = new Button(this);
+        btnEdit = new Button(this);
         boolean isZh = MyActivity.zh_cn;
         btnView.setText(isZh ? "查看" : "View");
         btnEdit.setText(isZh ? "编辑" : "Edit");
+
+        // ========= 窗口打开默认禁用两个按钮 =========
+        btnView.setEnabled(false);
+        btnEdit.setEnabled(false);
+
         LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -91,6 +99,11 @@ public class NoteGraphActivity extends AppCompatActivity {
             mGraphView.setGraphData(graphData, centerTitle);
             mGraphView.setOnNodeSelectListener(filePath -> {
                 mSelectedFilePath = filePath;
+                // 选中节点后，启用按钮
+                runOnUiThread(() -> {
+                    btnView.setEnabled(true);
+                    btnEdit.setEnabled(true);
+                });
             });
         }
     }
@@ -191,11 +204,16 @@ public class NoteGraphActivity extends AppCompatActivity {
             centerNode.filePath = mData.current;
             centerNode.dir = "";
             mNodeList.add(centerNode);
-
             if (mData.links != null) {
                 int count = mData.links.size();
-                // 动态半径，节点越多圆环越大
-                float radius = 80 + count * 45f;
+                // 相邻节点最小弧长，保证节点不会挤在一起
+                float minArcSpacing = dpRaw(90);
+                // 基础最小半径，防止1、2个节点过于靠近中心
+                float minBaseRadius = dpRaw(120);
+                // 根据弧长反推所需圆环半径：R = minArcSpacing * count / (2 * PI)
+                float radiusBySpacing = (float) ((minArcSpacing * count) /
+                    (2.0 * Math.PI));
+                float radius = Math.max(minBaseRadius, radiusBySpacing);
                 for (int i = 0; i < count; i++) {
                     GraphLink link = mData.links.get(i);
                     Node nd = new Node();
@@ -248,11 +266,9 @@ public class NoteGraphActivity extends AppCompatActivity {
             if (len < 1e-6f) return;
             float nx = dx / len;
             float ny = dy / len;
-
             // 箭头顶点：往曲线起点方向回退，停靠在目标节点圆周上
             float tipX = p2x - nx * mNodeRadius;
             float tipY = p2y - ny * mNodeRadius;
-
             // 箭头两翼，垂直于切线
             float ax = -ny * arrowSize;
             float ay = nx * arrowSize;
@@ -288,7 +304,6 @@ public class NoteGraphActivity extends AppCompatActivity {
             textPaint.setTextAlign(android.graphics.Paint.Align.CENTER);
             Node center = mNodeList.get(0);
             android.graphics.Path path = new android.graphics.Path();
-
             for (int i = 1; i < mNodeList.size(); i++) {
                 Node nd = mNodeList.get(i);
                 String dir = nd.dir;
@@ -307,7 +322,6 @@ public class NoteGraphActivity extends AppCompatActivity {
                     ctrlX = (center.x + nd.x) / 2f;
                     ctrlY = (center.y + nd.y) / 2f;
                 }
-
                 if ("out".equals(dir)) {
                     linePaint.setColor(0xFF4CAF50);
                     path.reset();
@@ -398,6 +412,10 @@ public class NoteGraphActivity extends AppCompatActivity {
                     mLastTouchY = y;
                     mIsDragging = false;
                     mSelectedNode = null;
+                    // 默认置空，先禁用按钮
+                    if (mNodeSelectListener != null) {
+                        mNodeSelectListener.onSelect(null);
+                    }
                     for (Node nd : mNodeList) {
                         float nx = nd.x + mOffsetX;
                         float ny = nd.y + mOffsetY;

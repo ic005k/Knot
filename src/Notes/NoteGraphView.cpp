@@ -101,6 +101,9 @@ void NoteGraphView::onNodeClicked(const QString& filePath) {
 
   ui->graphicsView->update();
   ui->graphicsView->repaint();
+
+  ui->btnEdit->setEnabled(true);
+  ui->btnView->setEnabled(true);
 }
 
 void NoteGraphView::on_btnView_clicked() { m_Notes->previewNote(); }
@@ -109,6 +112,8 @@ void NoteGraphView::on_btnEdit_clicked() { m_Notes->openEditUI(); }
 
 void NoteGraphView::showNoteGraph() {
   m_Method->setWinPos(this, 500, 3);
+  ui->btnEdit->setEnabled(false);
+  ui->btnView->setEnabled(false);
 
   QGraphicsScene* scene = new QGraphicsScene(this);
   scene->setBackgroundBrush(QBrush(Qt::white));
