@@ -233,7 +233,7 @@ void Notes::openEditUI() {
 
   if (isAndroid) {
     m_Method->setMDFile(currentMDFile);
-
+    m_Method->setTempSwapStr(m_NoteManager->getJsonData());
     openAndroidNoteEditor();
 
     return;

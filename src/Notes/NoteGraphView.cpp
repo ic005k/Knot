@@ -25,19 +25,26 @@ bool NoteGraphView::eventFilter(QObject* obj, QEvent* event) {
     switch (event->type()) {
       case QEvent::MouseButtonPress: {
         auto* mouseEvent = static_cast<QMouseEvent*>(event);
-        // ★ 仅左键或中键触发拖拽
         if (mouseEvent->button() == Qt::LeftButton ||
             mouseEvent->button() == Qt::MiddleButton) {
-          // 检查点击位置是否在任何可交互 item 上
-          // 如果点中了节点，不启动拖拽，让节点自己处理点击
           QGraphicsItem* itemAtPos =
               ui->graphicsView->itemAt(mouseEvent->pos());
-          if (!itemAtPos || itemAtPos->type() != GraphNodeItem::Type) {
+
+          // ★ 【核心】使用 qgraphicsitem_cast 准确识别节点
+          // 替代原来无效的 itemAtPos->type() != GraphNodeItem::Type
+          GraphNodeItem* nodeItem =
+              itemAtPos ? qgraphicsitem_cast<GraphNodeItem*>(itemAtPos)
+                        : nullptr;
+
+          // 只有点击在【非节点】区域时，才启动画布拖拽
+          if (!nodeItem) {
             m_isDragging = true;
             m_lastMousePos = mouseEvent->pos();
             ui->graphicsView->viewport()->setCursor(Qt::ClosedHandCursor);
-            return true;  // ★ 消费事件，不传递给底层
+            return true;
           }
+          // ★ 如果点中了节点，不 return true，让事件继续传递给节点的
+          // mousePressEvent
         }
         break;
       }
@@ -47,8 +54,6 @@ bool NoteGraphView::eventFilter(QObject* obj, QEvent* event) {
           auto* mouseEvent = static_cast<QMouseEvent*>(event);
           QPoint delta = mouseEvent->pos() - m_lastMousePos;
           m_lastMousePos = mouseEvent->pos();
-
-          // ★ 核心：反向移动滚动条 = 拖拽画布
           QScrollBar* hBar = ui->graphicsView->horizontalScrollBar();
           QScrollBar* vBar = ui->graphicsView->verticalScrollBar();
           hBar->setValue(hBar->value() - delta.x());
@@ -121,25 +126,34 @@ void NoteGraphView::showNoteGraph() {
   QString mainTitle =
       listNoteGraph.size() > 0 ? listNoteGraph.at(0) : "Unknown";
   QString jsonData = listNoteGraph.size() > 1 ? listNoteGraph.at(1) : "{}";
-  QString centerPath = listNoteGraph.size() > 2 ? listNoteGraph.at(2) : "";
+  // 从jsonData中解析中心节点路径
+  QString centerPath;
+  QJsonDocument doc = QJsonDocument::fromJson(jsonData.toUtf8());
+  if (!doc.isNull() && doc.isObject()) {
+    centerPath = doc.object().value("current").toString();
+  }
 
   // --- 1. 创建中心节点 ---
   const qreal centerRadius = 40;
+  // ★ 确认 centerPath 有值
+  qDebug() << "Center node path:" << centerPath;
+
   auto* centerNode =
       new GraphNodeItem(centerRadius, GraphNodeItem::Center, centerPath);
   centerNode->setBrush(QColor(70, 130, 180));
   centerNode->setPen(Qt::NoPen);
   scene->addItem(centerNode);
+  connect(centerNode, &GraphNodeItem::nodeClicked, this,
+          &NoteGraphView::onNodeClicked);
 
   auto* centerText = scene->addText(mainTitle);
   centerText->setDefaultTextColor(Qt::white);
   centerText->setPos(-centerText->boundingRect().width() / 2,
                      -centerText->boundingRect().height() / 2);
   centerText->setZValue(4);
+  centerText->setAcceptedMouseButtons(Qt::NoButton);
   centerText->setAcceptHoverEvents(false);
-
-  connect(centerNode, &GraphNodeItem::nodeClicked, this,
-          &NoteGraphView::onNodeClicked);
+  centerText->setTextInteractionFlags(Qt::NoTextInteraction);
 
   // --- 2. 【精确计算】最小安全轨道半径 ---
   QJsonArray links =

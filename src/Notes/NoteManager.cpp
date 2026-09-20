@@ -68,6 +68,19 @@ bool NoteManager::saveIndex() {
   return true;
 }
 
+QString NoteManager::getJsonData() {
+  QJsonObject root;
+  root["version"] = 1.0;
+  QJsonObject data;
+  for (auto it = m_metadataMap.begin(); it != m_metadataMap.end(); ++it) {
+    data.insert(it.key(), it.value().toJson());
+  }
+  root["data"] = data;
+  QJsonDocument doc(root);
+  // 返回格式化JSON字符串，供JNI传给Android Java层
+  return doc.toJson(QJsonDocument::Indented);
+}
+
 QString NoteManager::getNoteTitle(const QString& filePath) const {
   QString normalized = normalizePath(filePath);
   if (m_metadataMap.contains(normalized)) {

@@ -71,6 +71,7 @@ class NoteManager : public QObject {
   QHash<QString, NoteMetadata> getAllMetadata() const { return m_metadataMap; }
 
   bool hasMetadata(const QString &filePath) const;
+  QString getJsonData();
   signals:
   void noteMetaChanged(const QString& filePath, const NoteMetadata& meta);
   void noteRemoved(const QString& filePath);

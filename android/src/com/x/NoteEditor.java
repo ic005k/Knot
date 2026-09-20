@@ -3610,8 +3610,9 @@ public class NoteEditor
     // ==========================
     private void initNoteIndexManager() {
         // 1. 读取索引文件
-        String indexFile = "/storage/emulated/0/.Knot/MyNoteNameIndex";
-        String jsonContent = readTextFile(indexFile);
+        //String indexFile = "/storage/emulated/0/.Knot/MyNoteNameIndex";
+        //String jsonContent = readTextFile(indexFile);
+        String jsonContent = MyActivity.mInstance.getTempSwapStr();
 
         // 2. 初始化索引管理器
         noteIndexManager = new NoteIndexManager();
