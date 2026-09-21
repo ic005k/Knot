@@ -334,7 +334,8 @@ public class DefaultOpen extends Activity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            CallJavaNotify_9();
+            //CallJavaNotify_9();
+            MyActivity.mInstance.PublicJavaCallCpp("open_local_book_file");
         }
 
         DefaultOpen.this.finish();

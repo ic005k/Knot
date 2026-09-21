@@ -1638,6 +1638,8 @@ void Reader::openByMuPdf(const QString& bookfile) {
       bookName + "    " + m_Method->getFileSize(QFile(bookfile).size(), 2);
   bookList.insert(0, strTitle + "|" + fileName + "|" + currentBookName);
 
+  saveReader("", false);
+
   openMyPDF(fileName);
 }
 
@@ -2178,6 +2180,8 @@ void Reader::closeReader() {
     getReadList();
   }
 }
+
+void Reader::closeReadList() { m_Method->openMainEntranceWindow(); }
 
 void Reader::openReader() {
   // 延迟一小段时间再触发，避免模块快速切换时反复启停

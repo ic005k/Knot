@@ -205,9 +205,11 @@ class Reader : public QDialog {
 
   QByteArray txtToPdf(const QString& filePath);
   void setPdfDataToJava(QString txtFile);
-  void openByMuPdf(const QString &bookfile);
+  void openByMuPdf(const QString& bookfile);
   void openBookByLocal();
-  public slots:
+  void closeReadList();
+
+ public slots:
   void on_SetReaderFunVisible();
 
   void setPageScroll0();

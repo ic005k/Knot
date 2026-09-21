@@ -507,6 +507,11 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             m_Reader->clearReaderRecords(c_name);
           }
 
+          if (strType == "back_read_list") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { m_Reader->closeReadList(); });
+          }
+
           // 增加事件记录////////////////////////////////////////////////////////////
           if (strType == "add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {

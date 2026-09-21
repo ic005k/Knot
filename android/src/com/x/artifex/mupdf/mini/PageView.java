@@ -34,6 +34,12 @@ public class PageView
     private int pageVersion = 0;
     private int ttsHighlightVersion = -1; // 高亮对应的页面版本
 
+    // 文字选择相关
+    private Quad[] selectQuads;
+    private boolean isSelectingText;
+    private float selectStartX, selectStartY;
+    private float selectEndX, selectEndY;
+
     // 初始化
     {
         ttsPaint.setColor(0x66FF9800); // 半透明橙色
@@ -198,12 +204,42 @@ public class PageView
 
     public void onShowPress(MotionEvent e) {}
 
-    public void onLongPress(MotionEvent e) {
+    /*public void onLongPress(MotionEvent e) {
         showLinks = !showLinks;
         invalidate();
+    }*/
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+        if (bitmap == null) return;
+
+        float touchX = e.getX();
+        float touchY = e.getY();
+
+        // ✅ 不再自己做坐标转换，把原始数据和必要参数都传出去
+        if (actionListener != null) {
+            actionListener.onLongPressSelectText(
+                touchX,
+                touchY,
+                scrollX,
+                scrollY,
+                bitmapW,
+                bitmapH,
+                canvasW,
+                canvasH,
+                viewScale,
+                pageScale,
+                this
+            );
+        }
     }
 
     public boolean onSingleTapUp(MotionEvent e) {
+        // ✅ 单击时清除文字选区
+        if (isSelectingText) {
+            clearSelection();
+        }
+
         boolean foundLink = false;
         float x = e.getX();
         float y = e.getY();
@@ -488,6 +524,19 @@ public class PageView
                 canvas.drawPath(path, ttsPaint);
             }
         }
+
+        // 绘制文字选中选区
+        if (isSelectingText && selectQuads != null) {
+            for (Quad q : selectQuads) {
+                path.rewind();
+                path.moveTo(x + q.ul_x * viewScale, y + q.ul_y * viewScale);
+                path.lineTo(x + q.ll_x * viewScale, y + q.ll_y * viewScale);
+                path.lineTo(x + q.lr_x * viewScale, y + q.lr_y * viewScale);
+                path.lineTo(x + q.ur_x * viewScale, y + q.ur_y * viewScale);
+                path.close();
+                canvas.drawPath(path, selectionPaint); // ✅ 使用独立的蓝色选区 Paint
+            }
+        }
     }
 
     public void clearTtsHighlight() {
@@ -558,5 +607,28 @@ public class PageView
      */
     public void saveCurrentScrollX() {
         savedScrollX = scrollX;
+    }
+
+    // ✅ 文字选区专用 Paint
+    private final Paint selectionPaint = new Paint();
+
+    {
+        selectionPaint.setColor(0x662196F3); // 半透明蓝色
+        selectionPaint.setStyle(Paint.Style.FILL);
+        selectionPaint.setAntiAlias(true);
+    }
+
+    /** 设置文字选区高亮 */
+    public void setSelection(Quad[] quads) {
+        this.selectQuads = quads;
+        this.isSelectingText = quads != null && quads.length > 0;
+        invalidate();
+    }
+
+    /** 清除文字选区 */
+    public void clearSelection() {
+        this.selectQuads = null;
+        this.isSelectingText = false;
+        invalidate();
     }
 }

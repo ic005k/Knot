@@ -32,7 +32,7 @@ public class ReadListActivity extends AppCompatActivity {
         mBackCallback = new OnBackPressedCallback(true /* enabled */) {
             @Override
             public void handleOnBackPressed() {
-                PublicJavaCallCpp("cancel_add_event_record");
+                PublicJavaCallCpp("back_read_list");
                 finish();
             }
         };

@@ -14,7 +14,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Insets;
+import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -23,15 +26,25 @@ import android.os.FileUriExposedException;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.text.Editable;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.ActionMode;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -39,8 +52,11 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -1936,6 +1952,582 @@ public class DocumentActivity extends Activity {
             sleepTimerButton.setColorFilter(0xFF42A5F5); //蓝色高亮，表示睡眠定时已启用
         } else {
             sleepTimerButton.clearColorFilter();
+        }
+    }
+
+    /**
+     * 长按选词入口（由 PageView 回调）
+     * 提取当前页全文 + 定位长按处文字，弹出独立文本窗口
+     */
+    public void onLongPressSelectText(
+        float touchX,
+        float touchY,
+        int scrollX,
+        int scrollY,
+        int bitmapW,
+        int bitmapH,
+        int canvasW,
+        int canvasH,
+        float viewScale,
+        float pageScale,
+        View anchorView
+    ) {
+        worker.add(
+            new Worker.Task() {
+                String fullText;
+                String nearText;
+
+                public void work() {
+                    try {
+                        Page page = doc.loadPage(currentPage);
+                        StructuredText stext = page.toStructuredText(
+                            "preserve-whitespace"
+                        );
+
+                        // ===== 1. 提取全页文字 =====
+                        fullText = extractPageText(currentPage);
+
+                        // ===== 2. 坐标转换：屏幕 → 文档 =====
+                        Matrix baseCtm;
+                        if (fitPage) {
+                            baseCtm = AndroidDrawDevice.fitPage(
+                                page,
+                                canvasW,
+                                canvasH
+                            );
+                        } else {
+                            baseCtm = AndroidDrawDevice.fitPageWidth(
+                                page,
+                                canvasW
+                            );
+                        }
+                        float totalScale = baseCtm.a * pageZoom;
+
+                        float dx =
+                            bitmapW <= canvasW
+                                ? (bitmapW - canvasW) / 2f
+                                : scrollX;
+                        float dy =
+                            bitmapH <= canvasH
+                                ? (bitmapH - canvasH) / 2f
+                                : scrollY;
+                        float bmpX = touchX + dx;
+                        float bmpY = touchY + dy;
+                        float docX = bmpX / totalScale;
+                        float docY = bmpY / totalScale;
+
+                        Log.i(
+                            APP,
+                            "LongPress coord: touch=(" +
+                                touchX +
+                                "," +
+                                touchY +
+                                ") doc=(" +
+                                docX +
+                                "," +
+                                docY +
+                                ") totalScale=" +
+                                totalScale
+                        );
+
+                        // ===== 3. 获取长按位置附近的文字片段 =====
+                        nearText = null;
+                        float r = 5f; // 稍大的搜索半径，提高命中率
+                        Point p1 = new Point(docX - r, docY - r);
+                        Point p2 = new Point(docX + r, docY + r);
+                        Quad[] hlQuads = stext.highlight(p1, p2);
+
+                        if (hlQuads != null && hlQuads.length > 0) {
+                            // 取距离触摸点最近的 quad
+                            Quad nearest = hlQuads[0];
+                            float minDist = Float.MAX_VALUE;
+                            for (Quad q : hlQuads) {
+                                float cx = (q.ul_x + q.lr_x) / 2f;
+                                float cy = (q.ul_y + q.lr_y) / 2f;
+                                float dist =
+                                    (cx - docX) * (cx - docX) +
+                                    (cy - docY) * (cy - docY);
+                                if (dist < minDist) {
+                                    minDist = dist;
+                                    nearest = q;
+                                }
+                            }
+
+                            // 扩大复制范围：用 nearest quad 所在行的范围
+                            // 这样能拿到完整的一行/一句话，而非单个字符
+                            float lineTop = nearest.ul_y - 2f;
+                            float lineBottom = nearest.lr_y + 2f;
+                            // 向左扩展一些，尽量拿到所在行的更多文字
+                            float lineLeft = Math.max(0, nearest.ul_x - 200f);
+                            float lineRight = nearest.lr_x + 200f;
+
+                            Point qa = new Point(lineLeft, lineTop);
+                            Point qb = new Point(lineRight, lineBottom);
+                            nearText = stext.copy(qa, qb);
+
+                            Log.i(
+                                APP,
+                                "LongPress nearText raw: [" + nearText + "]"
+                            );
+                        }
+
+                        stext.destroy();
+                        page.destroy();
+                    } catch (Throwable x) {
+                        Log.e(
+                            APP,
+                            "onLongPressSelectText error: " + x.getMessage()
+                        );
+                    }
+                }
+
+                public void run() {
+                    // ===== 防御性检查 =====
+                    if (fullText == null || fullText.trim().isEmpty()) {
+                        Toast.makeText(
+                            DocumentActivity.this,
+                            MyActivity.zh_cn
+                                ? "此页无可提取文字"
+                                : "No extractable text on this page",
+                            Toast.LENGTH_SHORT
+                        ).show();
+                        return;
+                    }
+
+                    // 清理 nearText
+                    String target = null;
+                    if (nearText != null) {
+                        target = nearText.trim();
+                        // 去掉前后可能的空白行
+                        target = target.replaceAll("^\\n+|\\n+$", "").trim();
+                    }
+
+                    showTextSelectionDialog(fullText.trim(), target);
+                }
+            }
+        );
+    }
+
+    /**
+     * 弹出独立文本窗口：显示当前页全文，高亮并定位到长按处的文字
+     * 用户可在 TextView 上使用原生选词能力（长按、拖动、复制、分享）
+     *
+     * @param fullText   当前页全量纯文本
+     * @param targetText 长按位置附近的文字片段（用于定位高亮），可为 null
+     */
+    private void showTextSelectionDialog(String fullText, String targetText) {
+        // ===== 构建 SpannableString =====
+        SpannableString spannable = new SpannableString(fullText);
+        int highlightStart = -1;
+        int highlightEnd = -1;
+
+        if (targetText != null && !targetText.isEmpty()) {
+            // 策略1: 完整匹配
+            int idx = fullText.indexOf(targetText);
+
+            // 策略2: 去掉多余空白后再匹配
+            if (idx < 0) {
+                String compressed = targetText.replaceAll("\\s+", " ").trim();
+                if (compressed.length() >= 3) {
+                    idx = fullText.indexOf(compressed);
+                    if (idx >= 0) {
+                        targetText = compressed;
+                    }
+                }
+            }
+
+            // 策略3: 取前 20 个字符作为锚点匹配
+            if (idx < 0 && targetText.length() > 20) {
+                String anchor = targetText.substring(0, 20).trim();
+                if (anchor.length() >= 4) {
+                    idx = fullText.indexOf(anchor);
+                    if (idx >= 0) {
+                        targetText = anchor;
+                    }
+                }
+            }
+
+            // 策略4: 取前 10 个字符
+            if (idx < 0 && targetText.length() > 10) {
+                String anchor = targetText.substring(0, 10).trim();
+                if (anchor.length() >= 3) {
+                    idx = fullText.indexOf(anchor);
+                    if (idx >= 0) {
+                        targetText = anchor;
+                    }
+                }
+            }
+
+            if (idx >= 0) {
+                highlightStart = idx;
+                highlightEnd = Math.min(
+                    idx + targetText.length(),
+                    fullText.length()
+                );
+
+                // 高亮背景色
+                /*spannable.setSpan(
+                    new BackgroundColorSpan(0x88FFEB3B), // 半透明黄色
+                    highlightStart,
+                    highlightEnd,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                );*/
+                int hlColor = mInvertMode ? 0x66FFD54F : 0x88FFEB3B;
+                spannable.setSpan(
+                    new CenteredHighlightSpan(hlColor),
+                    highlightStart,
+                    highlightEnd,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+            } else {
+                Log.w(
+                    APP,
+                    "showTextSelectionDialog: target not found in fullText, target=[" +
+                        targetText +
+                        "]"
+                );
+            }
+        }
+
+        // ===== 构建 UI 组件 =====
+        int dp16 = (int) TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            16,
+            getResources().getDisplayMetrics()
+        );
+        int dp12 = (int) TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            12,
+            getResources().getDisplayMetrics()
+        );
+
+        // 页面标题标签
+        TextView headerLabel = new TextView(this);
+        headerLabel.setText(
+            (MyActivity.zh_cn ? "第 " : "Page ") +
+                (currentPage + 1) +
+                (MyActivity.zh_cn ? " 页" : "")
+        );
+        headerLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        headerLabel.setTextColor(0xFF999999);
+        headerLabel.setPadding(dp16, dp12, dp16, 0);
+
+        // 核心 TextView：可选中、可复制
+        final TextView textView = new TextView(this);
+        textView.setText(spannable);
+        textView.setTextIsSelectable(true);
+
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        textView.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
+        textView.setLineSpacing(0, 1.4f);
+        textView.setPadding(dp16, dp12, dp16, dp16);
+
+        // ScrollView
+        final ScrollView scrollView = new ScrollView(this);
+        scrollView.addView(
+            textView,
+            new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+        scrollView.setFillViewport(true);
+        scrollView.setBackgroundColor(mInvertMode ? 0xFF1E1E1E : 0xFFFAFAFA);
+
+        // 外层容器：header + scrollView
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.addView(
+            headerLabel,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+        container.addView(
+            scrollView,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
+                1f // weight=1，占满剩余空间
+            )
+        );
+
+        // ===== 弹窗尺寸：占屏幕 85% 宽高 =====
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+
+        // 宽度：85% 屏幕宽，但不超过 1200dp（平板友好）
+        int maxW = (int) TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            1200,
+            dm
+        );
+        int dialogW = Math.min((int) (dm.widthPixels * 0.85f), maxW);
+
+        // 高度：85% 屏幕高，但不超过 900dp
+        int maxH = (int) TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            900,
+            dm
+        );
+        int dialogH = Math.min((int) (dm.heightPixels * 0.85f), maxH);
+
+        // ===== 创建 AlertDialog =====
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(container);
+        builder.setNegativeButton(MyActivity.zh_cn ? "关闭" : "Close", null);
+
+        final AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setDimAmount(0.5f);
+        }
+
+        // ✅ 在 show() 之前设置 Callback，此时 dialog 已创建
+        textView.setCustomSelectionActionModeCallback(
+            new TextSelectionActionModeCallback(textView, dialog)
+        );
+
+        dialog.show();
+
+        // 必须在 show() 之后设置窗口尺寸
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(dialogW, dialogH);
+        }
+
+        // ===== 自动滚动到高亮位置 =====
+        if (highlightStart >= 0) {
+            final int fStart = highlightStart;
+            final int fEnd = highlightEnd;
+
+            textView.post(() -> {
+                android.text.Layout layout = textView.getLayout();
+                if (layout == null) {
+                    // layout 尚未就绪，再等一帧
+                    textView.post(() ->
+                        scrollToHighlight(textView, scrollView, fStart, fEnd)
+                    );
+                } else {
+                    scrollToHighlight(textView, scrollView, fStart, fEnd);
+                }
+            });
+        }
+    }
+
+    /**
+     * 自定义文本选择菜单回调：
+     * 在保留系统默认菜单（复制/分享/全选）的基础上，追加 AI搜索、网页搜索、添加笔记。
+     */
+    private class TextSelectionActionModeCallback
+        implements ActionMode.Callback
+    {
+
+        private final TextView textView;
+        private final AlertDialog parentDialog;
+
+        // 自定义菜单项 ID（避开系统默认 ID）
+        private static final int ID_AI_SEARCH = 1001;
+        private static final int ID_WEB_SEARCH = 1002;
+        private static final int ID_ADD_NOTE = 1003;
+
+        public TextSelectionActionModeCallback(
+            TextView textView,
+            AlertDialog parentDialog
+        ) {
+            this.textView = textView;
+            this.parentDialog = parentDialog;
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // 添加自定义菜单项（只执行一次）
+            int order = 100;
+            menu.add(
+                Menu.NONE,
+                ID_AI_SEARCH,
+                order++,
+                MyActivity.zh_cn ? "AI 搜索" : "AI Search"
+            ).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+            menu.add(
+                Menu.NONE,
+                ID_WEB_SEARCH,
+                order++,
+                MyActivity.zh_cn ? "网页搜索" : "Web Search"
+            ).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+            menu.add(
+                Menu.NONE,
+                ID_ADD_NOTE,
+                order++,
+                MyActivity.zh_cn ? "添加笔记" : "Add Note"
+            ).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+
+            return true; // 允许创建 ActionMode
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            // 如果不需要动态修改菜单，直接返回 false
+            // 如果需要根据选中内容动态启用/禁用某些项，可在此处理
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            // 获取当前选中的文本
+            int start = textView.getSelectionStart();
+            int end = textView.getSelectionEnd();
+
+            if (start < 0 || end < 0 || start == end) {
+                return false; // 没有选中文字，交给系统处理
+            }
+
+            String selectedText = textView
+                .getText()
+                .subSequence(start, end)
+                .toString()
+                .trim();
+
+            if (selectedText.isEmpty()) {
+                return false;
+            }
+
+            switch (item.getItemId()) {
+                case ID_AI_SEARCH:
+                    MyActivity.mInstance.PublicJavaCallCpp(
+                        "pdf_ai_search|==|" + selectedText
+                    );
+                    break;
+                case ID_WEB_SEARCH:
+                    /*MyActivity.mInstance.PublicJavaCallCpp(
+                        "pdf_web_search|==|" + selectedText
+                    );*/
+
+                    // ✅ 直接使用 Android 原生网页搜索
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+                        intent.putExtra(
+                            android.app.SearchManager.QUERY,
+                            selectedText
+                        );
+                        // 在新任务栈中打开，避免干扰当前阅读界面
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        DocumentActivity.this.startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e(APP, "Web search failed: " + e.getMessage());
+                        Toast.makeText(
+                            DocumentActivity.this,
+                            MyActivity.zh_cn
+                                ? "无法启动网页搜索"
+                                : "Cannot launch web search",
+                            Toast.LENGTH_SHORT
+                        ).show();
+                    }
+
+                    break;
+                case ID_ADD_NOTE:
+                    MyActivity.mInstance.PublicJavaCallCpp(
+                        "pdf_add_note|==|" + selectedText
+                    );
+                    break;
+                default:
+                    // ✅ 关键：对于非自定义 ID（如系统的复制、分享），返回 false
+                    // 这样系统就会接管并执行默认的复制/分享逻辑！
+                    return false;
+            }
+
+            // 执行完自定义操作后，关闭 ActionMode（取消选中状态）并关闭弹窗
+            mode.finish();
+            if (parentDialog != null && parentDialog.isShowing()) {
+                parentDialog.dismiss();
+            }
+
+            return true; // 返回 true 表示我们已消费了该点击事件
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            // ActionMode 销毁时的清理工作（通常留空）
+        }
+    }
+
+    /**
+     * 将 ScrollView 滚动到 TextView 中指定字符范围的位置，使其居中显示
+     */
+    private void scrollToHighlight(
+        TextView textView,
+        ScrollView scrollView,
+        int start,
+        int end
+    ) {
+        android.text.Layout layout = textView.getLayout();
+        if (layout == null) return;
+
+        // 获取高亮区域的像素 Y 坐标
+        int lineTop = layout.getLineTop(layout.getLineForOffset(start));
+        int lineBottom = layout.getLineBottom(
+            layout.getLineForOffset(
+                Math.min(end, layout.getText().length() - 1)
+            )
+        );
+        int highlightCenterY = (lineTop + lineBottom) / 2;
+
+        // 加上 textView 自身的 padding
+        highlightCenterY += textView.getPaddingTop();
+
+        // 计算滚动目标：让高亮位置出现在视口垂直中心偏上 1/3 处
+        int scrollTarget = highlightCenterY - scrollView.getHeight() / 3;
+        scrollTarget = Math.max(0, scrollTarget);
+
+        scrollView.smoothScrollTo(0, scrollTarget);
+    }
+
+    /**
+     * 垂直居中包裹文字的高亮 Span
+     * 以文字视觉中心为基准，上下各扩展固定比例的行高，
+     * 形成均匀包裹效果，而非撑满整行或仅贴附 Ascent-Descent。
+     */
+    private static class CenteredHighlightSpan extends BackgroundColorSpan {
+
+        /** 上下各扩展的比例（相对于行高）。0.15 ≈ 视觉上均匀包裹中文 */
+        private static final float VERTICAL_PADDING_RATIO = 0.15f;
+
+        public CenteredHighlightSpan(int color) {
+            super(color);
+        }
+
+        public void drawBackground(
+            Canvas canvas,
+            CharSequence text,
+            int start,
+            int end,
+            float x,
+            int top,
+            int y,
+            int bottom,
+            Paint paint
+        ) {
+            int lineHeight = bottom - top;
+            float padding = lineHeight * VERTICAL_PADDING_RATIO;
+
+            // 文字视觉中心 = (top + bottom) / 2
+            // 但更精确的做法是以 baseline(y) 为参考，
+            // 因为 top/bottom 已含 LineSpacingExtra，可能不对称。
+            // 这里用 ascent/descent 算出纯文字高度，再居中于 baseline：
+            Paint.FontMetrics fm = paint.getFontMetrics();
+            float textHeight = fm.descent - fm.ascent; // 纯正文字高度
+            float visualCenter = y + (fm.ascent + fm.descent) / 2f;
+
+            float halfBar = textHeight / 2f + padding;
+            float drawTop = visualCenter - halfBar;
+            float drawBottom = visualCenter + halfBar;
+
+            float textWidth = paint.measureText(text, start, end);
+
+            int savedColor = paint.getColor();
+            paint.setColor(getBackgroundColor());
+            canvas.drawRect(x, drawTop, x + textWidth, drawBottom, paint);
+            paint.setColor(savedColor);
         }
     }
 }
