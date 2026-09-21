@@ -230,13 +230,7 @@ static void JavaNotify_8() {
   qDebug() << "C++ JavaNotify_8";
 }
 
-static void JavaNotify_9() {
-  // 安卓打开书籍和缺省打开书籍调用
-  QTimer::singleShot(100, mw_one,
-                     []() { mw_one->m_ReceiveShare->callJavaNotify9(); });
-
-  qDebug() << "C++ JavaNotify_9";
-}
+static void JavaNotify_9() { qDebug() << "C++ JavaNotify_9"; }
 
 static void JavaNotify_10() {
   // Open Book
@@ -475,16 +469,24 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
         try {
           // 打开书籍文件
           // ////////////////////////////////////////////////////////
-          if (strType == "open_book_file") {
+          if (strType == "read_book_file") {
             QTimer::singleShot(100, mw_one, [=]() {
               QString bookfile = m_Method->getTempSwapStr();
               QFileInfo fi(bookfile);
               QString suffix = fi.suffix().toLower();
-              if (suffix != "pdf" && suffix != "mobi") {
-                mw_one->ui->frameMain->hide();
+              if (suffix != "txt" && suffix != "mobi" && suffix != "pdf" &&
+                  suffix != "xps" && suffix != "oxps" && suffix != "epub" &&
+                  suffix != "fb2" && suffix != "cbz" && suffix != "cbt") {
+                return;
               }
               m_Reader->startOpenFile(bookfile);
             });
+          }
+
+          // 从安卓文件选择器打开本地书籍
+          if (strType == "open_local_book_file") {
+            QTimer::singleShot(100, mw_one,
+                               [=]() { m_Reader->openBookByLocal(); });
           }
 
           if (strType.contains("remove_read_list|==|")) {

@@ -42,8 +42,6 @@ class ReceiveShare : public QDialog {
 
   void closeAllChildWindows();
 
-  void callJavaNotify9();
-
   void bringAppToForeground();
 
  protected:

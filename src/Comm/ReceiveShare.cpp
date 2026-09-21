@@ -360,25 +360,3 @@ void ReceiveShare::goReceiveShare() {
     mw_one->ui->btnNotes->click();
   }
 }
-
-void ReceiveShare::callJavaNotify9() {
-  QSettings Reg(privateDir + "choice_book.ini", QSettings::IniFormat);
-
-  QString file = Reg.value("book/file", "").toString();
-  QString type = Reg.value("book/type", "filepicker").toString();
-  if (QFile::exists(file)) {
-    if (type == "defaultopen") {
-      m_Method->closeMainEntranceWindow();
-
-      closeAllChildWindows();
-
-      m_Method->Sleep(100);
-
-      bringAppToForeground();
-
-      QTimer::singleShot(1000, this,
-                         [this, file]() { m_Reader->startOpenFile(file); });
-    } else
-      m_Reader->startOpenFile(file);
-  }
-}

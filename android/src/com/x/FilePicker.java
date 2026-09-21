@@ -534,24 +534,50 @@ public class FilePicker
         for (int i = 0; i < files.size(); i++) {
             String filePath = files.get(i);
             String fileInfo = filesInfo.get(i);
-            if (filePath.endsWith(".epub")) {
+            String lowerPath = filePath.toLowerCase();
+            if (lowerPath.endsWith(".epub")) {
                 Fruit epubBook = new Fruit(R.drawable.epub, filePath, fileInfo);
                 fruitlist.add(epubBook);
             }
 
-            if (filePath.endsWith(".txt")) {
+            if (lowerPath.endsWith(".txt")) {
                 Fruit txtBook = new Fruit(R.drawable.text, filePath, fileInfo);
                 fruitlist.add(txtBook);
             }
 
-            if (filePath.endsWith(".pdf")) {
+            if (lowerPath.endsWith(".pdf")) {
                 Fruit pdfBook = new Fruit(R.drawable.pdf, filePath, fileInfo);
                 fruitlist.add(pdfBook);
             }
 
-            if (filePath.endsWith(".mobi")) {
+            if (lowerPath.endsWith(".mobi")) {
                 Fruit mobiBook = new Fruit(R.drawable.mobi, filePath, fileInfo);
                 fruitlist.add(mobiBook);
+            }
+
+            if (lowerPath.endsWith(".xps")) {
+                Fruit xpsBook = new Fruit(R.drawable.mobi, filePath, fileInfo);
+                fruitlist.add(xpsBook);
+            }
+
+            if (lowerPath.endsWith(".oxps")) {
+                Fruit oxpsBook = new Fruit(R.drawable.mobi, filePath, fileInfo);
+                fruitlist.add(oxpsBook);
+            }
+
+            if (lowerPath.endsWith(".fb2")) {
+                Fruit fb2Book = new Fruit(R.drawable.mobi, filePath, fileInfo);
+                fruitlist.add(fb2Book);
+            }
+
+            if (lowerPath.endsWith(".cbz")) {
+                Fruit cbzBook = new Fruit(R.drawable.mobi, filePath, fileInfo);
+                fruitlist.add(cbzBook);
+            }
+
+            if (lowerPath.endsWith(".cbt")) {
+                Fruit cbtBook = new Fruit(R.drawable.mobi, filePath, fileInfo);
+                fruitlist.add(cbtBook);
             }
         }
 
@@ -604,7 +630,10 @@ public class FilePicker
                             filePath + "   Size:" + strFileSize,
                             Toast.LENGTH_LONG
                         ).show();
-                        CallJavaNotify_9();
+                        //CallJavaNotify_9();
+                        MyActivity.mInstance.PublicJavaCallCpp(
+                            "open_local_book_file"
+                        );
                     }
 
                     FilePicker.this.finish();

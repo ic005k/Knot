@@ -157,7 +157,7 @@ void MainWindow::on_ExecShortcut() {
   if (keyType == "defaultopen") {
 #ifdef Q_OS_ANDROID
 
-    m_ReceiveShare->callJavaNotify9();
+    m_Reader->openBookByLocal();
 
 #endif
   }

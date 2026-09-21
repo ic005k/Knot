@@ -61,6 +61,11 @@ void Reader::setReaderStyle() { QColor textColor, baseColor; }
 void Reader::startOpenFile(QString openfile) {
   if (isReport) return;
 
+  openByMuPdf(openfile);
+  return;
+
+  //////////////////////////////////////////////////////////////////////////
+
   if (isAndroid) {
     closeMyPDF();
   }
@@ -1592,6 +1597,48 @@ QString Reader::getSkipText(QString htmlFile, QString skipID) {
 void Reader::removeBookList(int idx) {
   bookList.remove(idx);
   saveReader("", false);
+}
+
+void Reader::openBookByLocal() {
+  QSettings Reg(privateDir + "choice_book.ini", QSettings::IniFormat);
+
+  QString file = Reg.value("book/file", "").toString();
+  QString type = Reg.value("book/type", "filepicker").toString();
+  if (QFile::exists(file)) {
+    if (type == "defaultopen") {
+      m_Method->closeMainEntranceWindow();
+
+      mw_one->m_ReceiveShare->closeAllChildWindows();
+
+      m_Method->Sleep(100);
+
+      mw_one->m_ReceiveShare->bringAppToForeground();
+
+      QTimer::singleShot(1000, this,
+                         [this, file]() { m_Reader->startOpenFile(file); });
+    } else
+      m_Reader->startOpenFile(file);
+  }
+}
+
+void Reader::openByMuPdf(const QString& bookfile) {
+  fileName = bookfile;
+  for (int i = 0; i < bookList.count(); i++) {
+    QString str = bookList.at(i);
+    if (str.contains(fileName)) {
+      bookList.removeAt(i);
+      break;
+    }
+  }
+
+  QFileInfo fi(bookfile);
+  QString bookName = fi.fileName();
+  currentBookName = fi.baseName();
+  strTitle =
+      bookName + "    " + m_Method->getFileSize(QFile(bookfile).size(), 2);
+  bookList.insert(0, strTitle + "|" + fileName + "|" + currentBookName);
+
+  openMyPDF(fileName);
 }
 
 void Reader::readBookDone() {

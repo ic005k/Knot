@@ -145,7 +145,7 @@ public class ReadListActivity extends AppCompatActivity {
             }*/
 
             MyActivity.m_instance.setTempSwapStr(filePath);
-            PublicJavaCallCpp("open_book_file");
+            PublicJavaCallCpp("read_book_file");
 
             finish();
         });
