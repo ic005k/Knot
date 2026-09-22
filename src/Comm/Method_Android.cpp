@@ -302,3 +302,31 @@ void Method::refreshJavaData(QString callJavaName, QString className,
 
 #endif
 }
+
+void Method::refreshJavaData(QString mInstance, QString callJavaName,
+                             QString className, QStringList list) {
+#ifdef Q_OS_ANDROID
+
+  QJniObject jArrayList("java/util/ArrayList", "()V");
+  for (const QString& item : list) {
+    QJniObject jItem = QJniObject::fromString(item);
+    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+  }
+
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+
+  if (instance.isValid()) {
+    instance.callMethod<void>(callJavaName.toUtf8().constData(),
+                              "(Ljava/util/ArrayList;)V", jArrayList.object());
+  }
+
+  qInfo() << callJavaName << "=" << list;
+
+#endif
+}

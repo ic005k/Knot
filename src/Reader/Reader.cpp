@@ -837,7 +837,7 @@ void Reader::setFontSize(int fontSize) {
   setVPos(pos2);
   textPos = pos2;
 
-  readReadNote(cPage);
+  readReadNote();
 }
 
 void Reader::PlainTextEditToFile(QPlainTextEdit* txtEdit, QString fileName) {
@@ -1041,7 +1041,7 @@ void Reader::showInfo() {
   m_ReaderSet->updateProgress();
 
   updateReaderProperty(cPage, tPage);
-  readReadNote(cPage);
+  readReadNote();
 }
 
 void Reader::updateReaderProperty(int currentPage, int totalPages) {}
@@ -1633,7 +1633,7 @@ void Reader::openByMuPdf(const QString& bookfile) {
 
   QFileInfo fi(bookfile);
   QString bookName = fi.fileName();
-  currentBookName = fi.baseName();
+  currentBookName = sanitizeFileName(bookName);
   strTitle =
       bookName + "    " + m_Method->getFileSize(QFile(bookfile).size(), 2);
   bookList.insert(0, strTitle + "|" + fileName + "|" + currentBookName);
@@ -2318,4 +2318,25 @@ void Reader::setEditText(const QString& txt, const QString& direction) {}
 void Reader::setStartEnd(int start, int end) {
   startNote = start;
   endNote = end;
+}
+
+QString Reader::sanitizeFileName(const QString& name) {
+  // 1. 获取当前操作系统的所有非法文件名字符
+  // Qt 内部已处理 Windows/Android/Linux/macOS 的差异
+  QString illegalChars =
+      QDir::separator() == '/'
+          ? QStringLiteral("[/\\0]")               // Unix-like: 仅 / 和 \0
+          : QStringLiteral("[<>:\"/\\\\|?*\\0]");  // Windows: 完整非法集
+
+  // 2. 一行替换 + 去首尾空白点
+  QString safe = name;
+  safe.replace(QRegularExpression(illegalChars), QStringLiteral("_"));
+
+  // 去除首尾的空白和点号（防止生成 ".json"）
+  while (!safe.isEmpty() && (safe.front() == ' ' || safe.front() == '.'))
+    safe.removeFirst();
+  while (!safe.isEmpty() && (safe.back() == ' ' || safe.back() == '.'))
+    safe.removeLast();
+
+  return safe.isEmpty() ? QStringLiteral("unnamed_note") : safe;
 }

@@ -2,7 +2,6 @@ package com.x.artifex.mupdf.mini;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -18,6 +17,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -26,6 +26,7 @@ import android.os.FileUriExposedException;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.text.Editable;
+import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -42,7 +43,6 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -51,15 +51,18 @@ import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.artifex.mupdf.fitz.*;
@@ -119,6 +122,7 @@ public class DocumentActivity extends Activity {
 
     //////////////////////////////////////////////////
     private ImageButton minimizeAppButton;
+    private ImageButton readingNoteButton;
 
     protected boolean mInvertMode = false;
 
@@ -359,6 +363,15 @@ public class DocumentActivity extends Activity {
                 updateStatusBarIconMode(true);
             }
             loadPage(); // 仅重新渲染当前页，invertBitmap 会自动生效
+        });
+
+        // 读书笔记按钮
+        readingNoteButton = findViewById(R.id.reading_note_button);
+        readingNoteButton.setOnClickListener(v -> {
+            // 调用C++，打开当前文档对应的读书笔记，`key` 就是当前文档 uri
+            MyActivity.mInstance.PublicJavaCallCpp(
+                "open_reading_notes|==|" + key
+            );
         });
 
         // 初始化同步状态栏图标
@@ -2262,7 +2275,7 @@ public class DocumentActivity extends Activity {
             1200,
             dm
         );
-        int dialogW = Math.min((int) (dm.widthPixels * 0.85f), maxW);
+        int dialogW = Math.min((int) (dm.widthPixels * 0.75f), maxW);
 
         // 高度：85% 屏幕高，但不超过 900dp
         int maxH = (int) TypedValue.applyDimension(
@@ -2316,18 +2329,22 @@ public class DocumentActivity extends Activity {
     /**
      * 自定义文本选择菜单回调：
      * 在保留系统默认菜单（复制/分享/全选）的基础上，追加 AI搜索、网页搜索、添加笔记。
+     * ✅ 改造：添加笔记时弹出二级弹窗，一级弹窗保持打开，支持连续添加
      */
     private class TextSelectionActionModeCallback
         implements ActionMode.Callback
     {
 
         private final TextView textView;
-        private final AlertDialog parentDialog;
+        //private final AlertDialog parentDialog;
+        private final androidx.appcompat.app.AlertDialog parentDialog;
 
-        // 自定义菜单项 ID（避开系统默认 ID）
         private static final int ID_AI_SEARCH = 1001;
         private static final int ID_WEB_SEARCH = 1002;
         private static final int ID_ADD_NOTE = 1003;
+
+        /** 上下文截取半径（字符数） */
+        private static final int CONTEXT_RADIUS = 50;
 
         public TextSelectionActionModeCallback(
             TextView textView,
@@ -2339,7 +2356,6 @@ public class DocumentActivity extends Activity {
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            // 添加自定义菜单项（只执行一次）
             int order = 100;
             menu.add(
                 Menu.NONE,
@@ -2362,24 +2378,21 @@ public class DocumentActivity extends Activity {
                 MyActivity.zh_cn ? "添加笔记" : "Add Note"
             ).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 
-            return true; // 允许创建 ActionMode
+            return true;
         }
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            // 如果不需要动态修改菜单，直接返回 false
-            // 如果需要根据选中内容动态启用/禁用某些项，可在此处理
             return false;
         }
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            // 获取当前选中的文本
             int start = textView.getSelectionStart();
             int end = textView.getSelectionEnd();
 
             if (start < 0 || end < 0 || start == end) {
-                return false; // 没有选中文字，交给系统处理
+                return false;
             }
 
             String selectedText = textView
@@ -2387,7 +2400,6 @@ public class DocumentActivity extends Activity {
                 .subSequence(start, end)
                 .toString()
                 .trim();
-
             if (selectedText.isEmpty()) {
                 return false;
             }
@@ -2397,20 +2409,19 @@ public class DocumentActivity extends Activity {
                     MyActivity.mInstance.PublicJavaCallCpp(
                         "pdf_ai_search|==|" + selectedText
                     );
-                    break;
+                    // AI搜索后关闭弹窗
+                    mode.finish();
+                    if (
+                        parentDialog != null && parentDialog.isShowing()
+                    ) parentDialog.dismiss();
+                    return true;
                 case ID_WEB_SEARCH:
-                    /*MyActivity.mInstance.PublicJavaCallCpp(
-                        "pdf_web_search|==|" + selectedText
-                    );*/
-
-                    // ✅ 直接使用 Android 原生网页搜索
                     try {
                         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                         intent.putExtra(
                             android.app.SearchManager.QUERY,
                             selectedText
                         );
-                        // 在新任务栈中打开，避免干扰当前阅读界面
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         DocumentActivity.this.startActivity(intent);
                     } catch (Exception e) {
@@ -2423,31 +2434,173 @@ public class DocumentActivity extends Activity {
                             Toast.LENGTH_SHORT
                         ).show();
                     }
-
-                    break;
+                    // 网页搜索后关闭弹窗
+                    mode.finish();
+                    if (
+                        parentDialog != null && parentDialog.isShowing()
+                    ) parentDialog.dismiss();
+                    return true;
                 case ID_ADD_NOTE:
-                    MyActivity.mInstance.PublicJavaCallCpp(
-                        "pdf_add_note|==|" + selectedText
-                    );
-                    break;
+                    // ✅ 核心改造：弹出二级笔记输入弹窗，不关闭一级弹窗
+                    showNoteInputDialog(selectedText, start, end);
+                    // ✅ 不调用 mode.finish()，不调用 parentDialog.dismiss()
+                    // 用户可以在二级弹窗取消后继续在当前页选词添加更多笔记
+                    return true;
                 default:
-                    // ✅ 关键：对于非自定义 ID（如系统的复制、分享），返回 false
-                    // 这样系统就会接管并执行默认的复制/分享逻辑！
+                    // 系统默认操作（复制/分享等），返回 false 让系统处理
                     return false;
             }
-
-            // 执行完自定义操作后，关闭 ActionMode（取消选中状态）并关闭弹窗
-            mode.finish();
-            if (parentDialog != null && parentDialog.isShowing()) {
-                parentDialog.dismiss();
-            }
-
-            return true; // 返回 true 表示我们已消费了该点击事件
         }
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            // ActionMode 销毁时的清理工作（通常留空）
+            // 留空
+        }
+
+        /**
+         * 弹出二级笔记输入弹窗
+         * @param keyword      选中的关键词
+         * @param selStart     选中起始索引（用于提取上下文）
+         * @param selEnd       选中结束索引
+         */
+        private void showNoteInputDialog(
+            String keyword,
+            int selStart,
+            int selEnd
+        ) {
+            // ===== 1. 提取上下文 =====
+            CharSequence fullText = textView.getText();
+            int totalLen = fullText.length();
+
+            int ctxStart = Math.max(0, selStart - CONTEXT_RADIUS);
+            int ctxEnd = Math.min(totalLen, selEnd + CONTEXT_RADIUS);
+            String searchContext = fullText
+                .subSequence(ctxStart, ctxEnd)
+                .toString()
+                .replaceAll("\\s+", " ") // 压缩空白，与C++端匹配策略一致
+                .trim();
+
+            // ===== 2. 构建二级弹窗UI =====
+            int dp16 = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                16,
+                getResources().getDisplayMetrics()
+            );
+            int dp12 = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                12,
+                getResources().getDisplayMetrics()
+            );
+
+            LinearLayout layout = new LinearLayout(DocumentActivity.this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setPadding(dp16, dp12, dp16, dp12);
+
+            // 标题：选中的文本（过长截断）
+            String titleText =
+                keyword.length() > 40
+                    ? keyword.substring(0, 40) + "..."
+                    : keyword;
+
+            TextView titleView = new TextView(DocumentActivity.this);
+            titleView.setText(titleText);
+            titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            titleView.setTextColor(mInvertMode ? 0xFFBBDEFB : 0xFF1565C0);
+            titleView.setMaxLines(2);
+            titleView.setEllipsize(TextUtils.TruncateAt.END);
+            titleView.setPadding(0, 0, 0, dp12);
+            layout.addView(titleView);
+
+            // 笔记输入框
+            final EditText noteEdit = new EditText(DocumentActivity.this);
+            noteEdit.setHint(
+                MyActivity.zh_cn ? "输入笔记内容..." : "Enter note content..."
+            );
+            noteEdit.setMinLines(3);
+            noteEdit.setGravity(Gravity.TOP | Gravity.START);
+            noteEdit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+            noteEdit.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
+            noteEdit.setHintTextColor(mInvertMode ? 0xFF666666 : 0xFF999999);
+            if (mInvertMode) {
+                noteEdit.setBackgroundColor(0xFF2D2D2D);
+            }
+            noteEdit.setPadding(dp12, dp12, dp12, dp12);
+            layout.addView(noteEdit);
+
+            // ===== 3. 创建并显示弹窗 =====
+            AlertDialog.Builder builder = new AlertDialog.Builder(
+                DocumentActivity.this
+            );
+            builder.setView(layout);
+            builder.setTitle(MyActivity.zh_cn ? "添加笔记" : "Add Note");
+            builder.setPositiveButton(MyActivity.zh_cn ? "确定" : "OK", null); // ✅ 先设null，下面手动处理
+            builder.setNegativeButton(
+                MyActivity.zh_cn ? "取消" : "Cancel",
+                null
+            );
+
+            final AlertDialog noteDialog = builder.create();
+            if (noteDialog.getWindow() != null) {
+                noteDialog.getWindow().setDimAmount(0.3f); // 轻量遮罩，不完全遮挡一级弹窗
+            }
+
+            // ✅ 关键：拦截PositiveButton点击，做判空校验后再决定是否关闭
+            noteDialog.setOnShowListener(dialog -> {
+                android.widget.Button positiveBtn = noteDialog.getButton(
+                    AlertDialog.BUTTON_POSITIVE
+                );
+                positiveBtn.setOnClickListener(v -> {
+                    String noteContent = noteEdit.getText().toString().trim();
+
+                    // 判空检查
+                    if (noteContent.isEmpty()) {
+                        Toast.makeText(
+                            DocumentActivity.this,
+                            MyActivity.zh_cn
+                                ? "笔记内容不能为空"
+                                : "Note content cannot be empty",
+                            Toast.LENGTH_SHORT
+                        ).show();
+                        return; // ✅ 不关闭弹窗，让用户继续编辑
+                    }
+
+                    // ✅ 组装数据发送到C++
+                    // 格式: pdf_save_note|==|searchContext|==|keyword|==|noteContent|==|currentPage
+                    String payload =
+                        "pdf_save_note|==|" +
+                        searchContext +
+                        "|==|" +
+                        keyword +
+                        "|==|" +
+                        noteContent +
+                        "|==|" +
+                        currentPage;
+
+                    MyActivity.mInstance.PublicJavaCallCpp(payload);
+
+                    Toast.makeText(
+                        DocumentActivity.this,
+                        MyActivity.zh_cn ? "笔记已保存" : "Note saved",
+                        Toast.LENGTH_SHORT
+                    ).show();
+
+                    noteDialog.dismiss(); // ✅ 只有内容非空才关闭二级弹窗
+                });
+            });
+
+            noteDialog.show();
+
+            // 自动聚焦输入框并弹出键盘
+            noteEdit.requestFocus();
+            noteEdit.post(() -> {
+                InputMethodManager imm = (InputMethodManager) getSystemService(
+                    Context.INPUT_METHOD_SERVICE
+                );
+                if (imm != null) imm.showSoftInput(
+                    noteEdit,
+                    InputMethodManager.SHOW_IMPLICIT
+                );
+            });
         }
     }
 
@@ -2529,5 +2682,251 @@ public class DocumentActivity extends Activity {
             canvas.drawRect(x, drawTop, x + textWidth, drawBottom, paint);
             paint.setColor(savedColor);
         }
+    }
+
+    /**
+     * C++ JNI调用入口：PDF笔记列表弹窗
+     * @param noteList 笔记数组，每条以 === 分割8个字段
+     * 字段顺序：id === currentPage === time === contextHtml === noteContent === searchContext === keyword === color
+     */
+    public void showNoteListDialog(ArrayList<String> noteList) {
+        runOnUiThread(() -> {
+            if (noteList == null || noteList.isEmpty()) {
+                return;
+            }
+            final ArrayList<String> rawNoteData = new ArrayList<>(noteList);
+            // 记录当前选中条目索引
+            final int[] selectedPos = { -1 };
+            // 自定义Adapter，列表项展示3个独立TextView
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this,
+                0,
+                rawNoteData
+            ) {
+                @Override
+                public View getView(
+                    int position,
+                    View convertView,
+                    ViewGroup parent
+                ) {
+                    View itemView = convertView;
+                    ViewHolder holder;
+                    if (itemView == null) {
+                        LinearLayout layout = new LinearLayout(
+                            DocumentActivity.this
+                        );
+                        layout.setOrientation(LinearLayout.VERTICAL);
+                        layout.setPadding(
+                            dp2px(12),
+                            dp2px(12),
+                            dp2px(12),
+                            dp2px(12)
+                        );
+                        // 1.页码+时间
+                        TextView tvPageTime = new TextView(
+                            DocumentActivity.this
+                        );
+                        tvPageTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                        // 2.原文html片段，斜体，字号更小
+                        TextView tvHtml = new TextView(DocumentActivity.this);
+                        tvHtml.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                        /*tvHtml.setTypeface(
+                            Typeface.create(
+                                tvHtml.getTypeface(),
+                                Typeface.ITALIC
+                            )
+                            );*/
+                        // 3.笔记内容，正常字号
+                        TextView tvNote = new TextView(DocumentActivity.this);
+                        tvNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+
+                        layout.addView(tvPageTime);
+                        layout.addView(tvHtml);
+                        layout.addView(tvNote);
+                        itemView = layout;
+
+                        holder = new ViewHolder();
+                        holder.tvPageTime = tvPageTime;
+                        holder.tvHtml = tvHtml;
+                        holder.tvNote = tvNote;
+                        itemView.setTag(holder);
+                    } else {
+                        holder = (ViewHolder) itemView.getTag();
+                    }
+                    String fullStr = rawNoteData.get(position);
+                    String[] parts = fullStr.split("===", 8);
+                    if (parts.length < 8) return itemView;
+                    String page = parts[1].trim();
+                    String time = parts[2].trim();
+                    String htmlStr = parts[3].trim();
+                    String noteText = parts[4].trim();
+
+                    holder.tvPageTime.setText(
+                        (MyActivity.zh_cn ? "页码：" : "Page:") +
+                            page +
+                            " | " +
+                            time
+                    );
+                    // 解析html
+                    Spanned spannedHtml;
+                    if (
+                        android.os.Build.VERSION.SDK_INT >=
+                        android.os.Build.VERSION_CODES.N
+                    ) {
+                        spannedHtml = Html.fromHtml(
+                            htmlStr,
+                            Html.FROM_HTML_MODE_LEGACY
+                        );
+                    } else {
+                        spannedHtml = Html.fromHtml(htmlStr);
+                    }
+                    holder.tvHtml.setText(spannedHtml);
+                    holder.tvNote.setText(noteText);
+
+                    // 选中高亮
+                    if (selectedPos[0] == position) {
+                        itemView.setBackgroundColor(0xFFE0EDFF);
+                    } else {
+                        itemView.setBackgroundColor(0x00000000);
+                    }
+                    return itemView;
+                }
+
+                // ViewHolder
+                class ViewHolder {
+
+                    TextView tvPageTime;
+                    TextView tvHtml;
+                    TextView tvNote;
+                }
+            };
+            ListView listView = new ListView(this);
+            listView.setAdapter(adapter);
+            listView.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
+            listView.setDividerHeight(dp2px(8));
+
+            // 外层布局：列表 + 底部按钮行
+            LinearLayout root = new LinearLayout(this);
+            root.setOrientation(LinearLayout.VERTICAL);
+            root.addView(
+                listView,
+                new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    0,
+                    1.0f
+                )
+            );
+            // 底部按钮栏
+            LinearLayout btnBar = new LinearLayout(this);
+            btnBar.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
+            btnBar.setWeightSum(4);
+            btnBar.setOrientation(LinearLayout.HORIZONTAL);
+            String txtGo = MyActivity.zh_cn ? "转到" : "Go";
+            String txtEdit = MyActivity.zh_cn ? "编辑" : "Edit";
+            String txtDel = MyActivity.zh_cn ? "删除" : "Delete";
+            String txtClose = MyActivity.zh_cn ? "关闭" : "Close";
+            TextView btnGo = createButton(txtGo);
+            TextView btnEdit = createButton(txtEdit);
+            TextView btnDel = createButton(txtDel);
+            TextView btnClose = createButton(txtClose);
+            btnBar.addView(btnGo);
+            btnBar.addView(btnEdit);
+            btnBar.addView(btnDel);
+            btnBar.addView(btnClose);
+            root.addView(btnBar);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setView(root);
+            AlertDialog dialog = builder.create();
+
+            // ========== 关键：设置弹窗尺寸，占屏幕80%宽，75%高 ==========
+            DisplayMetrics dm = getResources().getDisplayMetrics();
+            int dialogW = (int) (dm.widthPixels * 0.80f);
+            int dialogH = (int) (dm.heightPixels * 0.75f);
+
+            // 点击条目：仅选中，不弹出新弹窗
+            listView.setOnItemClickListener((parent, view, position, id) -> {
+                selectedPos[0] = position;
+                adapter.notifyDataSetChanged();
+            });
+            // 转到
+            btnGo.setOnClickListener(v -> {
+                if (selectedPos[0] < 0) return;
+                String fullStr = rawNoteData.get(selectedPos[0]);
+                String[] parts = fullStr.split("===", 8);
+                String id = parts[0].trim();
+                MyActivity.mInstance.PublicJavaCallCpp(
+                    "pdf_note_goto|==|" + id
+                );
+            });
+            // 编辑
+            btnEdit.setOnClickListener(v -> {
+                if (selectedPos[0] < 0) return;
+                String fullStr = rawNoteData.get(selectedPos[0]);
+                String[] parts = fullStr.split("===", 8);
+                String id = parts[0].trim();
+                MyActivity.mInstance.PublicJavaCallCpp(
+                    "pdf_note_edit|==|" + id
+                );
+            });
+            // 删除：增加确认弹窗
+            btnDel.setOnClickListener(v -> {
+                if (selectedPos[0] < 0) return;
+                String fullStr = rawNoteData.get(selectedPos[0]);
+                String[] parts = fullStr.split("===", 8);
+                String id = parts[0].trim();
+                String confirmTitle = MyActivity.zh_cn
+                    ? "确认删除"
+                    : "Confirm Delete";
+                String confirmMsg = MyActivity.zh_cn
+                    ? "确定删除这条笔记？"
+                    : "Are you sure to delete this note?";
+                String okTxt = MyActivity.zh_cn ? "删除" : "Delete";
+                String cancelTxt = MyActivity.zh_cn ? "取消" : "Cancel";
+                new AlertDialog.Builder(DocumentActivity.this)
+                    .setTitle(confirmTitle)
+                    .setMessage(confirmMsg)
+                    .setPositiveButton(okTxt, (d, w) -> {
+                        MyActivity.mInstance.PublicJavaCallCpp(
+                            "pdf_note_delete|==|" + id
+                        );
+                        dialog.dismiss();
+                    })
+                    .setNegativeButton(cancelTxt, null)
+                    .show();
+            });
+            // 关闭
+            btnClose.setOnClickListener(v -> {
+                dialog.dismiss();
+            });
+
+            dialog.show();
+            // show之后才能设置window尺寸
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setLayout(dialogW, dialogH);
+                dialog.getWindow().setDimAmount(0.5f);
+            }
+        });
+    }
+
+    // 辅助：创建按钮
+    private TextView createButton(String text) {
+        TextView tv = new TextView(this);
+        tv.setText(text);
+        tv.setPadding(dp2px(12), dp2px(8), dp2px(12), dp2px(8));
+        tv.setLayoutParams(
+            new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1
+            )
+        );
+        tv.setTextSize(15);
+        return tv;
+    }
+
+    private int dp2px(int dpVal) {
+        return (int) (dpVal * getResources().getDisplayMetrics().density +
+            0.5f);
     }
 }

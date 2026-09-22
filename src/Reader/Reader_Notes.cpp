@@ -1,137 +1,17 @@
+#include <QDateTime>
+#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QStringList>
+#include <map>  // 用于页码排序
+
 #include "Reader.h"
 #include "src/MainWindow.h"
 
-void Reader::addBookNote(const QString& preFillText) {
-  if (dlgAddBookNote != nullptr) {
-    dlgAddBookNote->close();
-    dlgAddBookNote->deleteLater();
-    dlgAddBookNote = nullptr;
-  }
-
-  dlgAddBookNote = new QDialog(mw_one);
-  int dlgh = mw_one->geometry().height() / 2;
-  if (dlgh < 350) dlgh = 350;
-  dlgAddBookNote->setFixedSize(mw_one->geometry().width() - 2, dlgh);
-  dlgAddBookNote->setWindowTitle(tr("Note"));
-
-  QTextEdit* textEdit = new QTextEdit(dlgAddBookNote);
-  textEdit->setObjectName("booknoteEdit");
-  textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
-  textEdit->setAcceptRichText(false);
-  textEdit->setText(preFillText);
-
-  initTextToolbarDynamic(dlgAddBookNote);
-  EditEventFilter* editFilter =
-      new EditEventFilter(textToolbarDynamic, dlgAddBookNote);
-  editFilter->setParent(dlgAddBookNote);
-  textEdit->installEventFilter(editFilter);
-  textEdit->viewport()->installEventFilter(editFilter);
-
-  QDialogButtonBox* buttonBox = new QDialogButtonBox(
-      QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dlgAddBookNote);
-  buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Ok"));
-  buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
-
-  QObject::connect(buttonBox, &QDialogButtonBox::accepted, dlgAddBookNote,
-                   &QDialog::accept);
-  QObject::connect(buttonBox, &QDialogButtonBox::rejected, dlgAddBookNote,
-                   &QDialog::reject);
-
-  connect(dlgAddBookNote, &QDialog::finished, this, [](int result) {
-    Q_UNUSED(result);
-    closeTextToolBar();
-  });
-
-  QVBoxLayout* vlayout = new QVBoxLayout(dlgAddBookNote);
-  QHBoxLayout* layout = new QHBoxLayout();
-  vlayout->addWidget(textEdit);
-  vlayout->addLayout(layout);
-  vlayout->addWidget(buttonBox);
-
-  m_Method->set_ToolButtonStyle(dlgAddBookNote);
-
-  //----------------------------------------------
-
-  layout->setSpacing(10);
-
-  // 创建按钮组，设置互斥
-  QButtonGroup* btnGroup = new QButtonGroup(this);
-  btnGroup->setExclusive(true);
-
-  QList<QPushButton*> colorButtons;
-
-  QStringList colorList = {
-      "#8500FF00",  // 保留：半透明纯绿（基准色，辅助标记）
-      "#85FF0000",  // 半透明纯红（重点提醒/错误标记，醒目不刺眼）
-      "#850000FF",  // 半透明纯蓝（关键信息/重要补充，与红色对比强烈）
-      "#85FFFF00",  // 半透明纯黄（核心高亮/荧光笔平替，视觉焦点）
-      "#8500FFFF",  // 半透明纯青（特殊注释/技术细节，独特不相近）
-      "#85FF00FF"   // 半透明纯洋红（个性化标记/主观标注，区分度拉满）
-  };
-
-  for (const QString& colorStr : colorList) {
-    QPushButton* btn = new QPushButton(this);
-    btn->setFixedSize(50, 50);
-    btn->setCheckable(true);
-
-    // 设置样式
-    QString style = QString(R"(
-    QPushButton {
-        border: 2px outset #666;
-        background-color: %1;
-    }
-    QPushButton:checked {
-        border: 2px solid red;         /* 选中时用红色边框 */
-        background-color: %1;
-    }
-    )")
-                        .arg(colorStr);
-
-    btn->setStyleSheet(style);
-
-    // 把原始颜色字符串存到按钮属性里
-    btn->setProperty("colorCode", colorStr);
-
-    layout->addWidget(btn);
-    btnGroup->addButton(btn);
-
-    colorButtons.append(btn);
-  }
-
-  // 默认选中第一个按钮
-  if (!colorButtons.isEmpty()) {
-    colorButtons.first()->setChecked(true);
-  }
-
-  // 连接信号槽（获取选中的颜色）
-  strColor = "#8500FF00";  //(默认)
-  connect(btnGroup,
-          QOverload<QAbstractButton*>::of(&QButtonGroup::buttonClicked), this,
-          [=](QAbstractButton* btn) {
-            strColor = btn->property("colorCode").toString();
-          });
-
-  //-------------------------------------------------------------------
-
-  QRect parentRect = mw_one->geometry();
-  int x = parentRect.x() + (parentRect.width() - dlgAddBookNote->width()) / 2;
-  int y = parentRect.y() + 1;
-  dlgAddBookNote->move(x, y);
-
-  if (dlgAddBookNote->exec() == QDialog::Accepted) {
-    QString noteText = textEdit->toPlainText();
-    // 在这里处理用户输入的笔记内容
-
-    qDebug() << strColor;
-    saveReadNote(cPage, startNote, endNote, strColor, noteText,
-                 "mui->editSetText->text()");
-    readReadNote(cPage);
-
-    qDebug() << "Note added:" << noteText;
-  } else {
-    qDebug() << "Note canceled.";
-  }
-}
+void Reader::addBookNote(const QString& preFillText) {}
 
 void Reader::editBookNote(int index, int page, const QString& content) {
   if (dlgEditBookNote != nullptr) {
@@ -326,109 +206,145 @@ void Reader::appendNoteDataToQmlList() {
   }
 }
 
-void Reader::saveReadNote(int page, int start, int end, const QString& color,
-                          const QString& content, const QString& quote) {
-  QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
+void Reader::saveReadNote(const QString& searchContext, const QString& keyword,
+                          const QString& noteContent,
+                          const QString& currentPage) {
+  QString filePath = iniDir + "memo/readnote/" + currentBookName + ".json";
+  QDir().mkpath(QFileInfo(filePath).path());
 
-  // 确保目录存在
-  QDir().mkpath(QFileInfo(file).path());
-
-  // 读取已有 JSON 数据
-  QJsonDocument doc;
-  if (QFile::exists(file)) {
-    QFile f(file);
+  // 1. 读取已有 JSON（带容错）
+  QJsonObject root;
+  if (QFile::exists(filePath)) {
+    QFile f(filePath);
     if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      QByteArray data = f.readAll();
-      doc = QJsonDocument::fromJson(data);
+      QJsonParseError err;
+      QJsonDocument doc = QJsonDocument::fromJson(f.readAll(), &err);
       f.close();
+      if (err.error == QJsonParseError::NoError && doc.isObject()) {
+        root = doc.object();
+      } else {
+        qWarning() << "[Reader] JSON parse failed:" << err.errorString();
+      }
     }
   }
 
-  // 如果文件为空，创建一个空对象
-  if (doc.isNull()) {
-    doc.setObject(QJsonObject());
-  }
-
-  QJsonObject root = doc.object();
-
-  // 获取 page 对应的数组（如果不存在则新建）
-  QJsonArray pageArray;
-  if (root.contains(QString::number(page))) {
-    pageArray = root[QString::number(page)].toArray();
-  }
-
-  // 创建新的笔记对象
+  // 2. 构建笔记对象（字段名与参数名严格对齐）
   QJsonObject noteObj;
-  noteObj["start"] = start;
-  noteObj["end"] = end;
-  noteObj["color"] = color;
-  noteObj["content"] = content;
-  noteObj["quote"] = quote;
-  noteObj["timestamp"] = QDateTime::currentMSecsSinceEpoch();  // 增加时间戳
+  qint64 ts = QDateTime::currentMSecsSinceEpoch();
 
-  // 追加到数组
+  noteObj["id"] = ts;
+  noteObj["time"] =
+      QDateTime::fromMSecsSinceEpoch(ts).toString(Qt::ISODateWithMs);
+  noteObj["currentPage"] = currentPage;  // ✅ 对齐参数名
+  noteObj["color"] = QStringLiteral("#FFEB3B");
+  noteObj["searchContext"] = searchContext;  // ✅ 对齐参数名
+  noteObj["keyword"] = keyword;              // ✅ 对齐参数名
+  noteObj["noteContent"] = noteContent;      // ✅ 对齐参数名
+
+  // 3. 追加到对应页码数组
+  QJsonArray pageArray = root.value(currentPage).toArray();
   pageArray.append(noteObj);
+  root[currentPage] = pageArray;
 
-  // 更新 root 对象
-  root[QString::number(page)] = pageArray;
-  doc.setObject(root);
+  // 4. 原子写入防损坏
+  QString tmpPath = filePath + ".tmp";
+  QFile tmpFile(tmpPath);
+  if (tmpFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    tmpFile.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+    tmpFile.flush();
+    tmpFile.close();
 
-  // 写回文件
-  QFile f(file);
-  if (f.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    f.write(doc.toJson(QJsonDocument::Indented));
-    f.close();
+    if (QFile::exists(filePath)) QFile::remove(filePath);
+    QFile::rename(tmpPath, filePath);
+  } else {
+    qCritical() << "[Reader] Failed to write note:" << tmpPath;
   }
 }
 
-void Reader::readReadNote(int page) {
-  QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
+QStringList Reader::readReadNote() {
+  QStringList result;
+  QString filePath = iniDir + "memo/readnote/" + currentBookName + ".json";
 
-  QFile f(file);
-  if (!f.exists()) {
-    qDebug() << "Note file not exists:" << file;
-    emit notesLoaded(QVariantList());  // 发送空列表
-    return;
+  if (!QFile::exists(filePath)) {
+    return result;  // 文件不存在，返回空数组
   }
 
+  QFile f(filePath);
   if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    qDebug() << "Failed to open note file:" << f.errorString();
-    return;
+    qWarning() << "[Reader] Failed to open readnote file:" << filePath;
+    return result;
   }
 
-  QByteArray data = f.readAll();
+  QJsonParseError err;
+  QJsonDocument doc = QJsonDocument::fromJson(f.readAll(), &err);
   f.close();
 
-  QJsonDocument doc = QJsonDocument::fromJson(data);
-  if (doc.isNull()) {
-    qDebug() << "Failed to parse JSON";
-    return;
+  if (err.error != QJsonParseError::NoError || !doc.isObject()) {
+    qWarning() << "[Reader] JSON parse failed:" << err.errorString();
+    return result;
   }
 
   QJsonObject root = doc.object();
 
-  // 获取 page 对应的笔记数组
-  if (root.contains(QString::number(page))) {
-    QJsonArray pageArray = root[QString::number(page)].toArray();
-
-    // 转换为 QVariantList，方便 QML 接收
-    QVariantList notesList;
-    for (int i = 0; i < pageArray.size(); ++i) {
-      QJsonObject noteObj = pageArray[i].toObject();
-      QVariantMap noteMap;
-      noteMap["start"] = noteObj["start"].toInt();
-      noteMap["end"] = noteObj["end"].toInt();
-      noteMap["color"] = noteObj["color"].toString();
-      noteMap["content"] = noteObj["content"].toString();
-      notesList.append(noteMap);
+  // ✅ 使用 std::map 自动按页码（数字大小）排序，防止安卓端列表乱序
+  std::map<int, QJsonArray> sortedPages;
+  for (auto it = root.begin(); it != root.end(); ++it) {
+    bool isNum;
+    int pageNum = it.key().toInt(&isNum);
+    if (isNum && it.value().isArray()) {
+      sortedPages[pageNum] = it.value().toArray();
     }
-
-    // TODO: 将 notesList 传递给 QML 的 notesModel
-    emit notesLoaded(notesList);
-  } else {
-    qDebug() << "No notes for page:" << page;
-    emit notesLoaded(QVariantList());  // 发送空列表
   }
+
+  // 遍历排序后的页码，组装数据
+  for (const auto& pair : sortedPages) {
+    const QJsonArray& pageArray = pair.second;
+
+    for (const QJsonValue& val : pageArray) {
+      if (!val.isObject()) continue;
+      QJsonObject note = val.toObject();
+
+      // 1. 提取基础字段（带默认值防崩溃）
+      QString id = QString::number(note["id"].toVariant().toLongLong());
+      QString currentPage = note["currentPage"].toString();
+      QString time = note["time"].toString();
+      QString noteContent = note["noteContent"].toString();
+      QString searchContext = note["searchContext"].toString();
+      QString keyword = note["keyword"].toString();
+      QString color = note["color"].toString("#FFEB3B");
+
+      // 2. 生成高亮 HTML (处理大小写及多次出现)
+      QString contextHtml = searchContext;
+      if (!keyword.isEmpty() && !searchContext.isEmpty()) {
+        QString highlightTag = QString(
+                                   "<mark style=\"background-color: %1; color: "
+                                   "#000000;\">%2</mark>")
+                                   .arg(color, keyword);
+        // 纯文本替换，仅增加高亮标记，不增加任何<i>/<em>斜体标签
+        contextHtml.replace(keyword, highlightTag, Qt::CaseInsensitive);
+      }
+
+      // 3. 采用 === 拼接（共 8 个字段）
+      // 顺序：id === 页码 === 时间 === HTML上下文 === 笔记内容 === 纯文本上下文
+      // === 关键词 === 颜色
+      QString item = QString("%1===%2===%3===%4===%5===%6===%7===%8")
+                         .arg(id)
+                         .arg(currentPage)
+                         .arg(time)
+                         .arg(contextHtml)
+                         .arg(noteContent)
+                         .arg(searchContext)
+                         .arg(keyword)
+                         .arg(color);
+
+      result.append(item);
+    }
+  }
+
+  m_Method->refreshJavaData("mPdfActivity", "showNoteListDialog",
+                            "artifex/mupdf/mini/DocumentActivity", result);
+
+  return result;
 }
 
 void Reader::delReadNote(int index) {
@@ -567,7 +483,7 @@ void Reader::updateReadNote(int page, int index, const QString& content,
 
   // 刷新 QML 模型
   if (page == cPage) {
-    readReadNote(page);
+    readReadNote();
   }
 }
 

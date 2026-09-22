@@ -184,7 +184,7 @@ class Reader : public QDialog {
   void showBookPageUp();
   void closeBookPage();
   void addBookNote(const QString& preFillText);
-  void readReadNote(int page);
+  QStringList readReadNote();
   int cPage, tPage;
   void viewBookNote();
   void keepScreenOn();
@@ -209,6 +209,9 @@ class Reader : public QDialog {
   void openBookByLocal();
   void closeReadList();
 
+  QString sanitizeFileName(const QString& name);
+  void saveReadNote(const QString& searchContext, const QString& keyword,
+                    const QString& noteContent, const QString& currentPage);
  public slots:
   void on_SetReaderFunVisible();
 
@@ -291,8 +294,6 @@ class Reader : public QDialog {
   bool getQmlReadyEnd();
   double readTotalHours();
   bool writeTotalHours(double value);
-  void saveReadNote(int page, int start, int end, const QString& color,
-                    const QString& content, const QString& quote);
 
   void updateReadNote(int page, int index, const QString& content,
                       const QString& color);

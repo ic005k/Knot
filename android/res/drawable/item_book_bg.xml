@@ -5,5 +5,10 @@
             <solid android:color="#BBDEFB" />
         </shape>
     </item>
-    <item android:drawable="@android:drawable/list_selector_background" />
+    <!-- 默认常态，纯白，移除系统自带的黄色按压效果 -->
+    <item>
+        <shape>
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
 </selector>
