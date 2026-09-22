@@ -316,11 +316,16 @@ QStringList Reader::readReadNote() {
       // 2. 生成高亮 HTML (处理大小写及多次出现)
       QString contextHtml = searchContext;
       if (!keyword.isEmpty() && !searchContext.isEmpty()) {
-        QString highlightTag = QString(
-                                   "<mark style=\"background-color: %1; color: "
-                                   "#000000;\">%2</mark>")
-                                   .arg(color, keyword);
-        // 纯文本替换，仅增加高亮标记，不增加任何<i>/<em>斜体标签
+        // ✅ 关键改动：
+        // 1. style 值用单引号包裹，避免双引号嵌套被 Android 解析器吞掉
+        // 2. 加上 padding 和 border-radius，与安卓端已验证的样式一致
+        // 3. color 用深色确保在浅色背景上可读
+        QString highlightTag =
+            QString(
+                "<span style='background-color:%1; color:#000000; "
+                "padding:2px; border-radius:2px;'>%2</span>")
+                .arg(color, keyword);
+
         contextHtml.replace(keyword, highlightTag, Qt::CaseInsensitive);
       }
 
