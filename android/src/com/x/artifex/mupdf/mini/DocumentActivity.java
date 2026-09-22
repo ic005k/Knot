@@ -28,6 +28,7 @@ import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.Html;
+import android.text.InputType;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -2558,14 +2559,19 @@ public class DocumentActivity extends Activity {
      * @param noteList 笔记数组，每条以 === 分割8个字段
      * 字段顺序：id === currentPage === time === contextHtml === noteContent === searchContext === keyword === color
      */
-    /**
-     * C++ JNI调用入口：PDF笔记列表弹窗
-     */
+
     public void showNoteListDialog(ArrayList<String> noteList) {
         runOnUiThread(() -> {
             if (noteList == null || noteList.isEmpty()) return;
             final ArrayList<String> rawNoteData = new ArrayList<>(noteList);
             final int[] selectedPos = { -1 };
+            final boolean dark = mInvertMode;
+            // 明暗配色
+            int bgRoot = dark ? 0xFF202020 : 0xFFFFFFFF;
+            int textColorMain = dark ? 0xFFEFEFEF : 0xFF222222;
+            int textColorSub = dark ? 0xFFB0B0B0 : 0xFF555555;
+            int itemSelectedBg = dark ? 0xFF354259 : 0xFFE0EDFF;
+            int dividerColor = dark ? 0xFF444444 : 0xFFDDDDDD;
 
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,
@@ -2595,7 +2601,6 @@ public class DocumentActivity extends Activity {
                             DocumentActivity.this
                         );
                         tvPageTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-
                         TextView tvHtml = new TextView(DocumentActivity.this);
                         tvHtml.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
                         tvHtml.setTypeface(
@@ -2604,14 +2609,12 @@ public class DocumentActivity extends Activity {
                                 Typeface.ITALIC
                             )
                         );
-
                         TextView tvNote = new TextView(DocumentActivity.this);
                         tvNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
                         // 设置全局粗体
                         tvNote.setTypeface(
                             Typeface.create(tvNote.getTypeface(), Typeface.BOLD)
                         );
-
                         layout.addView(tvPageTime);
                         layout.addView(tvHtml);
                         layout.addView(tvNote);
@@ -2624,6 +2627,11 @@ public class DocumentActivity extends Activity {
                     } else {
                         holder = (ViewHolder) itemView.getTag();
                     }
+                    // 每次刷新设置文字颜色（列表复用必须写这里）
+                    holder.tvPageTime.setTextColor(textColorSub);
+                    holder.tvHtml.setTextColor(textColorMain);
+                    holder.tvNote.setTextColor(textColorMain);
+
                     String fullStr = rawNoteData.get(position);
                     String[] parts = fullStr.split("===", 8);
                     if (parts.length < 8) return itemView;
@@ -2648,7 +2656,7 @@ public class DocumentActivity extends Activity {
                     holder.tvHtml.setText(spannedHtml);
                     holder.tvNote.setText(parts[4].trim());
                     itemView.setBackgroundColor(
-                        selectedPos[0] == position ? 0xFFE0EDFF : 0x00000000
+                        selectedPos[0] == position ? itemSelectedBg : 0x00000000
                     );
                     return itemView;
                 }
@@ -2660,16 +2668,17 @@ public class DocumentActivity extends Activity {
                     TextView tvNote;
                 }
             };
-
             ListView listView = new ListView(this);
             listView.setAdapter(adapter);
             listView.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
             listView.setDividerHeight(dp2px(8));
+            listView.setDivider(new ColorDrawable(dividerColor));
+            listView.setBackgroundColor(bgRoot);
             /////////////////////////////////////////////////////////////////////////
             // ===== 构建根布局：ListView(弹性) + 按钮栏(贴底) =====
             LinearLayout root = new LinearLayout(this);
             root.setOrientation(LinearLayout.VERTICAL);
-
+            root.setBackgroundColor(bgRoot);
             // ListView：weight=1 占满剩余空间，即使内容少也会撑开
             listView.setAdapter(adapter);
             listView.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
@@ -2682,12 +2691,12 @@ public class DocumentActivity extends Activity {
                     1.0f
                 )
             );
-
             // 按钮栏：WRAP_CONTENT，自然沉到最底部
             LinearLayout btnBar = new LinearLayout(this);
             btnBar.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
             btnBar.setWeightSum(4);
             btnBar.setOrientation(LinearLayout.HORIZONTAL);
+            btnBar.setBackgroundColor(bgRoot);
             TextView btnGo = createButton(MyActivity.zh_cn ? "转到" : "Go");
             TextView btnEdit = createButton(MyActivity.zh_cn ? "编辑" : "Edit");
             TextView btnDel = createButton(
@@ -2696,10 +2705,18 @@ public class DocumentActivity extends Activity {
             TextView btnClose = createButton(
                 MyActivity.zh_cn ? "关闭" : "Close"
             );
-            btnBar.addView(btnGo);
-            btnBar.addView(btnEdit);
-            btnBar.addView(btnDel);
-            btnBar.addView(btnClose);
+
+            // 关键：每个按钮必须设置 LayoutParams：width=0，weight=1，才能均分
+            LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1.0f
+            );
+            btnBar.addView(btnGo, btnLp);
+            btnBar.addView(btnEdit, btnLp);
+            btnBar.addView(btnDel, btnLp);
+            btnBar.addView(btnClose, btnLp);
+
             // ✅ 不传 weight，按钮栏以 WRAP_CONTENT 高度固定在底部
             root.addView(
                 btnBar,
@@ -2708,28 +2725,19 @@ public class DocumentActivity extends Activity {
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
             );
-
             ///////////////////////////////////////////////////////////////////////
-
-            //AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            //builder.setView(root);
-            //final AlertDialog dialog = builder.create();
-
             // ✅ 替换为 Dialog
             final Dialog dialog = new Dialog(this);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // 去除默认标题栏
             dialog.setContentView(root); // 直接设置你的根布局
             dialog.setCancelable(true); // 允许点击外部或返回键关闭（按需设置）
-
             DisplayMetrics dm = getResources().getDisplayMetrics();
             int dialogW = (int) (dm.widthPixels * 0.95f);
             int dialogH = (int) (dm.heightPixels * 0.95f);
-
             listView.setOnItemClickListener((parent, view, position, id) -> {
                 selectedPos[0] = position;
                 adapter.notifyDataSetChanged();
             });
-
             // ✅ 转到：关闭弹窗 → 跳页 → 高亮关键词
             btnGo.setOnClickListener(v -> {
                 if (selectedPos[0] < 0) return;
@@ -2738,15 +2746,12 @@ public class DocumentActivity extends Activity {
                     .split("===", 8);
                 int targetPage = Integer.parseInt(parts[1].trim());
                 String keyword = parts[6].trim();
-
                 dialog.dismiss(); // 先关闭笔记列表
-
                 // 跳转并高亮
                 gotoPage(targetPage);
                 searchNeedle = keyword;
                 loadPage(); // loadPage 内部会用 searchNeedle 执行 page.search() 并渲染高亮
             });
-
             // ✅ 编辑：复用笔记输入弹窗，预填已有内容
             btnEdit.setOnClickListener(v -> {
                 if (selectedPos[0] < 0) return;
@@ -2757,7 +2762,6 @@ public class DocumentActivity extends Activity {
                 String keyword = parts[6].trim();
                 String existingNote = parts[4].trim();
                 String searchContext = parts[5].trim();
-
                 // 弹出编辑弹窗（不关闭笔记列表，编辑完成后自动刷新）
                 showNoteInputDialog(
                     keyword,
@@ -2767,7 +2771,6 @@ public class DocumentActivity extends Activity {
                     dialog
                 );
             });
-
             // 删除
             btnDel.setOnClickListener(v -> {
                 if (selectedPos[0] < 0) return;
@@ -2797,19 +2800,25 @@ public class DocumentActivity extends Activity {
                     )
                     .show();
             });
-
             btnClose.setOnClickListener(v -> dialog.dismiss());
-
             dialog.show();
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setLayout(dialogW, dialogH);
                 dialog.getWindow().setDimAmount(0.5f);
+                // ✅ 暗黑模式背景
+                dialog
+                    .getWindow()
+                    .setBackgroundDrawableResource(
+                        mInvertMode
+                            ? android.R.drawable.dialog_holo_dark_frame
+                            : android.R.drawable.dialog_holo_light_frame
+                    );
             }
         });
     }
 
     // 辅助：创建按钮
-    private TextView createButton(String text) {
+    /*private TextView createButton(String text) {
         TextView tv = new TextView(this);
         tv.setText(text);
         tv.setPadding(dp2px(12), dp2px(8), dp2px(12), dp2px(8));
@@ -2823,6 +2832,16 @@ public class DocumentActivity extends Activity {
         tv.setGravity(Gravity.CENTER); // ✅ 关键：文字水平居中
         tv.setTextSize(15);
         tv.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
+        return tv;
+    }*/
+    private TextView createButton(String text) {
+        TextView tv = new TextView(this);
+        tv.setText(text);
+        tv.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
+        tv.setGravity(Gravity.CENTER);
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        int textColor = mInvertMode ? 0xFFEFEFEF : 0xFF222222;
+        tv.setTextColor(textColor);
         return tv;
     }
 
@@ -2850,109 +2869,221 @@ public class DocumentActivity extends Activity {
 
         int dp16 = dp2px(16);
         int dp12 = dp2px(12);
+        int dp8 = dp2px(8);
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(dp16, dp12, dp16, dp12);
+        // ===== 根布局 =====
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp16, dp12, dp16, dp12);
 
-        // 标题：显示关键词
+        // ✅ 1. 标题行：「笔记」+ 关键词 合并为一行，节省垂直空间
+        LinearLayout titleRow = new LinearLayout(this);
+        titleRow.setOrientation(LinearLayout.HORIZONTAL);
+        titleRow.setGravity(Gravity.CENTER_VERTICAL);
+        titleRow.setPadding(0, 0, 0, dp8);
+
+        TextView labelNote = new TextView(this);
+        labelNote.setText(MyActivity.zh_cn ? "笔记" : "Note");
+        labelNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        labelNote.setTypeface(Typeface.DEFAULT_BOLD);
+        labelNote.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
+        titleRow.addView(
+            labelNote,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        // 分隔符
+        TextView separator = new TextView(this);
+        separator.setText(" · ");
+        separator.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        separator.setTextColor(mInvertMode ? 0xFF888888 : 0xFF999999);
+        titleRow.addView(
+            separator,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        // 关键词（弹性占满剩余宽度，超长省略）
         String titleText =
-            keyword.length() > 40 ? keyword.substring(0, 40) + "..." : keyword;
+            keyword.length() > 50 ? keyword.substring(0, 50) + "…" : keyword;
         TextView titleView = new TextView(this);
         titleView.setText(titleText);
-        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         titleView.setTextColor(mInvertMode ? 0xFFBBDEFB : 0xFF1565C0);
-        titleView.setMaxLines(2);
+        titleView.setSingleLine(true);
         titleView.setEllipsize(TextUtils.TruncateAt.END);
-        titleView.setPadding(0, 0, 0, dp12);
-        layout.addView(titleView);
+        titleRow.addView(
+            titleView,
+            new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        );
 
-        // 输入框
+        root.addView(
+            titleRow,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        // ✅ 2. 输入框：weight=1 撑满中间所有剩余空间
         final EditText noteEdit = new EditText(this);
         noteEdit.setHint(
             MyActivity.zh_cn ? "输入笔记内容..." : "Enter note content..."
         );
-        noteEdit.setMinLines(3);
         noteEdit.setGravity(Gravity.TOP | Gravity.START);
         noteEdit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         noteEdit.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
         noteEdit.setHintTextColor(mInvertMode ? 0xFF666666 : 0xFF999999);
         if (mInvertMode) noteEdit.setBackgroundColor(0xFF2D2D2D);
         noteEdit.setPadding(dp12, dp12, dp12, dp12);
+
+        noteEdit.setInputType(
+            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        );
+
+        noteEdit.setImeOptions(EditorInfo.IME_ACTION_DONE);
         if (isEditMode) {
             noteEdit.setText(existingNote);
             noteEdit.setSelection(existingNote.length());
         }
-        layout.addView(noteEdit);
 
-        // ✅ 按钮文案统一为「保存」，不区分新增/编辑
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(layout);
-        builder.setTitle(MyActivity.zh_cn ? "笔记" : "Note");
-        builder.setPositiveButton(MyActivity.zh_cn ? "保存" : "Save", null);
-        builder.setNegativeButton(MyActivity.zh_cn ? "取消" : "Cancel", null);
+        LinearLayout.LayoutParams editParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            0,
+            1.0f
+        );
+        editParams.topMargin = dp8;
+        editParams.bottomMargin = dp8;
+        root.addView(noteEdit, editParams);
 
-        final AlertDialog noteDialog = builder.create();
-        if (noteDialog.getWindow() != null) noteDialog
-            .getWindow()
-            .setDimAmount(0.3f);
+        // ✅ 3. 按钮栏：WRAP_CONTENT 高度，始终贴在底部
+        LinearLayout btnBar = new LinearLayout(this);
+        btnBar.setOrientation(LinearLayout.HORIZONTAL);
+        btnBar.setGravity(Gravity.END);
+        btnBar.setWeightSum(2);
 
-        noteDialog.setOnShowListener(dlg -> {
-            android.widget.Button positiveBtn = noteDialog.getButton(
-                AlertDialog.BUTTON_POSITIVE
-            );
-            positiveBtn.setOnClickListener(v -> {
-                String noteContent = noteEdit.getText().toString().trim();
-                if (noteContent.isEmpty()) {
-                    Toast.makeText(
-                        DocumentActivity.this,
-                        MyActivity.zh_cn
-                            ? "笔记内容不能为空"
-                            : "Note content cannot be empty",
-                        Toast.LENGTH_SHORT
-                    ).show();
-                    return;
-                }
+        TextView btnCancel = createButton(MyActivity.zh_cn ? "取消" : "Cancel");
+        TextView btnSave = createButton(MyActivity.zh_cn ? "保存" : "Save");
+        // 保存按钮加粗/高亮以示区分
+        btnSave.setTypeface(Typeface.DEFAULT_BOLD);
+        btnSave.setTextColor(mInvertMode ? 0xFF90CAF9 : 0xFF1565C0);
 
-                // ✅ 自动判断：有 ID 就更新，没 ID 就新增
-                String payload;
-                if (isEditMode) {
-                    payload =
-                        "pdf_note_update|==|" +
-                        noteId +
-                        "|==|" +
-                        searchContext +
-                        "|==|" +
-                        keyword +
-                        "|==|" +
-                        noteContent;
-                } else {
-                    payload =
-                        "pdf_save_note|==|" +
-                        searchContext +
-                        "|==|" +
-                        keyword +
-                        "|==|" +
-                        noteContent +
-                        "|==|" +
-                        currentPage;
-                }
-                MyActivity.mInstance.PublicJavaCallCpp(payload);
+        btnBar.addView(
+            btnCancel,
+            new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        );
+        btnBar.addView(
+            btnSave,
+            new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        );
 
+        root.addView(
+            btnBar,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        // ===== 创建 Dialog（不使用 Builder 的 title/button）=====
+        final Dialog noteDialog = new Dialog(this);
+        noteDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        noteDialog.setContentView(root);
+        noteDialog.setCancelable(true);
+        if (noteDialog.getWindow() != null) {
+            noteDialog.getWindow().setDimAmount(0.3f);
+            noteDialog
+                .getWindow()
+                .setBackgroundDrawableResource(
+                    mInvertMode
+                        ? android.R.drawable.dialog_holo_dark_frame
+                        : android.R.drawable.dialog_holo_light_frame
+                );
+        }
+
+        // ===== 按钮点击事件 =====
+        btnCancel.setOnClickListener(v -> noteDialog.dismiss());
+
+        btnSave.setOnClickListener(v -> {
+            String noteContent = noteEdit.getText().toString().trim();
+            if (noteContent.isEmpty()) {
                 Toast.makeText(
                     DocumentActivity.this,
-                    MyActivity.zh_cn ? "已保存" : "Saved",
+                    MyActivity.zh_cn
+                        ? "笔记内容不能为空"
+                        : "Note content cannot be empty",
                     Toast.LENGTH_SHORT
                 ).show();
+                return;
+            }
 
-                noteDialog.dismiss();
-                if (parentDialog != null && parentDialog.isShowing()) {
-                    parentDialog.dismiss();
-                }
-            });
+            String payload;
+            if (isEditMode) {
+                payload =
+                    "pdf_note_update|==|" +
+                    noteId +
+                    "|==|" +
+                    searchContext +
+                    "|==|" +
+                    keyword +
+                    "|==|" +
+                    noteContent;
+            } else {
+                payload =
+                    "pdf_save_note|==|" +
+                    searchContext +
+                    "|==|" +
+                    keyword +
+                    "|==|" +
+                    noteContent +
+                    "|==|" +
+                    currentPage;
+            }
+            MyActivity.mInstance.PublicJavaCallCpp(payload);
+
+            Toast.makeText(
+                DocumentActivity.this,
+                MyActivity.zh_cn ? "已保存" : "Saved",
+                Toast.LENGTH_SHORT
+            ).show();
+
+            noteDialog.dismiss();
+            if (parentDialog != null && parentDialog.isShowing()) {
+                parentDialog.dismiss();
+            }
         });
 
+        // ===== 显示并设置尺寸 =====
         noteDialog.show();
+        if (noteDialog.getWindow() != null) {
+            DisplayMetrics dm = getResources().getDisplayMetrics();
+            int width = (int) (dm.widthPixels * 0.9);
+            int height = (int) (dm.heightPixels * 0.9);
+            noteDialog.getWindow().setLayout(width, height);
+            noteDialog
+                .getWindow()
+                .setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
+                );
+        }
+
         noteEdit.requestFocus();
         noteEdit.post(() -> {
             InputMethodManager imm = (InputMethodManager) getSystemService(
