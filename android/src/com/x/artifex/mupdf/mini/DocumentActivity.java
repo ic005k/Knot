@@ -191,6 +191,9 @@ public class DocumentActivity extends Activity {
     protected Insets systemInsets = Insets.NONE;
     protected boolean newSearchHitPage;
 
+    // AI加载等待弹窗
+    private androidx.appcompat.app.AlertDialog mAiLoadingDialog;
+
     // 用来存放C++返回的内存PDF byte[]
     private byte[] mConvertedPdfBuffer = null;
 
@@ -2402,13 +2405,17 @@ public class DocumentActivity extends Activity {
 
             switch (item.getItemId()) {
                 case ID_AI_SEARCH:
+                    // 显示AI等待弹窗
+                    showAiLoadingDialog();
                     MyActivity.mInstance.PublicJavaCallCpp(
                         "pdf_ai_search|==|" + selectedText
                     );
-                    mode.finish();
+
+                    /*mode.finish();
                     if (
                         parentDialog != null && parentDialog.isShowing()
-                    ) parentDialog.dismiss();
+                    ) parentDialog.dismiss();*/
+
                     return true;
                 case ID_WEB_SEARCH:
                     try {
@@ -2956,5 +2963,39 @@ public class DocumentActivity extends Activity {
                 InputMethodManager.SHOW_IMPLICIT
             );
         });
+    }
+
+    /**
+     * 显示AI分析等待弹窗，带转圈ProgressBar
+     */
+    public void showAiLoadingDialog() {
+        runOnUiThread(() -> {
+            if (isFinishing()) return;
+            if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
+                return;
+            }
+            // 调用MyActivity公共方法，拿到dialog实例保存到本页面成员
+            mAiLoadingDialog = MyActivity.showAiLoadingDialog(this);
+        });
+    }
+
+    /**
+     * 关闭AI等待弹窗
+     */
+    public void dismissAiLoadingDialog() {
+        runOnUiThread(() -> {
+            MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
+        });
+    }
+
+    /**
+     * C++调用：AI分析结果弹窗，支持简易MD渲染，支持 # ~ #### 标题
+     * @param mdList 数组，仅第0项存放Markdown原始文本
+     */
+    public void showAiMarkdownDialog(ArrayList<String> mdList) {
+        // 先关闭本页面的loading弹窗
+        dismissAiLoadingDialog();
+        // 调用MyActivity公共静态方法，传入当前this作为上下文
+        MyActivity.showAiMarkdownDialog(this, mdList);
     }
 }

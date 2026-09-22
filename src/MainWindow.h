@@ -415,6 +415,7 @@ class MainWindow : public QMainWindow {
  public slots:
   void on_btnAISteps_clicked();
   void on_btnRecentOpen_clicked();
+  void on_btnAIExplanation_clicked(const QString& selectedText);
 
   void on_btnBackAIAPIList_clicked();
 
@@ -843,8 +844,6 @@ class MainWindow : public QMainWindow {
   void on_chkAutoStopTTS_clicked(bool checked);
 
   void on_btnAIReportAnalysis_clicked();
-
-  void on_btnAIExplanation_clicked();
 
   void on_actionCopyLog();
 

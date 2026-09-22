@@ -555,6 +555,17 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.contains("pdf_ai_search|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              if (list.count() == 2) {
+                QString selectedText = list.at(1);
+                m_Reader->isAIReaderExplanation = true;
+                mw_one->on_btnAIExplanation_clicked(selectedText);
+              }
+            });
+          }
+
           if (strType.contains("open_reading_notes|==|")) {
             QTimer::singleShot(100, mw_one,
                                [=]() { m_Reader->readReadNote(); });

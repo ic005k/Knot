@@ -143,9 +143,17 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
           }
         } else if (m_Reader->isAIReaderExplanation) {
           m_Reader->isAIReaderExplanation = false;
-          m_MsgBox->ui->btnOk->setText(tr("Add Note"));
-          if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
-            m_Reader->addBookNote(aiReplyText);
+          if (isAndroid) {
+            QStringList list;
+            list.append(aiReplyText);
+            m_Method->refreshJavaData("mPdfActivity", "showAiMarkdownDialog",
+                                      "artifex/mupdf/mini/DocumentActivity",
+                                      list);
+          } else {
+            m_MsgBox->ui->btnOk->setText(tr("Add Note"));
+            if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
+              m_Reader->addBookNote(aiReplyText);
+            }
           }
         } else if (m_Notes->isAIQA) {
           m_Notes->ui->editAnswer->setText(aiReplyText);

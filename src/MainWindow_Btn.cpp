@@ -430,12 +430,9 @@ Rules:
   aiChatQuery(fullPrompt);
 }
 
-void MainWindow::on_btnAIExplanation_clicked() {
-  QString text = "";  //  mw_one->ui->editSetText->text();
-  QString trimText = text.trimmed();
+void MainWindow::on_btnAIExplanation_clicked(const QString& selectedText) {
+  QString trimText = selectedText.trimmed();
   if (trimText.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Tip"), tr("No consumption record data available"), 0);
     return;
   }
 
