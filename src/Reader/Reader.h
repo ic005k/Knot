@@ -212,6 +212,8 @@ class Reader : public QDialog {
   QString sanitizeFileName(const QString& name);
   void saveReadNote(const QString& searchContext, const QString& keyword,
                     const QString& noteContent, const QString& currentPage);
+  void updateReadNote(const QString& noteId, const QString& searchContext,
+                      const QString& keyword, const QString& noteContent);
  public slots:
   void on_SetReaderFunVisible();
 
@@ -243,7 +245,7 @@ class Reader : public QDialog {
   void goNextPage();
   void goUpPage();
 
-  void delReadNote(int index);
+  void delReadNote(const QString& noteId);
   void editBookNote(int index, int page, const QString& content);
   void closeViewBookNote();
   void setShowNoteValue(bool value);

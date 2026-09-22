@@ -261,6 +261,96 @@ void Reader::saveReadNote(const QString& searchContext, const QString& keyword,
   }
 }
 
+void Reader::updateReadNote(const QString& noteId, const QString& searchContext,
+                            const QString& keyword,
+                            const QString& noteContent) {
+  QString filePath = iniDir + "memo/readnote/" + currentBookName + ".json";
+  if (!QFile::exists(filePath)) {
+    qWarning() << "[Reader] updateReadNote: file not found:" << filePath;
+    return;
+  }
+
+  // ✅ Java传来的是字符串，JSON里存的是qint64，必须转成数值比较
+  bool ok = false;
+  qint64 targetId = noteId.toLongLong(&ok);
+  if (!ok) {
+    qWarning() << "[Reader] updateReadNote: invalid noteId format:" << noteId;
+    return;
+  }
+
+  // 1. 读取已有 JSON
+  QJsonObject root;
+  QFile f(filePath);
+  if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(f.readAll(), &err);
+    f.close();
+    if (err.error == QJsonParseError::NoError && doc.isObject()) {
+      root = doc.object();
+    } else {
+      qWarning() << "[Reader] JSON parse failed:" << err.errorString();
+      return;
+    }
+  } else {
+    qCritical() << "[Reader] Cannot open note file for update:" << filePath;
+    return;
+  }
+
+  // 2. 遍历查找目标笔记并原地更新
+  bool found = false;
+  qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+  QString nowStr =
+      QDateTime::fromMSecsSinceEpoch(nowMs).toString(Qt::ISODateWithMs);
+
+  for (auto it = root.begin(); it != root.end(); ++it) {
+    if (!it.value().isArray()) continue;
+
+    QJsonArray pageArray = it.value().toArray();
+    for (int i = 0; i < pageArray.size(); ++i) {
+      QJsonObject obj = pageArray[i].toObject();
+
+      // ✅ 使用 qint64 数值精确匹配 id
+      if (obj["id"].toVariant().toLongLong() == targetId) {
+        // 覆盖内容字段
+        obj["searchContext"] = searchContext;
+        obj["keyword"] = keyword;
+        obj["noteContent"] = noteContent;
+
+        // ✅ 直接覆盖 time 为当前编辑时间，简洁明了
+        obj["time"] = nowStr;
+
+        // ✅ QJsonValue 是值语义，修改后必须显式写回数组和根对象
+        pageArray[i] = obj;
+        root[it.key()] = pageArray;
+        found = true;
+        break;
+      }
+    }
+    if (found) break;
+  }
+
+  if (!found) {
+    qWarning() << "[Reader] updateReadNote: noteId not found:" << targetId;
+    return;
+  }
+
+  // 3. 原子写入防损坏
+  QString tmpPath = filePath + ".tmp";
+  QFile tmpFile(tmpPath);
+  if (tmpFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    tmpFile.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+    tmpFile.flush();
+    tmpFile.close();
+
+    if (QFile::exists(filePath)) QFile::remove(filePath);
+    if (!QFile::rename(tmpPath, filePath)) {
+      qCritical() << "[Reader] Failed to rename tmp file after update";
+    }
+  } else {
+    qCritical() << "[Reader] Failed to write updated note:" << tmpPath;
+  }
+}
+
 QStringList Reader::readReadNote() {
   QStringList result;
   QString filePath = iniDir + "memo/readnote/" + currentBookName + ".json";
@@ -352,74 +442,92 @@ QStringList Reader::readReadNote() {
   return result;
 }
 
-void Reader::delReadNote(int index) {
-  int page = cPage;
-  QString file = iniDir + "memo/readnote/" + currentBookName + ".json";
-
-  // 如果文件不存在，直接返回
-  if (!QFile::exists(file)) {
-    qDebug() << "Note file not exists:" << file;
+void Reader::delReadNote(const QString& noteId) {
+  QString filePath = iniDir + "memo/readnote/" + currentBookName + ".json";
+  if (!QFile::exists(filePath)) {
+    qWarning() << "[Reader] delReadNote: file not found:" << filePath;
     return;
   }
 
-  // 打开并读取 JSON
-  QFile f(file);
-  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    qDebug() << "Failed to open note file for reading:" << f.errorString();
+  // ✅ Java传来的是字符串，JSON里存的是qint64，必须转成数值比较
+  bool ok = false;
+  qint64 targetId = noteId.toLongLong(&ok);
+  if (!ok) {
+    qWarning() << "[Reader] delReadNote: invalid noteId format:" << noteId;
     return;
   }
 
-  QByteArray data = f.readAll();
-  f.close();
-
-  QJsonDocument doc = QJsonDocument::fromJson(data);
-  if (doc.isNull()) {
-    qDebug() << "Failed to parse JSON";
-    return;
-  }
-
-  QJsonObject root = doc.object();
-
-  // 检查 page 是否存在
-  QString pageKey = QString::number(page);
-  if (!root.contains(pageKey)) {
-    qDebug() << "No notes for page:" << page;
-    return;
-  }
-
-  QJsonArray notesArray = root[pageKey].toArray();
-
-  // 检查 index 是否有效
-  if (index < 0 || index >= notesArray.size()) {
-    qDebug() << "Invalid note index:" << index;
-    return;
-  }
-
-  // 删除指定索引的笔记
-  notesArray.removeAt(index);
-
-  // 如果删除后该 page 没有笔记，可将其从 JSON 中移除（可选）
-  if (notesArray.isEmpty()) {
-    root.remove(pageKey);
+  // 1. 读取已有 JSON
+  QJsonObject root;
+  QFile f(filePath);
+  if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(f.readAll(), &err);
+    f.close();
+    if (err.error == QJsonParseError::NoError && doc.isObject()) {
+      root = doc.object();
+    } else {
+      qWarning() << "[Reader] JSON parse failed:" << err.errorString();
+      return;
+    }
   } else {
-    root[pageKey] = notesArray;
-  }
-
-  // 写回文件
-  if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
-    qDebug() << "Failed to open note file for writing:" << f.errorString();
+    qCritical() << "[Reader] Cannot open note file for delete:" << filePath;
     return;
   }
 
-  doc.setObject(root);
-  f.write(doc.toJson(QJsonDocument::Indented));
-  f.close();
+  // 2. 遍历查找目标笔记并移除
+  bool found = false;
+  for (auto it = root.begin(); it != root.end(); ++it) {
+    if (!it.value().isArray()) continue;
 
-  qDebug() << "Note at index" << index << "on page" << page
-           << "has been deleted.";
+    QJsonArray pageArray = it.value().toArray();
+    int originalSize = pageArray.size();
 
-  // 刷新 QML 中的笔记模型(备选)
-  // readReadNote(page);
+    // ✅ 使用 erase-remove 模式安全移除匹配项
+    // 注意：不能用 range-for + removeAt，会导致索引错位
+    for (int i = pageArray.size() - 1; i >= 0; --i) {
+      QJsonObject obj = pageArray[i].toObject();
+      if (obj["id"].toVariant().toLongLong() == targetId) {
+        pageArray.removeAt(i);
+        found = true;
+        // id 是唯一的，找到后即可停止当前页的遍历
+        break;
+      }
+    }
+
+    // 有变动才写回
+    if (pageArray.size() != originalSize) {
+      if (pageArray.isEmpty()) {
+        // ✅ 该页笔记已清空，移除整个页码 key，保持 JSON 整洁
+        root.erase(it);
+      } else {
+        root[it.key()] = pageArray;
+      }
+      break;  // id 全局唯一，无需继续遍历其他页
+    }
+  }
+
+  if (!found) {
+    qWarning() << "[Reader] delReadNote: noteId not found:" << targetId;
+    return;
+  }
+
+  // 3. 原子写入防损坏
+  QString tmpPath = filePath + ".tmp";
+  QFile tmpFile(tmpPath);
+  if (tmpFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    tmpFile.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+    tmpFile.flush();
+    tmpFile.close();
+
+    if (QFile::exists(filePath)) QFile::remove(filePath);
+    if (!QFile::rename(tmpPath, filePath)) {
+      qCritical() << "[Reader] Failed to rename tmp file after delete";
+    }
+  } else {
+    qCritical() << "[Reader] Failed to write note file after delete:"
+                << tmpPath;
+  }
 }
 
 void Reader::updateReadNote(int page, int index, const QString& content,

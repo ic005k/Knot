@@ -108,7 +108,7 @@ void Reader::setPdfDataToJava(QString txtFile) {
 #endif
 }
 
-QByteArray Reader::txtToPdf(const QString& filePath) {
+/*QByteArray Reader::txtToPdf(const QString& filePath) {
   QFile file(filePath);
   if (!file.open(QIODevice::ReadOnly)) {
     qWarning() << "Failed to open txt file:" << filePath << file.errorString();
@@ -172,5 +172,90 @@ QByteArray Reader::txtToPdf(const QString& filePath) {
 
   delete printer;
   delete doc;
+  return pdfData;
+}*/
+
+#include <QBuffer>
+#include <QByteArray>
+#include <QFile>
+#include <QFileInfo>
+#include <QFont>
+#include <QIODevice>
+#include <QPageLayout>
+#include <QPageSize>
+#include <QPdfWriter>
+#include <QStringDecoder>
+#include <QTextDocument>
+
+QByteArray Reader::txtToPdf(const QString& filePath) {
+  // ================= 1. 读取与解码文本 =================
+  QFile file(filePath);
+  if (!file.open(QIODevice::ReadOnly)) {
+    qWarning() << "Failed to open txt file:" << filePath << file.errorString();
+    return {};
+  }
+  QByteArray raw = file.readAll();
+  file.close();
+
+  QString txtContent;
+
+  // 检查 UTF-8 BOM
+  if (raw.startsWith("\xEF\xBB\xBF")) {
+    txtContent = QString::fromUtf8(raw.mid(3));
+  } else {
+    // 尝试严格 UTF-8 解码
+    auto utf8Dec = QStringDecoder(QStringDecoder::Utf8,
+                                  QStringDecoder::Flag::ConvertInvalidToNull);
+    QString test = utf8Dec(raw);
+    bool isValidUtf8 =
+        utf8Dec.isValid() && !test.contains('\0') && !utf8Dec.hasError();
+
+    if (isValidUtf8) {
+      txtContent = test;
+    } else {
+      // 非 UTF-8 → 使用 JNI 解码 GBK
+      txtContent = decodeGbkViaJni(raw);
+      qInfo() << "TXT decoded as GBK via JNI:" << filePath;
+    }
+  }
+
+  // ================= 2. 构建文档 =================
+  auto* doc = new QTextDocument();
+  doc->setPlainText(txtContent);
+
+  QFont font("Noto Sans CJK SC", 16);
+  font.setStyleStrategy(QFont::PreferAntialias);
+  doc->setDefaultFont(font);
+
+  // ================= 3. 内存 PDF 输出 =================
+  QByteArray pdfData;
+  QBuffer buffer(&pdfData);
+
+  if (!buffer.open(QIODevice::WriteOnly)) {
+    qWarning() << "Failed to open memory buffer for PDF generation";
+    delete doc;
+    return {};
+  }
+
+  // ✅ 使用 QPdfWriter 直接写入 QBuffer (内存)
+  QPdfWriter writer(&buffer);
+  writer.setPageSize(QPageSize(QPageSize::A4));
+  writer.setPageOrientation(QPageLayout::Portrait);
+  writer.setResolution(300);  // 对标原 QPrinter::HighResolution，保证清晰度
+  writer.setTitle(QFileInfo(filePath).fileName());
+
+  // 执行渲染（QTextDocument::print 接受 QPagedPaintDevice，QPdfWriter
+  // 继承自它）
+  doc->print(&writer);
+
+  buffer.close();
+
+  // ================= 4. 清理与返回 =================
+  delete doc;
+
+  if (pdfData.isEmpty()) {
+    qWarning() << "Generated PDF data is empty for:" << filePath;
+  }
+
   return pdfData;
 }

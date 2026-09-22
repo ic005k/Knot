@@ -2,6 +2,7 @@ package com.x.artifex.mupdf.mini;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -2335,7 +2336,8 @@ public class DocumentActivity extends Activity {
     {
 
         private final TextView textView;
-        private final androidx.appcompat.app.AlertDialog parentDialog;
+        // private final androidx.appcompat.app.AlertDialog parentDialog;
+        private final Dialog parentDialog;
 
         private static final int ID_AI_SEARCH = 1001;
         private static final int ID_WEB_SEARCH = 1002;
@@ -2346,7 +2348,7 @@ public class DocumentActivity extends Activity {
 
         public TextSelectionActionModeCallback(
             TextView textView,
-            AlertDialog parentDialog
+            Dialog parentDialog
         ) {
             this.textView = textView;
             this.parentDialog = parentDialog;
@@ -2558,7 +2560,6 @@ public class DocumentActivity extends Activity {
             final ArrayList<String> rawNoteData = new ArrayList<>(noteList);
             final int[] selectedPos = { -1 };
 
-            // ... adapter 代码保持不变（ViewHolder 那一段）...
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,
                 0,
@@ -2587,6 +2588,7 @@ public class DocumentActivity extends Activity {
                             DocumentActivity.this
                         );
                         tvPageTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+
                         TextView tvHtml = new TextView(DocumentActivity.this);
                         tvHtml.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
                         tvHtml.setTypeface(
@@ -2595,8 +2597,14 @@ public class DocumentActivity extends Activity {
                                 Typeface.ITALIC
                             )
                         );
+
                         TextView tvNote = new TextView(DocumentActivity.this);
                         tvNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                        // 设置全局粗体
+                        tvNote.setTypeface(
+                            Typeface.create(tvNote.getTypeface(), Typeface.BOLD)
+                        );
+
                         layout.addView(tvPageTime);
                         layout.addView(tvHtml);
                         layout.addView(tvNote);
@@ -2650,18 +2658,25 @@ public class DocumentActivity extends Activity {
             listView.setAdapter(adapter);
             listView.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
             listView.setDividerHeight(dp2px(8));
-
+            /////////////////////////////////////////////////////////////////////////
+            // ===== 构建根布局：ListView(弹性) + 按钮栏(贴底) =====
             LinearLayout root = new LinearLayout(this);
             root.setOrientation(LinearLayout.VERTICAL);
+
+            // ListView：weight=1 占满剩余空间，即使内容少也会撑开
+            listView.setAdapter(adapter);
+            listView.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
+            listView.setDividerHeight(dp2px(8));
             root.addView(
                 listView,
                 new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    0,
+                    0, // ✅ height=0 + weight=1 → 始终占满可用空间
                     1.0f
                 )
             );
 
+            // 按钮栏：WRAP_CONTENT，自然沉到最底部
             LinearLayout btnBar = new LinearLayout(this);
             btnBar.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
             btnBar.setWeightSum(4);
@@ -2678,11 +2693,26 @@ public class DocumentActivity extends Activity {
             btnBar.addView(btnEdit);
             btnBar.addView(btnDel);
             btnBar.addView(btnClose);
-            root.addView(btnBar);
+            // ✅ 不传 weight，按钮栏以 WRAP_CONTENT 高度固定在底部
+            root.addView(
+                btnBar,
+                new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            );
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setView(root);
-            final AlertDialog dialog = builder.create();
+            ///////////////////////////////////////////////////////////////////////
+
+            //AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            //builder.setView(root);
+            //final AlertDialog dialog = builder.create();
+
+            // ✅ 替换为 Dialog
+            final Dialog dialog = new Dialog(this);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // 去除默认标题栏
+            dialog.setContentView(root); // 直接设置你的根布局
+            dialog.setCancelable(true); // 允许点击外部或返回键关闭（按需设置）
 
             DisplayMetrics dm = getResources().getDisplayMetrics();
             int dialogW = (int) (dm.widthPixels * 0.95f);
@@ -2731,7 +2761,7 @@ public class DocumentActivity extends Activity {
                 );
             });
 
-            // 删除（保持不变）
+            // 删除
             btnDel.setOnClickListener(v -> {
                 if (selectedPos[0] < 0) return;
                 String[] parts = rawNoteData
@@ -2776,14 +2806,16 @@ public class DocumentActivity extends Activity {
         TextView tv = new TextView(this);
         tv.setText(text);
         tv.setPadding(dp2px(12), dp2px(8), dp2px(12), dp2px(8));
-        tv.setLayoutParams(
-            new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1
-            )
+        // ✅ weight=1 平分宽度 + Gravity.CENTER 让文字在分配的空间内水平居中
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1f
         );
+        tv.setLayoutParams(lp);
+        tv.setGravity(Gravity.CENTER); // ✅ 关键：文字水平居中
         tv.setTextSize(15);
+        tv.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
         return tv;
     }
 
@@ -2805,7 +2837,7 @@ public class DocumentActivity extends Activity {
         String existingNote,
         String searchContext,
         String noteId,
-        AlertDialog parentDialog
+        Dialog parentDialog
     ) {
         boolean isEditMode = noteId != null && !noteId.isEmpty();
 

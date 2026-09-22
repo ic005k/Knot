@@ -528,6 +528,33 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.contains("pdf_note_update|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              // pdf_save_note|==|{noteId}|==|{searchContext}|==|{keyword}|==|noteContent
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 5) {
+                QString noteId = list.at(1);
+                QString searchContext = list.at(2);
+                QString keyword = list.at(3);
+                QString noteContent = list.at(4);
+
+                m_Reader->updateReadNote(noteId, searchContext, keyword,
+                                         noteContent);
+              }
+            });
+          }
+
+          if (strType.contains("pdf_note_delete|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              if (list.count() == 2) {
+                QString noteId = list.at(1);
+                m_Reader->delReadNote(noteId);
+              }
+            });
+          }
+
           if (strType.contains("open_reading_notes|==|")) {
             QTimer::singleShot(100, mw_one,
                                [=]() { m_Reader->readReadNote(); });

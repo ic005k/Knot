@@ -251,7 +251,8 @@ void NoteRelationParser::buildCacheFromMap(
 void NoteRelationParser::updateNoteCache(const QString& filePath) {
   QPointer<NoteRelationParser> safeThis(this);  // ★ 安全守卫
 
-  QtConcurrent::run([safeThis, filePath]() {
+  // QtConcurrent::run([safeThis, filePath]() {
+  QThreadPool::globalInstance()->start([safeThis, filePath]() {
     // 子线程只做纯文本正则匹配
     QMap<QString, QString> rawLinks;
     QFile file(filePath);
