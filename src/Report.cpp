@@ -383,9 +383,12 @@ void Report::getCategoryData(QString strCategory, bool appendTable) {
     listD.append(bfb);
   }
 
-  qInfo() << "listCateDetail=" << listCateDetail;
-  m_Method->execJavaFunc("mInstance", "showCateDetailDialog",
-                         "DataReportActivity", listCateDetail);
+  if (appendTable) {
+    qInfo() << "listCateDetail=" << listCateDetail;
+
+    m_Method->execJavaFunc("mInstance", "showCateDetailDialog",
+                           "DataReportActivity", listCateDetail);
+  }
 }
 
 QString Report::Out2Img(bool isShowMessage) { return "picFile"; }
