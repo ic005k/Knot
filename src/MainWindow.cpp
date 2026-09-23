@@ -988,8 +988,6 @@ void MainWindow::clearAll() {}
 
 void MainWindow::setCurrentIndex(int index) {}
 
-void MainWindow::gotoEnd() {}
-
 void MainWindow::gotoIndex(int index) {}
 
 int MainWindow::getCurrentIndex() { return 0; }

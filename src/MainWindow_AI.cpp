@@ -1,6 +1,29 @@
 #include "MainWindow.h"
 #include "defines.h"
 
+void MainWindow::gotoEnd() {
+  safeCloseProgress();
+  if (m_Reader->isAIReaderExplanation) {
+    m_Reader->isAIReaderExplanation = false;
+    if (isAndroid) {
+      m_Method->execJavaFunc("mPdfActivity", "dismissAiLoadingDialog",
+                             "artifex/mupdf/mini/DocumentActivity");
+    }
+  }
+
+  if (mw_one->m_Report->isAiMainEvent) {
+    mw_one->m_Report->isAiMainEvent = false;
+    m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
+                           "MyEventActivity");
+  }
+
+  if (m_Steps->isAiSteps) {
+    m_Steps->isAiSteps = false;
+    m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
+                           "StepListActivity");
+  }
+}
+
 void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
                                    const QString& userQuestion) {
   QWidget* parentWnd = this;
@@ -17,9 +40,11 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
   // 先执行连通检测（异步，检测成功后再执行真实提问，这里做分层回调）
   QUrl url = buildAiApiUrl(cfg.endpoint);
   if (!url.isValid()) {
-    safeCloseProgress();
-    auto msg = std::make_unique<ShowMessage>(parentWnd);
-    msg->showMsg(tr("Error"), tr("Endpoint URL invalid"), 1);
+    gotoEnd();
+    if (!isAndroid) {
+      QMessageBox::critical(parentWnd, tr("Error"), tr("Endpoint URL invalid"),
+                            QMessageBox::Ok);
+    }
     return;
   }
 
@@ -71,9 +96,11 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
         if (parseError.error != QJsonParseError::NoError) {
           QString errInfo = tr("Returned data is not valid JSON:\n%1")
                                 .arg(parseError.errorString());
-          safeCloseProgress();
-          auto msg = std::make_unique<ShowMessage>(parentWnd);
-          msg->showMsg(tr("Parse Failed"), errInfo, 1);
+          gotoEnd();
+          if (!isAndroid) {
+            QMessageBox::critical(parentWnd, tr("Parse Failed"), errInfo,
+                                  QMessageBox::Ok);
+          }
           return;
         }
 
@@ -83,19 +110,22 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
         if (rootObj.contains("error")) {
           QJsonObject errObj = rootObj["error"].toObject();
           QString serverErr = errObj["message"].toString().trimmed();
-          safeCloseProgress();
-          auto msg = std::make_unique<ShowMessage>(parentWnd);
-          msg->showMsg(tr("API Rejected"),
-                       tr("Server Error:\n%1").arg(serverErr), 1);
+          gotoEnd();
+          if (!isAndroid) {
+            QMessageBox::critical(parentWnd, tr("API Rejected"),
+                                  tr("Server Error:\n%1").arg(serverErr));
+          }
           return;
         }
 
         // 3. 正常成功响应，提取AI回答
         QJsonArray choicesArr = rootObj["choices"].toArray();
         if (choicesArr.isEmpty()) {
-          safeCloseProgress();
-          auto msg = std::make_unique<ShowMessage>(parentWnd);
-          msg->showMsg(tr("Success"), tr("AI returned empty content"), 1);
+          gotoEnd();
+          if (!isAndroid) {
+            QMessageBox::information(parentWnd, tr("Success"),
+                                     tr("AI returned empty content"));
+          }
           return;
         }
 
@@ -115,6 +145,8 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
         showBody += ":\n\n%1\n\n";
         showBody += part2;
         showBody += ":\n\n%2";
+        // 最后填充占位符
+        showBody = showBody.arg(userQuestion, aiReplyText);
 
         // qDebug() << aiReplyText;
         //  复制到系统剪贴板
@@ -123,13 +155,9 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
 
         m_Preferences->saveAIConfig();
 
-        // 最后填充占位符
-        showBody = showBody.arg(userQuestion, aiReplyText);
+        if (isAndroid) safeCloseProgress();
 
-        safeCloseProgress();
         auto msg = std::make_unique<ShowMessage>(parentWnd);
-        // msg->showMsg(tr("AI Response Completed"), showBody, 1);
-
         if (m_NotesList->isAINoteRename) {
           m_NotesList->isAINoteRename = false;
           m_MsgBox->ui->btnOk->setText(tr("Modify Title"));
@@ -196,8 +224,9 @@ void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
                                      std::function<void()> onSuccess) {
   QUrl url = buildAiApiUrl(cfg.endpoint);
   if (!url.isValid()) {
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg(tr("Error"), tr("Endpoint URL invalid"), 1);
+    if (!isAndroid) {
+      QMessageBox::critical(mw_one, tr("Error"), tr("Endpoint URL invalid"));
+    }
     return;
   }
   QNetworkRequest req(url);
@@ -230,8 +259,9 @@ void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
               QString content =
                   tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
               content = content.arg(errMsg, reqUrl);
-              auto msg = std::make_unique<ShowMessage>(mw_one);
-              msg->showMsg(tr("Connect Failed"), content, 1);
+              if (!isAndroid) {
+                QMessageBox::critical(mw_one, tr("Connect Failed"), content);
+              }
               return;
             }
             // 连通测试弹窗提示
@@ -263,9 +293,10 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   }
 
   if (ep.isEmpty() || key.isEmpty() || mid.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(parentWnd);
-    msg->showMsg(tr("Warning"),
-                 tr("Endpoint / API Key / Model ID cannot be empty"), 1);
+    if (!isAndroid) {
+      QMessageBox::warning(parentWnd, tr("Warning"),
+                           tr("Endpoint / API Key / Model ID cannot be empty"));
+    }
     return;
   }
 
@@ -278,7 +309,7 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   cfg.maxTokens = 1024;
 
   if (!m_Notes->isAIQA && !isAndroidAIQA) {
-    showProgress();
+    if (!isAndroid) showProgress();
   }
 
   // 复用统一连通检测函数，连通成功后执行提问

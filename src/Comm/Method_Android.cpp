@@ -330,3 +330,23 @@ void Method::refreshJavaData(QString mInstance, QString callJavaName,
 
 #endif
 }
+
+void Method::execJavaFunc(QString mInstance, QString callJavaName,
+                          QString className) {
+#ifdef Q_OS_ANDROID
+
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+
+  if (instance.isValid()) {
+    instance.callMethod<void>(callJavaName.toUtf8().constData(), "()V");
+  }
+
+#endif
+  qInfo() << mInstance << callJavaName << className;
+}
