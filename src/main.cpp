@@ -111,6 +111,11 @@ int main(int argc, char* argv[]) {
   // 禁用文本选择（针对所有的可输入的编辑框）
   qputenv("QT_QPA_NO_TEXT_HANDLES", "1");
 
+  isAndroid = false;
+  isWindows = false;
+  isIOS = false;
+  isLinux = false;
+  isMacOS = false;
 #ifdef Q_OS_WIN
   isWindows = true;
 #elif defined(Q_OS_MACOS)

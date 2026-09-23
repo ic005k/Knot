@@ -637,6 +637,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnNoteRecycle_clicked();
 
+  void on_btnAIReportAnalysis_clicked();
+
  private slots:
   void onQmlOpenNote(const QString& noteUid);
 
@@ -842,8 +844,6 @@ class MainWindow : public QMainWindow {
   void on_editAutoStopTTS_textChanged(const QString& arg1);
 
   void on_chkAutoStopTTS_clicked(bool checked);
-
-  void on_btnAIReportAnalysis_clicked();
 
   void on_actionCopyLog();
 

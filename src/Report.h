@@ -32,6 +32,7 @@ class Report : public QDialog {
   bool isSingleYear = false;
   static void saveYMD();
   bool isAiMainEvent = false;
+  bool isAiCategory = false;
   void getCategoryData(QString strCategory, bool appendTable);
   QStringList listCategorySort;
   QList<double> listD;
@@ -67,7 +68,7 @@ class Report : public QDialog {
 
   void startReport1(QString year, QString month);
   void startReport2();
-  void on_CateOk();
+  void on_CateOk(const QString& cateTitle);
 
   void appendTable(QString date, QString freq, QString amount);
 

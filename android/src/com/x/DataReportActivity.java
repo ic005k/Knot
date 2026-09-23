@@ -32,6 +32,8 @@ public class DataReportActivity extends AppCompatActivity {
     private int mSelectedPos = -1;
     private boolean mIsDark;
 
+    private androidx.appcompat.app.AlertDialog mAiLoadingDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -550,7 +552,7 @@ public class DataReportActivity extends AppCompatActivity {
      * 单条格式：分类文本===百分比文本===金额文本
      * @param cateList 分类条目数组
      */
-    public void showCategoryDialog(ArrayList<String> cateList) {
+    /*public void showCategoryDialog(ArrayList<String> cateList) {
         runOnUiThread(() -> {
             final DataReportActivity act = DataReportActivity.this;
             int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
@@ -629,6 +631,304 @@ public class DataReportActivity extends AppCompatActivity {
             builder.setView(listView);
             builder.setPositiveButton(android.R.string.ok, null);
             builder.show();
+        });
+        }*/
+    public void showCategoryDialog(ArrayList<String> cateList) {
+        runOnUiThread(() -> {
+            final DataReportActivity act = DataReportActivity.this;
+            int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+            int btnBgNormal = mIsDark ? 0xFF303030 : 0xFFE8E8E8;
+            int itemBgSelect = mIsDark ? 0xFF2A2A2A : 0xFFE0EDFB;
+            // 记录选中条目索引
+            final int[] selectedPos = { -1 };
+
+            ListView listView = new ListView(act);
+            listView.setBackgroundColor(bgColor);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                act,
+                0,
+                cateList
+            ) {
+                @Override
+                public View getView(
+                    int position,
+                    View convertView,
+                    ViewGroup parent
+                ) {
+                    LinearLayout itemLl;
+                    if (convertView instanceof LinearLayout) {
+                        itemLl = (LinearLayout) convertView;
+                    } else {
+                        itemLl = new LinearLayout(act);
+                        itemLl.setOrientation(LinearLayout.VERTICAL);
+                        itemLl.setGravity(Gravity.CENTER_VERTICAL);
+                        itemLl.setPadding(dp(12), dp(6), dp(12), dp(6));
+                    }
+                    itemLl.removeAllViews();
+                    // 选中背景
+                    if (position == selectedPos[0]) {
+                        itemLl.setBackgroundColor(itemBgSelect);
+                    } else {
+                        itemLl.setBackgroundColor(0x00000000);
+                    }
+                    String raw = getItem(position);
+                    String[] parts = raw.split("===");
+                    // 第一行：分类，粗体
+                    TextView tvCate = new TextView(act);
+                    tvCate.setTextSize(15);
+                    tvCate.setTextColor(textColor);
+                    tvCate.getPaint().setFakeBoldText(true);
+                    tvCate.setPadding(0, 0, 0, dp(2));
+                    if (parts.length >= 1) {
+                        tvCate.setText(parts[0]);
+                    }
+                    itemLl.addView(tvCate);
+                    // 第二行：百分比
+                    TextView tvPercent = new TextView(act);
+                    tvPercent.setTextSize(14);
+                    tvPercent.setTextColor(textColor);
+                    tvPercent.setPadding(0, 0, 0, dp(2));
+                    if (parts.length >= 2) {
+                        tvPercent.setText(parts[1]);
+                    }
+                    itemLl.addView(tvPercent);
+                    // 第三行：金额
+                    TextView tvAmount = new TextView(act);
+                    tvAmount.setTextSize(14);
+                    tvAmount.setTextColor(textColor);
+                    tvAmount.setPadding(0, 0, 0, 0);
+                    if (parts.length >= 3) {
+                        tvAmount.setText(parts[2]);
+                    }
+                    itemLl.addView(tvAmount);
+                    return itemLl;
+                }
+            };
+            listView.setAdapter(adapter);
+            // 条目点击，切换选中
+            listView.setOnItemClickListener((parent, view, position, id) -> {
+                selectedPos[0] = position;
+                adapter.notifyDataSetChanged();
+            });
+
+            // ========== 自定义底部按钮栏：AI分析 + 详细，平分宽度 ==========
+            LinearLayout btnContainer = new LinearLayout(act);
+            btnContainer.setOrientation(LinearLayout.HORIZONTAL);
+            btnContainer.setWeightSum(2);
+            btnContainer.setPadding(dp(12), dp(8), dp(12), dp(4));
+            Button btnAi = new Button(act);
+            btnAi.setText(MyActivity.zh_cn ? "AI分析" : "AI Analysis");
+            btnAi.setBackgroundColor(btnBgNormal);
+            btnAi.setTextColor(textColor);
+            LinearLayout.LayoutParams lpAi = new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1.0f
+            );
+            lpAi.setMargins(dp(4), 0, dp(4), 0);
+            btnAi.setLayoutParams(lpAi);
+            btnAi.setOnClickListener(v -> {
+                showAiLoadingDialog();
+                MyActivity.m_instance.PublicJavaCallCpp(
+                    "data_category_ai_analysis"
+                );
+            });
+
+            // 按钮改为【详细】
+            Button btnDetail = new Button(act);
+            btnDetail.setText(MyActivity.zh_cn ? "详细" : "Detail");
+            btnDetail.setBackgroundColor(btnBgNormal);
+            btnDetail.setTextColor(textColor);
+            LinearLayout.LayoutParams lpDetail = new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1.0f
+            );
+            lpDetail.setMargins(dp(4), 0, dp(4), 0);
+            btnDetail.setLayoutParams(lpDetail);
+
+            btnContainer.addView(btnAi);
+            btnContainer.addView(btnDetail);
+
+            // 外层垂直容器，ListView + 按钮栏
+            LinearLayout dialogRoot = new LinearLayout(act);
+            dialogRoot.setOrientation(LinearLayout.VERTICAL);
+            dialogRoot.addView(listView);
+            dialogRoot.addView(btnContainer);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+            builder.setTitle(
+                MyActivity.zh_cn ? "分类统计" : "Category Statistic"
+            );
+            builder.setView(dialogRoot);
+            AlertDialog dialog = builder.create();
+
+            btnDetail.setOnClickListener(v -> {
+                if (selectedPos[0] >= 0) {
+                    String rawItem = cateList.get(selectedPos[0]);
+                    String[] parts = rawItem.split("===");
+                    String cateText = "";
+                    if (parts.length >= 1) {
+                        cateText = parts[0];
+                    }
+                    // 回调C++，带上分类文本
+                    MyActivity.m_instance.PublicJavaCallCpp(
+                        "data_category_detail|==|" + cateText
+                    );
+                }
+                //dialog.dismiss();
+            });
+            dialog.show();
+        });
+    }
+
+    /**
+     * 显示AI分析等待弹窗，带转圈ProgressBar
+     */
+    public void showAiLoadingDialog() {
+        runOnUiThread(() -> {
+            if (isFinishing()) return;
+            if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
+                return;
+            }
+            // 调用MyActivity公共方法，拿到dialog实例保存到本页面成员
+            mAiLoadingDialog = MyActivity.showAiLoadingDialog(this);
+        });
+    }
+
+    /**
+     * 关闭AI等待弹窗
+     */
+    public void dismissAiLoadingDialog() {
+        runOnUiThread(() -> {
+            MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
+        });
+    }
+
+    /**
+     * C++调用：AI分析结果弹窗，支持简易MD渲染，支持 # ~ #### 标题
+     * @param mdList 数组，仅第0项存放Markdown原始文本
+     */
+    public void showAiMarkdownDialog(ArrayList<String> mdList) {
+        // 先关闭本页面的loading弹窗
+        dismissAiLoadingDialog();
+        // 调用MyActivity公共静态方法，传入当前this作为上下文
+        MyActivity.showAiMarkdownDialog(this, mdList);
+    }
+
+    /**
+     * C++调用：分类详情弹窗
+     * 单条格式：日期文本===金额文本===备注文本
+     * @param cateDetailList 详情条目数组
+     */
+    public void showCateDetailDialog(ArrayList<String> cateDetailList) {
+        runOnUiThread(() -> {
+            final DataReportActivity act = DataReportActivity.this;
+            int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+
+            ListView listView = new ListView(act);
+            listView.setBackgroundColor(bgColor);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                act,
+                0,
+                cateDetailList
+            ) {
+                @Override
+                public View getView(
+                    int position,
+                    View convertView,
+                    ViewGroup parent
+                ) {
+                    LinearLayout itemLl;
+                    if (convertView instanceof LinearLayout) {
+                        itemLl = (LinearLayout) convertView;
+                    } else {
+                        itemLl = new LinearLayout(act);
+                        itemLl.setOrientation(LinearLayout.VERTICAL);
+                        itemLl.setGravity(Gravity.CENTER_VERTICAL);
+                        itemLl.setPadding(dp(12), dp(8), dp(12), dp(8));
+                    }
+                    itemLl.removeAllViews();
+                    itemLl.setBackgroundColor(0x00000000);
+                    String raw = getItem(position);
+                    String[] parts = raw.split("===");
+
+                    // 第1行：日期
+                    TextView tvDate = new TextView(act);
+                    tvDate.setTextSize(14);
+                    tvDate.setTextColor(textColor);
+                    tvDate.setPadding(0, 0, 0, dp(3));
+                    if (parts.length >= 1) {
+                        tvDate.setText(parts[0]);
+                    }
+                    itemLl.addView(tvDate);
+
+                    // 第2行：金额
+                    TextView tvMoney = new TextView(act);
+                    tvMoney.setTextSize(14);
+                    tvMoney.setTextColor(textColor);
+                    tvMoney.setPadding(0, 0, 0, dp(3));
+                    if (parts.length >= 2) {
+                        tvMoney.setText(parts[1]);
+                    }
+                    itemLl.addView(tvMoney);
+
+                    // 第3行：详细备注，为空则隐藏
+                    TextView tvRemark = new TextView(act);
+                    tvRemark.setTextSize(14);
+                    tvRemark.setTextColor(textColor);
+                    tvRemark.setPadding(0, 0, 0, 0);
+                    if (parts.length >= 3) {
+                        String remarkText = parts[2];
+                        if (TextUtils.isEmpty(remarkText)) {
+                            tvRemark.setVisibility(View.GONE);
+                        } else {
+                            tvRemark.setText(remarkText);
+                            tvRemark.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        tvRemark.setVisibility(View.GONE);
+                    }
+                    itemLl.addView(tvRemark);
+
+                    return itemLl;
+                }
+            };
+            listView.setAdapter(adapter);
+
+            // 底部按钮：确定
+            LinearLayout btnContainer = new LinearLayout(act);
+            btnContainer.setOrientation(LinearLayout.HORIZONTAL);
+            btnContainer.setPadding(dp(12), dp(8), dp(12), dp(4));
+            btnContainer.setGravity(Gravity.CENTER);
+
+            Button btnOk = new Button(act);
+            btnOk.setText(MyActivity.zh_cn ? "确定" : "OK");
+            btnOk.setBackgroundColor(mIsDark ? 0xFF303030 : 0xFFE8E8E8);
+            btnOk.setTextColor(textColor);
+            LinearLayout.LayoutParams lpOk = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            lpOk.setMargins(dp(4), 0, dp(4), 0);
+            btnOk.setLayoutParams(lpOk);
+
+            // 外层容器
+            LinearLayout dialogRoot = new LinearLayout(act);
+            dialogRoot.setOrientation(LinearLayout.VERTICAL);
+            dialogRoot.addView(listView);
+            dialogRoot.addView(btnContainer);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+            builder.setTitle(MyActivity.zh_cn ? "分类详情" : "Category Detail");
+            builder.setView(dialogRoot);
+            AlertDialog dialog = builder.create();
+            btnOk.setOnClickListener(v -> dialog.dismiss());
+            btnContainer.addView(btnOk);
+
+            dialog.show();
         });
     }
 

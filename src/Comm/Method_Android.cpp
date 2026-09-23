@@ -331,6 +331,7 @@ void Method::refreshJavaData(QString mInstance, QString callJavaName,
 #endif
 }
 
+// 无参数版本
 void Method::execJavaFunc(QString mInstance, QString callJavaName,
                           QString className) {
 #ifdef Q_OS_ANDROID
@@ -349,4 +350,185 @@ void Method::execJavaFunc(QString mInstance, QString callJavaName,
 
 #endif
   qInfo() << mInstance << callJavaName << className;
+}
+
+// 重载：传入单个 QString
+void Method::execJavaFunc(QString mInstance, QString callJavaName,
+                          QString className, const QString& arg) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    QJniObject jArg = QJniObject::fromString(arg);
+    instance.callMethod<void>(callJavaName.toUtf8().constData(),
+                              "(Ljava/lang/String;)V", jArg.object());
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className << arg;
+}
+
+// 重载：传入 bool
+void Method::execJavaFunc(QString mInstance, QString callJavaName,
+                          QString className, bool arg) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    instance.callMethod<void>(callJavaName.toUtf8().constData(), "(Z)V", arg);
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className << arg;
+}
+
+// 重载：传入 int
+void Method::execJavaFunc(QString mInstance, QString callJavaName,
+                          QString className, int arg) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    instance.callMethod<void>(callJavaName.toUtf8().constData(), "(I)V", arg);
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className << arg;
+}
+
+// 重载：传入 QStringList
+void Method::execJavaFunc(QString mInstance, QString callJavaName,
+                          QString className, const QStringList& arg) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    QJniObject jArrayList("java/util/ArrayList", "()V");
+    for (const auto& s : arg) {
+      jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+                                  QJniObject::fromString(s).object());
+    }
+    instance.callMethod<void>(callJavaName.toUtf8().constData(),
+                              "(Ljava/util/ArrayList;)V", jArrayList.object());
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className << arg;
+}
+
+// 基础版本：无参数调用Java，返回 QString
+QString Method::getJavaFunc(QString mInstance, QString callJavaName,
+                            QString className) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    QJniObject retObj = instance.callMethod<QJniObject>(
+        callJavaName.toUtf8().constData(), "()Ljava/lang/String;");
+    if (retObj.isValid()) return retObj.toString();
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className;
+  return {};
+}
+
+// 重载：返回 bool
+bool Method::getJavaFuncBool(QString mInstance, QString callJavaName,
+                             QString className) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    return instance.callMethod<bool>(callJavaName.toUtf8().constData(), "()Z");
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className;
+  return false;
+}
+
+// 重载：返回 int
+int Method::getJavaFuncInt(QString mInstance, QString callJavaName,
+                           QString className) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    return instance.callMethod<int>(callJavaName.toUtf8().constData(), "()I");
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className;
+  return 0;
+}
+
+// 重载：返回 double
+double Method::getJavaFuncDouble(QString mInstance, QString callJavaName,
+                                 QString className) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    return instance.callMethod<double>(callJavaName.toUtf8().constData(),
+                                       "()D");
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className;
+  return 0.0;
+}
+
+// 重载：返回 QStringList（Java返回ArrayList<String>）
+QStringList Method::getJavaFuncStringList(QString mInstance,
+                                          QString callJavaName,
+                                          QString className) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    QJniObject jList = instance.callMethod<QJniObject>(
+        callJavaName.toUtf8().constData(), "()Ljava/util/ArrayList;");
+    if (!jList.isValid()) return {};
+
+    int size = jList.callMethod<int>("size", "()I");
+    QStringList res;
+    for (int i = 0; i < size; ++i) {
+      QJniObject elem =
+          jList.callMethod<QJniObject>("get", "(I)Ljava/lang/Object;", i);
+      if (elem.isValid()) res << elem.toString();
+    }
+    return res;
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className;
+  return {};
 }

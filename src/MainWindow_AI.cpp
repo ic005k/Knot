@@ -3,24 +3,30 @@
 
 void MainWindow::gotoEnd() {
   safeCloseProgress();
-  if (m_Reader->isAIReaderExplanation) {
-    m_Reader->isAIReaderExplanation = false;
-    if (isAndroid) {
+  if (isAndroid) {
+    if (m_Reader->isAIReaderExplanation) {
+      m_Reader->isAIReaderExplanation = false;
       m_Method->execJavaFunc("mPdfActivity", "dismissAiLoadingDialog",
                              "artifex/mupdf/mini/DocumentActivity");
     }
-  }
 
-  if (mw_one->m_Report->isAiMainEvent) {
-    mw_one->m_Report->isAiMainEvent = false;
-    m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
-                           "MyEventActivity");
-  }
+    if (mw_one->m_Report->isAiMainEvent) {
+      mw_one->m_Report->isAiMainEvent = false;
+      m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
+                             "MyEventActivity");
+    }
 
-  if (m_Steps->isAiSteps) {
-    m_Steps->isAiSteps = false;
-    m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
-                           "StepListActivity");
+    if (mw_one->m_Report->isAiCategory) {
+      mw_one->m_Report->isAiCategory = false;
+      m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
+                             "DataReportActivity");
+    }
+
+    if (m_Steps->isAiSteps) {
+      m_Steps->isAiSteps = false;
+      m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
+                             "StepListActivity");
+    }
   }
 }
 
@@ -80,9 +86,10 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
           QString content =
               tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
           content = content.arg(errMsg, reqUrl);
-          safeCloseProgress();
-          auto msg = std::make_unique<ShowMessage>(parentWnd);
-          msg->showMsg(tr("Connect Failed"), content, 1);
+          gotoEnd();
+          if (!isAndroid)
+            QMessageBox::critical(parentWnd, tr("Connect Failed"), content);
+
           return;
         }
         // 此处增加业务逻辑：读取返回JSON、解析AI回答内容
@@ -155,7 +162,7 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
 
         m_Preferences->saveAIConfig();
 
-        if (isAndroid) safeCloseProgress();
+        safeCloseProgress();
 
         auto msg = std::make_unique<ShowMessage>(parentWnd);
         if (m_NotesList->isAINoteRename) {
@@ -199,7 +206,15 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
           list.append(aiReplyText);
           m_Method->refreshJavaData("showAiMarkdownDialog", "MyEventActivity",
                                     list);
-        } else if (m_Steps->isAiSteps) {
+        } else if (mw_one->m_Report->isAiCategory) {
+          mw_one->m_Report->isAiCategory = false;
+          QStringList list;
+          list.append(aiReplyText);
+          m_Method->refreshJavaData("showAiMarkdownDialog",
+                                    "DataReportActivity", list);
+        }
+
+        else if (m_Steps->isAiSteps) {
           m_Steps->isAiSteps = false;
           QStringList list;
           list.append(aiReplyText);
@@ -309,7 +324,7 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   cfg.maxTokens = 1024;
 
   if (!m_Notes->isAIQA && !isAndroidAIQA) {
-    if (!isAndroid) showProgress();
+    showProgress();
   }
 
   // 复用统一连通检测函数，连通成功后执行提问

@@ -621,9 +621,29 @@ QScrollBar::sub-page:horizontal {
 
   void setWinPos(QWidget* w, int width, int pos);
 
-  void refreshJavaData(QString mInstance, QString callJavaName, QString className, QStringList list);
+  void refreshJavaData(QString mInstance, QString callJavaName,
+                       QString className, QStringList list);
   void execJavaFunc(QString mInstance, QString callJavaName, QString className);
-  protected:
+  void execJavaFunc(QString mInstance, QString callJavaName, QString className,
+                    const QString& arg);
+  void execJavaFunc(QString mInstance, QString callJavaName, QString className,
+                    bool arg);
+  void execJavaFunc(QString mInstance, QString callJavaName, QString className,
+                    int arg);
+  void execJavaFunc(QString mInstance, QString callJavaName, QString className,
+                    const QStringList& arg);
+  QString getJavaFunc(QString mInstance, QString callJavaName,
+                      QString className);
+  bool getJavaFuncBool(QString mInstance, QString callJavaName,
+                       QString className);
+  int getJavaFuncInt(QString mInstance, QString callJavaName,
+                     QString className);
+  double getJavaFuncDouble(QString mInstance, QString callJavaName,
+                           QString className);
+  QStringList getJavaFuncStringList(QString mInstance, QString callJavaName,
+                                    QString className);
+
+ protected:
   bool eventFilter(QObject* watchDlgSearch, QEvent* evn) override;
 
  signals:

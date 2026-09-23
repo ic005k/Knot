@@ -310,7 +310,12 @@ void Report::on_btnCategory_clicked() {
   // qInfo() << "listCateSortDisplay=" << listCateSortDisplay;
 }
 
-void Report::on_CateOk() {}
+void Report::on_CateOk(const QString& cateTitle) {
+  QString str0 = cateTitle;
+  str0 = str0.replace(tr("Category") + " : ", "").trimmed();
+
+  getCategoryData(str0, true);
+}
 
 void Report::getCategoryData(QString strCategory, bool appendTable) {
   if (appendTable) {
@@ -377,6 +382,10 @@ void Report::getCategoryData(QString strCategory, bool appendTable) {
                             QString::number(bfb));
     listD.append(bfb);
   }
+
+  qInfo() << "listCateDetail=" << listCateDetail;
+  m_Method->execJavaFunc("mInstance", "showCateDetailDialog",
+                         "DataReportActivity", listCateDetail);
 }
 
 QString Report::Out2Img(bool isShowMessage) { return "picFile"; }

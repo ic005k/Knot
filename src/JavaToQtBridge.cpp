@@ -741,6 +741,22 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.startsWith("data_category_ai_analysis")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              // AI分析分类统计的业务逻辑
+              mw_one->on_btnAIReportAnalysis_clicked();
+            });
+          }
+
+          if (strType.startsWith("data_category_detail|==|")) {
+            QStringList list = strType.split("|==|");
+            if (list.size() == 2) {
+              QString categoryName = list.at(1);
+              // 业务逻辑，打开该分类详细
+              mw_one->m_Report->on_CateOk(categoryName);
+            }
+          }
+
           if (strType.contains("open_aifx|==|")) {
             QTimer::singleShot(100, mw_one,
                                [=]() { mw_one->m_Report->aiAnalysis(); });

@@ -217,7 +217,7 @@ void MainWindow::on_btnImportBakList_clicked() {
   m_MainHelper->importBakFileList();
 }
 
-void MainWindow::on_btnOkViewCate_clicked() { m_Report->on_CateOk(); }
+void MainWindow::on_btnOkViewCate_clicked() {}
 
 void MainWindow::on_btnBackTabRecycle_clicked() {
   if (!isAndroid) {
@@ -521,10 +521,10 @@ void MainWindow::on_btnAIReportAnalysis_clicked() {
   QString text = m_Report->catetext;
   QString trimText = text.trimmed();
   if (trimText.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Tip"), tr("No consumption record data available"), 0);
     return;
   }
+
+  mw_one->m_Report->isAiCategory = true;
 
   // 获取当前程序生效的语言标识
   QLocale loc = QLocale::system();
