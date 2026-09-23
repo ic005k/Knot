@@ -1418,8 +1418,18 @@ void Steps::loadGpsList(int n_y, int n_m) {
 
     listText.append(t0 + "===" + t1 + "===" + t2 + "===" + t3 + "===" + t4 +
                     "===" + t5 + "===" + t6 + "===" + t7);
-    m_Speed.append(speedData);
-    m_Altitude.append(altitudeData);
+
+    int screenWidth = mw_one->width();
+
+    // 处理海拔数据
+    QVariantList processedAltitude =
+        processSensorData(altitudeData, screenWidth);
+
+    // 处理速度数据
+    QVariantList processedSpeed = processSensorData(speedData, screenWidth);
+
+    m_Speed.append(processedSpeed);
+    m_Altitude.append(processedAltitude);
   }
 
   if (!isAndroid) qInfo() << "listText=" << listText.count() << listText;
@@ -3146,6 +3156,7 @@ void Steps::on_btnAIExerciseSuggestions_clicked() {
 void Steps::on_btnList_clicked() {
   m_Method->openActivity("openSportChartActivity", listText);
   loadGpsList(nYear, nMonth);
+
   QTimer::singleShot(
       100, this, [=]() { refreshSportChart(listText, m_Speed, m_Altitude); });
 }

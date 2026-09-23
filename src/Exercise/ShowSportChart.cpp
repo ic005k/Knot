@@ -1,3 +1,10 @@
+#include <QList>
+#include <QVariant>
+#include <QVariantList>
+#include <QtMath>
+#include <algorithm>
+#include <cmath>
+
 #include "defines.h"
 #include "src/Exercise/Steps.h"
 
@@ -139,4 +146,97 @@ void Steps::getMySportData(QString strYear, int m) {
   QVector<MonthData> result = loadSportsData(strYear, m);
   QStringList list = getSportsDataSummary(result, strYear);
   m_Method->refreshJavaData("showSummaryDialog", "SportChartActivity", list);
+}
+
+// --- 辅助函数1：中值滤波（适配一维 QVariantList）---
+QVariantList Steps::medianFilter(const QVariantList& data, int windowSize = 5) {
+  if (data.isEmpty() || windowSize < 2) return data;
+
+  QVariantList filteredData;
+  int halfWindow = windowSize / 2;
+
+  for (int i = 0; i < data.size(); ++i) {
+    QList<double> windowValues;
+    for (int j = qMax(0, i - halfWindow);
+         j <= qMin(data.size() - 1, i + halfWindow); ++j) {
+      windowValues.append(data[j].toDouble());
+    }
+
+    std::sort(windowValues.begin(), windowValues.end());
+    double medianValue = windowValues[windowValues.size() / 2];
+
+    filteredData.append(QVariant(medianValue));
+  }
+  return filteredData;
+}
+
+// --- 辅助函数2：LTTB 降采样算法（适配一维 QVariantList）---
+QVariantList Steps::lttbDownsample(const QVariantList& data, int targetPoints) {
+  if (data.size() <= targetPoints) return data;
+
+  QVariantList sampledData;
+  sampledData.append(data.first());  // 保留首点
+
+  double bucketSize = static_cast<double>(data.size() - 2) / (targetPoints - 2);
+  int currentIdx = 0;
+
+  for (int i = 0; i < targetPoints - 2; ++i) {
+    int bucketStart = static_cast<int>(qFloor((i + 0) * bucketSize)) + 1;
+    int bucketEnd = static_cast<int>(qFloor((i + 1) * bucketSize)) + 1;
+
+    // 计算下一个桶的平均Y值
+    double nextBucketAvgY = 0;
+    int nextBucketStart = static_cast<int>(qFloor((i + 1) * bucketSize)) + 1;
+    int nextBucketEnd = static_cast<int>(qFloor((i + 2) * bucketSize)) + 1;
+    int nextBucketCount = 0;
+
+    for (int j = nextBucketStart; j < nextBucketEnd && j < data.size(); ++j) {
+      nextBucketAvgY += data[j].toDouble();
+      nextBucketCount++;
+    }
+    if (nextBucketCount > 0) nextBucketAvgY /= nextBucketCount;
+
+    // 在当前桶中寻找三角形面积最大的点
+    double maxArea = -1;
+    int maxIdx = bucketStart;
+
+    double currentY = data[currentIdx].toDouble();
+    // X轴直接用索引代替，避免重复 toDouble 转换
+    double currentX = currentIdx;
+    double nextAvgX = (nextBucketStart + nextBucketEnd) / 2.0;
+
+    for (int j = bucketStart; j < bucketEnd && j < data.size(); ++j) {
+      double pointY = data[j].toDouble();
+      double pointX = j;
+
+      double area = qAbs((currentX - nextAvgX) * (pointY - currentY) -
+                         (currentX - pointX) * (nextBucketAvgY - currentY)) *
+                    0.5;
+
+      if (area > maxArea) {
+        maxArea = area;
+        maxIdx = j;
+      }
+    }
+
+    sampledData.append(data[maxIdx]);
+    currentIdx = maxIdx;
+  }
+
+  sampledData.append(data.last());  // 保留尾点
+  return sampledData;
+}
+
+// --- 主处理函数（签名已修改为一维 QVariantList）---
+QVariantList Steps::processSensorData(const QVariantList& rawData,
+                                      int screenWidth) {
+  if (rawData.isEmpty()) return rawData;
+
+  // 1. 中值滤波去噪
+  QVariantList filteredData = medianFilter(rawData, 5);
+
+  // 2. LTTB 降采样 (目标点数设为屏幕宽度的2倍以保证平滑)
+  int targetPoints = screenWidth * 2;
+
+  return lttbDownsample(filteredData, targetPoints);
 }

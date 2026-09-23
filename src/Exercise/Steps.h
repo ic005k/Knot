@@ -25,7 +25,6 @@
 #include "Speedometer.h"
 #include "src/Comm/GeoAddressResolver.h"
 #include "src/Exercise/CompassWidget.h"
-#include "src/Exercise/DrawSportsFreq.h"
 #include "src/Exercise/StepHillChart.h"
 #include "src/Exercise/StepsOptions.h"
 #include "src/Exercise/WeatherFetcher.h"
@@ -246,6 +245,10 @@ class Steps : public QDialog {
                                    const QString& year);
   void getMySportData(QString strYear, int m);
   int getCurrentCount();
+
+  QVariantList processSensorData(const QVariantList& rawData, int screenWidth);
+  QVariantList lttbDownsample(const QVariantList& data, int targetPoints);
+  QVariantList medianFilter(const QVariantList& data, int windowSize);
  public slots:
   void clearAllGpsList();
   void getGpsTrack(int index);
