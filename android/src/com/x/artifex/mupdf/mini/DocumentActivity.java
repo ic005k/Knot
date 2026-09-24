@@ -123,6 +123,11 @@ public class DocumentActivity extends Activity {
     };
 
     //////////////////////////////////////////////////
+    // 固定排版参数（不允许用户调整）
+    private static final float FIXED_LETTER_SPACING = 0.08f; // 字间距：0.05~0.1em 最适宜，过大则散
+    private static final float FIXED_LINE_HEIGHT = 1.65f; // 行高：1.5~1.8 为中文舒适区，1.65 兼顾紧凑与透气
+    /////////////////////////////////////////////////
+
     private ImageButton minimizeAppButton;
     private ImageButton readingNoteButton;
 
@@ -1076,6 +1081,10 @@ public class DocumentActivity extends Activity {
                             metaTitle;
                         isReflowable = doc.isReflowable();
                         if (isReflowable) {
+                            // ✅ 首次 layout 前注入固定间距
+                            applyFixedSpacing();
+                            Log.i(APP, "layout document with fixed spacing");
+
                             Log.i(APP, "layout document");
                             doc.layout(layoutW, layoutH, layoutEm);
                         }
@@ -1113,6 +1122,12 @@ public class DocumentActivity extends Activity {
                         long mark = doc.makeBookmark(
                             doc.locationFromPageNumber(currentPage)
                         );
+
+                        // ✅ 重排前再次注入（防止 CSS 被重置）
+                        if (isReflowable) {
+                            applyFixedSpacing();
+                        }
+
                         Log.i(APP, "relayout document");
                         doc.layout(layoutW, layoutH, layoutEm);
                         pageCount = doc.countPages();
@@ -3243,5 +3258,39 @@ public class DocumentActivity extends Activity {
         dismissAiLoadingDialog();
         // 调用MyActivity公共静态方法，传入当前this作为上下文
         MyActivity.showAiMarkdownDialog(this, mdList);
+    }
+
+    /**
+     * 注入固定的字间距和行间距 CSS
+     * Context.setUserCSS 是全局静态方法，无需实例
+     */
+    private void applyFixedSpacing() {
+        try {
+            String css = String.format(
+                "body, p, div, span, li { " +
+                    "  letter-spacing: %.3fem !important; " +
+                    "  line-height: %.3f !important; " +
+                    "} " +
+                    "h1, h2, h3, h4, h5, h6 { " +
+                    "  line-height: 1.3 !important; " +
+                    "}",
+                FIXED_LETTER_SPACING,
+                FIXED_LINE_HEIGHT
+            );
+
+            // ✅ Context.setUserCSS 是静态方法，invoke 第一个参数传 null
+            java.lang.reflect.Method method =
+                com.artifex.mupdf.fitz.Context.class.getMethod(
+                    "setUserCSS",
+                    String.class
+                );
+            method.invoke(null, css);
+
+            Log.i(APP, "Fixed spacing CSS applied via Context.setUserCSS");
+        } catch (NoSuchMethodException e) {
+            Log.w(APP, "Context.setUserCSS not available in this MuPDF build");
+        } catch (Exception e) {
+            Log.w(APP, "Context.setUserCSS failed: " + e.getMessage());
+        }
     }
 }
