@@ -52,6 +52,13 @@ class Reader : public QDialog {
   ~Reader();
   Ui::Reader* ui;
 
+  // FB2 方案
+  QByteArray txtToFb2(const QString& filePath);
+  void setFb2DataToJava(QString txtFile);
+  // Epub
+  QByteArray txtToEpub(const QString& filePath);
+  void setEpubDataToJava(const QString& txtFile);
+
   QStandardItemModel* notesModel = nullptr;
 
   bool m_isAppForeground = true;

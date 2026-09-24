@@ -1382,7 +1382,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               QString file = fileName;  // list.at(1);
 
               QTimer::singleShot(
-                  100, mw_one, [file]() { m_Reader->setPdfDataToJava(file); });
+                  100, mw_one, [file]() { m_Reader->setEpubDataToJava(file); });
             }
           }
           //===========================================================

@@ -197,6 +197,8 @@ public class DocumentActivity extends Activity {
 
     // 用来存放C++返回的内存PDF byte[]
     private byte[] mConvertedPdfBuffer = null;
+    //  FB2 专用缓冲区
+    private byte[] mConvertedFb2Buffer = null;
 
     public static native void CallJavaNotify_0();
 
@@ -1837,43 +1839,7 @@ public class DocumentActivity extends Activity {
     /**
      * 【供C++ JNI调用】C++完成txt转pdf后，回传生成的pdf二进制数组
      */
-    /*public void setConvertedPdfBuffer(byte[] pdfBytes) {
-        runOnUiThread(() -> {
-            if (isFinishing() || isDestroyed()) return;
-            if (worker == null) return; // 增加保护，防止worker还没初始化完成
 
-            // 关闭等待转圈弹窗
-            if (
-                mConvertProgressDialog != null &&
-                mConvertProgressDialog.isShowing()
-            ) {
-                mConvertProgressDialog.dismiss();
-                mConvertProgressDialog = null;
-            }
-
-            mConvertedPdfBuffer = pdfBytes;
-            buffer = mConvertedPdfBuffer;
-            stream = null;
-            worker.add(
-                new Worker.Task() {
-                    boolean needsPassword;
-
-                    public void work() {
-                        Log.i(APP, "Loaded converted txt->pdf from buffer");
-                        doc = Document.openDocument(buffer, "application/pdf");
-                        needsPassword = doc.needsPassword();
-                    }
-
-                    public void run() {
-                        if (needsPassword) askPassword(
-                            R.string.dlog_password_message
-                        );
-                        else loadDocument();
-                    }
-                }
-            );
-        });
-        }*/
     public void setConvertedPdfBuffer(byte[] pdfBytes) {
         // ✅ 在 Lambda 外面完成 Buffer 清理（此处不在 Lambda 内，可以随意修改）
         if (pdfBytes != null && pdfBytes.length > 0) {
@@ -1961,6 +1927,155 @@ public class DocumentActivity extends Activity {
         } catch (java.io.UnsupportedEncodingException e) {
             return new String(data); // 兜底 UTF-8
         }
+    }
+
+    public void setConvertedFb2Buffer(byte[] fb2Bytes) {
+        // FB2 是 XML，以 <?xml 开头，无需像 PDF 那样裁剪前导字节
+        if (fb2Bytes == null || fb2Bytes.length == 0) {
+            Log.e(APP, "Empty FB2 buffer!");
+            return;
+        }
+
+        // ✅ 用 final 变量捕获，供 Lambda 使用
+        final byte[] finalFb2Bytes = fb2Bytes;
+
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            if (worker == null) return;
+
+            // 关闭等待弹窗
+            if (
+                mConvertProgressDialog != null &&
+                mConvertProgressDialog.isShowing()
+            ) {
+                mConvertProgressDialog.dismiss();
+                mConvertProgressDialog = null;
+            }
+
+            // ✅ 使用独立的 FB2 buffer 变量，避免与 PDF 方案互相干扰
+            mConvertedFb2Buffer = finalFb2Bytes;
+            buffer = mConvertedFb2Buffer;
+            stream = null;
+
+            worker.add(
+                new Worker.Task() {
+                    boolean needsPassword;
+
+                    public void work() {
+                        Log.i(
+                            APP,
+                            "Opening converted txt->fb2 from buffer, size=" +
+                                (finalFb2Bytes != null
+                                    ? finalFb2Bytes.length
+                                    : 0)
+                        );
+                        // ✅ MuPDF 内部注册的 FB2 MIME 类型（区分大小写）
+                        doc = Document.openDocument(
+                            finalFb2Bytes,
+                            "application/x-fictionbook+xml"
+                        );
+                        needsPassword = doc.needsPassword();
+                    }
+
+                    public void run() {
+                        if (needsPassword) askPassword(
+                            R.string.dlog_password_message
+                        );
+                        else loadDocument();
+                    }
+                }
+            );
+        });
+    }
+
+    // Epub方法
+    public void setConvertedEpubBuffer(byte[] epubBytes) {
+        if (epubBytes == null || epubBytes.length == 0) {
+            Log.e(APP, "Empty EPUB buffer!");
+            return;
+        }
+
+        final byte[] finalEpubBytes = epubBytes;
+
+        runOnUiThread(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            if (worker == null) return;
+
+            if (
+                mConvertProgressDialog != null &&
+                mConvertProgressDialog.isShowing()
+            ) {
+                mConvertProgressDialog.dismiss();
+                mConvertProgressDialog = null;
+            }
+
+            worker.add(
+                new Worker.Task() {
+                    boolean needsPassword;
+                    String tempPath;
+
+                    public void work() {
+                        try {
+                            Log.i(APP, "=== EPUB MODE v1 ===");
+
+                            File testDir = new File(
+                                "/storage/emulated/0/.Knot"
+                            );
+                            if (!testDir.exists()) testDir.mkdirs();
+
+                            String fileName =
+                                "converted_" +
+                                System.currentTimeMillis() +
+                                ".epub";
+                            File tmpFile = new File(testDir, fileName);
+
+                            FileOutputStream fos = new FileOutputStream(
+                                tmpFile
+                            );
+                            fos.write(finalEpubBytes);
+                            fos.flush();
+                            fos.close();
+
+                            tempPath = tmpFile.getAbsolutePath();
+                            Log.i(
+                                APP,
+                                "EPUB temp file written: " +
+                                    tempPath +
+                                    ", size=" +
+                                    finalEpubBytes.length
+                            );
+
+                            doc = Document.openDocument(tempPath);
+                            needsPassword = doc.needsPassword();
+                            // ⚠️ 不要在这里调用 getMetaData！
+                        } catch (Exception e) {
+                            Log.e(
+                                APP,
+                                "EPUB open failed: " + e.getMessage(),
+                                e
+                            );
+                            tempPath = null;
+                        }
+                    }
+
+                    public void run() {
+                        if (tempPath == null || doc == null) {
+                            Toast.makeText(
+                                DocumentActivity.this,
+                                "EPUB conversion failed",
+                                Toast.LENGTH_SHORT
+                            ).show();
+                            finish();
+                            return;
+                        }
+                        if (needsPassword) askPassword(
+                            R.string.dlog_password_message
+                        );
+                        else loadDocument();
+                    }
+                }
+            );
+        });
     }
 
     /** 更新睡眠按钮图标状态：开启时图标高亮 */
