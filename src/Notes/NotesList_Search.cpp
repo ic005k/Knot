@@ -58,7 +58,11 @@ QStringList findMarkdownFilesToSort(const QString& dirPath) {
   for (const auto& entry : entries) {
     result.append(entry.path);
   }
-  qInfo() << "result=" << result.at(0);
+
+  if (!result.isEmpty()) {
+    qInfo() << "First note:" << result.at(0);
+  }
+
   return result;
 }
 

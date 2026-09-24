@@ -87,6 +87,8 @@ void MainHelper::restoreTabRecycleFile(const QString& tabName,
   tabData->setCurrentIndex(count);
 
   mw_one->strLatestModify = tr("Restore Tab") + "(" + tab_name + ")";
+
+  m_Method->openMainEntranceWindow();
 }
 
 void MainHelper::openTabRecycle() {

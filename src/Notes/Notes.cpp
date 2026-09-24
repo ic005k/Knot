@@ -409,6 +409,7 @@ void Notes::init_all_notes() {
 
   QString dirPath = iniDir + "memo";
   MyAllNotes = findMarkdownFilesToSort(dirPath);
+
   MyNoteRecycle = m_NotesList->getRecycleNoteFiles();
   MyAllNotes.removeIf(
       [](const QString& f) { return MyNoteRecycle.contains(f); });
