@@ -1074,11 +1074,13 @@ public class DocumentActivity extends Activity {
                 public void work() {
                     try {
                         Log.i(APP, "load document");
-                        String metaTitle = doc.getMetaData(
+
+                        /*String metaTitle = doc.getMetaData(
                             Document.META_INFO_TITLE
                         );
                         if (metaTitle != null && !metaTitle.equals("")) title =
-                            metaTitle;
+                            metaTitle;*/
+
                         isReflowable = doc.isReflowable();
                         if (isReflowable) {
                             // ✅ 首次 layout 前注入固定间距
