@@ -18,10 +18,13 @@
     >
         <ImageView
             android:id="@+id/iv_todo_add"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
             android:layout_marginStart="10dp"
             android:src="@drawable/ic_todo_add"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
         />
         <EditText
             android:id="@+id/et_todo_input"
@@ -36,13 +39,15 @@
         />
         <ImageView
             android:id="@+id/iv_todo_clear"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
             android:layout_marginStart="10dp"
-            android:src="@drawable/ic_todo_clear"
+            android:src="@drawable/ic_todo_delete"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
         />
     </LinearLayout>
-
     <!-- Todo列表：底部直接约束到根布局，不再关联tab -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_todo_list"
@@ -52,5 +57,4 @@
         app:layout_constraintTop_toBottomOf="@id/todo_input_bar"
         app:layout_constraintBottom_toBottomOf="@id/layout_todo_root"
     />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

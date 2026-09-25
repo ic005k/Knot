@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:minHeight="48dp"
-            android:src="@drawable/ic_menu_clear_history"
+            android:src="@drawable/ic_todo_clear"
             android:contentDescription="清除"
             android:background="?attr/selectableItemBackgroundBorderless"
         />

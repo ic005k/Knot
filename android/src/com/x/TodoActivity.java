@@ -60,8 +60,9 @@ public class TodoActivity extends AppCompatActivity {
             etTodoInput.setText("");
         });
         ivTodoClear.setOnClickListener(v -> {
-            PublicJavaCallCpp("todo_clear_input");
-            etTodoInput.setText("");
+            //PublicJavaCallCpp("todo_clear_input");
+            //etTodoInput.setText("");
+            PublicJavaCallCpp("todo_recycle");
         });
 
         //Todo列表初始化

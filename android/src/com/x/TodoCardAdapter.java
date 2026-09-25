@@ -1,5 +1,6 @@
 package com.x;
 
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,6 +90,10 @@ public class TodoCardAdapter
             holder.viewStripe.setBackgroundColor(stripeColor);
             holder.tvTodoTag.setText(strTime);
             holder.tvTodoContent.setText(strText);
+            holder.tvTodoContent.setTypeface(
+                holder.tvTodoContent.getTypeface(),
+                Typeface.BOLD
+            );
         }
 
         boolean isSelected = position == mSelectedPos;
