@@ -2878,7 +2878,7 @@ public class DocumentActivity extends Activity {
                 String keyword = parts[6].trim();
                 dialog.dismiss(); // 先关闭笔记列表
                 // 跳转并高亮
-                gotoPage(targetPage);
+                gotoPage(targetPage - 1);
                 searchNeedle = keyword;
                 loadPage(); // loadPage 内部会用 searchNeedle 执行 page.search() 并渲染高亮
             });
@@ -2901,6 +2901,7 @@ public class DocumentActivity extends Activity {
                     dialog
                 );
             });
+
             // 删除
             btnDel.setOnClickListener(v -> {
                 if (selectedPos[0] < 0) return;
@@ -2921,7 +2922,22 @@ public class DocumentActivity extends Activity {
                             MyActivity.mInstance.PublicJavaCallCpp(
                                 "pdf_note_delete|==|" + id
                             );
-                            dialog.dismiss();
+                            // ✅ 1. 从数据源移除对应条目
+                            rawNoteData.remove(selectedPos[0]);
+                            // ✅ 2. 重置选中状态（避免越界或误操作）
+                            selectedPos[0] = -1;
+                            // ✅ 3. 通知适配器刷新列表
+                            adapter.notifyDataSetChanged();
+
+                            // 可选：如果列表为空，可以给出提示或自动关闭弹窗
+                            if (rawNoteData.isEmpty()) {
+                                Toast.makeText(
+                                    DocumentActivity.this,
+                                    MyActivity.zh_cn ? "暂无笔记" : "No notes",
+                                    Toast.LENGTH_SHORT
+                                ).show();
+                                // dialog.dismiss(); // 按需决定是否在删空后自动关闭
+                            }
                         }
                     )
                     .setNegativeButton(
@@ -2930,6 +2946,7 @@ public class DocumentActivity extends Activity {
                     )
                     .show();
             });
+
             btnClose.setOnClickListener(v -> dialog.dismiss());
             dialog.show();
             if (dialog.getWindow() != null) {
@@ -3184,7 +3201,7 @@ public class DocumentActivity extends Activity {
                     "|==|" +
                     noteContent +
                     "|==|" +
-                    currentPage;
+                    (currentPage + 1);
             }
             MyActivity.mInstance.PublicJavaCallCpp(payload);
 
