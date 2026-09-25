@@ -164,7 +164,7 @@ public class ReadListActivity extends AppCompatActivity {
             MyActivity.m_instance.shareImage(
                 sel.getTitle(),
                 sel.getFilePath(),
-                "Book",
+                "*/*",
                 MyActivity.m_instance
             );
         });

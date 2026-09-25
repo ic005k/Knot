@@ -2451,9 +2451,9 @@ public class DocumentActivity extends Activity {
                 android.text.Layout layout = textView.getLayout();
                 if (layout == null) {
                     // layout 尚未就绪，再等一帧
-                    textView.post(() ->
-                        scrollToHighlight(textView, scrollView, fStart, fEnd)
-                    );
+                    textView.post(() -> {
+                        scrollToHighlight(textView, scrollView, fStart, fEnd);
+                    });
                 } else {
                     scrollToHighlight(textView, scrollView, fStart, fEnd);
                 }
