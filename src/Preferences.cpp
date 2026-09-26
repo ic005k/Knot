@@ -16,6 +16,14 @@ Preferences::Preferences(QWidget* parent)
     : QDialog(parent), ui(new Ui::Preferences) {
   ui->setupUi(this);
 
+  QString fileOld = privateDir + ai_config_json;
+  QString fileNew = iniDir + "config/" + ai_config_json;
+  // 新文件不存在时，复制旧文件到新路径
+  QFile newFile(fileNew);
+  if (!newFile.exists()) {
+    QFile::copy(fileOld, fileNew);
+  }
+
   m_Method->set_ToolButtonStyle(this);
 
   this->installEventFilter(this);
@@ -123,9 +131,6 @@ void Preferences::saveOptions() {
   if (this->isVisible()) {
     iniPreferences->setValue("/Options/maxcon", ui->editConcurrency->text());
 
-    iniPreferences->setValue("/Options/ai", ui->chkAI->isChecked());
-    isChkAI = ui->chkAI->isChecked();
-
     iniPreferences->setValue("/Options/aiindex",
                              ui->cboxEndpoint->currentIndex());
   }
@@ -215,9 +220,6 @@ bool Preferences::isOverReaderFont() {
 }
 
 void Preferences::initOptions() {
-  ui->chkAI->setChecked(iniPreferences->value("/Options/ai", false).toBool());
-  isChkAI = ui->chkAI->isChecked();
-
   ui->cboxEndpoint->setCurrentIndex(
       iniPreferences->value("/Options/aiindex", 0).toInt());
 
@@ -414,6 +416,11 @@ void Preferences::closeEvent(QCloseEvent* event) {
   else
     mw_one->ui->lblVectorStatus->hide();
   m_NotesList->rebuilderNotesVector();
+
+  if (m_aiAllRecords.count() == 0)
+    isEnabledAiApi = false;
+  else
+    isEnabledAiApi = true;
 }
 
 void Preferences::on_btnShowPassword_pressed() {
@@ -696,11 +703,12 @@ void Preferences::saveAIConfig() {
   QJsonObject root;
   root["all_records"] = arr;
 
-  QString filePath = privateDir + "/" + ai_config_json;
+  QString filePath = iniDir + "config/" + ai_config_json;
   QFile file(filePath);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Save Failed"), tr("Cannot open config file to write"), 1);
+    QMessageBox::critical(this, tr("Save Failed"),
+                          tr("Cannot open config file to write"));
+
     return;
   }
   file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
@@ -728,7 +736,7 @@ void Preferences::saveAIConfig() {
 }
 
 void Preferences::initAIConfig() {
-  QString filePath = privateDir + "/" + ai_config_json;
+  QString filePath = iniDir + "config/" + ai_config_json;
   QFile file(filePath);
   m_aiAllRecords.clear();
   ui->cboxEndpoint->clear();
@@ -762,6 +770,11 @@ void Preferences::initAIConfig() {
     ui->cboxEndpoint->addItem(rec.displayText());
     ui->cboxEndpoint->setItemData(i, i);
   }
+
+  if (m_aiAllRecords.count() == 0)
+    isEnabledAiApi = false;
+  else
+    isEnabledAiApi = true;
 }
 
 void Preferences::on_cboxEndpoint_currentIndexChanged(int index) {
@@ -960,7 +973,7 @@ void Preferences::on_btnDel_clicked() {
   QJsonObject root;
   root["all_records"] = arr;
 
-  QString filePath = privateDir + "/" + ai_config_json;
+  QString filePath = iniDir + "config/" + ai_config_json;
   QFile file(filePath);
   if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
     file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));

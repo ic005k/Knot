@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabOptions">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -95,12 +95,14 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <widget class="QCheckBox" name="chkAI">
-            <property name="styleSheet">
-             <string notr="true"/>
+           <widget class="QLabel" name="lblAiApi">
+            <property name="font">
+             <font>
+              <bold>true</bold>
+             </font>
             </property>
             <property name="text">
-             <string>Enable AI</string>
+             <string>AI API Configuration:</string>
             </property>
            </widget>
           </item>
@@ -205,6 +207,11 @@
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
              <widget class="QLabel" name="lblModel">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>Local Model List:</string>
               </property>

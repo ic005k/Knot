@@ -559,7 +559,7 @@ color: rgb(255, 255, 255);</string>
              <item>
               <widget class="QTabWidget" name="tabAI">
                <property name="currentIndex">
-                <number>2</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="tabNoteLink">
                 <attribute name="title">

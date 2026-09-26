@@ -393,12 +393,6 @@ void Steps::openStepsUI() {
   btn0->setIconSize(QSize(btnh - 3, btnh - 3));
   btn0->setFixedSize(QSize(btnh, btnh));
 
-  if (mw_one->m_Preferences->ui->chkAI->isChecked()) {
-    ui->btnAIExerciseSuggestions->show();
-  } else {
-    ui->btnAIExerciseSuggestions->hide();
-  }
-
   if (ui->lblGpsInfo->text() == tr("GPS Info") ||
       ui->lblGpsInfo->text() == "GPS Info") {
     QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);

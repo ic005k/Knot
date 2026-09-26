@@ -561,7 +561,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               if (list.count() == 2) {
                 QString selectedText = list.at(1);
                 m_Reader->isAIReaderExplanation = true;
-                mw_one->on_btnAIExplanation_clicked(selectedText);
+                mw_one->on_btnAIBookExplanation_clicked(selectedText);
               }
             });
           }

@@ -562,7 +562,6 @@ void NotesList::on_btnRename_clicked() {
   if (isMouseClickNoteBook) {
     btnAIGen->hide();
   } else {
-    if (!mw_one->m_Preferences->ui->chkAI->isChecked()) btnAIGen->hide();
   }
 
   btnCancel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);

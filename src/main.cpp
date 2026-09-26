@@ -241,6 +241,7 @@ int main(int argc, char* argv[]) {
   p_dir.mkpath(iniDir + "memo/images");
   p_dir.mkpath(iniDir + "memo/gps");
   p_dir.mkpath(iniDir + "bookini");
+  p_dir.mkpath(iniDir + "config");
   QString bak_dir = iniDir;
   bak_dir = bak_dir.replace("KnotData", "KnotBak");
   p_dir.mkpath(bak_dir);

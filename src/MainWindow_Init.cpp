@@ -397,7 +397,6 @@ void MainWindow::init_UIWidget() {
   ui->lblSyncNote->setFont(f);
 
   if (isAndroid) {
-    mw_one->m_Preferences->ui->chkAI->setStyleSheet(strStyle);
     ui->chkAutoSync->setStyleSheet(strStyle);
     ui->chkWebDAV->setStyleSheet(strStyle);
     ui->chkZip->setStyleSheet(strStyle);

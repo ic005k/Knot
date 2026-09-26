@@ -415,7 +415,7 @@ class MainWindow : public QMainWindow {
  public slots:
   void on_btnAISteps_clicked();
   void on_btnRecentOpen_clicked();
-  void on_btnAIExplanation_clicked(const QString& selectedText);
+  void on_btnAIBookExplanation_clicked(const QString& selectedText);
 
   void on_btnBackAIAPIList_clicked();
 

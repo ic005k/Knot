@@ -252,12 +252,6 @@ void Notes::openEditUI() {
   else
     ui->btnAILink->hide();
 
-  if (mw_one->m_Preferences->ui->chkAI->isChecked()) {
-    ui->tabAI->setTabVisible(1, true);
-  } else {
-    ui->tabAI->setTabVisible(1, false);
-  }
-
   m_EditSource->setFocus();
 
   QTimer::singleShot(100, this,
@@ -428,7 +422,6 @@ void Notes::openNotes() {
   } else {
   }
   m_Method->setLocalAIModelEnabled(isLocalAIModel);
-  m_Method->setAIAPIEnabled(mw_one->m_Preferences->ui->chkAI->isChecked());
 
   isPasswordError = false;
   isWebDAVError = false;

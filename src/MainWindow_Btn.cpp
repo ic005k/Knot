@@ -380,6 +380,8 @@ void MainWindow::on_btnViewCategory_clicked() {
 }
 
 void MainWindow::on_btnAIExerciseSuggestions_clicked() {
+  if (!isEnabledAiApi) return;
+
   // 获取当前程序生效的语言标识
   QLocale loc = QLocale::system();
   QString langCode = loc.name();
@@ -430,11 +432,13 @@ Rules:
   aiChatQuery(fullPrompt);
 }
 
-void MainWindow::on_btnAIExplanation_clicked(const QString& selectedText) {
+void MainWindow::on_btnAIBookExplanation_clicked(const QString& selectedText) {
   QString trimText = selectedText.trimmed();
   if (trimText.isEmpty()) {
     return;
   }
+
+  if (!isEnabledAiApi) return;
 
   // qDebug() << trimText;
 
@@ -487,6 +491,8 @@ void MainWindow::on_btnAISteps_clicked() {
     return;
   }
 
+  if (!isEnabledAiApi) return;
+
   m_Steps->isAiSteps = true;
 
   // qDebug() << trimText;
@@ -523,6 +529,8 @@ void MainWindow::on_btnAIReportAnalysis_clicked() {
   if (trimText.isEmpty()) {
     return;
   }
+
+  if (!isEnabledAiApi) return;
 
   mw_one->m_Report->isAiCategory = true;
 

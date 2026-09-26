@@ -641,6 +641,8 @@ void Notes::on_btnQuestion_clicked() {
   QString fullPrompt = ui->editQuestion->toPlainText().trimmed();
   if (fullPrompt.isEmpty()) return;
 
+  if (!isEnabledAiApi) return;
+
   isAIQA = true;
   ui->progQA->setRange(0, 0);
   ui->editQuestion->setEnabled(false);
