@@ -160,7 +160,10 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
 }
 
 bool Notes::removeNoteVector(const QString& mdFilePath) {
+  if (!g_cpu_supports_llama) return false;
+
   if (!isLocalAIModel) return false;
+
   if (!g_vectorDb) {
     qWarning() << "删除向量：向量数据库未初始化";
     return false;

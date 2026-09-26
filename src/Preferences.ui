@@ -121,7 +121,7 @@
           <item>
            <widget class="QLabel" name="lblAIEndpoint">
             <property name="text">
-             <string>Endpoint:</string>
+             <string>Endpoint</string>
             </property>
            </widget>
           </item>
@@ -135,7 +135,7 @@
           <item>
            <widget class="QLabel" name="lblAIKey">
             <property name="text">
-             <string>API Key:</string>
+             <string>API Key</string>
             </property>
            </widget>
           </item>
@@ -149,7 +149,7 @@
           <item>
            <widget class="QLabel" name="lblAIModelID">
             <property name="text">
-             <string>Model Endpoint ID:</string>
+             <string>Model Endpoint ID</string>
             </property>
            </widget>
           </item>

@@ -772,6 +772,8 @@ void NotesList::newSubNoteBook(QString name, int idx) {
 }
 
 void NotesList::rebuilderNotesVector() {
+  if (!g_cpu_supports_llama) return;
+
   if (!isLocalAIModel) {
     mw_one->ui->lblVectorStatus->hide();
     return;

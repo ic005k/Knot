@@ -313,6 +313,8 @@ void NotesList::startVectorSerach(const QString& text) {
       return;
     }
 
+    if (!g_cpu_supports_llama) return;
+
     mw_one->mySearchText = text;
 
     if (isLocalAIModel && m_vectorSearchService && g_embEngine &&

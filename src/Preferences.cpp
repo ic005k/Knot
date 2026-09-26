@@ -838,6 +838,11 @@ void Preferences::on_cboxModel_currentIndexChanged(int index) {
 }
 
 void Preferences::initLocalModelList() {
+  if (!g_cpu_supports_llama) {
+    ui->f_localai->hide();
+    return;
+  }
+
   QString curText = ui->cboxModel->currentText();
 
   QString path = privateDir + "model";

@@ -1900,6 +1900,21 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../src/Preferences.ui" line="124"/>
+        <source>Endpoint</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.ui" line="138"/>
+        <source>API Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Preferences.ui" line="152"/>
+        <source>Model Endpoint ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../src/Preferences.ui" line="168"/>
         <source>Select</source>
         <translation type="unfinished"></translation>
@@ -1915,18 +1930,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.ui" line="124"/>
-        <source>Endpoint:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../src/Preferences.ui" line="145"/>
         <source>Paste your API key here</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.ui" line="152"/>
-        <source>Model Endpoint ID:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1959,11 +1964,6 @@
     <message>
         <location filename="../../src/Preferences.ui" line="116"/>
         <source>https://ark.cn-beijing.volces.com/api/v3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Preferences.ui" line="138"/>
-        <source>API Key:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

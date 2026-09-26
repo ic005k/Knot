@@ -20,6 +20,7 @@
 #include <QTranslator>
 #include <QWidget>
 
+#include "CpuCheck.h"
 #include "MainWindow.h"
 #include "NativeMsgThread.h"
 #include "SplashTimer.h"
@@ -275,12 +276,17 @@ int main(int argc, char* argv[]) {
 
   isLocalAIModel = false;
 #ifdef VECTOR_SEARCH
-  // 执行ORT引擎、向量库完整初始化
-  isLocalAIModel = initGlobalAiEngine();
-  if (!isLocalAIModel) {
-    qDebug() << "向量模型文件缺失...";
+  if (g_cpu_supports_llama) {
+    // 执行ORT引擎、向量库完整初始化
+    isLocalAIModel = initGlobalAiEngine();
+    if (!isLocalAIModel) {
+      qDebug() << "向量模型文件缺失...";
+    } else {
+      qDebug() << "向量模型初始化成功...";
+    }
   } else {
-    qDebug() << "向量模型初始化成功...";
+    qInfo() << "AI 引擎跳过加载（CPU 不兼容）";
+    isLocalAIModel = false;
   }
 #endif
 
@@ -341,8 +347,10 @@ int main(int argc, char* argv[]) {
   workerThread->deleteLater();
 
 #ifdef VECTOR_SEARCH
-  // 程序退出统一释放llama、ggml全局资源
-  releaseGlobalAiEngine();
+  if (g_cpu_supports_llama) {
+    // 程序退出统一释放llama、ggml全局资源
+    releaseGlobalAiEngine();
+  }
 #endif
 
   return ret;
@@ -593,21 +601,7 @@ void migrateOldDataIfNeeded() {
 
 #endif
 
-void initAndroidGPU() {
-  /*qputenv("QSG_RHI_BACKEND", "opengl");
-  qputenv("QT_QUICK_BACKEND", "opengl");
-  qputenv("QSG_INFO", "1");
-
-  // 全局关闭Quick持久离屏图形缓存，替代不存在的静态函数
-  qputenv("QSG_NO_PERSISTENT_GRAPHICS_CACHE", "1");
-  qputenv("QT_RHI_NO_OFFSCREEN_BLIT", "1");
-  qputenv("QT_QPA_GL_NO_PBO", "1");
-
-  QSurfaceFormat fmt;
-  fmt.setRenderableType(QSurfaceFormat::OpenGLES);
-  fmt.setVersion(3, 2);
-  fmt.setDefaultFormat(fmt);*/
-}
+void initAndroidGPU() {}
 
 int clearLockFiles(const QString& iniDir) {
   // 1. 初始化目录对象并校验有效性
@@ -653,6 +647,16 @@ int clearLockFiles(const QString& iniDir) {
 }
 
 int init_main_ai() {
+  // ✅ CPU 兼容性检测
+  g_cpu_supports_llama = CpuCheck::isCompatibleWithLlama();
+
+  if (!g_cpu_supports_llama) {
+    qWarning()
+        << "⚠ [CpuCheck] 当前 CPU 缺少 AVX2/FMA/F16C 指令集，AI 功能已禁用。";
+    qWarning() << "   (需要 Intel Core 4代 Haswell 或 AMD 同等及以上架构)";
+    return 0;  // 返回 0 表示非致命错误，程序继续运行，只是不加载 AI
+  }
+
   // ✅ 静态链接模式下，必须显式调用此函数注册 CPU 后端
   ggml_backend_cpu_init();
 

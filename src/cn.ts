@@ -3715,8 +3715,9 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="124"/>
-        <source>Endpoint:</source>
-        <translation>接入地址：</translation>
+        <source>Endpoint</source>
+        <oldsource>Endpoint:</oldsource>
+        <translation>接入地址</translation>
     </message>
     <message>
         <source>AI API Configuration</source>
@@ -3729,8 +3730,9 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="152"/>
-        <source>Model Endpoint ID:</source>
-        <translation>模型接入点ID：</translation>
+        <source>Model Endpoint ID</source>
+        <oldsource>Model Endpoint ID:</oldsource>
+        <translation>模型接入点ID</translation>
     </message>
     <message>
         <location filename="Preferences.ui" line="175"/>
@@ -3781,8 +3783,9 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="138"/>
-        <source>API Key:</source>
-        <translation>API Key：</translation>
+        <source>API Key</source>
+        <oldsource>API Key:</oldsource>
+        <translation>API Key</translation>
     </message>
     <message>
         <source>Model ID</source>

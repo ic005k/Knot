@@ -108,6 +108,8 @@ inline bool isAndroid, isLinux, isMacOS, isZipOK, isMenuImport, isDownData,
 
 inline bool isEnabledAiApi = false;
 
+inline bool g_cpu_supports_llama = false;
+
 inline bool isPasswordError = false;
 inline bool isrbFreq = true;
 inline bool isAdd = false;
