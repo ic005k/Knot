@@ -2922,73 +2922,65 @@ void Method::showInfoWindow(const QString& info) {
     infoWindow->setStyleSheet("background-color: #FFFFCC; color: black;");
   infoWindow->setModal(true);
 
-  // 创建信息标签（保持原有属性）
+  // ==================== 布局重构开始 ====================
+
+  // 主布局：垂直方向 [内容区 + 进度条]
+  QVBoxLayout* mainLayout = new QVBoxLayout(infoWindow);
+  mainLayout->setContentsMargins(14, 14, 14, 10);
+  mainLayout->setSpacing(8);
+
+  // 内容区：水平方向 [圆形计时器 | 文本]
+  QHBoxLayout* contentLayout = new QHBoxLayout();
+  contentLayout->setSpacing(isAndroid ? 16 : 12);
+  contentLayout->setAlignment(Qt::AlignVCenter);  // ✅ 关键：整体垂直居中
+
+  // 左侧：圆形数秒组件（固定尺寸，垂直居中）
+  IOSCircularProgress* circularTimer = new IOSCircularProgress(infoWindow);
+  if (isAndroid)
+    circularTimer->setFixedSize(60, 60);
+  else
+    circularTimer->setFixedSize(56, 56);  // 桌面端略小，更精致
+  contentLayout->addWidget(circularTimer, 0, Qt::AlignVCenter);
+
+  // 右侧：信息文本（占据剩余全部空间）
   lblInfo = new QTextEdit(info, infoWindow);
   lblInfo->setReadOnly(true);
   lblInfo->setFrameShape(QFrame::NoFrame);
   lblInfo->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   lblInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  lblInfo->setMinimumWidth(100);
+  contentLayout->addWidget(lblInfo, 1);  // ✅ stretch=1，自动填满剩余宽度
 
-  // --------------------------
-  // 新增：添加圆形数秒显示组件
-  // --------------------------
-  IOSCircularProgress* circularTimer = new IOSCircularProgress(infoWindow);
-  // 可根据需要调整大小（如果默认60x60不合适）
-  if (isAndroid)
-    circularTimer->setFixedSize(80, 80);
-  else
-    circularTimer->setFixedSize(60, 60);
+  mainLayout->addLayout(contentLayout, 1);  // 内容区占满可用高度
 
-  // 设置布局（核心：将圆形组件放在顶部）
-  QVBoxLayout* mainLayout = new QVBoxLayout(infoWindow);
-  mainLayout->setContentsMargins(10, 10, 10, 10);  // 适当增加边距，避免拥挤
-
-  // 顶部：圆形数秒组件（居中显示）
-  QHBoxLayout* topLayout = new QHBoxLayout();
-  topLayout->addStretch();  // 左侧留白，使组件居中
-  topLayout->addWidget(circularTimer);
-  topLayout->addStretch();           // 右侧留白，使组件居中
-  mainLayout->addLayout(topLayout);  // 将顶部布局加入主布局
-
-  // 中间：原有信息标签
-  mainLayout->addWidget(lblInfo);
-
-  // 底部：进度条
-  QHBoxLayout* bottomLayout = new QHBoxLayout();
-  mainLayout->addLayout(bottomLayout);
-
+  // 底部：进度条（独立一行，贴底）
   infoProgBar = new QProgressBar(infoWindow);
   infoProgBar->setMaximum(0);
   infoProgBar->setMinimum(0);
-  bottomLayout->addWidget(infoProgBar);
+  mainLayout->addWidget(infoProgBar, 0, Qt::AlignBottom);
 
-  // 调整窗口大小以适应新增组件
-  if (isAndroid)
-    infoWindow->setFixedWidth(mw_one->width() - 10);
-  else
-    infoWindow->setFixedWidth(340);
-
-  lblInfo->setMaximumWidth(infoWindow->width() - 10);
-
-  int win_h = 240;
+  // ==================== 窗口尺寸与字体 ====================
+  int win_h = 200;
   QFont font = this->font();
-  if (!isAndroid) {
-    win_h = 225;
-    font.setPointSize(8);
-  } else {
+  int mainW = mw_one->width() - 10;
+  if (isAndroid) {
     font.setPointSize(15);
+  } else {
+    if (mainW > 360) mainW = 360;
+    font.setPointSize(9);
   }
+  infoWindow->setFixedWidth(mainW);
   infoWindow->setFixedHeight(win_h);
   lblInfo->setFont(font);
 
-  // 计算位置（保持原有逻辑，确保窗口居中）
+  // ==================== 布局重构结束 ====================
+
+  // 计算位置（确保窗口居中）
   QPoint mainPos = mw_one->mapToGlobal(QPoint(0, 0));
   int x = mainPos.x() + (mw_one->geometry().width() - infoWindow->width()) / 2;
   int y =
       mainPos.y() + (mw_one->geometry().height() - infoWindow->height()) / 2;
 
-  // 屏幕边界检查（保持原有逻辑）
+  // 屏幕边界检查
   QScreen* screen = QApplication::screenAt(mainPos);
   if (screen) {
     QRect screenRect = screen->availableGeometry();
@@ -2997,7 +2989,7 @@ void Method::showInfoWindow(const QString& info) {
   }
   infoWindow->move(x, y);
 
-  // 显示窗口（保持原有逻辑）
+  // 显示窗口
   infoWindow->show();
   infoWindow->raise();
   infoWindow->activateWindow();
