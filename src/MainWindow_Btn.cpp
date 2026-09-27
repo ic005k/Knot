@@ -290,27 +290,11 @@ void MainWindow::on_btnClearNoteFindText_clicked() {}
 
 void MainWindow::on_btnShowFindNotes_clicked() { m_NotesList->showFindNotes(); }
 
-void MainWindow::on_btnNoteBookMenu_clicked() {
-  // m_NotesList->showNoteBookMenu(mw_one->ui->qwNoteBook->x(),
-  // mw_one->ui->qwNoteBook->y());
-}
-
-void MainWindow::on_btnNoteMenu_clicked() {
-  // m_NotesList->showNotsListMenu(mw_one->ui->qwNoteList->x(),
-  // mw_one->ui->qwNoteList->y());
-}
-
-void MainWindow::on_btnCancelType_clicked() {}
-
 void MainWindow::on_btnOkType_clicked() { m_CategoryList->on_btnOk_clicked(); }
 
 void MainWindow::on_btnDelType_clicked() {
   m_CategoryList->on_btnDel_clicked();
 }
-
-void MainWindow::on_btnRenameType_clicked() {}
-
-void MainWindow::on_btnBackSetTab_clicked() {}
 
 void MainWindow::on_btnBackSearch_clicked() {
   clearWidgetFocus();
@@ -320,8 +304,6 @@ void MainWindow::on_btnBackSearch_clicked() {
   } else
     m_Method->openMainEntranceWindow();
 }
-
-void MainWindow::on_btnClearSearchText_clicked() {}
 
 void MainWindow::on_btnStartSearch_clicked(const QString& searchStr) {
   // 主事件搜索
@@ -351,19 +333,11 @@ void MainWindow::on_btnEndDate_clicked() {
   m_DateSelector->initStartEndDate("end");
 }
 
-void MainWindow::on_btnBackEditRecord_clicked() {}
-
 void MainWindow::on_btnType_clicked() { m_EditRecord->on_btnType_clicked(); }
 
 void MainWindow::on_btnOkEditRecord_clicked() {
   m_EditRecord->on_btnOk_clicked();
 }
-
-void MainWindow::on_btnClearType_clicked() {}
-
-void MainWindow::on_btnClearDetails_clicked() {}
-
-void MainWindow::on_btnClearAmount_clicked() {}
 
 void MainWindow::on_btnBackSteps_clicked() { m_Steps->closeSteps(); }
 
@@ -584,17 +558,6 @@ void MainWindow::on_btnWebDAVRestore_clicked() {
   m_CloudBackup->webDAVRestoreData();
 }
 
-void MainWindow::on_chkWebDAV_clicked() {}
-
-void MainWindow::on_btnBack_NotesSearchResult_clicked() {
-  clearWidgetFocus();
-
-  // mw_one->ui->frameNoteList->show();
-  isOpenSearchResult = false;
-}
-
-void MainWindow::on_btnClearSearchResults_clicked() {}
-
 void MainWindow::on_btnOpenSearchEdit_clicked() {
   QString mdFile = m_NotesList->getSearchResultQmlFile();
   if (!QFile::exists(mdFile)) return;
@@ -615,10 +578,6 @@ void MainWindow::on_btnOpenSearchView_clicked() {
   m_NotesList->setCurrentItemFromMDFile(mdFile);
 }
 
-void MainWindow::on_btnFindNotes2_clicked() {}
-
-void MainWindow::on_btnTools_clicked() {}
-
 void MainWindow::on_btnCopyNoteLink_clicked() {
   QString mdFile = m_NotesList->getSearchResultQmlFile();
   if (!QFile::exists(mdFile)) return;
@@ -635,15 +594,9 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
   msg->showMsg(appName, res, 1);
 }
 
-void MainWindow::on_btnRotation_clicked() {}
-
 void MainWindow::on_btnAddBookNote_clicked() { m_Reader->addBookNote(""); }
 
 void MainWindow::on_btnViewBookNote_clicked() { m_Reader->viewBookNote(); }
-
-void MainWindow::on_btnMap_clicked() {}
-
-void MainWindow::on_btnSportsChart_clicked() {}
 
 void MainWindow::on_btnSpeak_clicked() {
   isPlayBook = true;
@@ -684,12 +637,6 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
 #endif
 }
 
-void MainWindow::on_btnHigh() {}
-
-void MainWindow::on_btnLow() {}
-
-void MainWindow::on_btnSetTime() {}
-
 void MainWindow::on_btnRecycle() { m_Todo->on_btnRecycle(); }
 
 void MainWindow::on_btnReturnRecycle_clicked() {
@@ -704,34 +651,11 @@ void MainWindow::on_btnRestoreRecycle_clicked() {
   m_Todo->on_btnRestore_clicked();
 }
 
-void MainWindow::on_btnSelText() {}
-
 void MainWindow::on_btnDownload_clicked() {
   m_CloudBackup->on_pushButton_downloadFile_clicked();
 }
 
 void MainWindow::on_btnBack_One_clicked() { m_CloudBackup->backExit(); }
-
-void MainWindow::on_btnBackNotesGraph_clicked() {
-  // m_NotesList->clickNoteList();
-}
-
-void MainWindow::on_btnCopy_clicked() {
-  QClipboard* clipboard = QApplication::clipboard();
-  // clipboard->setText(mw_one->ui->editSetText->text().trimmed());
-}
-
-void MainWindow::on_btnCancelSel_clicked() {
-  m_Reader->resetTextSelection();
-
-  m_Reader->isSelText = false;
-}
-
-void MainWindow::on_btnBackImg_clicked() {}
-
-void MainWindow::on_btnZoomIn_clicked() {}
-
-void MainWindow::on_btnZoomOut_clicked() {}
 
 void MainWindow::on_btnReport() { on_actionReport_triggered(); }
 
@@ -751,41 +675,9 @@ void MainWindow::on_btnShowValidate_released() {
   m_Preferences->on_btnShowValidate_released();
 }
 
-void MainWindow::on_btnSendEmail() {
-  int cur_index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwBakList);
-  QString filePath =
-      "";  // m_Method->getText3(mw_one->ui->qwBakList, cur_index);
-
-  if (m_Method->sendMailWithAttachment("", filePath)) {
-    qDebug() << "The default email client of the system has been invoked.";
-  } else {
-    qDebug() << "The call to the email client failed!";
-  }
-}
-
-void MainWindow::on_btnShareBakFile_clicked() {
-  // if (m_Method->getCountFromQW(mw_one->ui->qwBakList) == 0) return;
-
-  int cur_index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwBakList);
-  QString filePath =
-      "";  //  m_Method->getText3(mw_one->ui->qwBakList, cur_index);
-  if (QFile::exists(filePath)) {
-    mw_one->m_ReceiveShare->shareImage(tr("Share to"), filePath, "*/*");
-  }
-}
-
 void MainWindow::on_btnNewNote_clicked() {
   m_NotesList->on_actionAdd_Note_triggered();
 }
-
-void MainWindow::on_btnShareBookText_clicked() {
-  QString txt = "";  // mw_one->ui->editSetText->text().trimmed();
-  if (txt.length() > 0) {
-    mw_one->m_ReceiveShare->shareString(tr("Share to"), txt);
-  }
-}
-
-void MainWindow::on_btnBackReader_clicked() { m_Reader->closeReader(); }
 
 void MainWindow::on_btnOpen_clicked() {
   m_Reader->saveReader("", false);
@@ -811,8 +703,6 @@ void MainWindow::on_btnToPDF_clicked() {
 
   m_Notes->on_btnPDF_clicked();
 }
-
-void MainWindow::on_btnPause_clicked() {}
 
 void MainWindow::on_btnTestWebDav_clicked() {
   auto msg = std::make_unique<ShowMessage>(mw_one);
@@ -879,8 +769,6 @@ void MainWindow::on_btnMenu_clicked() {
   mainMenu->deleteLater();
   mainMenu = nullptr;
 }
-
-void MainWindow::on_btnModifyRecord() {}
 
 void MainWindow::on_btnSelTab_clicked() {
   mw_one->ui->frameMain->hide();

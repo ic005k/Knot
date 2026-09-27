@@ -569,8 +569,6 @@ QScrollBar::sub-page:horizontal {
   void setAccessCount(int count);
 
   int getAccessCount();
-  bool sendMailWithAttachment(const QString& recipient = "",
-                              const QString& filePath = "");
 
   QObjectList getAllTextEdit(QObjectList lstUIControls);
   QObjectList getAllLineEdit(QObjectList lstUIControls);

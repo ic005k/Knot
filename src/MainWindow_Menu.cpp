@@ -97,8 +97,6 @@ void MainWindow::on_actionAdd_Tab_triggered() {
 
     mw_one->ui->tabWidget->addTab(tw, customTabText);
     mw_one->ui->tabWidget->setCurrentIndex(count);
-    // addItem(customTabText, "", "", "", 0);
-    setCurrentIndex(count);
 
     reloadMain();
     saveTab();
@@ -116,8 +114,6 @@ void MainWindow::addTab(const QString& customTabText) {
 
   mw_one->ui->tabWidget->addTab(tw, customTabText);
   mw_one->ui->tabWidget->setCurrentIndex(count);
-
-  setCurrentIndex(count);
 
   saveTab();
   strLatestModify = tr("Add Tab") + " ( " + customTabText + " ) ";
@@ -178,7 +174,6 @@ void MainWindow::on_actionDel_Tab_triggered() {
   int TabCount = mw_one->ui->tabWidget->tabBar()->count();
   if (TabCount > 1) {
     mw_one->ui->tabWidget->removeTab(index);
-    delItem(index);
   }
 
   if (TabCount == 1) {
@@ -187,9 +182,6 @@ void MainWindow::on_actionDel_Tab_triggered() {
     QTreeWidget* tw = init_TreeWidget(tw_name);
     QString tabText = tr("Tab 1");
     mw_one->ui->tabWidget->addTab(tw, tabText);
-
-    clearAll();
-    // addItem(tabData->tabText(0), "", "", "", 0);
 
     reloadMain();
   }

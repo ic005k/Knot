@@ -41,40 +41,25 @@ MainWindow::MainWindow(QWidget* parent)
 #endif
   }
 
-  qInfo() << "MainWindow开始设置参数...";
-
   loading = true;
 
   init_Instance();
 
-  qInfo() << "MainWindow开始初始化选项...";
-
   init_Options();
-
-  qInfo() << "MainWindow初始化选项完成...";
 
   init_Thread_Timer();
 
-  qInfo() << "MainWindow初始化线程定时器完成...";
-
   init_UIWidget();
-  // init_Theme();
-
-  qInfo() << "MainWindow初始化UI组件完成...";
 
   init_TotalData();
-
-  qInfo() << "MainWindow初始化总数据完成...";
 
   loading = false;
 
   QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
   startRead(strDate);
-  qInfo() << "MainWindow启动读数据完成...";
+
   get_Today(tw);
   init_Stats(tw);
-
-  qInfo() << "MainWindow加载TW数据完成...";
 
   if (m_Preferences->devMode) {
     // resetWinPos();
@@ -87,7 +72,7 @@ MainWindow::MainWindow(QWidget* parent)
 
   QTimer::singleShot(10, this, [this]() {
     reloadMain();
-    clickData();
+
     updateMainTab();
   });
 
@@ -204,14 +189,12 @@ MainWindow::~MainWindow() {
   // 停止所有定时器
   timer->stop();
   timerSyncData->stop();
-  timerMousePress->stop();
 
   tmeStartRecordAudio->stop();
 
   // 释放定时器
   delete timer;
   delete timerSyncData;
-  delete timerMousePress;
 
   delete tmeStartRecordAudio;
 
@@ -958,92 +941,8 @@ void MainWindow::refreshMainUI() {
   qApp->processEvents();
 }
 
-QString MainWindow::getSelectedText() { return ""; }
-
-void MainWindow::on_timerMousePress() {
-  if (!isMouseMove && isMousePress) on_btnSelText();
-}
-
 void MainWindow::on_editTodo_textChanged() {
   m_Todo->on_editTodo_textChanged();
-}
-
-void MainWindow::setItemHeight(int h) {}
-
-QString MainWindow::getTop(int index) { return ""; }
-
-QString MainWindow::getText0(int index) { return ""; }
-
-QString MainWindow::getText1(int index) { return ""; }
-
-QString MainWindow::getText2(int index) { return ""; }
-
-int MainWindow::getItemType(int index) { return 0; }
-
-void MainWindow::delItem(int index) {}
-
-int MainWindow::getCount() { return 0; }
-
-void MainWindow::clearAll() {}
-
-void MainWindow::setCurrentIndex(int index) {}
-
-void MainWindow::gotoIndex(int index) {}
-
-int MainWindow::getCurrentIndex() { return 0; }
-
-void MainWindow::setScrollBarPos(double pos) {}
-
-void MainWindow::reeditData() {
-  if (setTWCurrentItem()) {
-    on_twItemDoubleClicked();
-  }
-}
-
-void MainWindow::clickData() {
-  if (setTWCurrentItem()) on_twItemClicked();
-}
-
-bool MainWindow::setTWCurrentItem() {
-  bool isSel = false;
-  int row = getCurrentIndex();
-  if (row < 0) return false;
-
-  // type==0 child; type==1 top
-  int type = getItemType(row);
-
-  QString textTop = getTop(row);
-  QString text0 = getText0(row);
-  QStringList list = text0.split(".");
-  int childIndex = 0;
-  if (list.count() > 0) {
-    childIndex = list.at(0).toInt() - 1;
-  }
-
-  if (type == 0) {
-    if (childIndex < 0) return false;
-  }
-
-  QTreeWidget* tw = get_tw(tabData->currentIndex());
-  int count = tw->topLevelItemCount();
-  for (int i = 0; i < count; i++) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(count - 1 - i);
-    if (topItem->text(0) + "  " + topItem->text(3) == textTop) {
-      if (type == 0) {
-        QTreeWidgetItem* childItem = topItem->child(childIndex);
-        tw->setCurrentItem(childItem, 0);
-      }
-
-      if (type == 1) {
-        tw->setCurrentItem(topItem);
-      }
-
-      isSel = true;
-      break;
-    }
-  }
-
-  return isSel;
 }
 
 int MainWindow::getMaxDay(QString sy, QString sm) {

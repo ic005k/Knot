@@ -2,6 +2,7 @@ package com.x;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -83,7 +84,8 @@ public class TodoReminderActivity extends AppCompatActivity {
         centerContainer.setGravity(Gravity.CENTER);
 
         mTvContent = new TextView(this);
-        mTvContent.setTextSize(20);
+        mTvContent.setTextSize(21);
+        mTvContent.setTypeface(Typeface.DEFAULT_BOLD);
         mTvContent.setTextColor(textMain);
         mTvContent.setGravity(Gravity.CENTER);
         mTvContent.setPadding(dp(24), dp(12), dp(24), dp(12));

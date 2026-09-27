@@ -12,10 +12,6 @@ void MainHelper::selectTab() {
 
   mw_one->m_EditRecord->saveCurrentValue();
 
-  if (!isAndroid) {
-    mw_one->on_btnBackEditRecord_clicked();
-  }
-
   mw_one->ui->btnHome->click();
   isSelectTab = true;
 }
@@ -65,8 +61,6 @@ void MainHelper::restoreTabRecycleFile(const QString& tabName,
   QTreeWidget* tw = mw_one->init_TreeWidget(twName);
   mw_one->ui->tabWidget->addTab(tw, tab_name);
 
-  mw_one->setCurrentIndex(count);
-
   mw_one->readData(tw);
 
   if (recycleList.count() > 1) {
@@ -82,7 +76,6 @@ void MainHelper::restoreTabRecycleFile(const QString& tabName,
   mw_one->saveTab();
 
   mw_one->reloadMain();
-  mw_one->clickData();
 
   tabData->setCurrentIndex(count);
 

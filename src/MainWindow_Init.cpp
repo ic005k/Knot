@@ -49,7 +49,7 @@ void MainWindow::init_TotalData() {
     currentTabIndex = 0;
 
   mw_one->ui->tabWidget->setCurrentIndex(currentTabIndex);
-  setCurrentIndex(currentTabIndex);
+
   QTreeWidget* twCur = (QTreeWidget*)tabData->currentWidget();
   readData(twCur);
   mw_one->ui->actionImport_Data->setEnabled(false);
@@ -124,9 +124,6 @@ void MainWindow::init_Thread_Timer() {
 
   timerSyncData = new QTimer(this);
   connect(timerSyncData, SIGNAL(timeout()), this, SLOT(on_timerSyncData()));
-  timerMousePress = new QTimer(this);
-  connect(timerMousePress, SIGNAL(timeout()), this, SLOT(on_timerMousePress()));
-  timerMousePress->setSingleShot(true);
 
   tmeStartRecordAudio = new QTimer(this);
   connect(tmeStartRecordAudio, SIGNAL(timeout()), this,

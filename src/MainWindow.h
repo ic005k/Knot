@@ -283,7 +283,6 @@ class MainWindow : public QMainWindow {
 
   QTimer* timer;
 
-  QTimer* timerMousePress;
   QTimer* timerSyncData;
   QTimer* tmeStartRecordAudio;
 
@@ -318,27 +317,12 @@ class MainWindow : public QMainWindow {
 
   void refreshMainUI();
 
-  QString getSelectedText();
-
   int calcStringPixelWidth(QString s_str, QFont font, int n_font_size);
   int calcStringPixelHeight(QFont font, int n_font_size);
 
-  void delItem(int index);
-  int getCount();
-  void clearAll();
   void reloadMain();
-  void setCurrentIndex(int index);
-  void gotoEnd();
-  void gotoIndex(int index);
-  void setItemHeight(int h);
 
-  QString getTop(int index);
-  QString getText0(int index);
-  int getItemType(int index);
-  int getCurrentIndex();
-  bool setTWCurrentItem();
-  QString getText1(int index);
-  QString getText2(int index);
+  void gotoEnd();
 
   void startInitReport();
 
@@ -346,8 +330,6 @@ class MainWindow : public QMainWindow {
 
   int getMaxDay(QString sy, QString sm);
   void showProgress();
-
-  void setScrollBarPos(double pos);
 
   void execDeskShortcut();
 
@@ -429,8 +411,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnMove();
 
-  void on_btnSelText();
-
   void on_hSlider_sliderMoved(int position);
 
   void on_btnTodo_clicked();
@@ -444,11 +424,7 @@ class MainWindow : public QMainWindow {
 
   void on_actionReport_triggered();
 
-  void on_btnCopy_clicked();
-
   void on_btnSearch_clicked();
-
-  void on_btnCancelSel_clicked();
 
   void on_timerSyncData();
   void timerUpdate();
@@ -460,8 +436,6 @@ class MainWindow : public QMainWindow {
   void on_actionDel_Tab_triggered();
 
   void on_tabWidget_currentChanged(int index);
-
-  void on_btnModifyRecord();
 
   void on_actionExport_Data_triggered();
 
@@ -495,8 +469,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnSelTab_clicked();
 
-  void on_btnBackReader_clicked();
-
   void on_btnAddTodo_clicked();
   void on_btnAddTodo_pressed();
   void on_btnReader_clicked();
@@ -511,25 +483,13 @@ class MainWindow : public QMainWindow {
 
   void on_btnBack_One_clicked();
 
-  void on_btnBackNotesGraph_clicked();
-
   void on_btnNotes_clicked();
 
-  void on_btnZoomIn_clicked();
-
-  void on_btnZoomOut_clicked();
-
   void on_openKnotBakDir();
-
-  void reeditData();
-
-  void clickData();
 
   void on_btnStartSearch_clicked(const QString& searchStr);
 
   void on_btnChart();
-
-  void on_btnBack_NotesSearchResult_clicked();
 
   void on_btnOpenSearchEdit_clicked();
 
@@ -549,29 +509,17 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackBookList_clicked();
 
-  void on_btnBackEditRecord_clicked();
-
   void on_btnBackNoteList_clicked();
 
   void on_btnBackReaderSet_clicked();
 
   void on_btnBackNoteRecycle_clicked();
 
-  void on_timerMousePress();
-
-  void on_btnBackImg_clicked();
-
   void on_btnReport();
 
   void on_btnAdd_clicked();
 
   void on_btnDel_clicked();
-
-  void on_btnHigh();
-
-  void on_btnLow();
-
-  void on_btnSetTime();
 
   void on_btnRecycle();
 
@@ -609,11 +557,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackBakList_clicked();
 
-  void on_btnBackSetTab_clicked();
-
   void on_btnBack_Tree_clicked();
-
-  void on_btnCancelType_clicked();
 
   void on_actionTabRecycle();
 
@@ -644,8 +588,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnSync_clicked();
 
-  void on_btnClearSearchText_clicked();
-
   void on_btnImportBakList_clicked();
 
   void on_btnOkViewCate_clicked();
@@ -658,25 +600,13 @@ class MainWindow : public QMainWindow {
 
   void on_btnClearNoteFindText_clicked();
 
-  void on_btnNoteBookMenu_clicked();
-
-  void on_btnNoteMenu_clicked();
-
   void on_btnOkType_clicked();
 
   void on_btnDelType_clicked();
 
-  void on_btnRenameType_clicked();
-
   void on_btnType_clicked();
 
   void on_btnOkEditRecord_clicked();
-
-  void on_btnClearType_clicked();
-
-  void on_btnClearDetails_clicked();
-
-  void on_btnClearAmount_clicked();
 
   void on_editAmount_textChanged(const QString& arg1);
 
@@ -775,15 +705,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnWebDAVRestore_clicked();
 
-  void on_chkWebDAV_clicked();
-
   void on_editFindNote_returnPressed();
-
-  void on_btnClearSearchResults_clicked();
-
-  void on_btnFindNotes2_clicked();
-
-  void on_btnTools_clicked();
 
   void on_btnCopyNoteLink_clicked();
 
@@ -791,25 +713,13 @@ class MainWindow : public QMainWindow {
 
   void on_btnShowCboxList_clicked();
 
-  void on_btnRotation_clicked();
-
   void on_btnBackNoteDiff_clicked();
 
-  void on_btnSendEmail();
-
-  void on_btnShareBakFile_clicked();
-
   void on_btnNewNote_clicked();
-
-  void on_btnShareBookText_clicked();
 
   void on_btnAddBookNote_clicked();
 
   void on_btnViewBookNote_clicked();
-
-  void on_btnMap_clicked();
-
-  void on_btnSportsChart_clicked();
 
   void on_btnSpeak_clicked();
 
@@ -818,8 +728,6 @@ class MainWindow : public QMainWindow {
   void on_chkPlayRunVoice_clicked(bool checked);
 
   void on_tabMotion_currentChanged(int index);
-
-  void on_btnPause_clicked();
 
   void on_btnTestWebDav_clicked();
 
