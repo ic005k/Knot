@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
 >
-
     <!-- ==========【全局常驻】顶部操作按钮栏 ========== -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,7 +13,6 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
     >
-
         <Button
             android:id="@+id/btn_cancel"
             android:textAllCaps="false"
@@ -23,7 +21,6 @@
             android:layout_height="match_parent"
             android:text="Close"
         />
-
         <Button
             android:id="@+id/btn_save"
             android:textAllCaps="false"
@@ -32,7 +29,6 @@
             android:layout_height="match_parent"
             android:text="Save"
         />
-
         <Button
             android:id="@+id/btnFind"
             android:textAllCaps="false"
@@ -41,7 +37,6 @@
             android:layout_height="match_parent"
             android:text="Find"
         />
-
         <Button
             android:id="@+id/btnUndo"
             android:textAllCaps="false"
@@ -50,7 +45,6 @@
             android:layout_height="match_parent"
             android:text="Undo"
         />
-
         <Button
             android:id="@+id/btnRedo"
             android:textAllCaps="false"
@@ -59,7 +53,6 @@
             android:layout_height="match_parent"
             android:text="Redo"
         />
-
         <View
             android:id="@+id/preview_selected_color"
             android:layout_width="48dp"
@@ -67,7 +60,6 @@
             android:layout_gravity="center"
             android:background="@android:color/darker_gray"
         />
-
         <Button
             android:id="@+id/btnMenu"
             android:textAllCaps="false"
@@ -77,7 +69,6 @@
             android:text="Menu"
         />
     </LinearLayout>
-
     <!-- ==========【全局常驻】查找栏 ========== -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -85,7 +76,6 @@
         android:gravity="top"
         android:orientation="horizontal"
     >
-
         <Button
             android:id="@+id/btnToggleReplace"
             android:layout_width="55dp"
@@ -95,7 +85,6 @@
             android:layout_weight="1"
             android:text="R"
         />
-
         <Button
             android:id="@+id/btnPrev"
             android:layout_width="55dp"
@@ -105,7 +94,6 @@
             android:layout_weight="1"
             android:text="Prev"
         />
-
         <EditText
             android:id="@+id/editFind"
             android:layout_width="150dp"
@@ -115,13 +103,11 @@
             android:layout_marginLeft="10dp"
             android:text=""
             android:imeOptions="actionGo"
-            android:textColor="#000000"
             android:scrollbars="vertical"
             android:fadeScrollbars="true"
             android:singleLine="true"
             android:layout_weight="1"
         />
-
         <ImageButton
             android:id="@+id/btnStartFind"
             android:layout_width="25dp"
@@ -133,7 +119,6 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
         />
-
         <TextView
             android:id="@+id/lblResult"
             android:layout_width="65dp"
@@ -144,7 +129,6 @@
             android:text=""
             android:textSize="10sp"
             android:textStyle="bold"
-            android:textColor="#000000"
             android:scrollbars="vertical"
             android:fadeScrollbars="true"
             android:inputType="textMultiLine"
@@ -152,7 +136,6 @@
             android:gravity="center"
             android:layout_gravity="center_vertical"
         />
-
         <Button
             android:id="@+id/btnNext"
             android:layout_width="55dp"
@@ -163,7 +146,6 @@
             android:text="Next"
         />
     </LinearLayout>
-
     <!-- ==========【全局常驻】替换面板 ========== -->
     <LinearLayout
         android:id="@+id/replaceLayout"
@@ -173,24 +155,20 @@
         android:paddingTop="4dp"
         android:visibility="gone"
     >
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
         >
-
             <TextView
                 android:id="@+id/lblReplace"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:text="Replace:"
-                android:textColor="#000000"
                 android:textSize="14sp"
             />
-
             <EditText
                 android:id="@+id/editReplace"
                 android:layout_width="match_parent"
@@ -199,10 +177,8 @@
                 android:layout_marginRight="10dp"
                 android:singleLine="true"
                 android:text=""
-                android:textColor="#000000"
             />
         </LinearLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -210,7 +186,6 @@
             android:orientation="horizontal"
             android:weightSum="3"
         >
-
             <Button
                 android:id="@+id/btnReplace"
                 android:layout_width="0dp"
@@ -219,7 +194,6 @@
                 android:text="Replace"
                 android:textAllCaps="false"
             />
-
             <Button
                 android:id="@+id/btnReplaceFind"
                 android:layout_width="0dp"
@@ -228,7 +202,6 @@
                 android:text="Replace &amp; Find"
                 android:textAllCaps="false"
             />
-
             <Button
                 android:id="@+id/btnReplaceAll"
                 android:layout_width="0dp"
@@ -239,7 +212,6 @@
             />
         </LinearLayout>
     </LinearLayout>
-
     <!-- ==========【全局常驻】Tab切换按钮行 ========== -->
     <LinearLayout
         android:id="@+id/layout_tab_bar"
@@ -257,7 +229,6 @@
             android:text="笔记编辑"
             android:textAllCaps="false"
         />
-
         <Button
             android:id="@+id/tab_ai"
             android:layout_width="0dp"
@@ -266,7 +237,6 @@
             android:text="边写边查"
             android:textAllCaps="false"
         />
-
         <Button
             android:id="@+id/tab_search"
             android:layout_width="0dp"
@@ -275,15 +245,12 @@
             android:text="搜索结果"
             android:textAllCaps="false"
         />
-
     </LinearLayout>
-
     <!-- ==========【Tab容器：两个页面互斥显示】 ========== -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
     >
-
         <!-- Page1：编辑器页面（默认显示） -->
         <LinearLayout
             android:id="@+id/page_editor_container"
@@ -291,12 +258,10 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
         >
-
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
             >
-
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerView"
                     android:layout_width="match_parent"
@@ -308,7 +273,6 @@
                     android:layout_marginRight="16dp"
                     android:layout_marginLeft="0dp"
                 />
-
                 <ScrollView
                     android:id="@+id/scrollView"
                     android:layout_width="match_parent"
@@ -325,11 +289,9 @@
                         android:layout_marginRight="16dp"
                         android:layout_marginLeft="0dp"
                         android:text="Loading, please wait..."
-                        android:textColor="#000000"
                         android:inputType="textMultiLine"
                     />
                 </ScrollView>
-
                 <!-- 居中圆形加载进度卡片 -->
                 <FrameLayout
                     android:id="@+id/progressContainer"
@@ -349,7 +311,6 @@
                         android:theme="@style/CircularProgressStyle"
                     />
                 </FrameLayout>
-
                 <!-- 右上角预览浮窗 -->
                 <FrameLayout
                     android:id="@+id/previewContainer"
@@ -359,10 +320,10 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
                     android:background="#CC000000"
-                    android:visibility="gone"
                     android:elevation="6dp"
                     android:clickable="true"
                     android:focusable="true"
+                    android:visibility="gone"
                 >
                     <ImageView
                         android:id="@+id/previewImage"
@@ -379,14 +340,11 @@
                         android:maxLines="3"
                         android:ellipsize="end"
                         android:padding="2dp"
-                        android:textColor="#FFFFFFFF"
                         android:visibility="gone"
                     />
                 </FrameLayout>
             </FrameLayout>
         </LinearLayout>
-
-
         <!-- Page2：AI边写边查页面（默认隐藏） -->
         <LinearLayout
             android:id="@+id/page_ai_container"
@@ -396,14 +354,12 @@
             android:visibility="gone"
             android:padding="2dp"
         >
-
             <TextView
                 android:id="@+id/label_query"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="问:"
             />
-
             <EditText
                 android:id="@+id/et_query"
                 android:layout_width="match_parent"
@@ -413,7 +369,6 @@
                 android:minLines="1"
                 android:inputType="textMultiLine"
             />
-
             <!-- 操作按钮行：清空｜历史记录｜发送 靠右排列 -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -422,7 +377,6 @@
                 android:gravity="end"
                 android:layout_marginBottom="4dp"
             >
-
                 <Button
                     android:id="@+id/btn_clear_query"
                     android:layout_width="wrap_content"
@@ -431,7 +385,6 @@
                     android:textAllCaps="false"
                     android:layout_marginEnd="8dp"
                 />
-
                 <Button
                     android:id="@+id/btn_query_history"
                     android:layout_width="wrap_content"
@@ -440,7 +393,6 @@
                     android:textAllCaps="false"
                     android:layout_marginEnd="8dp"
                 />
-
                 <Button
                     android:id="@+id/btn_submit_ai"
                     android:layout_width="wrap_content"
@@ -449,7 +401,6 @@
                     android:textAllCaps="false"
                 />
             </LinearLayout>
-
             <!-- AI请求水平加载进度条 -->
             <ProgressBar
                 android:id="@+id/progress_ai_wait"
@@ -459,7 +410,6 @@
                 android:visibility="gone"
                 android:indeterminate="true"
             />
-
             <TextView
                 android:id="@+id/label_answer"
                 android:layout_width="wrap_content"
@@ -467,7 +417,6 @@
                 android:layout_marginTop="2dp"
                 android:text="答:"
             />
-
             <!-- AI回答编辑框 -->
             <EditText
                 android:id="@+id/et_answer"
@@ -481,7 +430,6 @@
                 android:verticalScrollbarPosition="right"
             />
         </LinearLayout>
-
         <!-- Page3：搜索结果列表页面 -->
         <LinearLayout
             android:id="@+id/page_search_container"
@@ -491,7 +439,6 @@
             android:visibility="gone"
             android:padding="4dp"
         >
-
             <TextView
                 android:id="@+id/lbl_search_summary"
                 android:layout_width="match_parent"
@@ -500,7 +447,6 @@
                 android:textSize="12sp"
                 android:padding="8dp"
             />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_search_results"
                 android:layout_width="match_parent"
@@ -509,7 +455,5 @@
                 android:fadeScrollbars="true"
             />
         </LinearLayout>
-
     </FrameLayout>
-
 </LinearLayout>

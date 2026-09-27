@@ -186,6 +186,8 @@ public class NoteEditor
         "/storage/emulated/0/.Knot/cursor_positions.json";
     private boolean isCursorSaved = false;
 
+    private static boolean isDark;
+
     //搜索结果显示TAB================================
     // TAB容器新增
     private View pageSearchContainer;
@@ -235,7 +237,7 @@ public class NoteEditor
             tv.setTextSize(14);
             tv.setMaxLines(3);
             tv.setEllipsize(TextUtils.TruncateAt.END);
-            tv.setTextColor(MyActivity.isDark ? 0xFFE0E0E0 : 0xFF333333);
+            tv.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF333333);
             tv.setLayoutParams(
                 new RecyclerView.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -245,7 +247,7 @@ public class NoteEditor
 
             // 添加底部分隔线效果
             tv.setBackground(
-                MyActivity.isDark
+                isDark
                     ? new ColorDrawable(0xFF2A2A2A)
                     : new ColorDrawable(0xFFF5F5F5)
             );
@@ -268,17 +270,13 @@ public class NoteEditor
             int idx = 0;
             while ((idx = lowerContext.indexOf(lowerKeyword, idx)) != -1) {
                 ssb.setSpan(
-                    new BackgroundColorSpan(
-                        MyActivity.isDark ? 0xFF665500 : 0xFFFFEE00
-                    ),
+                    new BackgroundColorSpan(isDark ? 0xFF665500 : 0xFFFFEE00),
                     idx,
                     idx + item.keyword.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 );
                 ssb.setSpan(
-                    new ForegroundColorSpan(
-                        MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000
-                    ),
+                    new ForegroundColorSpan(isDark ? 0xFFFFFFFF : 0xFF000000),
                     idx,
                     idx + item.keyword.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -429,14 +427,6 @@ public class NoteEditor
 
     private static final int REQUEST_CAMERA_PERMISSION = 1001;
 
-    private MediaPlayer mediaPlayer;
-    private static int curVol;
-    private static String strInfo = "";
-    private String strMute = "false";
-    private boolean isRefreshAlarm = true;
-    private AudioManager mAudioManager;
-    private InternalConfigure internalConfigure;
-
     private boolean isSaved = false;
 
     private Button btn_cancel;
@@ -556,12 +546,6 @@ public class NoteEditor
     private static boolean isGoBackKnot = false;
 
     private ProgressBar progressBar;
-
-    public static int setInfoText(String str) {
-        strInfo = str;
-        System.out.println("InfoText" + strInfo);
-        return 1;
-    }
 
     private void bindViews() {
         ScrollView scrollView = findViewById(R.id.scrollView);
@@ -719,12 +703,6 @@ public class NoteEditor
             btnQueryHistory.setText("History");
         }
 
-        boolean showAiButton = MyActivity.mAIAPIEnabled;
-        if (!showAiButton) {
-            // AI API关闭，直接隐藏该按钮
-            tab_ai.setVisibility(View.GONE);
-            tab_editor.setVisibility(View.GONE);
-        }
         // ========== Tab按钮 + AI问答界面 结束 ==========
 
         // 搜索结果显示==================================================
@@ -772,6 +750,44 @@ public class NoteEditor
         tab_search.setOnClickListener(v -> switchTab(false, true)); // 新增参数区分AI/Search
 
         //搜索结果显示界面完成==========================================================
+        // 动态实现暗黑模式颜色
+        int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
+        int bgColorRoot = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+        int btnBgNormal = isDark ? 0xFF303030 : 0xFFE8E8E8;
+
+        // 编辑器相关文本控件
+        editNote.setTextColor(textColor);
+        editFind.setTextColor(textColor);
+        editReplace.setTextColor(textColor);
+        lblResult.setTextColor(textColor);
+        lblReplace.setTextColor(textColor);
+        labelQuery.setTextColor(textColor);
+        labelAnswer.setTextColor(textColor);
+        etQuery.setTextColor(textColor);
+        etAnswer.setTextColor(textColor);
+        lblSearchSummary.setTextColor(textColor);
+
+        // 输入框背景
+        etQuery.setBackgroundColor(isDark ? 0xFF333333 : 0xFFFFFFFF);
+        etAnswer.setBackgroundColor(isDark ? 0xFF333333 : 0xFFFFFFFF);
+        editFind.setBackgroundColor(isDark ? 0xFF333333 : 0xFFFFFFFF);
+        editReplace.setBackgroundColor(isDark ? 0xFF333333 : 0xFFFFFFFF);
+
+        // 页面容器背景
+        findViewById(R.id.page_editor_container).setBackgroundColor(
+            bgColorRoot
+        );
+        findViewById(R.id.page_ai_container).setBackgroundColor(bgColorRoot);
+        findViewById(R.id.page_search_container).setBackgroundColor(
+            bgColorRoot
+        );
+        findViewById(R.id.layout_tab_bar).setBackgroundColor(
+            isDark ? 0xFF292929 : 0xFFF2F2F2
+        );
+
+        // 顶部整栏背景
+        LinearLayout topBar = findViewById(R.id.layout_tab_bar);
+        topBar.setBackgroundColor(isDark ? 0xFF292929 : 0xFFF2F2F2);
     }
 
     @Override
@@ -878,38 +894,17 @@ public class NoteEditor
         }
     }
 
-    private void AnimationWhenClosed() {
-        // 淡出效果
-        // overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-
-        // 或者使用底部滑出效果(自定义文件exit_anim.xml)
-        overridePendingTransition(0, R.anim.exit_anim);
-    }
-
-    private void AnimationWhenOpen() {
-        overridePendingTransition(0, R.anim.enter_anim);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         currentMDFile = MyActivity.strMDFile;
 
-        // ========== 隐藏标题栏 ==========
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
+        // ========== 真正沉浸式 ==========
+        isDark = ImmersiveUtil.applyRealImmersive(this);
 
         // ========== 统一布局 ==========
-        if (MyActivity.isDark) {
-            setContentView(R.layout.noteeditor_dark);
-        } else {
-            setContentView(R.layout.noteeditor);
-        }
-
-        // ========== 真正沉浸式 ==========
-        ImmersiveUtil.applyRealImmersive(this);
+        setContentView(R.layout.noteeditor);
 
         // TAB容器 ================================================
         pageEditorContainer = findViewById(R.id.page_editor_container);
@@ -997,39 +992,6 @@ public class NoteEditor
         largeTextEditor.loadFile(currentFile);
     }
 
-    private void loadMDFile() {
-        final String mdfile = MyActivity.strMDFile; // getIntent().getStringExtra("MD_FILE_PATH");
-        // 启动子线程执行耗时操作
-        Handler mHandler = new Handler(Looper.getMainLooper());
-
-        new Thread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    // 子线程读取文件
-                    final String data = readTextFile(mdfile);
-
-                    // 文件读取完成后，通过 Handler 发送消息到主线程
-                    mHandler.post(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                editNote.setText(data);
-                                setCursorPos();
-                                openSearchResult();
-
-                                isTextChanged = false;
-                                initRedoUndo();
-                                initEditTextChangedListener();
-                                init_all();
-                            }
-                        }
-                    );
-                }
-            }
-        ).start();
-    }
-
     private void loadMDFileChunks() {
         final String mdfile = MyActivity.strMDFile;
 
@@ -1074,86 +1036,6 @@ public class NoteEditor
                                 initEditTextChangedListener();
                                 init_all();
                                 // 隐藏进度条
-                                findViewById(
-                                    R.id.progressContainer
-                                ).setVisibility(View.GONE);
-                            }
-                        }
-                    );
-                }
-            }
-        ).start();
-    }
-
-    private void loadMDFileChunks_old() {
-        final String mdfile = MyActivity.strMDFile;
-
-        findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
-
-        new Thread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    // 1. 子线程读取文件
-                    final String data = readTextFile(mdfile);
-
-                    // 2. 将数据分块
-                    final int totalChunks = 50; // 分块数量（根据数据量调整）
-                    final int chunkSize = data.length() / totalChunks;
-                    final AtomicInteger currentChunk = new AtomicInteger(0);
-
-                    // 3. 分批次更新UI
-                    for (int i = 0; i < totalChunks; i++) {
-                        final int start = i * chunkSize;
-                        final int end =
-                            i == totalChunks - 1
-                                ? data.length()
-                                : start + chunkSize;
-                        final String chunk = data.substring(start, end);
-
-                        // 主线程追加文本并更新进度
-
-                        runOnUiThread(
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (currentChunk.get() == 0) {
-                                        editNote.setText(chunk); // 首次设置文本
-                                    } else {
-                                        editNote.append(chunk); // 后续追加文本
-                                    }
-                                    currentChunk.incrementAndGet();
-                                }
-                            }
-                        );
-
-                        // 控制速度（避免主线程过载）
-                        try {
-                            int m_sleep = 50;
-                            String str_file = MyActivity.strMDFile;
-                            File file = new File(str_file);
-                            if (getFileSizeInKB(file) < 200) m_sleep = 2;
-                            else m_sleep = 50;
-                            Thread.sleep(m_sleep); // 调整此值以平衡流畅性与速度
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    // 4. 最终关闭进度条并执行其他操作
-
-                    runOnUiThread(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                setCursorPos();
-                                openSearchResult();
-                                isTextChanged = false;
-                                initRedoUndo();
-                                initEditTextChangedListener();
-                                init_all();
-                                // closeAndroidProgressBar();
-                                // progressBar.setVisibility(View.GONE);
                                 findViewById(
                                     R.id.progressContainer
                                 ).setVisibility(View.GONE);
@@ -1285,73 +1167,6 @@ public class NoteEditor
     public static void close() {
         if (m_instance != null) {
             m_instance.finish();
-        }
-    }
-
-    public class InternalConfigure {
-
-        private final Context context;
-        private Properties properties;
-
-        public InternalConfigure(Context context) {
-            super();
-            this.context = context;
-        }
-
-        /**
-         * 保存文件filename为文件名，filecontent为存入的文件内容
-         * 例:configureActivity.saveFiletoSD("text.ini","");
-         */
-        public void saveFile(String filename, Properties properties)
-            throws Exception {
-            // 设置Context.MODE_PRIVATE表示每次调用该方法会覆盖原来的文件数据
-            FileOutputStream fileOutputStream; // = context.openFileOutput(filename, Context.MODE_PRIVATE);
-
-            // 每次都会生成一个新文件并抹掉除本次key之外的其他key数据
-            // File file = new File(filename);
-            fileOutputStream = new FileOutputStream(filename);
-
-            // 通过properties.stringPropertyNames()获得所有key的集合Set，里面是String对象
-            for (String key : properties.stringPropertyNames()) {
-                String s = key + " = " + properties.getProperty(key) + "\n";
-                System.out.println(s);
-                fileOutputStream.write(s.getBytes());
-            }
-            fileOutputStream.close();
-        }
-
-        /**
-         * 读取文件
-         */
-        public void readFrom(String filename) throws Exception {
-            properties = new Properties();
-
-            FileInputStream fileInputStream; // = context.openFileInput(filename);
-
-            File file = new File(filename);
-            fileInputStream = new FileInputStream(file);
-
-            InputStreamReader reader = new InputStreamReader(
-                fileInputStream,
-                "UTF-8"
-            );
-            BufferedReader br = new BufferedReader(reader);
-
-            properties.load(br);
-
-            br.close();
-            reader.close();
-            fileInputStream.close();
-        }
-
-        /**
-         * 返回指定key对应的value
-         */
-        public String getIniKey(String key) {
-            if (properties.containsKey(key) == false) {
-                return null;
-            }
-            return String.valueOf(properties.get(key));
         }
     }
 
@@ -1536,36 +1351,6 @@ public class NoteEditor
         } finally {
             try {
                 if (reader != null) reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public String readTextFile_old(String filename) {
-        BufferedReader reader = null;
-        try {
-            File file = new File(filename);
-            reader = new BufferedReader(
-                new InputStreamReader(
-                    new FileInputStream(file),
-                    Charset.defaultCharset() // ✅ 自动适配系统编码
-                )
-            );
-
-            char[] buffer = new char[8192]; // 8KB 缓冲区
-            StringBuilder sb = new StringBuilder();
-            int charsRead;
-            while ((charsRead = reader.read(buffer)) != -1) {
-                sb.append(buffer, 0, charsRead);
-            }
-            return sb.toString();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return "";
-        } finally {
-            try {
-                if (reader != null) reader.close(); // ✅ 确保关闭
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -2219,150 +2004,10 @@ public class NoteEditor
         normalDialog.show();
     }
 
-    /* 创建选项菜单，目前暂不使用，它显示在菜单栏上 */
-    // 该方法用于创建显示Menu
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_optionmenu, menu);
-        return true;
-    }
-
-    // 在选项菜单打开以后会调用这个方法，设置menu图标显示（icon）
-
-    @Override
-    public boolean onMenuOpened(int featureId, Menu menu) {
-        if (menu != null) {
-            if (
-                menu.getClass().getSimpleName().equalsIgnoreCase("MenuBuilder")
-            ) {
-                try {
-                    Method method = menu
-                        .getClass()
-                        .getDeclaredMethod(
-                            "setOptionalIconsVisible",
-                            Boolean.TYPE
-                        );
-                    method.setAccessible(true);
-                    method.invoke(menu, true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return super.onMenuOpened(featureId, menu);
-    }
-
-    // 该方法对菜单的item进行监听
-
-    /*@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // mTextView.setText(item.getTitle());
-        switch (item.getItemId()) {
-            case R.id.menu1:
-                Toast.makeText(
-                    this,
-                    "点击了第" + 1 + "个",
-                    Toast.LENGTH_SHORT
-                ).show();
-                break;
-            case R.id.menu2:
-                Toast.makeText(
-                    this,
-                    "点击了第" + 2 + "个",
-                    Toast.LENGTH_SHORT
-                ).show();
-                break;
-            case R.id.menu3:
-                Toast.makeText(
-                    this,
-                    "点击了第" + 3 + "个",
-                    Toast.LENGTH_SHORT
-                ).show();
-                break;
-            case R.id.menu4:
-                Toast.makeText(
-                    this,
-                    "点击了第" + 4 + "个",
-                    Toast.LENGTH_SHORT
-                ).show();
-                break;
-            case R.id.menu5:
-                Toast.makeText(
-                    this,
-                    "点击了第" + 5 + "个",
-                    Toast.LENGTH_SHORT
-                ).show();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }*/
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.menu1) {
-            Toast.makeText(
-                this,
-                "点击了第" + 1 + "个",
-                Toast.LENGTH_SHORT
-            ).show();
-        } else if (id == R.id.menu2) {
-            Toast.makeText(
-                this,
-                "点击了第" + 2 + "个",
-                Toast.LENGTH_SHORT
-            ).show();
-        } else if (id == R.id.menu3) {
-            Toast.makeText(
-                this,
-                "点击了第" + 3 + "个",
-                Toast.LENGTH_SHORT
-            ).show();
-        } else if (id == R.id.menu4) {
-            Toast.makeText(
-                this,
-                "点击了第" + 4 + "个",
-                Toast.LENGTH_SHORT
-            ).show();
-        } else if (id == R.id.menu5) {
-            Toast.makeText(
-                this,
-                "点击了第" + 5 + "个",
-                Toast.LENGTH_SHORT
-            ).show();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    /*private void showCustomPopupMenu() {
-        PopupMenuCustomLayout popupMenu = new PopupMenuCustomLayout(
-            this,
-            R.layout.popup_menu_custom_layout,
-            new PopupMenuCustomLayout.PopupMenuCustomOnClickListener() {
-                @Override
-                public void onClick(int itemId) {
-                    // log statement: "Clicked on: " + itemId
-                    switch (itemId) {
-                        case R.id.format:
-                            System.out.println("Item A was clicked!");
-                            break;
-                    }
-                }
-            }
-        );
-
-        popupMenu.show();
-    }*/
-
-    //if (itemId == R.id.format) {
-    //    System.out.println("Item A was clicked!");
-    //}
-
     // 当前正在使用 main.xml main_cn.xml
     private void showPopupMenu(View view) {
         Context wrapper;
-        if (MyActivity.isDark) wrapper = new ContextThemeWrapper(
+        if (isDark) wrapper = new ContextThemeWrapper(
             this,
             R.style.popup_menu_style_dark
         );
@@ -3307,7 +2952,7 @@ public class NoteEditor
     }
 
     private void initColorValue() {
-        if (MyActivity.isDark) {
+        if (isDark) {
             strBack1 = "#A52A2A";
             strBack2 = "#8B7E66";
             strFore = "#FFFFFF";
@@ -3315,40 +2960,6 @@ public class NoteEditor
             strBack1 = "#FFC1C1";
             strBack2 = "#CFCFCF";
             strFore = "#000000";
-        }
-    }
-
-    // 触发拍照的方法
-    private void dispatchTakePictureIntent() {
-        // 检查设备是否有相机硬件
-        if (
-            !getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_CAMERA_ANY
-            )
-        ) {
-            String tip = MyActivity.zh_cn
-                ? "设备无相机硬件"
-                : "Device has no camera hardware";
-            Toast.makeText(this, tip, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // 确保有相机应用可以处理该Intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // 创建临时文件用于存储拍摄的照片
-            File photoFile = createImageFile();
-            if (photoFile != null) {
-                // 将临时文件的Uri传递给相机应用程序
-                photoUri = FileProvider.getUriForFile(this, "com.x", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            } else {
-                String tip = MyActivity.zh_cn
-                    ? "图片文件创建失败"
-                    : "Failed to create image file";
-                Toast.makeText(this, tip, Toast.LENGTH_SHORT).show();
-            }
         }
     }
 
@@ -3383,17 +2994,6 @@ public class NoteEditor
             }
         }
         MyActivity.isOpenSearchResult = false;
-    }
-
-    public void showAndroidProgressBar() {
-        Context context = NoteEditor.this;
-        Intent i = new Intent(context, MyProgBar.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(i);
-    }
-
-    public void closeAndroidProgressBar() {
-        if (MyProgBar.m_MyProgBar != null) MyProgBar.m_MyProgBar.finish();
     }
 
     // 获取文件大小（单位：KB）
@@ -3571,7 +3171,7 @@ public class NoteEditor
                 WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
             );
 
-            if (MyActivity.isDark) {
+            if (isDark) {
                 // 暗黑模式
                 window.setStatusBarColor(Color.parseColor("#19232D"));
                 window.setNavigationBarColor(Color.parseColor("#121212"));
@@ -3743,7 +3343,7 @@ public class NoteEditor
             String aiBtnText = MyActivity.zh_cn ? "AI 智能链接" : "AI Link";
             btnAiLink.setText(aiBtnText);
             // 样式适配深浅色
-            if (MyActivity.isDark) {
+            if (isDark) {
                 btnAiLink.setBackgroundColor(0xFF4444AA);
                 btnAiLink.setTextColor(0xFFFFFFFF);
             } else {
@@ -3770,12 +3370,8 @@ public class NoteEditor
             );
             filterEdit.setPadding(40, 40, 40, 40);
             filterEdit.setTextSize(16);
-            filterEdit.setBackgroundColor(
-                MyActivity.isDark ? 0xFF333333 : 0xFFEEEEEE
-            );
-            filterEdit.setTextColor(
-                MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000
-            );
+            filterEdit.setBackgroundColor(isDark ? 0xFF333333 : 0xFFEEEEEE);
+            filterEdit.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
             LinearLayout.LayoutParams editParams =
                 new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -3811,7 +3407,7 @@ public class NoteEditor
                 ViewGroup.LayoutParams.MATCH_PARENT
             );
             noteLinkPopup.setContentView(container);
-            int bgColor = MyActivity.isDark ? 0xFF222222 : 0xFFFFFFFF;
+            int bgColor = isDark ? 0xFF222222 : 0xFFFFFFFF;
             noteLinkPopup.setBackgroundDrawable(new ColorDrawable(bgColor));
             noteLinkPopup.setOutsideTouchable(true); // 点击外部关闭窗口
             noteLinkPopup.setFocusable(true);
@@ -3881,7 +3477,7 @@ public class NoteEditor
             Button btnAiLink = new Button(context);
             String aiBtnText = MyActivity.zh_cn ? "AI 智能链接" : "AI Link";
             btnAiLink.setText(aiBtnText);
-            if (MyActivity.isDark) {
+            if (isDark) {
                 btnAiLink.setBackgroundColor(0xFF4444AA);
                 btnAiLink.setTextColor(0xFFFFFFFF);
             } else {
@@ -3908,12 +3504,8 @@ public class NoteEditor
             );
             filterEdit.setPadding(40, 40, 40, 40);
             filterEdit.setTextSize(16);
-            filterEdit.setBackgroundColor(
-                MyActivity.isDark ? 0xFF333333 : 0xFFEEEEEE
-            );
-            filterEdit.setTextColor(
-                MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000
-            );
+            filterEdit.setBackgroundColor(isDark ? 0xFF333333 : 0xFFEEEEEE);
+            filterEdit.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
             LinearLayout.LayoutParams editParams =
                 new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -3971,7 +3563,7 @@ public class NoteEditor
                 ViewGroup.LayoutParams.MATCH_PARENT
             );
             aiLinkPopup.setContentView(container);
-            int bgColor = MyActivity.isDark ? 0xFF222222 : 0xFFFFFFFF;
+            int bgColor = isDark ? 0xFF222222 : 0xFFFFFFFF;
             aiLinkPopup.setBackgroundDrawable(new ColorDrawable(bgColor));
             aiLinkPopup.setOutsideTouchable(true);
             aiLinkPopup.setFocusable(true);
@@ -4108,7 +3700,7 @@ public class NoteEditor
             TextView tv = new TextView(parent.getContext());
             tv.setPadding(40, 40, 40, 40);
             tv.setTextSize(16);
-            tv.setTextColor(MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000);
+            tv.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
             tv.setLayoutParams(
                 new RecyclerView.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -4178,12 +3770,12 @@ public class NoteEditor
             tvPreview.setTextSize(16);
             tvPreview.setMaxLines(3);
             tvPreview.setEllipsize(TextUtils.TruncateAt.END);
-            tvPreview.setTextColor(MyActivity.isDark ? 0xFFFFFFFF : 0xFF000000);
+            tvPreview.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
 
             // 次要灰色小字：完整文件路径
             TextView tvPath = new TextView(parent.getContext());
             tvPath.setTextSize(12);
-            tvPath.setTextColor(MyActivity.isDark ? 0xFFAAAAAA : 0xFF777777);
+            tvPath.setTextColor(isDark ? 0xFFAAAAAA : 0xFF777777);
             tvPath.setPadding(0, 8, 0, 0);
 
             itemLayout.addView(tvPreview);
@@ -4814,10 +4406,10 @@ public class NoteEditor
             isSearchSelectedFlag.length > 0 && isSearchSelectedFlag[0];
         boolean isAiSelected = !isEditorSelected && !isSearchSelected;
 
-        int colorSelectedBg = MyActivity.isDark ? 0xFF2858C0 : 0xFF2168DD;
+        int colorSelectedBg = isDark ? 0xFF2858C0 : 0xFF2168DD;
         int colorSelectedText = 0xFFFFFFFF;
-        int colorNormalBg = MyActivity.isDark ? 0xFF303030 : 0xFFEAEAEA;
-        int colorNormalText = MyActivity.isDark ? 0xFFD0D0D0 : 0xFF333333;
+        int colorNormalBg = isDark ? 0xFF303030 : 0xFFEAEAEA;
+        int colorNormalText = isDark ? 0xFFD0D0D0 : 0xFF333333;
 
         // Editor Tab
         tab_editor.setBackgroundColor(

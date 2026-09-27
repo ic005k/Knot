@@ -296,10 +296,10 @@ void MainWindow::bakDataDone() {
 
   safeCloseProgress();
 
+  m_MainHelper->startBackgroundTaskUpdateBakFileList();
+
   if (!errorInfo.isEmpty()) {
-    ShowMessage* msg = new ShowMessage(this);
-    msg->showMsg("Knot", errorInfo, 1);
-    msg->setAttribute(Qt::WA_DeleteOnClose);
+    QMessageBox::critical(this, "Knot", errorInfo);
 
     if (isAndroid) m_Method->openMainEntranceWindow();
 
@@ -312,7 +312,7 @@ void MainWindow::bakDataDone() {
     QFile zipFile(zipfile);
     if (zipFile.exists()) {
       QString fileSize = m_Method->getFileSize(zipFile.size(), 2);
-      // 使用多参数版 arg()
+
       QString bakInfo =
           QString("%1\n%2\n%3")
               .arg(QDateTime::currentDateTime().toString("yyyy-M-d HH:mm:ss"),
@@ -320,11 +320,9 @@ void MainWindow::bakDataDone() {
 
       m_Preferences->appendBakFile(bakInfo, zipfile);
 
-      ShowMessage* msg = new ShowMessage(this);
       QString msgContent = tr("The data was exported successfully.") + "\n\n" +
                            zipfile + "\n\n" + fileSize;
-      msg->showMsg("Knot", msgContent, 1);
-      msg->setAttribute(Qt::WA_DeleteOnClose);
+      QMessageBox::information(this, "Knot", msgContent);
 
       if (isAndroid) m_Method->openMainEntranceWindow();
     }

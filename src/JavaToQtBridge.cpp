@@ -1300,13 +1300,24 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
-          if (strType.startsWith("note_search_edit|==|") ||
-              strType.startsWith("recent_note_edit|==|")) {
+          if (strType.startsWith("recent_note_edit|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");
-
               if (list.count() == 2) {
                 currentMDFile = list.at(1);
+                m_Notes->openEditUI();
+              }
+            });
+          }
+
+          if (strType.startsWith("note_search_edit|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+              if (list.count() == 3) {
+                mw_one->isOpenSearchResult = true;
+                mw_one->mySearchText = list.at(1);
+
+                currentMDFile = list.at(2);
                 m_Notes->openEditUI();
               }
             });

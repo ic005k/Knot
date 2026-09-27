@@ -1141,33 +1141,9 @@ void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
   }
 }
 
-void MainWindow::on_btnBackFavorites_clicked() {}
-
 void MainWindow::on_btnOpenFavoritesNote_clicked() {
   if (!QFile::exists(currentMDFile)) return;
 
   // mw_one->ui->btnBackFavorites->click();
   m_Notes->openEditUI();
-}
-
-void MainWindow::on_btnOpenFavoritesView_clicked() {
-  if (!QFile::exists(currentMDFile)) return;
-
-  // mw_one->ui->btnBackFavorites->click();
-  m_Notes->previewNote();
-}
-
-void MainWindow::on_btnClearTitleKey_clicked() {}
-
-void MainWindow::on_btnBackAIAPIList_clicked() {
-  mw_one->ui->frameMain->show();
-  mw_one->m_Preferences->openPreferences();
-}
-
-void MainWindow::on_btnAIAPIListOk_clicked(int index) {
-  if (index < 0) return;
-
-  mw_one->ui->frameMain->show();
-  mw_one->m_Preferences->openPreferences();
-  mw_one->m_Preferences->ui->cboxEndpoint->setCurrentIndex(index);
 }

@@ -417,10 +417,6 @@ class MainWindow : public QMainWindow {
   void on_btnRecentOpen_clicked();
   void on_btnAIBookExplanation_clicked(const QString& selectedText);
 
-  void on_btnBackAIAPIList_clicked();
-
-  void on_btnAIAPIListOk_clicked(int index);
-
   void safeCloseProgress();
 
   void on_btnBookCata_clicked();
@@ -847,15 +843,9 @@ class MainWindow : public QMainWindow {
 
   void on_actionCopyLog();
 
-  void on_btnBackFavorites_clicked();
-
   void on_btnOpenFavoritesNote_clicked();
 
   void on_editTitleKey_textChanged(const QString& arg1);
-
-  void on_btnOpenFavoritesView_clicked();
-
-  void on_btnClearTitleKey_clicked();
 
   void on_btnOpenSearchView_clicked();
 

@@ -23,13 +23,10 @@ QString vecDbPath;
 #ifdef VECTOR_SEARCH
 
 bool initGlobalAiEngine() {
+  if (!g_cpu_supports_llama) return false;
+
   // ========= 全局后端、llama一次性初始化 =========
   if (!g_llama_ggml_inited) {
-    // 多线程上下文隔离兜底，任意平台子线程加载模型前刷新后端注册表
-
-    // ggml_backend_cpu_init();  // ← 关键！替代 ggml_backend_load_all()
-    // llama_backend_init();
-
     qDebug() << "子线程执行ggml_backend_load_all() 后端扫描完成";
 
     g_llama_ggml_inited = true;

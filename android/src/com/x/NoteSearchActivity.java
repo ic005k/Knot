@@ -254,8 +254,11 @@ public class NoteSearchActivity extends AppCompatActivity {
                 String rowText = mResultList.get(mSelectedPosition);
                 String[] parts = rowText.split("===");
                 String filePath = parts.length >= 3 ? parts[2] : "";
+                String keyword = mEtSearchInput.getText().toString().trim();
                 if (!TextUtils.isEmpty(filePath)) {
-                    PublicJavaCallCpp("note_search_edit|==|" + filePath);
+                    PublicJavaCallCpp(
+                        "note_search_edit|==|" + keyword + "|==|" + filePath
+                    );
                 }
             }
         });

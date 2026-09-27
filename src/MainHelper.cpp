@@ -214,8 +214,8 @@ void MainHelper::startBackgroundTaskUpdateBakFileList() {
 
     // 2. 裁剪逻辑（只在子线程处理数据）
     int bakCount = list.count();
-    if (bakCount > 15) {
-      int count_a = bakCount - 15;
+    if (bakCount > 10) {
+      int count_a = bakCount - 10;
       for (int j = 0; j < count_a; j++) {
         QString str = list.at(0);
         QString fn = str.split("-===-").at(1);

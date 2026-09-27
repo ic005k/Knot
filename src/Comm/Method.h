@@ -593,7 +593,6 @@ QScrollBar::sub-page:horizontal {
 
   QString escapeAllHtml(const QString& src);
   void setLocalAIModelEnabled(bool isLocalAI);
-  void setAIAPIEnabled(bool isAIAPI);
 
   void exitSystemFullscreen();
 

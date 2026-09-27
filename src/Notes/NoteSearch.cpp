@@ -52,6 +52,9 @@ void NoteSearch::on_btnEdit_clicked() {
   int idx = ui->listSearch->currentRow();
   if (idx == -1) return;
 
+  mw_one->isOpenSearchResult = true;
+  mw_one->mySearchText = ui->editSearch->text().trimmed();
+
   QString str = ui->listSearch->currentItem()->text();
   currentMDFile = str.split("===").at(2);
   m_Notes->openEditUI();

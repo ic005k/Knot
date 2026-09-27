@@ -183,7 +183,6 @@ public class MyActivity
 
     // 本地AI模型开关全局存储，C++同步、Qt读取
     public static boolean mLocalAIModelEnabled = false;
-    public static boolean mAIAPIEnabled = false;
 
     private OnBackInvokedCallback mBackCallback;
 
@@ -2746,10 +2745,6 @@ public class MyActivity
     public void setLocalAIModelEnabled(boolean isLocalAI) {
         mLocalAIModelEnabled = isLocalAI;
         Log.d(TAG, "C++同步本地AI状态：" + isLocalAI);
-    }
-
-    public void setAIAPIEnabled(boolean isAIAPI) {
-        mAIAPIEnabled = isAIAPI;
     }
 
     /**
