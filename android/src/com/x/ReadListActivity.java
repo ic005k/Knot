@@ -1,8 +1,10 @@
 package com.x;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
@@ -15,6 +17,7 @@ import java.util.List;
 
 public class ReadListActivity extends AppCompatActivity {
 
+    public static boolean isDark = false;
     private BookAdapter bookAdapter;
     private List<Book> bookList;
 
@@ -29,7 +32,7 @@ public class ReadListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // 注册返回拦截回调
-        mBackCallback = new OnBackPressedCallback(true /* enabled */) {
+        mBackCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 PublicJavaCallCpp("back_read_list");
@@ -38,17 +41,22 @@ public class ReadListActivity extends AppCompatActivity {
         };
         getOnBackPressedDispatcher().addCallback(this, mBackCallback);
 
-        if (MyActivity.isDark) {
-            setContentView(R.layout.activity_read_list_dark);
-        } else {
-            setContentView(R.layout.activity_read_list);
-        }
-        setTitle("阅读列表");
+        isDark = ImmersiveUtil.applyRealImmersive(this);
+        setContentView(R.layout.activity_read_list);
+        setTitle("Read List");
 
-        // 接收主Activity传递过来的暗黑模式，复用项目沉浸式工具
-        boolean darkMode = getIntent().getBooleanExtra("isDarkMode", false);
-        //ImmersiveUtil.applyRealImmersive(this, darkMode);
-        ImmersiveUtil.applyRealImmersive(this);
+        // ========== ✅ 新增：动态暗黑模式适配 ==========
+        int bgColorRoot = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+        int bgColorToolbar = isDark ? 0xFF2A2A2A : 0xFFF5F5F5;
+        int iconColor = isDark ? 0xFFFFFFFF : 0xFF000000;
+
+        // 根布局背景
+        findViewById(R.id.rootLayout).setBackgroundColor(bgColorRoot);
+
+        // 工具栏背景
+        LinearLayout toolbarLayout = findViewById(R.id.toolbarLayout);
+        toolbarLayout.setBackgroundColor(bgColorToolbar);
+        // ================================================
 
         btnOpen = findViewById(R.id.btnOpen);
         btnRead = findViewById(R.id.btnRead);
@@ -57,13 +65,7 @@ public class ReadListActivity extends AppCompatActivity {
         btnClear = findViewById(R.id.btnClear);
         btnClear.setVisibility(View.GONE);
 
-        int iconColor;
-        if (MyActivity.isDark) {
-            iconColor = 0xFFFFFFFF; //暗黑：白色图标
-        } else {
-            iconColor = 0xFF000000; //亮色：黑色图标
-        }
-
+        // ✅ 使用上面统一定义的 iconColor
         btnOpen.setColorFilter(iconColor);
         btnRead.setColorFilter(iconColor);
         btnShare.setColorFilter(iconColor);
@@ -72,6 +74,8 @@ public class ReadListActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.recyclerBookList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // ✅ RecyclerView 也跟随根背景色
+        recyclerView.setBackgroundColor(bgColorRoot);
 
         bookList = new ArrayList<>();
 
@@ -82,13 +86,11 @@ public class ReadListActivity extends AppCompatActivity {
         if (rawBookList != null && !rawBookList.isEmpty()) {
             for (String line : rawBookList) {
                 String[] parts = line.split("\\|");
-                // 顺序：标题 | 文件路径 | 隐藏原始书名，至少3段
                 if (parts.length >= 3) {
                     String showTitle = parts[0];
                     String path = parts[1];
                     String hiddenRawName = parts[2];
                     Book b = new Book(showTitle, path, hiddenRawName);
-                    // 新增：计算扩展名 set到Book对象
                     String ext = "";
                     int dotIndex = path.lastIndexOf('.');
                     if (dotIndex >= 0) {
@@ -105,16 +107,14 @@ public class ReadListActivity extends AppCompatActivity {
         }
         // ====================================================
 
-        bookAdapter = new BookAdapter(bookList);
+        bookAdapter = new BookAdapter(bookList, isDark); // ✅ 传入 isDark
         recyclerView.setAdapter(bookAdapter);
 
-        // 打开按钮
         btnOpen.setOnClickListener(v -> {
             MyActivity.m_instance.openFilePicker();
             finish();
         });
 
-        // 阅读按钮
         btnRead.setOnClickListener(v -> {
             Book sel = bookAdapter.getSelectedItem();
             if (sel == null) {
@@ -126,31 +126,13 @@ public class ReadListActivity extends AppCompatActivity {
                 return;
             }
             String filePath = sel.getFilePath();
-            if (filePath == null || filePath.isEmpty()) {
-                return;
-            }
-
-            // 获取小写扩展名
-            String ext = "";
-            int dotIndex = filePath.lastIndexOf('.');
-            if (dotIndex >= 0) {
-                ext = filePath.substring(dotIndex + 1).toLowerCase();
-            }
-
-            /*if ("pdf".equals(ext) || "mobi".equals(ext)) {
-                MyActivity.m_instance.openMyPDF(filePath);
-            } else {
-                MyActivity.m_instance.setTempSwapStr(filePath);
-                PublicJavaCallCpp("open_book_file");
-            }*/
+            if (filePath == null || filePath.isEmpty()) return;
 
             MyActivity.m_instance.setTempSwapStr(filePath);
             PublicJavaCallCpp("read_book_file");
-
             finish();
         });
 
-        // 分享按钮：复用项目已有的分享工具
         btnShare.setOnClickListener(v -> {
             Book sel = bookAdapter.getSelectedItem();
             if (sel == null) {
@@ -169,7 +151,6 @@ public class ReadListActivity extends AppCompatActivity {
             );
         });
 
-        // 移除按钮
         btnRemove.setOnClickListener(v -> {
             Book sel = bookAdapter.getSelectedItem();
             if (sel == null) {
@@ -183,18 +164,14 @@ public class ReadListActivity extends AppCompatActivity {
             int index = bookList.indexOf(sel);
             bookList.remove(index);
             bookAdapter.notifyItemRemoved(index);
-
             MyActivity.mInstance.PublicJavaCallCpp(
                 "remove_read_list|==|" + index
             );
-
-            // 如果删掉的就是当前选中，清空选择
             if (bookAdapter.getSelectedPosition() == index) {
                 bookAdapter.clearAllSelect();
             }
         });
 
-        // 清除阅读标记
         btnClear.setOnClickListener(v -> {
             Book sel = bookAdapter.getSelectedItem();
             if (sel == null) {
@@ -206,17 +183,12 @@ public class ReadListActivity extends AppCompatActivity {
                 return;
             }
             String rawName = sel.getRawBookName();
-            if (rawName == null || rawName.isEmpty()) {
-                return;
-            }
+            if (rawName == null || rawName.isEmpty()) return;
 
             String iniDir = "/storage/emulated/0/KnotData/";
             String file_ini = iniDir + "bookini/" + rawName + ".ini";
             File iniFile = new File(file_ini);
-            if (!iniFile.exists() || !iniFile.isFile()) {
-                // 文件不存在，直接返回，不弹确认框
-                return;
-            }
+            if (!iniFile.exists() || !iniFile.isFile()) return;
 
             new AlertDialog.Builder(this)
                 .setTitle("Knot")
@@ -246,7 +218,6 @@ public class ReadListActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         if (mBackCallback != null) {
             mBackCallback.remove();
             mBackCallback = null;

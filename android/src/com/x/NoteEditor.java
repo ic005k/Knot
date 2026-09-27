@@ -788,6 +788,16 @@ public class NoteEditor
         // 顶部整栏背景
         LinearLayout topBar = findViewById(R.id.layout_tab_bar);
         topBar.setBackgroundColor(isDark ? 0xFF292929 : 0xFFF2F2F2);
+
+        // ========== 预览浮窗暗黑适配 ==========
+        previewContainer = findViewById(R.id.previewContainer);
+        previewImage = findViewById(R.id.previewImage);
+        previewText = findViewById(R.id.previewText);
+
+        // 容器背景：暗黑用深灰，浅色用白底+阴影感
+        previewContainer.setBackgroundColor(isDark ? 0xFF2A2A2A : 0xFFFFFFFF);
+        // 文字颜色
+        previewText.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF333333);
     }
 
     @Override
@@ -4020,20 +4030,24 @@ public class NoteEditor
                 previewImage.setVisibility(View.GONE);
                 previewText.setVisibility(View.VISIBLE);
                 previewText.setText("🖼️");
+                previewText.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF333333);
             }
         } else if (content.startsWith("IMG_ERR:")) {
             // ===== 场景1：图片链接存在但文件失效 =====
             previewText.setVisibility(View.VISIBLE);
             previewText.setText("🖼️");
+            previewText.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF333333);
         } else if (content.startsWith("TXT:")) {
             // ===== 场景B：笔记有效 =====
             previewText.setVisibility(View.VISIBLE);
             previewText.setText(content.substring(4));
-            // ✅ 不再设置 textSize/textColor/padding/gravity，全部由布局决定
+            // ✅ 确保每次显示时颜色正确（防止复用残留）
+            previewText.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF333333);
         } else if (content.startsWith("NOTE_ERR:")) {
             // ===== 场景2：笔记链接存在但文件失效 =====
             previewText.setVisibility(View.VISIBLE);
             previewText.setText("📄");
+            previewText.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF333333);
         }
     }
 
