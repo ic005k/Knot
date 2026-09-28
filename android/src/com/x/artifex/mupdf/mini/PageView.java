@@ -34,6 +34,10 @@ public class PageView
     private int pageVersion = 0;
     private int ttsHighlightVersion = -1; // 高亮对应的页面版本
 
+    // ✅ 边缘防误触安全区（像素），此区域内长按不触发文本选择
+    // 24dp ≈ 48px @2x，36dp ≈ 72px @2x
+    private int edgeSafeZonePx;
+
     // 文字选择相关
     private Quad[] selectQuads;
     private boolean isSelectingText;
@@ -70,6 +74,10 @@ public class PageView
 
     public PageView(Context ctx, AttributeSet atts) {
         super(ctx, atts);
+
+        // 24dp 作为默认值，横屏下足够覆盖手掌边缘
+        float density = ctx.getResources().getDisplayMetrics().density;
+        edgeSafeZonePx = (int) (24 * density + 0.5f);
 
         scroller = new Scroller(ctx);
         detector = new GestureDetector(ctx, this);
@@ -215,6 +223,17 @@ public class PageView
 
         float touchX = e.getX();
         float touchY = e.getY();
+
+        // ✅ 排除屏幕边缘区域，防止手掌误触触发读书笔记弹窗
+        if (
+            touchX < edgeSafeZonePx ||
+            touchX > canvasW - edgeSafeZonePx ||
+            touchY < edgeSafeZonePx ||
+            touchY > canvasH - edgeSafeZonePx
+        ) {
+            Log.d(APP, "Long press ignored: edge safe zone");
+            return;
+        }
 
         // ✅ 不再自己做坐标转换，把原始数据和必要参数都传出去
         if (actionListener != null) {

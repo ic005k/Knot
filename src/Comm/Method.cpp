@@ -2935,12 +2935,12 @@ void Method::showInfoWindow(const QString& info) {
   contentLayout->setAlignment(Qt::AlignVCenter);  // ✅ 关键：整体垂直居中
 
   // 左侧：圆形数秒组件（固定尺寸，垂直居中）
-  IOSCircularProgress* circularTimer = new IOSCircularProgress(infoWindow);
+  /*IOSCircularProgress* circularTimer = new IOSCircularProgress(infoWindow);
   if (isAndroid)
     circularTimer->setFixedSize(60, 60);
   else
     circularTimer->setFixedSize(56, 56);  // 桌面端略小，更精致
-  contentLayout->addWidget(circularTimer, 0, Qt::AlignVCenter);
+  contentLayout->addWidget(circularTimer, 0, Qt::AlignVCenter);*/
 
   // 右侧：信息文本（占据剩余全部空间）
   lblInfo = new QTextEdit(info, infoWindow);
