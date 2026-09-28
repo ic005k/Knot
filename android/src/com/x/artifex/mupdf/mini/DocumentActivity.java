@@ -1440,8 +1440,12 @@ public class DocumentActivity extends Activity {
     }
 
     /**
-     * 对 Bitmap 进行颜色反转（暗黑模式核心）
-     * 保留 Alpha 通道，仅反转 RGB 分量
+     * 暗黑模式颜色重映射 v2
+     *
+     * 策略：
+     * 1. 高亮像素(背景) → 强制映射为纯黑 #000000
+     * 2. 低亮像素(文字) → 反转到柔和浅灰 #C8C8C8
+     * 3. 中间过渡区(抗锯齿边缘) → 线性插值，保持文字轮廓清晰
      */
     private void invertBitmap(Bitmap bitmap) {
         if (bitmap == null || bitmap.isRecycled()) return;
@@ -1452,9 +1456,59 @@ public class DocumentActivity extends Activity {
 
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
 
+        // ===== 无光夜晚阅读环境优化参数 =====
+        // 暖灰文字：R>G>B，降低蓝光比例，模拟纸质书泛黄感
+        final int TARGET_R = 0xB8; // 184 - 暖色主通道
+        final int TARGET_G = 0xA8; // 168 - 略低，减少绿光
+        final int TARGET_B = 0x90; // 144 - 明显压低，减少蓝光刺激
+
+        // 等效平均亮度 ≈ #A8A8A8 (66%)，比之前的 #C8C8C8 (78%) 柔和很多
+        // 对比度(对纯黑底) ≈ 6.8:1，处于 WCAG AAA 舒适区下限
+
+        // 文字阈值放宽：确保中等粗细笔画不被过度压暗
+        final float TEXT_THRESHOLD = 95f / 255f; // 原80 → 95
+        // 背景阈值保持不变
+        final float BG_THRESHOLD = 200f / 255f;
+
         for (int i = 0; i < pixels.length; i++) {
-            // 0xFF000000 保留 Alpha，0x00FFFFFF 取反 RGB
-            pixels[i] = (pixels[i] & 0xFF000000) | (~pixels[i] & 0x00FFFFFF);
+            int pixel = pixels[i];
+            int a = (pixel >> 24) & 0xFF;
+            int r = (pixel >> 16) & 0xFF;
+            int g = (pixel >> 8) & 0xFF;
+            int b = pixel & 0xFF;
+
+            float luminance = (0.299f * r + 0.587f * g + 0.114f * b) / 255f;
+
+            int nr, ng, nb;
+
+            if (luminance >= BG_THRESHOLD) {
+                // ✅ 背景区域：强制纯黑
+                nr = 0;
+                ng = 0;
+                nb = 0;
+            } else if (luminance <= TEXT_THRESHOLD) {
+                // ✅ 文字区域：映射到柔和浅灰
+                // 原始越黑 → 目标越亮（反转关系）
+                // luminance=0 → TARGET; luminance=TEXT_THRESHOLD → TARGET*0.7
+                float textRatio = 1.0f - luminance / TEXT_THRESHOLD;
+                float scale = 0.7f + 0.3f * textRatio; // [0.7, 1.0]
+                nr = (int) (TARGET_R * scale);
+                ng = (int) (TARGET_G * scale);
+                nb = (int) (TARGET_B * scale);
+            } else {
+                // ✅ 过渡区域(抗锯齿边缘)：从浅灰平滑过渡到纯黑
+                // luminance 从 TEXT_THRESHOLD → BG_THRESHOLD
+                // 输出从 TARGET*0.7 → 0
+                float edgeRatio =
+                    (luminance - TEXT_THRESHOLD) /
+                    (BG_THRESHOLD - TEXT_THRESHOLD);
+                float scale = 0.7f * (1.0f - edgeRatio);
+                nr = (int) (TARGET_R * scale);
+                ng = (int) (TARGET_G * scale);
+                nb = (int) (TARGET_B * scale);
+            }
+
+            pixels[i] = (a << 24) | (nr << 16) | (ng << 8) | nb;
         }
 
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
@@ -2301,62 +2355,40 @@ public class DocumentActivity extends Activity {
      * @param targetText 长按位置附近的文字片段（用于定位高亮），可为 null
      */
     private void showTextSelectionDialog(String fullText, String targetText) {
-        // ===== 构建 SpannableString =====
+        // ===== 构建 SpannableString（高亮逻辑不变）=====
         SpannableString spannable = new SpannableString(fullText);
         int highlightStart = -1;
         int highlightEnd = -1;
 
         if (targetText != null && !targetText.isEmpty()) {
-            // 策略1: 完整匹配
             int idx = fullText.indexOf(targetText);
-
-            // 策略2: 去掉多余空白后再匹配
             if (idx < 0) {
                 String compressed = targetText.replaceAll("\\s+", " ").trim();
                 if (compressed.length() >= 3) {
                     idx = fullText.indexOf(compressed);
-                    if (idx >= 0) {
-                        targetText = compressed;
-                    }
+                    if (idx >= 0) targetText = compressed;
                 }
             }
-
-            // 策略3: 取前 20 个字符作为锚点匹配
             if (idx < 0 && targetText.length() > 20) {
                 String anchor = targetText.substring(0, 20).trim();
                 if (anchor.length() >= 4) {
                     idx = fullText.indexOf(anchor);
-                    if (idx >= 0) {
-                        targetText = anchor;
-                    }
+                    if (idx >= 0) targetText = anchor;
                 }
             }
-
-            // 策略4: 取前 10 个字符
             if (idx < 0 && targetText.length() > 10) {
                 String anchor = targetText.substring(0, 10).trim();
                 if (anchor.length() >= 3) {
                     idx = fullText.indexOf(anchor);
-                    if (idx >= 0) {
-                        targetText = anchor;
-                    }
+                    if (idx >= 0) targetText = anchor;
                 }
             }
-
             if (idx >= 0) {
                 highlightStart = idx;
                 highlightEnd = Math.min(
                     idx + targetText.length(),
                     fullText.length()
                 );
-
-                // 高亮背景色
-                /*spannable.setSpan(
-                    new BackgroundColorSpan(0x88FFEB3B), // 半透明黄色
-                    highlightStart,
-                    highlightEnd,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                );*/
                 int hlColor = mInvertMode ? 0x66FFD54F : 0x88FFEB3B;
                 spannable.setSpan(
                     new CenteredHighlightSpan(hlColor),
@@ -2364,27 +2396,24 @@ public class DocumentActivity extends Activity {
                     highlightEnd,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 );
-            } else {
-                Log.w(
-                    APP,
-                    "showTextSelectionDialog: target not found in fullText, target=[" +
-                        targetText +
-                        "]"
-                );
             }
         }
 
-        // ===== 构建 UI 组件 =====
-        int dp16 = (int) TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            16,
-            getResources().getDisplayMetrics()
-        );
-        int dp12 = (int) TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            12,
-            getResources().getDisplayMetrics()
-        );
+        // ===== 统一颜色常量 =====
+        final boolean dark = mInvertMode;
+        final int bgColor = dark ? 0xFF000000 : 0xFFFAFAFA;
+        final int textMain = dark ? 0xFFB8A890 : 0xFF333333; // 与PDF暖灰一致
+        final int textSub = dark ? 0xFF706858 : 0xFF999999;
+        final int btnText = dark ? 0xFFB8A890 : 0xFF333333;
+
+        int dp16 = dp2px(16);
+        int dp12 = dp2px(12);
+        int dp8 = dp2px(8);
+
+        // ===== 根布局 =====
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(bgColor); // ✅ 整个弹窗背景统一
 
         // 页面标题标签
         TextView headerLabel = new TextView(this);
@@ -2394,21 +2423,28 @@ public class DocumentActivity extends Activity {
                 (MyActivity.zh_cn ? " 页" : "")
         );
         headerLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        headerLabel.setTextColor(0xFF999999);
+        headerLabel.setTextColor(textSub);
         headerLabel.setPadding(dp16, dp12, dp16, 0);
+        root.addView(
+            headerLabel,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
 
-        // 核心 TextView：可选中、可复制
+        // 核心 TextView
         final TextView textView = new TextView(this);
         textView.setText(spannable);
         textView.setTextIsSelectable(true);
-
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        textView.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
+        textView.setTextColor(textMain);
         textView.setLineSpacing(0, 1.4f);
         textView.setPadding(dp16, dp12, dp16, dp16);
 
-        // ScrollView
         final ScrollView scrollView = new ScrollView(this);
+        scrollView.setFillViewport(true);
+        scrollView.setBackgroundColor(bgColor);
         scrollView.addView(
             textView,
             new FrameLayout.LayoutParams(
@@ -2416,81 +2452,94 @@ public class DocumentActivity extends Activity {
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         );
-        scrollView.setFillViewport(true);
-        scrollView.setBackgroundColor(mInvertMode ? 0xFF1E1E1E : 0xFFFAFAFA);
+        root.addView(
+            scrollView,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
+                1f
+            )
+        );
 
-        // 外层容器：header + scrollView
-        LinearLayout container = new LinearLayout(this);
-        container.setOrientation(LinearLayout.VERTICAL);
-        container.addView(
-            headerLabel,
+        // ✅ 底部关闭按钮栏（替代 Builder 的 setNegativeButton）
+        LinearLayout btnBar = new LinearLayout(this);
+        btnBar.setOrientation(LinearLayout.HORIZONTAL);
+        btnBar.setGravity(Gravity.END);
+        btnBar.setPadding(dp8, dp8, dp8, dp8);
+        btnBar.setBackgroundColor(bgColor);
+
+        TextView btnClose = createButton(MyActivity.zh_cn ? "关闭" : "Close");
+        btnBar.addView(
+            btnClose,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+        root.addView(
+            btnBar,
             new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
         );
-        container.addView(
-            scrollView,
-            new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                0,
-                1f // weight=1，占满剩余空间
-            )
+
+        // ===== 创建 Dialog（不用 AlertDialog.Builder）=====
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(root);
+        dialog.setCancelable(true);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setDimAmount(0.5f);
+            // ✅ 关键：设置窗口背景为透明或对应暗黑frame，消除默认亮色边框
+            dialog
+                .getWindow()
+                .setBackgroundDrawableResource(
+                    dark
+                        ? android.R.drawable.dialog_holo_dark_frame
+                        : android.R.drawable.dialog_holo_light_frame
+                );
+        }
+
+        // 选词菜单回调
+        textView.setCustomSelectionActionModeCallback(
+            new TextSelectionActionModeCallback(textView, dialog)
         );
 
-        // ===== 弹窗尺寸：占屏幕 85% 宽高 =====
-        DisplayMetrics dm = getResources().getDisplayMetrics();
+        // 关闭按钮
+        btnClose.setOnClickListener(v -> dialog.dismiss());
 
-        // 宽度：85% 屏幕宽，但不超过 1200dp（平板友好）
+        dialog.show();
+
+        // 设置尺寸
+        DisplayMetrics dm = getResources().getDisplayMetrics();
         int maxW = (int) TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             1200,
             dm
         );
         int dialogW = Math.min((int) (dm.widthPixels * 0.75f), maxW);
-
-        // 高度：85% 屏幕高，但不超过 900dp
         int maxH = (int) TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             900,
             dm
         );
         int dialogH = Math.min((int) (dm.heightPixels * 0.85f), maxH);
-
-        // ===== 创建 AlertDialog =====
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(container);
-        builder.setNegativeButton(MyActivity.zh_cn ? "关闭" : "Close", null);
-
-        final AlertDialog dialog = builder.create();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setDimAmount(0.5f);
-        }
-
-        // ✅ 在 show() 之前设置 Callback，此时 dialog 已创建
-        textView.setCustomSelectionActionModeCallback(
-            new TextSelectionActionModeCallback(textView, dialog)
-        );
-
-        dialog.show();
-
-        // 必须在 show() 之后设置窗口尺寸
         if (dialog.getWindow() != null) {
             dialog.getWindow().setLayout(dialogW, dialogH);
         }
 
-        // ===== 自动滚动到高亮位置 =====
+        // 自动滚动到高亮位置
         if (highlightStart >= 0) {
             final int fStart = highlightStart;
             final int fEnd = highlightEnd;
-
             textView.post(() -> {
                 android.text.Layout layout = textView.getLayout();
                 if (layout == null) {
-                    // layout 尚未就绪，再等一帧
-                    textView.post(() -> {
-                        scrollToHighlight(textView, scrollView, fStart, fEnd);
-                    });
+                    textView.post(() ->
+                        scrollToHighlight(textView, scrollView, fStart, fEnd)
+                    );
                 } else {
                     scrollToHighlight(textView, scrollView, fStart, fEnd);
                 }
