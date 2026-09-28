@@ -507,6 +507,20 @@ public class DocumentActivity extends Activity {
         titleLabel = (TextView) findViewById(R.id.title_label);
         titleLabel.setText(title);
 
+        // ========== ✅ TTS 书籍身份校验 ==========
+        boolean shouldRestoreTts = false;
+        if (MyService.isTextPlaying()) {
+            String ttsTitle = MyService.getCurrentTtsTitle();
+            if (title != null && title.equals(ttsTitle)) {
+                shouldRestoreTts = true;
+                Log.i(APP, "TTS same book [" + title + "], will restore page");
+            } else {
+                Log.i(APP, "TTS different book, stopping TTS");
+                MyService.stopTextPlay();
+            }
+        }
+        // ==========================================
+
         history = new Stack<Integer>();
 
         worker = new Worker(this);
@@ -1103,14 +1117,44 @@ public class DocumentActivity extends Activity {
 
                 public void run() {
                     pageCountChanged = true;
+
+                    // ✅ TTS 恢复：直接从 Service 读取，不再依赖 Intent///
                     if (
-                        currentPage < 0 || currentPage >= pageCount
-                    ) currentPage = 0;
+                        MyService.isTextPlaying() &&
+                        title != null &&
+                        title.equals(MyService.getCurrentTtsTitle())
+                    ) {
+                        int ttsPage = MyService.getCurrentTtsPage();
+                        if (ttsPage >= 0 && ttsPage < pageCount) {
+                            currentPage = ttsPage;
+                            Log.i(
+                                APP,
+                                "TTS auto-restore to page " + currentPage
+                            );
+                        }
+                    } else {
+                        // 非 TTS 恢复场景：使用 SharedPreferences 保存的阅读进度
+                        if (
+                            currentPage < 0 || currentPage >= pageCount
+                        ) currentPage = 0;
+                    }
+
+                    ///////////////////////////////////////////////////
+
                     titleLabel.setText(title);
                     if (isReflowable) layoutButton.setVisibility(View.VISIBLE);
                     else zoomButton.setVisibility(View.VISIBLE);
                     loadPage();
                     loadOutline();
+
+                    // ✅ TTS UI 同步：同样基于 Service 实时状态判断
+                    if (
+                        MyService.isTextPlaying() &&
+                        title != null &&
+                        title.equals(MyService.getCurrentTtsTitle())
+                    ) {
+                        pageView.post(() -> syncTtsUiState());
+                    }
                 }
             }
         );
@@ -1525,18 +1569,6 @@ public class DocumentActivity extends Activity {
         };
 
     /** 开始朗读 */
-    /*public void startTtsReading() {
-        if (mIsTtsReading) {
-            stopTtsReading();
-            return;
-        }
-
-        mIsTtsReading = true;
-        mTtsReadingPage = currentPage;
-        updateTtsButtonState();
-        updateTtsButtonState(); // ✅ 切换为停止图标
-        readCurrentPage();
-    }*/
     public void startTtsReading() {
         if (mIsTtsReading) {
             stopTtsReading();
@@ -1580,6 +1612,9 @@ public class DocumentActivity extends Activity {
 
     /** 读取并播放当前页 */
     private void readCurrentPage() {
+        // ✅ 每次朗读新页面时实时更新 Service 中的位置
+        MyService.setCurrentTtsPosition(key, mTtsReadingPage, title);
+
         worker.add(
             new Worker.Task() {
                 String text;
@@ -3311,5 +3346,36 @@ public class DocumentActivity extends Activity {
         } catch (Exception e) {
             Log.w(APP, "Context.setUserCSS failed: " + e.getMessage());
         }
+    }
+
+    /**
+     * 仅同步 UI 到已运行的 TTS，不重启播放
+     */
+    private void syncTtsUiState() {
+        // 双重保险：跳转间隙 TTS 可能已播完
+        if (!MyService.isTextPlaying()) {
+            mIsTtsReading = false;
+            updateTtsButtonState();
+            return;
+        }
+
+        mIsTtsReading = true;
+        mTtsReadingPage = currentPage;
+        updateTtsButtonState(); // 按钮显示停止图标
+
+        // ✅ 重新注入监听器 → 下一次 onSentenceChanged 自动触发 highlightCurrentSentence
+        MyService service = MyService.getInstance();
+        if (service != null) {
+            service.setTtsSentenceListener(mTtsSentenceListener);
+        }
+
+        Log.i(APP, "TTS UI synced to page " + currentPage);
+    }
+
+    // ✅ 必须重写！SINGLE_TOP 模式下 Intent 通过此方法传递
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // 关键：更新内部 Intent，否则 getIntent() 返回旧值
     }
 }

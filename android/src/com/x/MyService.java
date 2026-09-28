@@ -62,6 +62,11 @@ import java.util.TimerTask;
 
 public class MyService extends Service {
 
+    // 恢复书籍tts
+    private static volatile int sCurrentTtsPage = -1;
+    private static volatile String sCurrentTtsKey = null;
+    private static volatile String sCurrentTtsTitle = null;
+
     // ========== MyService 中新增 TTS 相关逻辑 ==========
     private boolean isTtsInitialized = false;
     private boolean isTtsInitializing = false;
@@ -1476,6 +1481,11 @@ public class MyService extends Service {
             isTtsInitializing = false;
             pendingTtsText = null;
 
+            // ✅ 清除 TTS 位置
+            sCurrentTtsPage = -1;
+            sCurrentTtsKey = null;
+            sCurrentTtsTitle = null;
+
             if (currentPlayingTts != null) {
                 currentPlayingTts.stop();
                 currentPlayingTts.shutdown();
@@ -1845,5 +1855,38 @@ public class MyService extends Service {
         if (service != null) {
             service.playMyTextInService(text, listener);
         }
+    }
+
+    public static boolean isTextPlaying() {
+        MyService service = getInstance();
+        if (service == null) return false;
+        synchronized (service.ttsLock) {
+            return (
+                service.currentPlayingTts != null &&
+                service.currentPlayingTts.getTtsState() == 2
+            );
+        }
+    }
+
+    public static void setCurrentTtsPosition(
+        String key,
+        int page,
+        String title
+    ) {
+        sCurrentTtsKey = key;
+        sCurrentTtsPage = page;
+        sCurrentTtsTitle = title;
+    }
+
+    public static int getCurrentTtsPage() {
+        return sCurrentTtsPage;
+    }
+
+    public static String getCurrentTtsKey() {
+        return sCurrentTtsKey;
+    }
+
+    public static String getCurrentTtsTitle() {
+        return sCurrentTtsTitle;
     }
 }

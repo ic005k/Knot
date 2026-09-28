@@ -40,6 +40,10 @@ void Reader::initTTS() {
 }
 
 void Reader::setTtsCurrentSentence(const QString& currentSentence) {
+  return;
+
+  /////////////////////////////////////////////////////
+
   bool isLockScreen = m_Method->getLockScreenStatus();
 
   if (QDateTime::currentDateTime() > m_autoStopDeadline) {
