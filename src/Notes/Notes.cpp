@@ -13,6 +13,17 @@ static QAtomicInt n_Files = 0;
 
 Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->setupUi(this);
+
+  QString old_file = privateDir + "notes_counter.json";
+  QString new_file = iniDir + "config/notes_counter.json";
+  if (!QFile::exists(new_file)) {
+    QDir targetDir(QFileInfo(new_file).absolutePath());
+    if (!targetDir.exists()) {
+      targetDir.mkpath(".");
+    }
+    QFile::copy(old_file, new_file);
+  }
+
   m_NoteManager = new NoteManager();
 
   ui->listSearchResults->setItemDelegate(new TextMatchDelegate(this));
@@ -868,7 +879,7 @@ void Notes::editNote() { openEditUI(); }
 // ========== 加载 ==========
 void Notes::loadNotesCounter() {
   m_counterMap.clear();
-  QString file = privateDir + "notes_counter.json";
+  QString file = iniDir + "config/notes_counter.json";
 
   QFile f(file);
   if (!f.open(QIODevice::ReadOnly)) return;
@@ -928,7 +939,7 @@ void Notes::saveNotesCounter() {
     root[it.key()] = obj;
   }
 
-  QString file = privateDir + "notes_counter.json";
+  QString file = iniDir + "config/notes_counter.json";
   QFile f(file);
   if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
     f.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
@@ -957,26 +968,28 @@ void Notes::refreshRecentOpenByCounter() {
               return a.second.last > b.second.last;
             });
 
-  // 3. 组装列表，最多保留50条
+  // 3. 组装列表，最多保留500条有效记录
+  int addedCount = 0;
+  constexpr int MAX_RECENT = 500;
+
   for (const auto& pair : sortedList) {
-    if (m_NotesList->listRecentOpen.count() >= 50) break;
+    if (addedCount >= MAX_RECENT) break;  // ✅ 按"实际添加数"而非列表总长度判断
 
     const QString& mdFile = pair.first;
 
-    // 跳过已不存在的文件（可选，防止删除笔记后残留）
+    // 跳过已不存在的文件
     if (!QFile::exists(mdFile)) continue;
 
     QString title = m_Notes->m_NoteManager->getNoteTitle(mdFile);
-    QString strmd = mdFile;
-    // strmd = strmd.replace(iniDir, "").trimmed();
-
-    m_NotesList->listRecentOpen.append(title + "===" + strmd);
+    m_NotesList->listRecentOpen.append(title + "===" + mdFile);
+    ++addedCount;  // ✅ 只有成功添加才计数
   }
 
   // 4. 兜底去重（理论上计数器key唯一不会重复）
   m_NotesList->listRecentOpen =
       m_Method->removeDuplicatesFromQStringList(m_NotesList->listRecentOpen);
 }
+
 void Notes::on_listNoteBook_currentRowChanged(int currentRow) {
   m_NotesList->clickNoteBook(currentRow);
 }
