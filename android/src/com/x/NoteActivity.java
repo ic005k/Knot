@@ -50,6 +50,9 @@ public class NoteActivity extends AppCompatActivity {
 
     private OnBackPressedCallback mBackCallback;
 
+    // 用于AI回填文本
+    private EditText mRenameEt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -648,41 +651,88 @@ public class NoteActivity extends AppCompatActivity {
      * 笔记重命名弹窗
      * @param isZh 是否中文
      * @param selectedPos 当前选中笔记索引
+     * @param aiNewName AI生成的预填文本，传null/空则使用原始标题
      */
-    private void showNoteRenameDialog(boolean isZh, int selectedPos) {
+    private void showNoteRenameDialog(
+        boolean isZh,
+        int selectedPos,
+        String aiNewName
+    ) {
         boolean dark = ImmersiveUtil.applyRealImmersive(this);
         int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
-        EditText etInput = new EditText(this);
-        etInput.setTextColor(textColor);
+        mRenameEt = new EditText(this);
+        mRenameEt.setTextColor(textColor);
 
-        // String currentTitle = mNoteAdapter.getItemAt(selectedPos);
-        String currentTitle = mOriginNoteList.get(selectedPos);
-
-        etInput.setText(currentTitle);
-        etInput.setSelection(etInput.getText().length());
+        String initText;
+        if (aiNewName != null && !aiNewName.isEmpty()) {
+            initText = aiNewName;
+        } else {
+            initText = mOriginNoteList.get(selectedPos);
+        }
+        mRenameEt.setText(initText);
+        mRenameEt.setSelection(initText.length());
 
         String title = isZh ? "重命名笔记" : "Rename Note";
         String hint = isZh ? "输入笔记新名称" : "Input new note name";
-        etInput.setHint(hint);
+        mRenameEt.setHint(hint);
 
         String okText = isZh ? "确定" : "OK";
         String cancelText = isZh ? "取消" : "Cancel";
+        String aiRenameText = isZh ? "AI重命名" : "AI Rename";
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
-        builder.setView(etInput);
+        builder.setView(mRenameEt);
+
+        // 取消按钮
+        builder.setNegativeButton(cancelText, (dialog, which) -> {
+            mRenameEt = null;
+            dialog.dismiss();
+        });
+
+        // AI重命名：调用C++
+        builder.setNeutralButton(aiRenameText, (dialog, which) -> {
+            showLoadingDialog();
+            PublicJavaCallCpp("note_ai_rename|==|" + selectedPos);
+            dialog.dismiss();
+        });
+
+        // 确定按钮
         builder.setPositiveButton(okText, (dialog, which) -> {
-            String newName = etInput.getText().toString().trim();
+            String newName = mRenameEt.getText().toString().trim();
+            mRenameEt = null;
             if (newName.isEmpty()) {
                 return;
             }
             String cmd = "note_rename|==|" + selectedPos + "|==|" + newName;
             PublicJavaCallCpp(cmd);
-        });
-        builder.setNegativeButton(cancelText, (dialog, which) -> {
             dialog.dismiss();
         });
+
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void showNoteRenameDialog(boolean isZh, int selectedPos) {
+        showNoteRenameDialog(isZh, selectedPos, null);
+    }
+
+    /**
+     * C++ JNI调用，传入AI生成的新标题，自动获取当前选中笔记，弹出重命名弹窗并预填文本
+     * @param aiNewName AI生成的新笔记名称
+     */
+    public void showNoteRenameDialog(String aiNewName) {
+        runOnUiThread(() -> {
+            boolean isZh = MyActivity.zh_cn;
+            int selectedPos = getSelectedOriginNoteIndex();
+            if (selectedPos == -1) {
+                showTipDialog(
+                    isZh ? "请先选择一条笔记" : "Please select a note first"
+                );
+                return;
+            }
+            showNoteRenameDialog(isZh, selectedPos, aiNewName);
+        });
     }
 
     /**
@@ -749,7 +799,7 @@ public class NoteActivity extends AppCompatActivity {
     /**
      * C++调用：关闭AI等待弹窗
      */
-    public void dismissLoadingDialog() {
+    public void dismissAiLoadingDialog() {
         runOnUiThread(() -> {
             MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
             mAiLoadingDialog = null;

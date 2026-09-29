@@ -4,6 +4,12 @@
 void MainWindow::gotoEnd() {
   safeCloseProgress();
   if (isAndroid) {
+    if (m_NotesList->isAINoteRename) {
+      m_NotesList->isAINoteRename = false;
+      m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
+                             "NoteActivity");
+    }
+
     if (m_Reader->isAIReaderExplanation) {
       m_Reader->isAIReaderExplanation = false;
       m_Method->execJavaFunc("mPdfActivity", "dismissAiLoadingDialog",
@@ -76,163 +82,163 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
   QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
   QNetworkReply* reply = m_ainetMgr->post(req, postData);
 
-  connect(
-      reply, &QNetworkReply::finished, this,
-      [this, reply, userQuestion, parentWnd]() {
-        reply->deleteLater();
-        QString reqUrl = reply->request().url().toString();
-        if (reply->error() != QNetworkReply::NoError) {
-          QString errMsg = reply->errorString();
-          QString content =
-              tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
-          content = content.arg(errMsg, reqUrl);
-          gotoEnd();
-          if (!isAndroid)
-            QMessageBox::critical(parentWnd, tr("Connect Failed"), content);
+  connect(reply, &QNetworkReply::finished, this,
+          [this, reply, userQuestion, parentWnd]() {
+            reply->deleteLater();
+            QString reqUrl = reply->request().url().toString();
+            if (reply->error() != QNetworkReply::NoError) {
+              QString errMsg = reply->errorString();
+              QString content =
+                  tr("Network Error") + ":\n%1\n" + tr("Request URL") + ":\n%2";
+              content = content.arg(errMsg, reqUrl);
+              gotoEnd();
+              if (!isAndroid)
+                QMessageBox::critical(parentWnd, tr("Connect Failed"), content);
 
-          return;
-        }
-        // 此处增加业务逻辑：读取返回JSON、解析AI回答内容
-        QByteArray rawResp = reply->readAll();
-        // TODO：解析返回内容，自行实现界面渲染逻辑
-        QJsonParseError parseError;
-        // 转为JSON文档，捕获解析错误
-        QJsonDocument doc = QJsonDocument::fromJson(rawResp, &parseError);
-
-        // 1. 判断：返回内容不是合法JSON
-        if (parseError.error != QJsonParseError::NoError) {
-          QString errInfo = tr("Returned data is not valid JSON:\n%1")
-                                .arg(parseError.errorString());
-          gotoEnd();
-          if (!isAndroid) {
-            QMessageBox::critical(parentWnd, tr("Parse Failed"), errInfo,
-                                  QMessageBox::Ok);
-          }
-          return;
-        }
-
-        QJsonObject rootObj = doc.object();
-
-        // 2. 判断：服务端返回业务错误（密钥无效、模型不存在、余额不足等）
-        if (rootObj.contains("error")) {
-          QJsonObject errObj = rootObj["error"].toObject();
-          QString serverErr = errObj["message"].toString().trimmed();
-          gotoEnd();
-          if (!isAndroid) {
-            QMessageBox::critical(parentWnd, tr("API Rejected"),
-                                  tr("Server Error:\n%1").arg(serverErr));
-          }
-          return;
-        }
-
-        // 3. 正常成功响应，提取AI回答
-        QJsonArray choicesArr = rootObj["choices"].toArray();
-        if (choicesArr.isEmpty()) {
-          gotoEnd();
-          if (!isAndroid) {
-            QMessageBox::information(parentWnd, tr("Success"),
-                                     tr("AI returned empty content"));
-          }
-          return;
-        }
-
-        // 取第一条回复
-        QJsonObject firstChoice = choicesArr.first().toObject();
-        QJsonObject aiMsgObj = firstChoice["message"].toObject();
-        QString aiReplyText = aiMsgObj["content"].toString().trimmed();
-
-        // ========== 弹窗展示完整问答 ==========
-        // 分段纯翻译文本，tr内部不含任何换行符
-        QString part1 = tr("User Question");
-        QString part2 = tr("AI Reply");
-
-        // 外部拼接换行、占位符，tr只负责文字
-        QString showBody;
-        showBody += part1;
-        showBody += ":\n\n%1\n\n";
-        showBody += part2;
-        showBody += ":\n\n%2";
-        // 最后填充占位符
-        showBody = showBody.arg(userQuestion, aiReplyText);
-
-        // qDebug() << aiReplyText;
-        //  复制到系统剪贴板
-        QClipboard* clip = QGuiApplication::clipboard();
-        clip->setText(aiReplyText);
-
-        m_Preferences->saveAIConfig();
-
-        safeCloseProgress();
-
-        auto msg = std::make_unique<ShowMessage>(parentWnd);
-        if (m_NotesList->isAINoteRename) {
-          m_NotesList->isAINoteRename = false;
-          m_MsgBox->ui->btnOk->setText(tr("Modify Title"));
-
-          if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
-            QTextEdit* edit =
-                m_NotesList->m_RenameNotes->findChild<QTextEdit*>("renameEdit");
-            if (edit) {
-              edit->setText(aiReplyText);
+              return;
             }
-          }
-        } else if (m_Reader->isAIReaderExplanation) {
-          m_Reader->isAIReaderExplanation = false;
-          if (isAndroid) {
-            QStringList list;
-            list.append(aiReplyText);
-            m_Method->refreshJavaData("mPdfActivity", "showAiMarkdownDialog",
-                                      "artifex/mupdf/mini/DocumentActivity",
-                                      list);
-          } else {
-            m_MsgBox->ui->btnOk->setText(tr("Add Note"));
-            if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
-              m_Reader->addBookNote(aiReplyText);
+            // 此处增加业务逻辑：读取返回JSON、解析AI回答内容
+            QByteArray rawResp = reply->readAll();
+            // TODO：解析返回内容，自行实现界面渲染逻辑
+            QJsonParseError parseError;
+            // 转为JSON文档，捕获解析错误
+            QJsonDocument doc = QJsonDocument::fromJson(rawResp, &parseError);
+
+            // 1. 判断：返回内容不是合法JSON
+            if (parseError.error != QJsonParseError::NoError) {
+              QString errInfo = tr("Returned data is not valid JSON:\n%1")
+                                    .arg(parseError.errorString());
+              gotoEnd();
+              if (!isAndroid) {
+                QMessageBox::critical(parentWnd, tr("Parse Failed"), errInfo,
+                                      QMessageBox::Ok);
+              }
+              return;
             }
-          }
-        } else if (m_Notes->isAIQA) {
-          m_Notes->ui->editAnswer->setText(aiReplyText);
-          m_Notes->ui->progQA->setRange(0, 100);
-          m_Notes->isAIQA = false;
-          m_Notes->ui->editQuestion->setEnabled(true);
 
-        } else if (isAndroidAIQA) {
-          isAndroidAIQA = false;
-          m_Notes->appendAIResults(aiReplyText);
+            QJsonObject rootObj = doc.object();
 
-        } else if (mw_one->m_Report->isAiMainEvent) {
-          mw_one->m_Report->isAiMainEvent = false;
-          QStringList list;
-          list.append(aiReplyText);
-          m_Method->refreshJavaData("showAiMarkdownDialog", "MyEventActivity",
-                                    list);
-        } else if (mw_one->m_Report->isAiCategory) {
-          mw_one->m_Report->isAiCategory = false;
-          QStringList list;
-          list.append(aiReplyText);
-          m_Method->refreshJavaData("showAiMarkdownDialog",
-                                    "DataReportActivity", list);
-        }
+            // 2. 判断：服务端返回业务错误（密钥无效、模型不存在、余额不足等）
+            if (rootObj.contains("error")) {
+              QJsonObject errObj = rootObj["error"].toObject();
+              QString serverErr = errObj["message"].toString().trimmed();
+              gotoEnd();
+              if (!isAndroid) {
+                QMessageBox::critical(parentWnd, tr("API Rejected"),
+                                      tr("Server Error:\n%1").arg(serverErr));
+              }
+              return;
+            }
 
-        else if (m_Steps->isAiSteps) {
-          m_Steps->isAiSteps = false;
-          QStringList list;
-          list.append(aiReplyText);
-          m_Method->refreshJavaData("showAiMarkdownDialog", "StepListActivity",
-                                    list);
-        } else
+            // 3. 正常成功响应，提取AI回答
+            QJsonArray choicesArr = rootObj["choices"].toArray();
+            if (choicesArr.isEmpty()) {
+              gotoEnd();
+              if (!isAndroid) {
+                QMessageBox::information(parentWnd, tr("Success"),
+                                         tr("AI returned empty content"));
+              }
+              return;
+            }
 
-        {
-          if (isAndroid) {
-            QStringList list;
-            list.append(aiReplyText);
-            m_Method->refreshJavaData("showAiMarkdownDialog", "MyActivity",
-                                      list);
-          } else {
-            msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
-          }
-        }
-      });
+            // 取第一条回复
+            QJsonObject firstChoice = choicesArr.first().toObject();
+            QJsonObject aiMsgObj = firstChoice["message"].toObject();
+            QString aiReplyText = aiMsgObj["content"].toString().trimmed();
+
+            // ========== 弹窗展示完整问答 ==========
+            // 分段纯翻译文本，tr内部不含任何换行符
+            QString part1 = tr("User Question");
+            QString part2 = tr("AI Reply");
+
+            // 外部拼接换行、占位符，tr只负责文字
+            QString showBody;
+            showBody += part1;
+            showBody += ":\n\n%1\n\n";
+            showBody += part2;
+            showBody += ":\n\n%2";
+            // 最后填充占位符
+            showBody = showBody.arg(userQuestion, aiReplyText);
+
+            // qDebug() << aiReplyText;
+            //  复制到系统剪贴板
+            QClipboard* clip = QGuiApplication::clipboard();
+            clip->setText(aiReplyText);
+
+            m_Preferences->saveAIConfig();
+
+            safeCloseProgress();
+
+            auto msg = std::make_unique<ShowMessage>(parentWnd);
+            if (m_NotesList->isAINoteRename) {
+              m_NotesList->isAINoteRename = false;
+              if (isAndroid) {
+                m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
+                                       "NoteActivity");
+                m_Method->execJavaFunc("mInstance", "showNoteRenameDialog",
+                                       "NoteActivity", aiReplyText);
+
+              } else {
+                m_NotesList->execRename(aiReplyText);
+              }
+
+            } else if (m_Reader->isAIReaderExplanation) {
+              m_Reader->isAIReaderExplanation = false;
+              if (isAndroid) {
+                QStringList list;
+                list.append(aiReplyText);
+                m_Method->refreshJavaData(
+                    "mPdfActivity", "showAiMarkdownDialog",
+                    "artifex/mupdf/mini/DocumentActivity", list);
+              } else {
+                m_MsgBox->ui->btnOk->setText(tr("Add Note"));
+                if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
+                  m_Reader->addBookNote(aiReplyText);
+                }
+              }
+            } else if (m_Notes->isAIQA) {
+              m_Notes->ui->editAnswer->setText(aiReplyText);
+              m_Notes->ui->progQA->setRange(0, 100);
+              m_Notes->isAIQA = false;
+              m_Notes->ui->editQuestion->setEnabled(true);
+
+            } else if (isAndroidAIQA) {
+              isAndroidAIQA = false;
+              m_Notes->appendAIResults(aiReplyText);
+
+            } else if (mw_one->m_Report->isAiMainEvent) {
+              mw_one->m_Report->isAiMainEvent = false;
+              QStringList list;
+              list.append(aiReplyText);
+              m_Method->refreshJavaData("showAiMarkdownDialog",
+                                        "MyEventActivity", list);
+            } else if (mw_one->m_Report->isAiCategory) {
+              mw_one->m_Report->isAiCategory = false;
+              QStringList list;
+              list.append(aiReplyText);
+              m_Method->refreshJavaData("showAiMarkdownDialog",
+                                        "DataReportActivity", list);
+            }
+
+            else if (m_Steps->isAiSteps) {
+              m_Steps->isAiSteps = false;
+              QStringList list;
+              list.append(aiReplyText);
+              m_Method->refreshJavaData("showAiMarkdownDialog",
+                                        "StepListActivity", list);
+            } else
+
+            {
+              if (isAndroid) {
+                QStringList list;
+                list.append(aiReplyText);
+                m_Method->refreshJavaData("showAiMarkdownDialog", "MyActivity",
+                                          list);
+              } else {
+                msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
+              }
+            }
+          });
 }
 
 void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,

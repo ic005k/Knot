@@ -1128,6 +1128,17 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
             });
           }
 
+          if (strType.startsWith("note_ai_rename|==|")) {
+            QTimer::singleShot(100, mw_one, [=]() {
+              QStringList list = strType.split("|==|");
+
+              if (list.count() == 2) {
+                int idx = list.at(1).toInt();
+                m_NotesList->execAiReanme();
+              }
+            });
+          }
+
           if (strType.startsWith("note_delete|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
               QStringList list = strType.split("|==|");

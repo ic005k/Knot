@@ -1221,25 +1221,7 @@ void NotesList::on_btnNoteMenu_clicked() {
   });
 
   QAction* actRename = menu->addAction(tr("Rename"));
-  connect(actRename, &QAction::triggered, this, [this]() {
-    int idx = getNoteListOrgIndex();
-    if (idx == -1) return;
-
-    QString oldName = listNoteEntry.at(idx);
-
-    // 弹出输入对话框，以旧名称作为默认值
-    bool ok = false;
-    QString newName =
-        QInputDialog::getText(this, tr("Rename Note"), tr("New name:"),
-                              QLineEdit::Normal, oldName, &ok);
-
-    // 用户取消、输入为空、或名称未改变时，均不执行重命名
-    if (!ok || newName.trimmed().isEmpty() || newName == oldName) {
-      return;
-    }
-
-    renameNote(newName.trimmed(), idx);
-  });
+  connect(actRename, &QAction::triggered, this, [this]() { execRename(); });
 
   QAction* actGraph = menu->addAction(tr("Relation Graph"));
   connect(actGraph, &QAction::triggered, this, [this]() {
@@ -1268,6 +1250,116 @@ void NotesList::on_btnNoteMenu_clicked() {
   QPoint pos =
       ui->btnNoteMenu->mapToGlobal(QPoint(0, ui->btnNoteMenu->height()));
   menu->popup(pos);
+}
+
+void NotesList::execRename(const QString& aiSuggestedName) {
+  int idx = getNoteListOrgIndex();
+  if (idx == -1) return;
+  QString oldName;
+  if (aiSuggestedName == "")
+    oldName = listNoteEntry.at(idx);
+  else
+    oldName = aiSuggestedName;
+  // ========== 自定义重命名对话框（含 AI 重命名按钮）==========
+  QDialog dlg(this);
+  dlg.setWindowTitle(tr("Rename Note"));
+  auto* layout = new QVBoxLayout(&dlg);
+  auto* label = new QLabel(tr("New name:"), &dlg);
+  layout->addWidget(label);
+  auto* lineEdit = new QLineEdit(oldName, &dlg);
+  lineEdit->selectAll();  // 默认全选旧名称，方便直接编辑或替换
+  layout->addWidget(lineEdit);
+
+  // 底部按钮布局：AI Rename | Cancel | OK
+  QHBoxLayout* btnLayout = new QHBoxLayout();
+  QPushButton* aiBtn = new QPushButton(tr("✨ AI Rename"));
+  QPushButton* cancelBtn = new QPushButton(tr("Cancel"));
+  QPushButton* okBtn = new QPushButton(tr("OK"));
+
+  // 按目标顺序添加控件
+  btnLayout->addWidget(aiBtn);
+  btnLayout->addWidget(cancelBtn);
+  btnLayout->addWidget(okBtn);
+  btnLayout->setSpacing(12);
+
+  // 默认将焦点给到 OK 按钮
+  okBtn->setDefault(true);
+  layout->addLayout(btnLayout);
+
+  // === AI 按钮点击逻辑 ===
+  connect(aiBtn, &QPushButton::clicked, [&]() {
+    dlg.close();
+    execAiReanme();
+  });
+
+  // === Cancel 按钮 ===
+  connect(cancelBtn, &QPushButton::clicked, &dlg, &QDialog::reject);
+
+  // === OK 按钮（增加空值拦截）===
+  connect(okBtn, &QPushButton::clicked, [&]() {
+    if (lineEdit->text().trimmed().isEmpty()) {
+      QMessageBox::warning(&dlg, tr("Warning"), tr("Name cannot be empty."));
+      return;  // 阻止对话框关闭
+    }
+    dlg.accept();
+  });
+
+  // === 回车键支持（等同于点击 OK）===
+  connect(lineEdit, &QLineEdit::returnPressed, [&]() {
+    if (!lineEdit->text().trimmed().isEmpty()) {
+      dlg.accept();
+    }
+  });
+
+  // 显示对话框并等待用户操作
+  if (dlg.exec() != QDialog::Accepted) {
+    return;  // 用户点击了取消，或关闭窗口
+  }
+  // 获取最终名称
+  QString newName = lineEdit->text().trimmed();
+  // 名称未改变且不是ai重命名时，不执行重命名
+  if (aiSuggestedName == "") {
+    if (newName == oldName) {
+      return;
+    }
+  }
+  // 执行最终的重命名逻辑
+  renameNote(newName, idx);
+}
+
+void NotesList::execAiReanme() {
+  const qint64 MAX_READ_KB = 16;
+  const qint64 MAX_READ_BYTE = MAX_READ_KB * 1024;
+
+  QFile file(currentMDFile);
+  QString text;
+  if (file.open(QIODevice::ReadOnly)) {
+    QByteArray buf = file.read(MAX_READ_BYTE);  // 仅读取前128KB
+    file.close();
+    text = QString::fromUtf8(buf);
+  } else {
+    // 文件读取失败，置空
+    text = "";
+  }
+
+  // 统一英文指令，要求标题语言跟随笔记原文
+  QString promptTemplate = R"(
+Generate a short title for the note below.
+
+Rule: Title language matches the note's main language, output only title, no
+extra words.
+
+Note:
+
+%1
+)";
+
+  // 拼接笔记内容
+  QString fullPrompt = promptTemplate.arg(text);
+  isAINoteRename = true;
+  // 调用AI
+  mw_one->aiChatQuery(fullPrompt);
+  // qDebug() << fullPrompt;
 }
 
 void NotesList::on_btnNewNote_clicked() { m_NotesList->newCreateNote(); }

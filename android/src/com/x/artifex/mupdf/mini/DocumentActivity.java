@@ -507,18 +507,44 @@ public class DocumentActivity extends Activity {
         titleLabel = (TextView) findViewById(R.id.title_label);
         titleLabel.setText(title);
 
-        // ========== ✅ TTS 书籍身份校验 ==========
+        // ========== ✅ TTS 书籍身份校验（基于 URI key，避免同名误判）==========
         boolean shouldRestoreTts = false;
         if (MyService.isTextPlaying()) {
-            String ttsTitle = MyService.getCurrentTtsTitle();
-            if (title != null && title.equals(ttsTitle)) {
+            String ttsKey = MyService.getCurrentTtsKey();
+            if (key != null && key.equals(ttsKey)) {
                 shouldRestoreTts = true;
-                Log.i(APP, "TTS same book [" + title + "], will restore page");
+                Log.i(
+                    APP,
+                    "TTS same book [key=" + key + "], will restore page"
+                );
             } else {
-                Log.i(APP, "TTS different book, stopping TTS");
+                // ✅ 在 stopTextPlay 清空 Service 状态之前，
+                //    把旧书的 TTS 真实页码持久化到 SharedPreferences
+                int oldTtsPage = MyService.getCurrentTtsPage();
+                if (ttsKey != null && oldTtsPage >= 0) {
+                    SharedPreferences sp = getPreferences(Context.MODE_PRIVATE);
+                    sp.edit().putInt(ttsKey, oldTtsPage).apply();
+                    Log.i(
+                        APP,
+                        "Persisted old TTS book page: key=" +
+                            ttsKey +
+                            ", page=" +
+                            oldTtsPage
+                    );
+                }
+
+                Log.i(
+                    APP,
+                    "TTS different book [old=" +
+                        ttsKey +
+                        ", new=" +
+                        key +
+                        "], stopping TTS"
+                );
                 MyService.stopTextPlay();
             }
         }
+
         // ==========================================
 
         history = new Stack<Integer>();
@@ -1118,11 +1144,11 @@ public class DocumentActivity extends Activity {
                 public void run() {
                     pageCountChanged = true;
 
-                    // ✅ TTS 恢复：直接从 Service 读取，不再依赖 Intent///
+                    // ✅ TTS 恢复：基于 key 判断（与 onCreate 一致）
                     if (
                         MyService.isTextPlaying() &&
-                        title != null &&
-                        title.equals(MyService.getCurrentTtsTitle())
+                        key != null &&
+                        key.equals(MyService.getCurrentTtsKey())
                     ) {
                         int ttsPage = MyService.getCurrentTtsPage();
                         if (ttsPage >= 0 && ttsPage < pageCount) {
@@ -1133,7 +1159,6 @@ public class DocumentActivity extends Activity {
                             );
                         }
                     } else {
-                        // 非 TTS 恢复场景：使用 SharedPreferences 保存的阅读进度
                         if (
                             currentPage < 0 || currentPage >= pageCount
                         ) currentPage = 0;
@@ -1147,11 +1172,11 @@ public class DocumentActivity extends Activity {
                     loadPage();
                     loadOutline();
 
-                    // ✅ TTS UI 同步：同样基于 Service 实时状态判断
+                    // ✅ TTS UI 同步：同样基于 key 判断
                     if (
                         MyService.isTextPlaying() &&
-                        title != null &&
-                        title.equals(MyService.getCurrentTtsTitle())
+                        key != null &&
+                        key.equals(MyService.getCurrentTtsKey())
                     ) {
                         pageView.post(() -> syncTtsUiState());
                     }
@@ -1645,16 +1670,16 @@ public class DocumentActivity extends Activity {
     }
 
     /** 停止朗读 */
-    /*public void stopTtsReading() {
-        mIsTtsReading = false;
-        mTtsReadingPage = -1;
-        MyService.stopTextPlay();
-        pageView.clearTtsHighlight();
-        updateTtsButtonState();
-        updateTtsButtonState(); // ✅ 切换为播放图标
-    }*/
+
     public void stopTtsReading() {
         mIsTtsReading = false;
+
+        // ✅ 停止前：把 TTS 实际朗读页码同步到 currentPage
+        //    确保后续 onPause 持久化的值是正确的
+        if (mTtsReadingPage >= 0 && mTtsReadingPage < pageCount) {
+            currentPage = mTtsReadingPage;
+        }
+
         mTtsReadingPage = -1;
         MyService.stopTextPlay();
         pageView.clearTtsHighlight();
