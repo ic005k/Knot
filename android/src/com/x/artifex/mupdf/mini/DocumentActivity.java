@@ -3452,4 +3452,27 @@ public class DocumentActivity extends Activity {
         super.onNewIntent(intent);
         setIntent(intent); // 关键：更新内部 Intent，否则 getIntent() 返回旧值
     }
+
+    /**
+     * 拦截音量键：TTS 未运行时用于翻页，TTS 运行时交还系统调节音量
+     * + (VOLUME_UP) → 上一页
+     * - (VOLUME_DOWN) → 下一页
+     */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // ✅ 仅在 TTS 未朗读时拦截音量键
+        if (!mIsTtsReading) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_VOLUME_UP:
+                    goBackward(); // + 上一页
+                    return true; // 消费事件，阻止系统调音量
+                case KeyEvent.KEYCODE_VOLUME_DOWN:
+                    goForward(); // - 下一页
+                    return true; // 消费事件，阻止系统调音量
+            }
+        }
+        // TTS 运行中 → 不拦截，走 super 让系统正常调节音量
+        // Activity 销毁后 → 此方法不再被调用，音量键自动恢复正常
+        return super.onKeyDown(keyCode, event);
+    }
 }
