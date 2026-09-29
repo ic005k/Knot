@@ -274,7 +274,8 @@ class NotesList : public QDialog {
   void execRename(const QString& aiSuggestedName = "");
 
   void execAiReanme();
-  protected:
+
+ protected:
   bool eventFilter(QObject* watch, QEvent* evn) override;
 
   void closeEvent(QCloseEvent* event) override;
@@ -378,9 +379,6 @@ class NotesList : public QDialog {
                          const QString& t2, const QString& t3,
                          const QString& t4, int fontSize, int level,
                          int parentIndex, bool isExpand = true);
-
-  QMutex m_saveMutex;       // 保存锁
-  bool m_isSaving = false;  // 保存状态
 
   QString notebookName;
 

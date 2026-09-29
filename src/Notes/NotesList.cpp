@@ -180,33 +180,22 @@ void NotesList::closeEvent(QCloseEvent* event) {
 }
 
 void NotesList::saveNotesList() {
-  if (m_isSaving) return;
-  m_isSaving = true;
-
-  // ✅ 【关键】在主线程生成元数据快照，彻底隔离子线程并发访问
-  QHash<QString, NoteMetadata> metadataSnapshot;
-  if (m_Notes && m_Notes->m_NoteManager) {
-    metadataSnapshot = m_Notes->m_NoteManager->getMetadataSnapshot();
+  if (!m_Notes || !m_Notes->m_NoteManager) {
+    return;
   }
 
-  QPointer<NotesList> self(this);
-  // ✅ lambda 按值捕获 metadataSnapshot（深拷贝，线程安全）
-  QFuture<void> future = QtConcurrent::run([self, metadataSnapshot]() {
-    if (!self) return;
-    QMutexLocker locker(&self->m_saveMutex);
+  // 1. 获取当前最新的元数据快照（主线程同步获取，绝对拿到最新数据）
+  QHash<QString, NoteMetadata> metadataSnapshot =
+      m_Notes->m_NoteManager->getMetadataSnapshot();
 
-    // ✅ 直接作为参数传递，不再依赖成员变量
-    self->saveNotesListToFile(metadataSnapshot);
-  });
+  // 2. 同步执行文件保存（几毫秒即可完成，不会阻塞 UI）
+  saveNotesListToFile(metadataSnapshot);
 
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
-  connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
+  // 3. 更新保存后的状态标记
+  if (mw_one) {
     mw_one->strLatestModify = tr("Modi Notes List");
-    m_Notes->isSaveNotesConfig = true;
-    m_isSaving = false;
-    watcher->deleteLater();
-  });
-  watcher->setFuture(future);
+  }
+  m_Notes->isSaveNotesConfig = true;
 }
 
 // 递归序列化节点：完全沿用原规则，text(1)空=子笔记本，非空=笔记
