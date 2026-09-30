@@ -268,7 +268,6 @@ class NotesList : public QDialog {
 
   int getNoteListOrgIndex() const;
 
-  void closeNoteActivityLoadingDlg();
   void execRename(const QString& aiSuggestedName = "");
 
   void execAiReanme();
