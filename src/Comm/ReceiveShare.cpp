@@ -206,6 +206,8 @@ QObjectList ReceiveShare::getAllFrame(QObjectList lstUIControls) {
 }
 
 void ReceiveShare::closeAllChildWindows() {
+  return;
+  //////////////////////////////////////////////
   if (mw_one->m_AboutThis->isVisible()) {
     mw_one->m_AboutThis->ui->btnBack_About->click();
   }

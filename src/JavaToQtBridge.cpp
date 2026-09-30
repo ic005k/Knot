@@ -219,6 +219,11 @@ static void JavaNotify_7() {
 
 static void JavaNotify_8() {
   if (isInitThemeEnd) {
+    // 如果当前窗口不是主入口界面，则不执行快捷方式
+    bool isInstanceValid = m_Method->getJavaFuncBool(
+        "mInstance", "isInstanceValid", "MainEntrance");
+    if (!isInstanceValid) return;
+
     m_Method->closeMainEntranceWindow();
 
     QTimer::singleShot(100, mw_one, []() { mw_one->execDeskShortcut(); });

@@ -622,7 +622,6 @@ void NotesList::on_actionSetColorFlag() {
 
 void NotesList::on_actionStatistics() {
   mw_one->showProgress();
-  int countNoteBook = getNoteBookCount();
 
   int webDAVCount = m_Method->getAccessCount();
   QString memoDir = iniDir + "memo/images/";

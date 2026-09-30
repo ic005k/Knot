@@ -740,4 +740,27 @@ public class MainEntrance extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    /**
+     * JNI调用：判断MainEntrance实例是否存在且有效
+     * 业务约定：MainEntrance不会启动新Activity压栈；实例有效等价于处于Task栈顶
+     * @return true：窗口实例有效，存在；false：窗口已销毁
+     */
+    public boolean isInstanceValid() {
+        return (
+            mInstance != null &&
+            !mInstance.isFinishing() &&
+            !mInstance.isDestroyed()
+        );
+    }
 }
