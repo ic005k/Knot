@@ -54,7 +54,14 @@ jobs:
           echo "/opt/homebrew/bin" >> $GITHUB_PATH
           brew update
           brew install openssl@3 cmake
-          brew link openssl@3 --force
+
+          # ✅ 改用 keg-only 方式导出环境变量
+          OPENSSL_PREFIX="$(brew --prefix openssl@3)"
+          echo "OPENSSL_ROOT_DIR=${OPENSSL_PREFIX}" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=${OPENSSL_PREFIX}" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${OPENSSL_PREFIX}/lib/pkgconfig" >> $GITHUB_ENV
+          echo "LDFLAGS=-L${OPENSSL_PREFIX}/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I${OPENSSL_PREFIX}/include" >> $GITHUB_ENV
 
       - name: Build macOS (arm64)
         timeout-minutes: 30

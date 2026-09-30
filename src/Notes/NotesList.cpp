@@ -180,22 +180,36 @@ void NotesList::closeEvent(QCloseEvent* event) {
 }
 
 void NotesList::saveNotesList() {
-  if (!m_Notes || !m_Notes->m_NoteManager) {
-    return;
-  }
+  if (!m_Notes || !m_Notes->m_NoteManager) return;
 
-  // 1. 获取当前最新的元数据快照（主线程同步获取，绝对拿到最新数据）
-  QHash<QString, NoteMetadata> metadataSnapshot =
+  QHash<QString, NoteMetadata> snapshot =
       m_Notes->m_NoteManager->getMetadataSnapshot();
 
-  // 2. 同步执行文件保存（几毫秒即可完成，不会阻塞 UI）
-  saveNotesListToFile(metadataSnapshot);
+  int version = ++m_saveVersion;  // ✅ 单调递增版本号
 
-  // 3. 更新保存后的状态标记
-  if (mw_one) {
-    mw_one->strLatestModify = tr("Modi Notes List");
-  }
-  m_Notes->isSaveNotesConfig = true;
+  QtConcurrent::run([this, snapshot, version]() {
+    // ✅ 如果已有更新的版本在排队/执行，直接丢弃本次
+    // atomic load 是无锁的，开销极小
+    if (version != m_saveVersion.load(std::memory_order_relaxed)) {
+      return;
+    }
+
+    QMutexLocker locker(
+        &m_saveMutex);  // ✅ 防止两个过期检查同时通过后并发写文件
+
+    // double-check: 拿到锁后再确认一次
+    if (version != m_saveVersion.load(std::memory_order_relaxed)) {
+      return;
+    }
+
+    saveNotesListToFile(snapshot);
+  }).then([this, version]() {
+    // ✅ 只有最新版本的回调才更新 UI 状态
+    if (version == m_saveVersion.load(std::memory_order_relaxed)) {
+      if (mw_one) mw_one->strLatestModify = tr("Modi Notes List");
+      m_Notes->isSaveNotesConfig = true;
+    }
+  });
 }
 
 // 递归序列化节点：完全沿用原规则，text(1)空=子笔记本，非空=笔记
@@ -238,7 +252,7 @@ QJsonObject NotesList::serializeNotebookItem(QTreeWidgetItem* item) {
 void NotesList::saveNotesListToFile(
     const QHash<QString, NoteMetadata>& metadataSnapshot) {
   // 空指针防护
-  if (!tw || !twrb || !m_Method) return;
+  if (!twrb || !m_Method) return;
 
   const QString tempFile = QDir(iniDir).filePath("temp.json");
   const QString endFile = QDir(iniDir).filePath("mainnotes.json");
@@ -249,14 +263,16 @@ void NotesList::saveNotesListToFile(
   QDir baseDir(iniDir);
   rootObj["CurrentMD"] = baseDir.relativeFilePath(currentMDFile);
 
-  // 遍历所有顶级根笔记本，逐个序列化
-  QJsonArray mainNotesArray;
-  int count = tw->topLevelItemCount();
-  for (int i = 0; i < count; i++) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
-    mainNotesArray.append(serializeNotebookItem(topItem));
-  }
-  rootObj["mainNotes"] = mainNotesArray;
+  /*{
+    // 遍历所有顶级根笔记本，逐个序列化
+    QJsonArray mainNotesArray;
+    int count = tw->topLevelItemCount();
+    for (int i = 0; i < count; i++) {
+      QTreeWidgetItem* topItem = tw->topLevelItem(i);
+      mainNotesArray.append(serializeNotebookItem(topItem));
+    }
+    rootObj["mainNotes"] = mainNotesArray;
+  }*/
 
   // ========== 回收站 完全保留原逻辑 ==========
   QJsonArray recycleBinArray;
@@ -644,47 +660,6 @@ void NotesList::initRecycle() {
 
     twrb->expandAll();
   }
-}
-
-void NotesList::initUnclassified() {
-  QStringList dirFiles = m_Method->getMdFilesInDir(iniDir + "memo/", true);
-
-  QStringList excludeFiles = noteFiles + recycleFiles;
-  excludeFiles.removeDuplicates();
-
-  QStringList result;
-  foreach (const QString& file, dirFiles) {
-    if (!excludeFiles.contains(file)) {
-      result.append(file);
-    }
-  }
-
-  int count = result.count();
-  if (count == 0) return;
-
-  QTreeWidgetItem* topItem = new QTreeWidgetItem;
-  topItem->setText(0, tr("Unclassified"));
-  topItem->setText(2, "#FF0000");
-
-  TitleGenerator generator;
-
-  for (int i = 0; i < count; i++) {
-    QString mdFile = result.at(i);
-    QString str0, str1;
-    str0 = generator.genNewTitle(loadText(mdFile));
-    str1 = mdFile;
-    str1 = str1.replace(iniDir, "");
-    QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
-    childItem->setText(0, str0);
-    childItem->setText(1, str1);
-
-    m_Notes->m_NoteManager->setNoteTitle(mdFile, str0);
-  }
-
-  tw->addTopLevelItem(topItem);
-  tw->expandAll();
-
-  qDebug() << "未分类笔记：" << result;
 }
 
 void NotesList::setWinPos() {

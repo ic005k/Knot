@@ -1655,6 +1655,12 @@ public class DocumentActivity extends Activity {
         }
         mIsTtsReading = true;
         mTtsReadingPage = currentPage;
+
+        // ✅ TTS 启动时立即持久化当前页（防止刚开播就被中断）
+        if (prefs != null) {
+            prefs.edit().putInt(key, currentPage).apply();
+        }
+
         updateTtsButtonState();
         // =========睡眠定时逻辑=========
         if (mSleepTimerEnabled) {
@@ -1746,6 +1752,12 @@ public class DocumentActivity extends Activity {
         if (mTtsReadingPage < pageCount - 1) {
             mTtsReadingPage++;
             currentPage = mTtsReadingPage;
+
+            // ✅ TTS 翻页时实时持久化页码（apply 异步，零阻塞）
+            if (prefs != null) {
+                prefs.edit().putInt(key, currentPage).apply();
+            }
+
             pageView.clearTtsHighlight();
             pageView.saveCurrentScrollX(); // ✅ TTS 翻页前快照水平位置
             loadPage();

@@ -410,7 +410,6 @@ void Notes::buildCleanFileList() {
 void Notes::init_all_notes() {
   m_NotesList->initAllFromJson();
   m_NotesList->initRecycle();
-  m_NotesList->initUnclassified();
 
   QString dirPath = iniDir + "memo";
   MyAllNotes = findMarkdownFilesToSort(dirPath);

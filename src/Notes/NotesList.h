@@ -208,8 +208,6 @@ class NotesList : public QDialog {
 
   void moveToFirst();
 
-  void initUnclassified();
-
   void startBackgroundTaskDelFilesIndex(const QStringList& files);
   QStringList getRecycleNoteFiles();
 
@@ -362,6 +360,9 @@ class NotesList : public QDialog {
  private:
   QStringListModel* m_stringListModel;
   QSortFilterProxyModel* m_proxyModel;
+
+  std::atomic<int> m_saveVersion{0};
+  QMutex m_saveMutex;  // 仅用于保护文件写入的互斥
 
   // 精准搜索导航缓存（与 m_searchModel 平行存在）
   QVector<ExactMatchResult> m_exactMatchCache;
