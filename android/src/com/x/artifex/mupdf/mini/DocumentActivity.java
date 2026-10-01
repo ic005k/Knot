@@ -3011,54 +3011,92 @@ public class DocumentActivity extends Activity {
                     .get(selectedPos[0])
                     .split("===", 9);
 
-                String keyword = parts[6].trim();
-                String searchCtx = parts[5].trim();
-                String bookmarkHex = parts.length > 8 ? parts[8].trim() : "";
-                int targetPage = Integer.parseInt(parts[1].trim());
+                final String keyword = parts[6].trim();
+                final String searchCtx = parts[5].trim();
+                final int savedPage = Integer.parseInt(parts[1].trim()); // 1-based
 
                 dialog.dismiss();
 
-                // === 准备搜索词 ===
-                String needle = keyword;
-                if (keyword.length() < 3 && !searchCtx.isEmpty()) {
-                    needle = searchCtx.substring(
-                        0,
-                        Math.min(30, searchCtx.length())
-                    );
+                if (keyword.isEmpty() && searchCtx.isEmpty()) {
+                    Toast.makeText(
+                        DocumentActivity.this,
+                        getString(R.string.toast_search_not_found),
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    return;
                 }
-                searchNeedle = needle;
 
-                // === 统一定位：优先 Bookmark，fallback 页码 ===
-                int startPage = -1;
+                history.push(currentPage);
 
-                if (!bookmarkHex.isEmpty()) {
-                    try {
-                        long mark = Long.parseLong(bookmarkHex, 16);
-                        Location loc = doc.findBookmark(mark);
-                        int page = doc.pageNumberFromLocation(loc);
-                        if (page >= 0 && page < pageCount) {
-                            startPage = page;
-                            Log.i(APP, "Bookmark resolved → page " + page);
+                worker.add(
+                    new Worker.Task() {
+                        int foundPage = -1;
+
+                        public void work() {
+                            // === 计算搜索窗口 [start, end]，clamp 到合法范围 ===
+                            final int WINDOW = 50;
+                            int center =
+                                savedPage > 0 ? savedPage - 1 : currentPage;
+                            int start = Math.max(0, center - WINDOW);
+                            int end = Math.min(pageCount - 1, center + WINDOW);
+
+                            // === 第一轮：用上下文在窗口内搜索 ===
+                            String locator = null;
+                            if (!searchCtx.isEmpty()) {
+                                locator = searchCtx.substring(
+                                    0,
+                                    Math.min(30, searchCtx.length())
+                                );
+                            }
+
+                            if (locator != null && locator.length() >= 2) {
+                                for (int p = start; p <= end; p++) {
+                                    Page page = doc.loadPage(p);
+                                    Quad[][] hits = page.search(locator);
+                                    page.destroy();
+                                    if (hits != null && hits.length > 0) {
+                                        foundPage = p;
+                                        return; // ✅ 命中即停
+                                    }
+                                }
+                            }
+
+                            // === 第二轮：降级用 keyword 在窗口内搜索 ===
+                            if (!keyword.isEmpty()) {
+                                for (int p = start; p <= end; p++) {
+                                    Page page = doc.loadPage(p);
+                                    Quad[][] hits = page.search(keyword);
+                                    page.destroy();
+                                    if (hits != null && hits.length > 0) {
+                                        foundPage = p;
+                                        return;
+                                    }
+                                }
+                            }
                         }
-                    } catch (Exception e) {
-                        Log.w(APP, "Bookmark failed: " + e.getMessage());
+
+                        public void run() {
+                            if (foundPage >= 0) {
+                                // 上下文定位页码，keyword 负责高亮
+                                searchNeedle = keyword.isEmpty()
+                                    ? null
+                                    : keyword;
+                                currentPage = foundPage;
+                                loadPage();
+                            } else {
+                                // 窗口内未找到，回退历史
+                                history.pop();
+                                Toast.makeText(
+                                    DocumentActivity.this,
+                                    MyActivity.zh_cn
+                                        ? "未找到笔记位置，可能排版已大幅变化"
+                                        : "Note location not found, layout may have changed significantly",
+                                    Toast.LENGTH_SHORT
+                                ).show();
+                            }
+                        }
                     }
-                }
-
-                // Bookmark 缺失或失败时，用页码兜底（兼容旧笔记数据）
-                if (startPage < 0) {
-                    startPage = targetPage > 0 ? targetPage - 1 : 0;
-                    Log.i(
-                        APP,
-                        "Bookmark unavailable, fallback to page " + startPage
-                    );
-                }
-
-                startPage = Math.max(0, Math.min(startPage, pageCount - 1));
-
-                // === 统一跳转 + 单向向后搜索 ===
-                gotoPage(startPage);
-                runSearch(startPage, 1, needle);
+                );
             });
             // ✅ 编辑：复用笔记输入弹窗，预填已有内容
             btnEdit.setOnClickListener(v -> {
