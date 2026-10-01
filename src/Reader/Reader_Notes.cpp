@@ -208,11 +208,12 @@ void Reader::appendNoteDataToQmlList() {
 
 void Reader::saveReadNote(const QString& searchContext, const QString& keyword,
                           const QString& noteContent,
-                          const QString& currentPage) {
+                          const QString& currentPage,
+                          const QString& bookmark) {  // ← 仅新增此参数
   QString filePath = iniDir + "memo/readnote/" + currentBookName + ".json";
   QDir().mkpath(QFileInfo(filePath).path());
 
-  // 1. 读取已有 JSON（带容错）
+  // 1. 读取已有 JSON（带容错）【完全不变】
   QJsonObject root;
   if (QFile::exists(filePath)) {
     QFile f(filePath);
@@ -228,25 +229,26 @@ void Reader::saveReadNote(const QString& searchContext, const QString& keyword,
     }
   }
 
-  // 2. 构建笔记对象（字段名与参数名严格对齐）
+  // 2. 构建笔记对象 【仅新增一行 bookmark】
   QJsonObject noteObj;
   qint64 ts = QDateTime::currentMSecsSinceEpoch();
 
   noteObj["id"] = ts;
   noteObj["time"] =
       QDateTime::fromMSecsSinceEpoch(ts).toString(Qt::ISODateWithMs);
-  noteObj["currentPage"] = currentPage;  // ✅ 对齐参数名
+  noteObj["currentPage"] = currentPage;
   noteObj["color"] = QStringLiteral("#FFEB3B");
-  noteObj["searchContext"] = searchContext;  // ✅ 对齐参数名
-  noteObj["keyword"] = keyword;              // ✅ 对齐参数名
-  noteObj["noteContent"] = noteContent;      // ✅ 对齐参数名
+  noteObj["searchContext"] = searchContext;
+  noteObj["keyword"] = keyword;
+  noteObj["noteContent"] = noteContent;
+  noteObj["bookmark"] = bookmark;  // ← 唯一新增行，非PDF时有值，PDF时为空串
 
-  // 3. 追加到对应页码数组
+  // 3. 追加到对应页码数组 【完全不变】
   QJsonArray pageArray = root.value(currentPage).toArray();
   pageArray.append(noteObj);
   root[currentPage] = pageArray;
 
-  // 4. 原子写入防损坏
+  // 4. 原子写入防损坏 【完全不变】
   QString tmpPath = filePath + ".tmp";
   QFile tmpFile(tmpPath);
   if (tmpFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -402,6 +404,7 @@ QStringList Reader::readReadNote() {
       QString searchContext = note["searchContext"].toString();
       QString keyword = note["keyword"].toString();
       QString color = note["color"].toString("#FFEB3B");
+      QString bookmark = note["bookmark"].toString("");
 
       // 2. 生成高亮 HTML (处理大小写及多次出现)
       QString contextHtml = searchContext;
@@ -419,10 +422,10 @@ QStringList Reader::readReadNote() {
         contextHtml.replace(keyword, highlightTag, Qt::CaseInsensitive);
       }
 
-      // 3. 采用 === 拼接（共 8 个字段）
+      // 3. 采用 === 拼接（共 9 个字段）
       // 顺序：id === 页码 === 时间 === HTML上下文 === 笔记内容 === 纯文本上下文
-      // === 关键词 === 颜色
-      QString item = QString("%1===%2===%3===%4===%5===%6===%7===%8")
+      // === 关键词 === 颜色 === 书签
+      QString item = QString("%1===%2===%3===%4===%5===%6===%7===%8===%9")
                          .arg(id)
                          .arg(currentPage)
                          .arg(time)
@@ -430,7 +433,8 @@ QStringList Reader::readReadNote() {
                          .arg(noteContent)
                          .arg(searchContext)
                          .arg(keyword)
-                         .arg(color);
+                         .arg(color)
+                         .arg(bookmark);
 
       result.append(item);
     }

@@ -359,11 +359,8 @@ void Reader::initReader() {
 
   readerStyle = Reg.value("/Reader/Style", "1").toString();
   scrollValue = Reg.value("/Reader/ScrollValue", "0.25").toReal();
-  QString value = QString::number(scrollValue, 'f', 2);
 
   m_ReaderSet->setScrollValue();
-
-  int tabindex = Reg.value("/Reader/tabReaderIndex", 0).toInt();
 
   QFont font;
   int fsize = Reg.value("/Reader/FontSize", 18).toInt();

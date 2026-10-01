@@ -218,7 +218,8 @@ class Reader : public QDialog {
 
   QString sanitizeFileName(const QString& name);
   void saveReadNote(const QString& searchContext, const QString& keyword,
-                    const QString& noteContent, const QString& currentPage);
+                    const QString& noteContent, const QString& currentPage,
+                    const QString& bookmark);
   void updateReadNote(const QString& noteId, const QString& searchContext,
                       const QString& keyword, const QString& noteContent);
  public slots:

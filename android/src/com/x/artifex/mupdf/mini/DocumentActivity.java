@@ -2886,14 +2886,27 @@ public class DocumentActivity extends Activity {
                     holder.tvNote.setTextColor(textColorMain);
 
                     String fullStr = rawNoteData.get(position);
-                    String[] parts = fullStr.split("===", 8);
+                    String[] parts = fullStr.split("===", 9);
+                    // 兼容判断保持不变，≥8即可
                     if (parts.length < 8) return itemView;
-                    holder.tvPageTime.setText(
-                        (MyActivity.zh_cn ? "页码：" : "Page:") +
-                            parts[1].trim() +
-                            " | " +
-                            parts[2].trim()
-                    );
+
+                    String pageStr = parts[1].trim();
+                    boolean isPageReliable =
+                        !pageStr.equals("-1") && !isReflowable;
+
+                    if (isPageReliable) {
+                        holder.tvPageTime.setText(
+                            (MyActivity.zh_cn ? "页码：" : "Page:") +
+                                pageStr +
+                                " | " +
+                                parts[2].trim()
+                        );
+                    } else {
+                        // 非PDF：不显示页码，只显示时间，或用章节名替代
+                        holder.tvPageTime.setText(parts[2].trim()); // 仅显示时间
+                        // 或者如果有 outline/chapter 信息，显示章节名更佳
+                    }
+
                     Spanned spannedHtml;
                     if (
                         android.os.Build.VERSION.SDK_INT >=
@@ -2996,21 +3009,63 @@ public class DocumentActivity extends Activity {
                 if (selectedPos[0] < 0) return;
                 String[] parts = rawNoteData
                     .get(selectedPos[0])
-                    .split("===", 8);
-                int targetPage = Integer.parseInt(parts[1].trim());
+                    .split("===", 9);
+
                 String keyword = parts[6].trim();
-                dialog.dismiss(); // 先关闭笔记列表
-                // 跳转并高亮
-                gotoPage(targetPage - 1);
-                searchNeedle = keyword;
-                loadPage(); // loadPage 内部会用 searchNeedle 执行 page.search() 并渲染高亮
+                String searchCtx = parts[5].trim();
+                String bookmarkHex = parts.length > 8 ? parts[8].trim() : "";
+                int targetPage = Integer.parseInt(parts[1].trim());
+
+                dialog.dismiss();
+
+                // === 准备搜索词 ===
+                String needle = keyword;
+                if (keyword.length() < 3 && !searchCtx.isEmpty()) {
+                    needle = searchCtx.substring(
+                        0,
+                        Math.min(30, searchCtx.length())
+                    );
+                }
+                searchNeedle = needle;
+
+                // === 统一定位：优先 Bookmark，fallback 页码 ===
+                int startPage = -1;
+
+                if (!bookmarkHex.isEmpty()) {
+                    try {
+                        long mark = Long.parseLong(bookmarkHex, 16);
+                        Location loc = doc.findBookmark(mark);
+                        int page = doc.pageNumberFromLocation(loc);
+                        if (page >= 0 && page < pageCount) {
+                            startPage = page;
+                            Log.i(APP, "Bookmark resolved → page " + page);
+                        }
+                    } catch (Exception e) {
+                        Log.w(APP, "Bookmark failed: " + e.getMessage());
+                    }
+                }
+
+                // Bookmark 缺失或失败时，用页码兜底（兼容旧笔记数据）
+                if (startPage < 0) {
+                    startPage = targetPage > 0 ? targetPage - 1 : 0;
+                    Log.i(
+                        APP,
+                        "Bookmark unavailable, fallback to page " + startPage
+                    );
+                }
+
+                startPage = Math.max(0, Math.min(startPage, pageCount - 1));
+
+                // === 统一跳转 + 单向向后搜索 ===
+                gotoPage(startPage);
+                runSearch(startPage, 1, needle);
             });
             // ✅ 编辑：复用笔记输入弹窗，预填已有内容
             btnEdit.setOnClickListener(v -> {
                 if (selectedPos[0] < 0) return;
                 String[] parts = rawNoteData
                     .get(selectedPos[0])
-                    .split("===", 8);
+                    .split("===", 9);
                 String id = parts[0].trim();
                 String keyword = parts[6].trim();
                 String existingNote = parts[4].trim();
@@ -3030,7 +3085,7 @@ public class DocumentActivity extends Activity {
                 if (selectedPos[0] < 0) return;
                 String[] parts = rawNoteData
                     .get(selectedPos[0])
-                    .split("===", 8);
+                    .split("===", 9);
                 String id = parts[0].trim();
                 new AlertDialog.Builder(DocumentActivity.this)
                     .setTitle(MyActivity.zh_cn ? "确认删除" : "Confirm Delete")
@@ -3088,22 +3143,7 @@ public class DocumentActivity extends Activity {
     }
 
     // 辅助：创建按钮
-    /*private TextView createButton(String text) {
-        TextView tv = new TextView(this);
-        tv.setText(text);
-        tv.setPadding(dp2px(12), dp2px(8), dp2px(12), dp2px(8));
-        // ✅ weight=1 平分宽度 + Gravity.CENTER 让文字在分配的空间内水平居中
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-            0,
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            1f
-        );
-        tv.setLayoutParams(lp);
-        tv.setGravity(Gravity.CENTER); // ✅ 关键：文字水平居中
-        tv.setTextSize(15);
-        tv.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
-        return tv;
-    }*/
+
     private TextView createButton(String text) {
         TextView tv = new TextView(this);
         tv.setText(text);
@@ -3304,6 +3344,21 @@ public class DocumentActivity extends Activity {
                 return;
             }
 
+            // ✅ 统一锚点：所有文档类型都使用 Bookmark
+            String bookmark = "";
+            int pageForNote = currentPage + 1; // 仅作为列表显示的辅助信息
+
+            if (doc != null) {
+                try {
+                    long mark = doc.makeBookmark(
+                        doc.locationFromPageNumber(currentPage)
+                    );
+                    bookmark = Long.toHexString(mark);
+                } catch (Exception e) {
+                    Log.w(APP, "Failed to make bookmark: " + e.getMessage());
+                }
+            }
+
             String payload;
             if (isEditMode) {
                 payload =
@@ -3324,7 +3379,9 @@ public class DocumentActivity extends Activity {
                     "|==|" +
                     noteContent +
                     "|==|" +
-                    (currentPage + 1);
+                    pageForNote +
+                    "|==|" +
+                    bookmark;
             }
             MyActivity.mInstance.PublicJavaCallCpp(payload);
 

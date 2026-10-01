@@ -522,20 +522,21 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
               // pdf_save_note|==|{searchContext}|==|{keyword}|==|{noteContent}|==|currentPage
               QStringList list = strType.split("|==|");
 
-              if (list.count() == 5) {
+              if (list.count() == 6) {
                 QString searchContext = list.at(1);
                 QString keyword = list.at(2);
                 QString noteContent = list.at(3);
                 QString currentPage = list.at(4);
+                QString bookmark = list.at(5);
                 m_Reader->saveReadNote(searchContext, keyword, noteContent,
-                                       currentPage);
+                                       currentPage, bookmark);
               }
             });
           }
 
           if (strType.contains("pdf_note_update|==|")) {
             QTimer::singleShot(100, mw_one, [=]() {
-              // pdf_save_note|==|{noteId}|==|{searchContext}|==|{keyword}|==|noteContent
+              // pdf_note_update|==|{noteId}|==|{searchContext}|==|{keyword}|==|noteContent
               QStringList list = strType.split("|==|");
 
               if (list.count() == 5) {
