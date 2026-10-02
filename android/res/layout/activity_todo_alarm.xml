@@ -261,19 +261,19 @@
                     <NumberPicker
                         android:id="@+id/np_year"
                         android:layout_width="0dp"
-                        android:layout_height="120dp"
+                        android:layout_height="150dp"
                         android:layout_weight="1"
                     />
                     <NumberPicker
                         android:id="@+id/np_month"
                         android:layout_width="0dp"
-                        android:layout_height="120dp"
+                        android:layout_height="150dp"
                         android:layout_weight="1"
                     />
                     <NumberPicker
                         android:id="@+id/np_day"
                         android:layout_width="0dp"
-                        android:layout_height="120dp"
+                        android:layout_height="150dp"
                         android:layout_weight="1"
                     />
                 </LinearLayout>
@@ -304,7 +304,7 @@
                     <NumberPicker
                         android:id="@+id/np_hour"
                         android:layout_width="0dp"
-                        android:layout_height="120dp"
+                        android:layout_height="150dp"
                         android:layout_weight="1"
                     />
                     <TextView
@@ -317,7 +317,7 @@
                     <NumberPicker
                         android:id="@+id/np_minute"
                         android:layout_width="0dp"
-                        android:layout_height="120dp"
+                        android:layout_height="150dp"
                         android:layout_weight="1"
                     />
                 </LinearLayout>
@@ -326,6 +326,7 @@
 
         <!-- TTS语音 +测试按钮 -->
         <LinearLayout
+            android:id="@+id/layout_tts_test_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"

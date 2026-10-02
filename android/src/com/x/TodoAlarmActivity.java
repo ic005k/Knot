@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
@@ -30,6 +31,8 @@ public class TodoAlarmActivity extends AppCompatActivity {
     private SwitchCompat swTts;
     private Button btnTest, btnBack, btnDeleteAlarm, btnSetAlarm;
     private View layoutAlarmRoot;
+    //==== 新增：TTS+测试按钮所在的整行布局
+    private View layoutTtsTestRow;
 
     public static native void PublicJavaCallCpp(String type);
 
@@ -53,6 +56,11 @@ public class TodoAlarmActivity extends AppCompatActivity {
         initPickerRange();
         refreshUi();
 
+        // ========== 隐藏TTS语音+测试按钮整行 ==========
+        if (layoutTtsTestRow != null) {
+            layoutTtsTestRow.setVisibility(View.GONE);
+        }
+
         //===== 读取C++传入的初始化参数，赋值UI初始值 =====
         ArrayList<String> initList = getIntent().getStringArrayListExtra(
             "todo_alarm_list"
@@ -66,10 +74,8 @@ public class TodoAlarmActivity extends AppCompatActivity {
             int w5 = parseSafeInt(initList.get(4));
             int w6 = parseSafeInt(initList.get(5));
             int w7 = parseSafeInt(initList.get(6));
-
             String strDate = initList.get(7);
             String strTime = initList.get(8);
-
             //日期默认兜底 2026‑1‑1
             int y = 2026,
                 m = 1,
@@ -80,7 +86,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
                 m = parseSafeInt(dateSplit[1]);
                 d = parseSafeInt(dateSplit[2]);
             }
-
             //时间默认兜底 00:00
             int h = 0,
                 mi = 0;
@@ -89,7 +94,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
                 h = parseSafeInt(timeSplit[0]);
                 mi = parseSafeInt(timeSplit[1]);
             }
-
             final int fy = y;
             final int fm = m;
             final int fd = d;
@@ -102,7 +106,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
             final int fw5 = w5;
             final int fw6 = w6;
             final int fw7 = w7;
-
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed()) return;
                 npYear.setValue(fy);
@@ -110,7 +113,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
                 npDay.setValue(fd);
                 npHour.setValue(fh);
                 npMinute.setValue(fmi);
-
                 swWeek1.setChecked(fw1 == 1);
                 swWeek2.setChecked(fw2 == 1);
                 swWeek3.setChecked(fw3 == 1);
@@ -118,7 +120,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
                 swWeek5.setChecked(fw5 == 1);
                 swWeek6.setChecked(fw6 == 1);
                 swWeek7.setChecked(fw7 == 1);
-
                 boolean allChecked =
                     fw1 == 1 &&
                     fw2 == 1 &&
@@ -130,7 +131,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
                 swWeekAll.setChecked(allChecked);
             });
         }
-
         /////////////////////////////////////////
     }
 
@@ -162,6 +162,9 @@ public class TodoAlarmActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
         btnDeleteAlarm = findViewById(R.id.btn_delete_alarm);
         btnSetAlarm = findViewById(R.id.btn_set_alarm);
+        //==== 绑定TTS+测试按钮所在的父布局ID
+        layoutTtsTestRow = findViewById(R.id.layout_tts_test_row);
+
         btnBack.setOnClickListener(v -> {
             PublicJavaCallCpp("todo_alarm_back");
             finish();
@@ -240,7 +243,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
         int day = npDay.getValue();
         int hour = npHour.getValue();
         int minute = npMinute.getValue();
-
         // 7个周bool，1=选中 true；0=未选中 false，严格匹配C++参数顺序 w1 w2 w3 w4 w5 w6 w7
         int w1 = swWeek1.isChecked() ? 1 : 0;
         int w2 = swWeek2.isChecked() ? 1 : 0;
@@ -249,7 +251,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
         int w5 = swWeek5.isChecked() ? 1 : 0;
         int w6 = swWeek6.isChecked() ? 1 : 0;
         int w7 = swWeek7.isChecked() ? 1 : 0;
-
         PublicJavaCallCpp(
             "todo_alarm_set|==|" +
                 w1 +
@@ -276,7 +277,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
                 "|==|" +
                 minute
         );
-
         finish();
     }
 

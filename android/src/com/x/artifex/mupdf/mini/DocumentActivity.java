@@ -1186,6 +1186,10 @@ public class DocumentActivity extends Activity {
     }
 
     protected void relayoutDocument() {
+        relayoutDocument(null);
+    }
+
+    protected void relayoutDocument(final Runnable onComplete) {
         worker.add(
             new Worker.Task() {
                 public void work() {
@@ -1194,7 +1198,6 @@ public class DocumentActivity extends Activity {
                             doc.locationFromPageNumber(currentPage)
                         );
 
-                        // ✅ 重排前再次注入（防止 CSS 被重置）
                         if (isReflowable) {
                             applyFixedSpacing();
                         }
@@ -1215,6 +1218,14 @@ public class DocumentActivity extends Activity {
                 public void run() {
                     history.clear();
                     pageCountChanged = true;
+
+                    // ✅ 关键：在 loadPage 入队之前注册回调
+                    // 当 loadPage 的 work() 在后台渲染完成、
+                    // run() 中调用 setBitmap 后，才会触发 onComplete
+                    if (onComplete != null) {
+                        pageView.setOnNextBitmapReady(onComplete);
+                    }
+
                     loadPage();
                     loadOutline();
                 }
@@ -3005,6 +3016,12 @@ public class DocumentActivity extends Activity {
                 adapter.notifyDataSetChanged();
             });
             // ✅ 转到：关闭弹窗 → 跳页 → 高亮关键词
+            /**
+             * C++ JNI调用入口：PDF笔记列表弹窗
+             * @param noteList 笔记数组，每条以 === 分割9个字段
+             * 字段顺序：id[0] === currentPage[1] === time[2] === contextHtml[3] === noteContent[4] === searchContext[5] === keyword[6] === color[7] === bookmark[8]
+             */
+
             btnGo.setOnClickListener(v -> {
                 if (selectedPos[0] < 0) return;
                 String[] parts = rawNoteData
@@ -3013,7 +3030,10 @@ public class DocumentActivity extends Activity {
 
                 final String keyword = parts[6].trim();
                 final String searchCtx = parts[5].trim();
-                final int savedPage = Integer.parseInt(parts[1].trim()); // 1-based
+                final int savedPage = Integer.parseInt(parts[1].trim());
+                // ✅ 索引修正：[8] 才是 bookmark（字号）
+                final String savedBookmark =
+                    parts.length > 8 ? parts[8].trim() : "";
 
                 dialog.dismiss();
 
@@ -3028,76 +3048,28 @@ public class DocumentActivity extends Activity {
 
                 history.push(currentPage);
 
-                worker.add(
-                    new Worker.Task() {
-                        int foundPage = -1;
-
-                        public void work() {
-                            // === 计算搜索窗口 [start, end]，clamp 到合法范围 ===
-                            final int WINDOW = 50;
-                            int center =
-                                savedPage > 0 ? savedPage - 1 : currentPage;
-                            int start = Math.max(0, center - WINDOW);
-                            int end = Math.min(pageCount - 1, center + WINDOW);
-
-                            // === 第一轮：用上下文在窗口内搜索 ===
-                            String locator = null;
-                            if (!searchCtx.isEmpty()) {
-                                locator = searchCtx.substring(
-                                    0,
-                                    Math.min(30, searchCtx.length())
-                                );
-                            }
-
-                            if (locator != null && locator.length() >= 2) {
-                                for (int p = start; p <= end; p++) {
-                                    Page page = doc.loadPage(p);
-                                    Quad[][] hits = page.search(locator);
-                                    page.destroy();
-                                    if (hits != null && hits.length > 0) {
-                                        foundPage = p;
-                                        return; // ✅ 命中即停
-                                    }
-                                }
-                            }
-
-                            // === 第二轮：降级用 keyword 在窗口内搜索 ===
-                            if (!keyword.isEmpty()) {
-                                for (int p = start; p <= end; p++) {
-                                    Page page = doc.loadPage(p);
-                                    Quad[][] hits = page.search(keyword);
-                                    page.destroy();
-                                    if (hits != null && hits.length > 0) {
-                                        foundPage = p;
-                                        return;
-                                    }
-                                }
-                            }
+                boolean needRelayout = false;
+                if (isReflowable && !savedBookmark.isEmpty()) {
+                    try {
+                        float savedEm = Float.parseFloat(savedBookmark);
+                        if (Math.abs(savedEm - layoutEm) > 0.01f) {
+                            layoutEm = savedEm;
+                            prefs.edit().putFloat("layoutEm", layoutEm).apply();
+                            needRelayout = true;
                         }
+                    } catch (NumberFormatException ignored) {}
+                }
 
-                        public void run() {
-                            if (foundPage >= 0) {
-                                // 上下文定位页码，keyword 负责高亮
-                                searchNeedle = keyword.isEmpty()
-                                    ? null
-                                    : keyword;
-                                currentPage = foundPage;
-                                loadPage();
-                            } else {
-                                // 窗口内未找到，回退历史
-                                history.pop();
-                                Toast.makeText(
-                                    DocumentActivity.this,
-                                    MyActivity.zh_cn
-                                        ? "未找到笔记位置，可能排版已大幅变化"
-                                        : "Note location not found, layout may have changed significantly",
-                                    Toast.LENGTH_SHORT
-                                ).show();
-                            }
-                        }
-                    }
-                );
+                if (needRelayout) {
+                    // ✅ relayout 完成后，currentPage 已被 bookmark 映射更新为新页码
+                    // 在回调里用 currentPage 而非 savedPage 做搜索中心
+                    relayoutDocument(() -> doNoteSearch(searchCtx, keyword));
+                } else {
+                    // PDF 或字号相同：直接用旧页码搜索
+                    doNoteSearch(savedPage, searchCtx, keyword);
+                }
             });
+
             // ✅ 编辑：复用笔记输入弹窗，预填已有内容
             btnEdit.setOnClickListener(v -> {
                 if (selectedPos[0] < 0) return;
@@ -3382,18 +3354,27 @@ public class DocumentActivity extends Activity {
                 return;
             }
 
-            // ✅ 统一锚点：所有文档类型都使用 Bookmark
+            // ✅ 统一锚点策略
             String bookmark = "";
-            int pageForNote = currentPage + 1; // 仅作为列表显示的辅助信息
+            int pageForNote = currentPage + 1;
 
-            if (doc != null) {
-                try {
-                    long mark = doc.makeBookmark(
-                        doc.locationFromPageNumber(currentPage)
-                    );
-                    bookmark = Long.toHexString(mark);
-                } catch (Exception e) {
-                    Log.w(APP, "Failed to make bookmark: " + e.getMessage());
+            if (isReflowable) {
+                // 非PDF：bookmark 存储当前字号（如 "8.0"），用于跳转时恢复排版
+                bookmark = String.valueOf(layoutEm);
+            } else {
+                // PDF：保留原始 MuPDF bookmark 机制
+                if (doc != null) {
+                    try {
+                        long mark = doc.makeBookmark(
+                            doc.locationFromPageNumber(currentPage)
+                        );
+                        bookmark = Long.toHexString(mark);
+                    } catch (Exception e) {
+                        Log.w(
+                            APP,
+                            "Failed to make bookmark: " + e.getMessage()
+                        );
+                    }
                 }
             }
 
@@ -3581,5 +3562,87 @@ public class DocumentActivity extends Activity {
         // TTS 运行中 → 不拦截，走 super 让系统正常调节音量
         // Activity 销毁后 → 此方法不再被调用，音量键自动恢复正常
         return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * relayout 后调用：以当前页（已映射到新字号）为中心搜索
+     */
+    private void doNoteSearch(String searchCtx, String keyword) {
+        int center = currentPage;
+        if (center < 0 || center >= pageCount) center = 0;
+        doNoteSearchInternal(center, searchCtx, keyword);
+    }
+
+    /**
+     * PDF / 字号相同时调用：以保存的旧页码为中心搜索
+     */
+    private void doNoteSearch(int savedPage, String searchCtx, String keyword) {
+        int center = savedPage > 0 ? savedPage - 1 : 0;
+        doNoteSearchInternal(center, searchCtx, keyword);
+    }
+
+    private void doNoteSearchInternal(
+        final int centerPage,
+        final String searchCtx,
+        final String keyword
+    ) {
+        worker.add(
+            new Worker.Task() {
+                int foundPage = -1;
+
+                public void work() {
+                    final int WINDOW = isReflowable ? 5 : 10;
+                    int start = Math.max(0, centerPage - WINDOW);
+                    int end = Math.min(pageCount - 1, centerPage + WINDOW);
+
+                    // 第一轮：上下文定位
+                    if (!searchCtx.isEmpty()) {
+                        String locator = searchCtx.substring(
+                            0,
+                            Math.min(30, searchCtx.length())
+                        );
+                        for (int p = start; p <= end; p++) {
+                            Page page = doc.loadPage(p);
+                            Quad[][] hits = page.search(locator);
+                            page.destroy();
+                            if (hits != null && hits.length > 0) {
+                                foundPage = p;
+                                return;
+                            }
+                        }
+                    }
+
+                    // 第二轮：关键词降级
+                    if (!keyword.isEmpty()) {
+                        for (int p = start; p <= end; p++) {
+                            Page page = doc.loadPage(p);
+                            Quad[][] hits = page.search(keyword);
+                            page.destroy();
+                            if (hits != null && hits.length > 0) {
+                                foundPage = p;
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                public void run() {
+                    if (foundPage >= 0) {
+                        searchNeedle = keyword.isEmpty() ? null : keyword;
+                        currentPage = foundPage;
+                        loadPage();
+                    } else {
+                        history.pop();
+                        Toast.makeText(
+                            DocumentActivity.this,
+                            MyActivity.zh_cn
+                                ? "未找到笔记位置，可能排版已大幅变化"
+                                : "Note location not found, layout may have changed significantly",
+                            Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+            }
+        );
     }
 }

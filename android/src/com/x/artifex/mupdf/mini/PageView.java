@@ -34,6 +34,17 @@ public class PageView
     private int pageVersion = 0;
     private int ttsHighlightVersion = -1; // 高亮对应的页面版本
 
+    // ✅ 一次性回调：下一次 setBitmap 完成后触发
+    private Runnable mOnNextBitmapReady = null;
+
+    /**
+     * 注册一次性回调：下一次 setBitmap 完成（bitmap 已渲染上屏）后触发
+     * 用于确保 relayout 完成后再执行笔记定位搜索
+     */
+    public void setOnNextBitmapReady(Runnable callback) {
+        mOnNextBitmapReady = callback;
+    }
+
     // ✅ 边缘防误触安全区（像素），此区域内长按不触发文本选择
     // 24dp ≈ 48px @2x，36dp ≈ 72px @2x
     private int edgeSafeZonePx;
@@ -186,6 +197,14 @@ public class PageView
         }
         pageScale = zoom;
         invalidate();
+
+        // ✅ 在 setBitmap 最后、invalidate 之后触发回调
+        // 此时新字号的 bitmap 已经设置完毕，pageVersion 已递增
+        if (mOnNextBitmapReady != null) {
+            Runnable cb = mOnNextBitmapReady;
+            mOnNextBitmapReady = null; // 一次性消费
+            cb.run();
+        }
     }
 
     public void resetHits() {
