@@ -41,11 +41,9 @@
 #include "defines.h"
 #include "src/AI/GlobalAI.h"
 #include "src/Comm/TextEditToolbar.h"
-#include "src/Notes/MoveTo.h"
 #include "src/Notes/NoteGraph.h"
 #include "src/Notes/NoteListModel.h"
 #include "src/Notes/NoteManager.h"
-#include "ui_MoveTo.h"
 #include "ui_NotesList.h"
 
 struct MySearchResult {
@@ -106,8 +104,6 @@ class NotesList : public QDialog {
 
   NoteGraphController* m_graphController;  // 图谱控制器
   QDialog* m_RenameNotes = nullptr;
-
-  MoveTo* m_MoveTo = nullptr;
 
   void startBackgroundTaskUpdateFilesIndex();
 
@@ -203,7 +199,7 @@ class NotesList : public QDialog {
   void refreshRecentOpen();
 
   void showFindNotes();
-  void restoreNoteFromRecycle();
+
   void needDelNotes();
 
   void moveToFirst();
@@ -219,11 +215,7 @@ class NotesList : public QDialog {
 
   void on_btnBatchDel_Recycle_clicked();
 
-  void on_btnBatchRestore_clicked();
-
   void delRemoteWebDAVFiles();
-
-  void on_btnRename_clicked();
 
   QStringList getAllNotePaths();
 
@@ -302,15 +294,11 @@ class NotesList : public QDialog {
 
   void on_btnRecycle();
 
-  void on_btnRestore_clicked();
-
   void on_btnDel_Recycle_clicked();
 
   void on_btnUp_clicked();
 
   void on_btnDown_clicked();
-
-  void on_btnMoveTo_clicked();
 
   void on_actionRelationshipGraph();
 
@@ -418,8 +406,6 @@ class NotesList : public QDialog {
   void on_actionRename_Note_triggered();
   void on_actionMoveUp_Note_triggered();
   void on_actionMoveDown_Note_triggered();
-
-  bool moveItem(QTreeWidget* tw);
 
   QFutureWatcher<QVector<ExactMatchResult>>* watcher = nullptr;
 

@@ -299,8 +299,6 @@ QString Reader::get_href(QString idref, QStringList opfList) {
 }
 
 void Reader::saveReader(QString BookmarkText, bool isSetBookmark) {
-  m_ReaderSet->saveScrollValue();
-
   QString endFile = iniDir + "bookini/" + currentBookName + ".ini";
   QSettings Reg(endFile, QSettings::IniFormat);
 
@@ -359,8 +357,6 @@ void Reader::initReader() {
 
   readerStyle = Reg.value("/Reader/Style", "1").toString();
   scrollValue = Reg.value("/Reader/ScrollValue", "0.25").toReal();
-
-  m_ReaderSet->setScrollValue();
 
   QFont font;
   int fsize = Reg.value("/Reader/FontSize", 18).toInt();
@@ -925,8 +921,6 @@ void Reader::showInfo() {
     cPage = htmlIndex + 1;
     tPage = htmlFiles.count();
   }
-
-  m_ReaderSet->updateProgress();
 
   updateReaderProperty(cPage, tPage);
   readReadNote();
@@ -1652,8 +1646,6 @@ void Reader::setStatusBarShow() {
 }
 
 void Reader::selectText() {
-  m_ReaderSet->close();
-
   if (!isSelText) {
     isSelText = true;
 

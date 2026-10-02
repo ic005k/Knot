@@ -99,8 +99,6 @@ void MainWindow::init_Instance() {
 
   m_CloudBackup = new CloudBackup;
 
-  m_ReaderSet = new ReaderSet(this);
-
   m_NotesList = new NotesList(this);
 
   m_ReceiveShare = new ReceiveShare(this);

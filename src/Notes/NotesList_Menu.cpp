@@ -116,12 +116,7 @@ void NotesList::on_actionDel_NoteBook_triggered() {
   }
 }
 
-void NotesList::on_actionRename_NoteBook_triggered() {
-  int index = getNoteBookCurrentIndex();
-  if (index < 0) return;
-
-  on_btnRename_clicked();
-}
+void NotesList::on_actionRename_NoteBook_triggered() {}
 
 void NotesList::on_actionAdd_Note_triggered() {
   int notebookIndex = getNoteBookCurrentIndex();
@@ -182,14 +177,7 @@ void NotesList::on_actionDel_Note_triggered() {
   }
 }
 
-void NotesList::on_actionRename_Note_triggered() {
-  int notebookIndex = getNoteBookCurrentIndex();
-  int noteIndex = getNotesListCurrentIndex();
-  if (notebookIndex < 0) return;
-  if (noteIndex < 0) return;
-
-  on_btnRename_clicked();
-}
+void NotesList::on_actionRename_Note_triggered() {}
 
 void NotesList::renameNote(QString newName, int idxNote) {
   QString file = MyAllNotes.at(idxNote);

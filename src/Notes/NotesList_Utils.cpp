@@ -287,19 +287,6 @@ QStringList NotesList::extractLocalImagesFromMarkdown(const QString& filePath) {
 QStringList NotesList::getValidMDFiles() { return validMDFiles; }
 template class QFutureWatcher<ResultsMap>;
 
-void NotesList::restoreNoteFromRecycle() {
-  // int count = m_Method->getCountFromQW(mui->qwNoteRecycle);
-  // if (count == 0) return;
-
-  // int index = m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
-  // if (index < 0) return;
-
-  if (getNoteBookCount() == 0) return;
-
-  setTWRBCurrentItem();
-  on_btnBatchRestore_clicked();
-}
-
 // 安全的文件写入函数
 bool NotesList::safeWriteFile(const QString& filePath, const QString& content) {
   QTemporaryFile tempFile;

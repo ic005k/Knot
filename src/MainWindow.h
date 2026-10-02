@@ -68,13 +68,11 @@
 #include "src/EditRecord.h"
 #include "src/Exercise/Steps.h"
 #include "src/Exercise/StepsOptions.h"
-#include "src/LoadPic.h"
 #include "src/MyThread.h"
 #include "src/Notes/Notes.h"
 #include "src/Notes/NotesList.h"
 #include "src/Preferences.h"
 #include "src/Reader/Reader.h"
-#include "src/Reader/ReaderSet.h"
 #include "src/Report.h"
 #include "src/Todo/Todo.h"
 #include "src/Todo/TodoAlarm.h"
@@ -107,7 +105,7 @@ QT_END_NAMESPACE
 
 extern MainWindow* mw_one;
 extern QSettings* iniPreferences;
-extern ReaderSet* m_ReaderSet;
+
 extern CloudBackup* m_CloudBackup;
 extern QTreeWidgetItem* parentItem;
 extern Reader* m_Reader;
@@ -418,8 +416,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnShowFindNotes_clicked();
 
-  void on_btnRename_clicked();
-
   void on_actionOneDriveBackupData();
 
   void on_actionReport_triggered();
@@ -557,8 +553,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnBackBakList_clicked();
 
-  void on_btnBack_Tree_clicked();
-
   void on_actionTabRecycle();
 
   void on_actionShareFile();
@@ -568,8 +562,6 @@ class MainWindow : public QMainWindow {
   void on_btnDownMove_clicked();
 
   void on_btnDelNote_NoteBook_clicked();
-
-  void on_btnMoveTo_clicked();
 
   void on_btnToPDF_clicked();
 
@@ -595,8 +587,6 @@ class MainWindow : public QMainWindow {
   void on_btnDelBakFile_clicked();
 
   void on_btnDelNoteRecycle_clicked();
-
-  void on_btnRestoreNoteRecycle_clicked();
 
   void on_btnClearNoteFindText_clicked();
 
@@ -646,8 +636,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnFontPlus_clicked();
 
-  void on_btnFont_clicked();
-
   void on_btnBackgroundColor_clicked();
 
   void on_btnForegroundColor_clicked();
@@ -655,14 +643,6 @@ class MainWindow : public QMainWindow {
   void on_editBackgroundColor_textChanged(const QString& arg1);
 
   void on_editForegroundColor_textChanged(const QString& arg1);
-
-  void on_btnStyle1_clicked();
-
-  void on_btnStyle2_clicked();
-
-  void on_btnStyle3_clicked();
-
-  void on_btnGoPage_clicked();
 
   void on_hSlider_sliderReleased();
 
@@ -750,8 +730,6 @@ class MainWindow : public QMainWindow {
   void on_chkAutoStopTTS_clicked(bool checked);
 
   void on_actionCopyLog();
-
-  void on_btnOpenFavoritesNote_clicked();
 
   void on_editTitleKey_textChanged(const QString& arg1);
 

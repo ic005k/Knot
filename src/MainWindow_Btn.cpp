@@ -61,15 +61,6 @@ void MainWindow::on_btnDelNote_NoteBook_clicked() {
   m_NotesList->on_btnDel_clicked();
 }
 
-void MainWindow::on_btnMoveTo_clicked() {
-  m_NotesList->setTWCurrentItem();
-  m_NotesList->on_btnMoveTo_clicked();
-}
-
-void MainWindow::on_btnBack_Tree_clicked() {}
-
-void MainWindow::on_btnRename_clicked() { m_Notes->renameTitle(false); }
-
 void MainWindow::on_btnHideFind_clicked() { closeTextToolBar(); }
 
 void MainWindow::on_btnStepsOptions_clicked() {}
@@ -116,41 +107,19 @@ void MainWindow::on_btnSetBookmark_clicked() {
   QTimer::singleShot(200, this, SLOT(slotSetBookmark()));
 }
 
-void MainWindow::slotSetBookmark() { m_ReaderSet->on_btnSetBookmark_clicked(); }
+void MainWindow::slotSetBookmark() {}
 
-void MainWindow::on_btnFontLess_clicked() {
-  m_ReaderSet->on_btnFontLess_clicked();
-}
+void MainWindow::on_btnFontLess_clicked() {}
 
-void MainWindow::on_btnFontPlus_clicked() {
-  m_ReaderSet->on_btnFontPlus_clicked();
-}
+void MainWindow::on_btnFontPlus_clicked() {}
 
-void MainWindow::on_btnFont_clicked() { m_ReaderSet->on_btnFont_clicked(); }
+void MainWindow::on_btnBackgroundColor_clicked() {}
 
-void MainWindow::on_btnBackgroundColor_clicked() {
-  m_ReaderSet->on_btnBackgroundColor_clicked();
-}
+void MainWindow::on_btnForegroundColor_clicked() {}
 
-void MainWindow::on_btnForegroundColor_clicked() {
-  m_ReaderSet->on_btnForegroundColor_clicked();
-}
+void MainWindow::on_editBackgroundColor_textChanged(const QString& arg1) {}
 
-void MainWindow::on_editBackgroundColor_textChanged(const QString& arg1) {
-  m_ReaderSet->on_editBackgroundColor_textChanged(arg1);
-}
-
-void MainWindow::on_editForegroundColor_textChanged(const QString& arg1) {
-  m_ReaderSet->on_editForegroundColor_textChanged(arg1);
-}
-
-void MainWindow::on_btnStyle1_clicked() { m_ReaderSet->on_btnStyle1_clicked(); }
-
-void MainWindow::on_btnStyle2_clicked() { m_ReaderSet->on_btnStyle2_clicked(); }
-
-void MainWindow::on_btnStyle3_clicked() { m_ReaderSet->on_btnStyle3_clicked(); }
-
-void MainWindow::on_btnGoPage_clicked() { m_ReaderSet->on_btnGoPage_clicked(); }
+void MainWindow::on_editForegroundColor_textChanged(const QString& arg1) {}
 
 void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
 
@@ -158,13 +127,11 @@ void MainWindow::on_btnAutoRun_clicked() {}
 
 void MainWindow::on_btnAutoStop_clicked() {}
 
-void MainWindow::on_btnLessen_clicked() { m_ReaderSet->on_btnLessen_clicked(); }
+void MainWindow::on_btnLessen_clicked() {}
 
-void MainWindow::on_btnDefault_clicked() {
-  m_ReaderSet->on_btnDefault_clicked();
-}
+void MainWindow::on_btnDefault_clicked() {}
 
-void MainWindow::on_btnPlus_clicked() { m_ReaderSet->on_btnPlus_clicked(); }
+void MainWindow::on_btnPlus_clicked() {}
 
 void MainWindow::on_btnAddTodo_clicked() { m_Todo->AddTodoText(); }
 
@@ -178,9 +145,7 @@ void MainWindow::on_btnAddTodo_released() {
   m_Todo->stopRecordVoice();
 }
 
-void MainWindow::on_btnClearReaderFont_clicked() {
-  m_ReaderSet->on_btnClear_clicked();
-}
+void MainWindow::on_btnClearReaderFont_clicked() {}
 
 void MainWindow::on_btnMove() {
   isMoveEntry = true;
@@ -271,11 +236,6 @@ void MainWindow::on_btnNoteRecycle_clicked() { m_NotesList->loadAllRecycle(); }
 void MainWindow::on_btnDelNoteRecycle_clicked() {
   m_NotesList->setTWRBCurrentItem();
   m_NotesList->on_btnBatchDel_Recycle_clicked();
-}
-
-void MainWindow::on_btnRestoreNoteRecycle_clicked() {
-  isStopMoveNote = false;
-  m_NotesList->restoreNoteFromRecycle();
 }
 
 void MainWindow::on_btnFindNotes_clicked(const QString& kw) {
@@ -683,7 +643,6 @@ void MainWindow::on_btnOpen_clicked() {
   m_Reader->saveReader("", false);
   m_Reader->savePageVPos();
 
-  m_ReaderSet->close();
   m_Reader->closeSelText();
   m_Reader->on_btnOpen_clicked();
 }
@@ -736,7 +695,6 @@ void MainWindow::on_btnReadList_clicked() {
 
   if (isAndroid) m_Reader->closeMyPDF();
 
-  m_ReaderSet->close();
   m_Reader->closeSelText();
 
   if (mw_one->ui->frameMain->isVisible()) mw_one->ui->frameMain->hide();
@@ -864,13 +822,6 @@ void MainWindow::onAndroidBackHandle() {
   if (m_NotesList->menuRecentOpen != nullptr) {
     if (m_NotesList->menuRecentOpen->isVisible()) {
       m_NotesList->menuRecentOpen->close();
-      return;
-    }
-  }
-
-  if (m_NotesList->m_MoveTo != nullptr) {
-    if (m_NotesList->m_MoveTo->isVisible()) {
-      m_NotesList->m_MoveTo->ui->btnCancel->click();
       return;
     }
   }
@@ -1027,11 +978,4 @@ void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
     // 把拼接好的完整样式赋值给按钮
     btn->setStyleSheet(sheet);
   }
-}
-
-void MainWindow::on_btnOpenFavoritesNote_clicked() {
-  if (!QFile::exists(currentMDFile)) return;
-
-  // mw_one->ui->btnBackFavorites->click();
-  m_Notes->openEditUI();
 }

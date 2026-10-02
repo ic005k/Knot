@@ -5,7 +5,7 @@
 
 MainWindow* mw_one = nullptr;
 QSettings* iniPreferences;
-ReaderSet* m_ReaderSet;
+
 CloudBackup* m_CloudBackup;
 QTreeWidgetItem* parentItem;
 Reader* m_Reader;
@@ -927,8 +927,6 @@ void MainWindow::on_hSlider_sliderMoved(int position) {
 
   if (isEpub) {
   }
-
-  m_ReaderSet->updateProgress();
 }
 
 QString MainWindow::getTabText() {
@@ -971,9 +969,7 @@ void MainWindow::on_editDetails_textChanged() {
   m_EditRecord->on_editDetails_textChanged();
 }
 
-void MainWindow::on_hSlider_sliderReleased() {
-  m_ReaderSet->on_hSlider_sliderReleased();
-}
+void MainWindow::on_hSlider_sliderReleased() {}
 
 void MainWindow::on_DelayCloseProgressBar() {
   QTimer::singleShot(200, this, SLOT(on_CloseProgressBar()));

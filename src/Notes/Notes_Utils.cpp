@@ -28,14 +28,6 @@ bool Notes::isSetNewNoteTitle() {
           title.trimmed() == "Untitled Note");
 }
 
-void Notes::renameTitle(bool isOk) {
-  if (isOk) {
-    m_NotesList->saveNotesList();
-  } else {
-    m_NotesList->on_btnRename_clicked();
-  }
-}
-
 void Notes::delLink(QString link) {
   QString mdBuffers = loadText(currentMDFile);
 

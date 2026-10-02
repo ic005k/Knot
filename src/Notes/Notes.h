@@ -224,8 +224,6 @@ class Notes : public QDialog {
 
   bool openUrl(const QString& url);
 
-  void renameTitle(bool isOk);
-
   void refreshNote();
 
   bool checkAndUpdateCleanDate();
