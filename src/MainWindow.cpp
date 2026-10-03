@@ -70,9 +70,7 @@ MainWindow::MainWindow(QWidget* parent)
 
   m_Reader->initReader();
 
-  QTimer::singleShot(10, this, [this]() {
-    reloadMain();
-  });
+  QTimer::singleShot(10, this, [this]() { reloadMain(); });
 
   m_CloudBackup->init_CloudBacup();
   m_Preferences->setEncSyncStatusTip();
@@ -1145,9 +1143,6 @@ QVariantList MainWindow::buildRecentList() {
 
 void MainWindow::setDisplayResult(const QVariantList& list) {}
 
-void MainWindow::onQmlOpenNote(const QString& noteUid) {
-  // noteUid 就是完整绝对路径，和现有逻辑完全兼容
-  const QString filePath = noteUid;
-  currentMDFile = filePath;
-  m_NotesList->setCurrentItemFromMDFile(currentMDFile);
-}
+void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
+
+void MainWindow::on_btnTodo_clicked() { m_Todo->openTodo(); }

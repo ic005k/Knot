@@ -256,7 +256,6 @@ void Preferences::initOptions() {
     mw_one->ui->btnDel->hide();
     mw_one->ui->btnFind->hide();
 
-    mw_one->ui->btnSelTab->hide();
     mw_one->ui->lblStats->hide();
 
     int s = 120;

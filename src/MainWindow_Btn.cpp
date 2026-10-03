@@ -620,12 +620,6 @@ void MainWindow::on_btnMenu_clicked() {
   mainMenu = nullptr;
 }
 
-void MainWindow::on_btnSelTab_clicked() {
-  mw_one->ui->frameMain->hide();
-
-  getMainTabs();
-}
-
 void MainWindow::on_btnSearch_clicked() {
   QString str = "";  // mw_one->ui->editSetText->text().trimmed();
   if (str == "") return;

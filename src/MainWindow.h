@@ -452,8 +452,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnSteps_clicked();
 
-  void on_btnSelTab_clicked();
-
   void on_btnAddTodo_clicked();
   void on_btnAddTodo_pressed();
 
@@ -550,7 +548,6 @@ class MainWindow : public QMainWindow {
   void on_btnAIReportAnalysis_clicked();
 
  private slots:
-  void onQmlOpenNote(const QString& noteUid);
 
   void onAndroidBackHandle();
 
@@ -663,6 +660,10 @@ class MainWindow : public QMainWindow {
   void on_editTitleKey_textChanged(const QString& arg1);
 
   void on_btnOpenSearchView_clicked();
+
+  void on_btnReader_clicked();
+
+  void on_btnTodo_clicked();
 
  private:
   QNetworkAccessManager* m_ainetMgr;

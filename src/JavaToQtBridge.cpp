@@ -828,13 +828,12 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           }
 
           if (strType == "tab_reader") {
-            QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->ui->btnReader->click(); });
+            QTimer::singleShot(100, mw_one, [=]() { m_Reader->openReader(); });
           }
 
           if (strType == "tab_todo") {
             QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->ui->btnTodo->click(); });
+                               [=]() { mw_one->m_Todo->openTodo(); });
           }
 
           if (strType == "tab_notes") {

@@ -211,7 +211,6 @@ void MainWindow::init_ButtonStyle() {
 
   setToolButtonAnimation(mw_one->ui->btnSync, true);
   setToolButtonAnimation(mw_one->ui->btnFind, true);
-  setToolButtonAnimation(mw_one->ui->btnSelTab, true);
 
   if (isDark) {
   } else {
@@ -238,8 +237,6 @@ void MainWindow::init_Theme() {
 
     mw_one->ui->btnFind->setIcon(QIcon(":/res/find.svg"));
 
-    mw_one->ui->btnSelTab->setIcon(QIcon(":/res/tab.svg"));
-
     mw_one->ui->btnMenu->setIcon(QIcon(":/res/mainmenu.svg"));
     mw_one->ui->btnHome->setIcon(QIcon(":/res/home.svg"));
     mw_one->ui->btnAdd->setIcon(QIcon(":/res/additem.svg"));
@@ -256,8 +253,6 @@ void MainWindow::init_Theme() {
     mw_one->ui->btnTodo->setIcon(QIcon(":/res/todo_l.png"));
     mw_one->ui->btnSteps->setIcon(QIcon(":/res/steps_l.svg"));
     mw_one->ui->btnNotes->setIcon(QIcon(":/res/note_l.svg"));
-
-    mw_one->ui->btnSelTab->setIcon(QIcon(":/res/tab_l.svg"));
 
     mw_one->ui->btnMenu->setIcon(QIcon(":/res/mainmenu_l.svg"));
     mw_one->ui->btnHome->setIcon(QIcon(":/res/home_l.svg"));
@@ -316,8 +311,6 @@ void MainWindow::init_UIWidget() {
 
   mw_one->ui->btnSync->hide();
 
-  mw_one->ui->btnSelTab->hide();
-
   mw_one->ui->menubar->hide();
   mw_one->ui->statusbar->hide();
 
@@ -375,7 +368,6 @@ void MainWindow::init_UIWidget() {
 
   mw_one->ui->btnReader->setFont(f);
   mw_one->ui->btnNotes->setFont(f);
-  mw_one->ui->btnSelTab->setFont(f);
 
   f.setPointSize(nIConFontSize + 0);
   mw_one->ui->btnMenu->setFont(f);
