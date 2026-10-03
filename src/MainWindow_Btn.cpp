@@ -620,17 +620,6 @@ void MainWindow::on_btnMenu_clicked() {
   mainMenu = nullptr;
 }
 
-void MainWindow::on_btnSearch_clicked() {
-  QString str = "";  // mw_one->ui->editSetText->text().trimmed();
-  if (str == "") return;
-
-  QString strurl;
-  strurl = "https://bing.com/search?q=" + str;
-
-  QUrl url(strurl);
-  QDesktopServices::openUrl(url);
-}
-
 void MainWindow::on_btnShowCboxList_clicked() {
   mw_one->ui->cboxWebDAV->showPopup();
 }

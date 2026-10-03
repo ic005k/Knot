@@ -411,8 +411,6 @@ class MainWindow : public QMainWindow {
 
   void on_actionReport_triggered();
 
-  void on_btnSearch_clicked();
-
   void on_timerSyncData();
   void timerUpdate();
 
