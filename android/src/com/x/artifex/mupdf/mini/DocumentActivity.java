@@ -1185,54 +1185,6 @@ public class DocumentActivity extends Activity {
         );
     }
 
-    protected void relayoutDocument() {
-        relayoutDocument(null);
-    }
-
-    protected void relayoutDocument(final Runnable onComplete) {
-        worker.add(
-            new Worker.Task() {
-                public void work() {
-                    try {
-                        long mark = doc.makeBookmark(
-                            doc.locationFromPageNumber(currentPage)
-                        );
-
-                        if (isReflowable) {
-                            applyFixedSpacing();
-                        }
-
-                        Log.i(APP, "relayout document");
-                        doc.layout(layoutW, layoutH, layoutEm);
-                        pageCount = doc.countPages();
-                        currentPage = doc.pageNumberFromLocation(
-                            doc.findBookmark(mark)
-                        );
-                    } catch (Throwable x) {
-                        pageCount = 1;
-                        currentPage = 0;
-                        throw x;
-                    }
-                }
-
-                public void run() {
-                    history.clear();
-                    pageCountChanged = true;
-
-                    // ✅ 关键：在 loadPage 入队之前注册回调
-                    // 当 loadPage 的 work() 在后台渲染完成、
-                    // run() 中调用 setBitmap 后，才会触发 onComplete
-                    if (onComplete != null) {
-                        pageView.setOnNextBitmapReady(onComplete);
-                    }
-
-                    loadPage();
-                    loadOutline();
-                }
-            }
-        );
-    }
-
     private void loadOutline() {
         worker.add(
             new Worker.Task() {
@@ -2902,8 +2854,8 @@ public class DocumentActivity extends Activity {
                     if (parts.length < 8) return itemView;
 
                     String pageStr = parts[1].trim();
-                    boolean isPageReliable =
-                        !pageStr.equals("-1") && !isReflowable;
+                    // ✅ 只要页码不是 -1，就显示页码（reflowable 同字号下页码是有效的）
+                    boolean isPageReliable = !pageStr.equals("-1");
 
                     if (isPageReliable) {
                         holder.tvPageTime.setText(
@@ -3029,15 +2981,13 @@ public class DocumentActivity extends Activity {
                     .split("===", 9);
 
                 final String keyword = parts[6].trim();
-                final String searchCtx = parts[5].trim();
-                final int savedPage = Integer.parseInt(parts[1].trim());
-                // ✅ 索引修正：[8] 才是 bookmark（字号）
+                final int savedPage = Integer.parseInt(parts[1].trim()); // 1-based
                 final String savedBookmark =
                     parts.length > 8 ? parts[8].trim() : "";
 
                 dialog.dismiss();
 
-                if (keyword.isEmpty() && searchCtx.isEmpty()) {
+                if (keyword.isEmpty()) {
                     Toast.makeText(
                         DocumentActivity.this,
                         getString(R.string.toast_search_not_found),
@@ -3048,26 +2998,27 @@ public class DocumentActivity extends Activity {
 
                 history.push(currentPage);
 
-                boolean needRelayout = false;
+                // ✅ 对于 reflowable：先恢复保存时的字号，再用保存的页码直接跳转
                 if (isReflowable && !savedBookmark.isEmpty()) {
                     try {
                         float savedEm = Float.parseFloat(savedBookmark);
                         if (Math.abs(savedEm - layoutEm) > 0.01f) {
+                            // 字号不同：恢复字号 → relayout → 用保存页码跳转
                             layoutEm = savedEm;
                             prefs.edit().putFloat("layoutEm", layoutEm).apply();
-                            needRelayout = true;
+                            relayoutThenGotoNote(savedPage, keyword);
+                            return;
                         }
                     } catch (NumberFormatException ignored) {}
                 }
 
-                if (needRelayout) {
-                    // ✅ relayout 完成后，currentPage 已被 bookmark 映射更新为新页码
-                    // 在回调里用 currentPage 而非 savedPage 做搜索中心
-                    relayoutDocument(() -> doNoteSearch(searchCtx, keyword));
-                } else {
-                    // PDF 或字号相同：直接用旧页码搜索
-                    doNoteSearch(savedPage, searchCtx, keyword);
-                }
+                // ✅ 字号相同（或 PDF）：直接用保存的页码跳转
+                int targetPage = isReflowable ? savedPage - 1 : savedPage;
+                if (targetPage < 0 || targetPage >= pageCount) targetPage =
+                    currentPage;
+                searchNeedle = keyword;
+                currentPage = targetPage;
+                loadPage();
             });
 
             // ✅ 编辑：复用笔记输入弹窗，预填已有内容
@@ -3153,7 +3104,6 @@ public class DocumentActivity extends Activity {
     }
 
     // 辅助：创建按钮
-
     private TextView createButton(String text) {
         TextView tv = new TextView(this);
         tv.setText(text);
@@ -3564,83 +3514,107 @@ public class DocumentActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 
-    /**
-     * relayout 后调用：以当前页（已映射到新字号）为中心搜索
-     */
-    private void doNoteSearch(String searchCtx, String keyword) {
-        int center = currentPage;
-        if (center < 0 || center >= pageCount) center = 0;
-        doNoteSearchInternal(center, searchCtx, keyword);
-    }
-
-    /**
-     * PDF / 字号相同时调用：以保存的旧页码为中心搜索
-     */
-    private void doNoteSearch(int savedPage, String searchCtx, String keyword) {
-        int center = savedPage > 0 ? savedPage - 1 : 0;
-        doNoteSearchInternal(center, searchCtx, keyword);
-    }
-
-    private void doNoteSearchInternal(
-        final int centerPage,
-        final String searchCtx,
-        final String keyword
+    // ✅ 带页码参数的回调接口
+    protected void relayoutDocument(
+        final java.util.function.IntConsumer onComplete
     ) {
         worker.add(
             new Worker.Task() {
-                int foundPage = -1;
+                int safePage = 0; // ✅ 在 work() 中计算，run() 中传递
 
                 public void work() {
-                    final int WINDOW = isReflowable ? 5 : 10;
-                    int start = Math.max(0, centerPage - WINDOW);
-                    int end = Math.min(pageCount - 1, centerPage + WINDOW);
-
-                    // 第一轮：上下文定位
-                    if (!searchCtx.isEmpty()) {
-                        String locator = searchCtx.substring(
-                            0,
-                            Math.min(30, searchCtx.length())
+                    try {
+                        long mark = doc.makeBookmark(
+                            doc.locationFromPageNumber(currentPage)
                         );
-                        for (int p = start; p <= end; p++) {
-                            Page page = doc.loadPage(p);
-                            Quad[][] hits = page.search(locator);
-                            page.destroy();
-                            if (hits != null && hits.length > 0) {
-                                foundPage = p;
-                                return;
-                            }
-                        }
-                    }
+                        if (isReflowable) applyFixedSpacing();
+                        doc.layout(layoutW, layoutH, layoutEm);
+                        pageCount = doc.countPages();
 
-                    // 第二轮：关键词降级
-                    if (!keyword.isEmpty()) {
-                        for (int p = start; p <= end; p++) {
-                            Page page = doc.loadPage(p);
-                            Quad[][] hits = page.search(keyword);
-                            page.destroy();
-                            if (hits != null && hits.length > 0) {
-                                foundPage = p;
-                                return;
-                            }
+                        // ✅ 关键修复：bookmark 映射后严格校验
+                        int mapped = doc.pageNumberFromLocation(
+                            doc.findBookmark(mark)
+                        );
+                        if (mapped >= 0 && mapped < pageCount) {
+                            safePage = mapped;
+                        } else {
+                            Log.w(
+                                APP,
+                                "Bookmark out of range after relayout: " +
+                                    mapped +
+                                    ", pageCount=" +
+                                    pageCount
+                            );
+                            safePage = Math.max(
+                                0,
+                                Math.min(currentPage, pageCount - 1)
+                            );
                         }
+                        currentPage = safePage;
+                    } catch (Throwable x) {
+                        pageCount = 1;
+                        safePage = 0;
+                        currentPage = 0;
+                        throw x;
                     }
                 }
 
                 public void run() {
-                    if (foundPage >= 0) {
-                        searchNeedle = keyword.isEmpty() ? null : keyword;
-                        currentPage = foundPage;
+                    pageCountChanged = true;
+
+                    if (onComplete != null) {
+                        // ✅ 直接在 run() 中执行回调逻辑，保证原子性
+                        final int capturedPage = safePage;
+                        // 先执行回调（设置 searchNeedle + currentPage）
+                        onComplete.accept(capturedPage);
+                        // 再加载页面（此时 searchNeedle 已就绪）
                         loadPage();
                     } else {
-                        history.pop();
-                        Toast.makeText(
-                            DocumentActivity.this,
-                            MyActivity.zh_cn
-                                ? "未找到笔记位置，可能排版已大幅变化"
-                                : "Note location not found, layout may have changed significantly",
-                            Toast.LENGTH_SHORT
-                        ).show();
+                        loadPage();
                     }
+                    loadOutline();
+                }
+            }
+        );
+    }
+
+    // 保留无参版本兼容其他调用方
+    protected void relayoutDocument() {
+        relayoutDocument(page -> {});
+    }
+
+    /**
+     * 恢复字号后 relayout，然后用笔记保存的页码直接跳转。
+     * 同字号下页码是确定性的，无需 bookmark 映射。
+     */
+    private void relayoutThenGotoNote(
+        final int savedPage,
+        final String keyword
+    ) {
+        worker.add(
+            new Worker.Task() {
+                public void work() {
+                    try {
+                        if (isReflowable) applyFixedSpacing();
+                        doc.layout(layoutW, layoutH, layoutEm);
+                        pageCount = doc.countPages();
+                    } catch (Throwable x) {
+                        pageCount = 1;
+                        currentPage = 0;
+                        throw x;
+                    }
+                }
+
+                public void run() {
+                    pageCountChanged = true;
+                    // ✅ relayout 完成后，savedPage 在新(旧)字号下就是正确的页码
+                    int targetPage = savedPage - 1; // 1-based → 0-based
+                    if (targetPage < 0 || targetPage >= pageCount) targetPage =
+                        0;
+                    searchNeedle = keyword;
+                    currentPage = targetPage;
+                    loadPage();
+                    loadOutline();
                 }
             }
         );
