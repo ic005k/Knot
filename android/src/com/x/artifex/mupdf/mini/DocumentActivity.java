@@ -2854,10 +2854,8 @@ public class DocumentActivity extends Activity {
                     if (parts.length < 8) return itemView;
 
                     String pageStr = parts[1].trim();
-                    // ✅ 只要页码不是 -1，就显示页码（reflowable 同字号下页码是有效的）
-                    boolean isPageReliable = !pageStr.equals("-1");
-
-                    if (isPageReliable) {
+                    // ✅ PDF 显示页码，非 PDF (reflowable) 隐藏页码，仅显示时间
+                    if (!isReflowable && !pageStr.equals("-1")) {
                         holder.tvPageTime.setText(
                             (MyActivity.zh_cn ? "页码：" : "Page:") +
                                 pageStr +
@@ -2865,9 +2863,8 @@ public class DocumentActivity extends Activity {
                                 parts[2].trim()
                         );
                     } else {
-                        // 非PDF：不显示页码，只显示时间，或用章节名替代
-                        holder.tvPageTime.setText(parts[2].trim()); // 仅显示时间
-                        // 或者如果有 outline/chapter 信息，显示章节名更佳
+                        // 非PDF：不显示页码，只显示时间
+                        holder.tvPageTime.setText(parts[2].trim());
                     }
 
                     Spanned spannedHtml;
@@ -2998,27 +2995,27 @@ public class DocumentActivity extends Activity {
 
                 history.push(currentPage);
 
-                // ✅ 对于 reflowable：先恢复保存时的字号，再用保存的页码直接跳转
-                if (isReflowable && !savedBookmark.isEmpty()) {
+                if (isReflowable) {
+                    // ✅ 【非 PDF 策略】：恢复字号 + 页码粗定位 + 前后50页螺旋搜索
                     try {
                         float savedEm = Float.parseFloat(savedBookmark);
                         if (Math.abs(savedEm - layoutEm) > 0.01f) {
-                            // 字号不同：恢复字号 → relayout → 用保存页码跳转
                             layoutEm = savedEm;
                             prefs.edit().putFloat("layoutEm", layoutEm).apply();
-                            relayoutThenGotoNote(savedPage, keyword);
-                            return;
                         }
                     } catch (NumberFormatException ignored) {}
-                }
 
-                // ✅ 字号相同（或 PDF）：直接用保存的页码跳转
-                int targetPage = isReflowable ? savedPage - 1 : savedPage;
-                if (targetPage < 0 || targetPage >= pageCount) targetPage =
-                    currentPage;
-                searchNeedle = keyword;
-                currentPage = targetPage;
-                loadPage();
+                    // 触发 relayout 并执行螺旋搜索
+                    relayoutThenSearchNote(savedPage, keyword);
+                } else {
+                    // ✅ 【PDF 策略】：绝对精准，直接 1-based 转 0-based 跳转
+                    int targetPage = savedPage - 1;
+                    if (targetPage < 0 || targetPage >= pageCount) targetPage =
+                        currentPage;
+                    searchNeedle = keyword;
+                    currentPage = targetPage;
+                    loadPage();
+                }
             });
 
             // ✅ 编辑：复用笔记输入弹窗，预填已有内容
@@ -3584,39 +3581,108 @@ public class DocumentActivity extends Activity {
     }
 
     /**
-     * 恢复字号后 relayout，然后用笔记保存的页码直接跳转。
-     * 同字号下页码是确定性的，无需 bookmark 映射。
+     * 非 PDF 笔记跳转：恢复字号 relayout 后，以保存页码为中心进行螺旋搜索
+     * @param savedPage 1-based 保存页码
+     * @param keyword 关键词
      */
-    private void relayoutThenGotoNote(
+    private void relayoutThenSearchNote(
         final int savedPage,
         final String keyword
     ) {
         worker.add(
             new Worker.Task() {
+                int targetPage = -1;
+
                 public void work() {
                     try {
+                        // 1. 重新排版
                         if (isReflowable) applyFixedSpacing();
                         doc.layout(layoutW, layoutH, layoutEm);
                         pageCount = doc.countPages();
+
+                        // 2. 页码粗定位 (1-based -> 0-based)
+                        int centerPage = savedPage - 1;
+                        if (centerPage < 0) centerPage = 0;
+                        if (centerPage >= pageCount) centerPage = pageCount - 1;
+
+                        // 3. 螺旋搜索：以 centerPage 为中心，向外扩展最多 50 页
+                        // 搜索顺序：0, +1, -1, +2, -2 ... +50, -50
+                        int maxRadius = 50;
+                        for (int radius = 0; radius <= maxRadius; radius++) {
+                            // 先搜中心 + radius
+                            int pageToCheck = centerPage + radius;
+                            if (pageToCheck < pageCount) {
+                                if (checkPageForKeyword(pageToCheck, keyword)) {
+                                    targetPage = pageToCheck;
+                                    break;
+                                }
+                            }
+
+                            // 再搜中心 - radius (radius=0 时不重复搜)
+                            if (radius > 0) {
+                                pageToCheck = centerPage - radius;
+                                if (pageToCheck >= 0) {
+                                    if (
+                                        checkPageForKeyword(
+                                            pageToCheck,
+                                            keyword
+                                        )
+                                    ) {
+                                        targetPage = pageToCheck;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // 如果两边都越界了，提前结束
+                            if (
+                                centerPage + radius >= pageCount &&
+                                centerPage - radius < 0
+                            ) {
+                                break;
+                            }
+                        }
+
+                        // 4. 兜底：如果 50 页内没搜到，就停在粗定位页
+                        if (targetPage < 0) {
+                            targetPage = centerPage;
+                        }
                     } catch (Throwable x) {
                         pageCount = 1;
-                        currentPage = 0;
-                        throw x;
+                        targetPage = 0;
                     }
                 }
 
                 public void run() {
                     pageCountChanged = true;
-                    // ✅ relayout 完成后，savedPage 在新(旧)字号下就是正确的页码
-                    int targetPage = savedPage - 1; // 1-based → 0-based
-                    if (targetPage < 0 || targetPage >= pageCount) targetPage =
-                        0;
-                    searchNeedle = keyword;
+                    searchNeedle = keyword; // 设置搜索词，让 loadPage 自动高亮
                     currentPage = targetPage;
                     loadPage();
                     loadOutline();
+
+                    // 如果没搜到关键词，给个轻量提示
+                    if (targetPage == savedPage - 1) {
+                        // 这里可以加个 Toast，但为了不打扰用户，建议不加，或者只在 debug 模式加
+                        // Log.w(APP, "Keyword not found within 50 pages, fallback to saved page.");
+                    }
                 }
             }
         );
+    }
+
+    /**
+     * 辅助方法：检查指定页面是否包含关键词
+     */
+    private boolean checkPageForKeyword(int pageNum, String keyword) {
+        Page page = null;
+        try {
+            page = doc.loadPage(pageNum);
+            Quad[][] hits = page.search(keyword);
+            return hits != null && hits.length > 0;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (page != null) page.destroy();
+        }
     }
 }
