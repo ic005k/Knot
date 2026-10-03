@@ -4,25 +4,6 @@
 
 SearchWorker* m_searchWorker;
 
-void MainWindow::on_btnBackNoteDiff_clicked() { m_NotesList->closeNoteDiff(); }
-
-void MainWindow::on_btnBackBookList_clicked() {
-  if (!isGpsRun) m_Reader->cancelKeepScreenOn();
-
-  m_Reader->hideBookListWin();
-  mw_one->ui->frameMain->show();
-}
-
-void MainWindow::on_btnOpenBookFile_clicked() { on_btnOpen_clicked(); }
-
-void MainWindow::on_btnOkBookList_clicked() { m_Reader->openBookListItem(); }
-
-void MainWindow::on_btnClearAllRecords_clicked() {
-  m_Reader->clearAllReaderRecords();
-}
-
-void MainWindow::on_btnAnd_clicked() {}
-
 void MainWindow::on_btnModify_clicked() { m_Todo->reeditText(); }
 
 void MainWindow::on_btnTabMoveUp_clicked() {
@@ -30,7 +11,7 @@ void MainWindow::on_btnTabMoveUp_clicked() {
   int curIndex = tabData->currentIndex();
   if (curIndex > 0) {
     tabData->tabBar()->moveTab(curIndex, curIndex - 1);
-    updateMainTab();
+
     saveTab();
     getMainTabs();
   }
@@ -41,17 +22,13 @@ void MainWindow::on_btnTabMoveDown_clicked() {
   int curIndex = tabData->currentIndex();
   if (curIndex <= tabData->count() - 2) {
     tabData->tabBar()->moveTab(curIndex, curIndex + 1);
-    updateMainTab();
+
     saveTab();
     getMainTabs();
   }
 }
 
-void MainWindow::updateMainTab() {}
-
 void MainWindow::on_btnChart() { m_MainHelper->clickBtnChart(); }
-
-void MainWindow::on_btnManagement_clicked() {}
 
 void MainWindow::on_btnUpMove_clicked() { m_NotesList->on_btnUp_clicked(); }
 
@@ -60,10 +37,6 @@ void MainWindow::on_btnDownMove_clicked() { m_NotesList->on_btnDown_clicked(); }
 void MainWindow::on_btnDelNote_NoteBook_clicked() {
   m_NotesList->on_btnDel_clicked();
 }
-
-void MainWindow::on_btnHideFind_clicked() { closeTextToolBar(); }
-
-void MainWindow::on_btnStepsOptions_clicked() {}
 
 void MainWindow::on_btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
@@ -85,13 +58,9 @@ void MainWindow::on_btnShowBookmark_clicked() {
   m_Reader->showOrHideBookmark();
 }
 
-void MainWindow::on_btnRemoveBookList_clicked() {}
-
 void MainWindow::on_btnShareImage_clicked() {
   m_ReceiveShare->shareImage(tr("Share to"), bookimgFileName, "image/png");
 }
-
-void MainWindow::on_btnDelImage_clicked() {}
 
 void MainWindow::on_btnBackReaderSet_clicked() {
   closeTextToolBar();
@@ -102,36 +71,7 @@ void MainWindow::on_btnBackReaderSet_clicked() {
   QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
 }
 
-void MainWindow::on_btnSetBookmark_clicked() {
-  mw_one->on_btnBackReaderSet_clicked();
-  QTimer::singleShot(200, this, SLOT(slotSetBookmark()));
-}
-
-void MainWindow::slotSetBookmark() {}
-
-void MainWindow::on_btnFontLess_clicked() {}
-
-void MainWindow::on_btnFontPlus_clicked() {}
-
-void MainWindow::on_btnBackgroundColor_clicked() {}
-
-void MainWindow::on_btnForegroundColor_clicked() {}
-
-void MainWindow::on_editBackgroundColor_textChanged(const QString& arg1) {}
-
-void MainWindow::on_editForegroundColor_textChanged(const QString& arg1) {}
-
 void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
-
-void MainWindow::on_btnAutoRun_clicked() {}
-
-void MainWindow::on_btnAutoStop_clicked() {}
-
-void MainWindow::on_btnLessen_clicked() {}
-
-void MainWindow::on_btnDefault_clicked() {}
-
-void MainWindow::on_btnPlus_clicked() {}
 
 void MainWindow::on_btnAddTodo_clicked() { m_Todo->AddTodoText(); }
 
@@ -145,31 +85,7 @@ void MainWindow::on_btnAddTodo_released() {
   m_Todo->stopRecordVoice();
 }
 
-void MainWindow::on_btnClearReaderFont_clicked() {}
-
-void MainWindow::on_btnMove() {
-  isMoveEntry = true;
-  if (del_Data((QTreeWidget*)mw_one->ui->tabWidget->currentWidget())) {
-    on_btnSelTab_clicked();
-
-    // while (mw_one->ui->frameEditRecord->isHidden()) {
-    //   QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-    //   QThread::msleep(1);
-    // }
-
-    m_EditRecord->strCate = strCategory;
-    m_EditRecord->strDeta = strDetails;
-    m_EditRecord->strAmount = strAmount;
-
-    on_btnOkEditRecord_clicked();
-  }
-}
-
-void MainWindow::on_btnGPS_clicked() {}
-
 void MainWindow::on_btnSelGpsDate_clicked() { m_Steps->selGpsListYearMonth(); }
-
-void MainWindow::on_btnGetGpsListData_clicked() {}
 
 void MainWindow::on_btnBackBakList_clicked() {
   if (!isAndroid) {
@@ -181,8 +97,6 @@ void MainWindow::on_btnBackBakList_clicked() {
 void MainWindow::on_btnImportBakList_clicked() {
   m_MainHelper->importBakFileList();
 }
-
-void MainWindow::on_btnOkViewCate_clicked() {}
 
 void MainWindow::on_btnBackTabRecycle_clicked() {
   if (!isAndroid) {
@@ -223,14 +137,6 @@ void MainWindow::on_btnBackNoteList_clicked() {
   m_Notes->syncToWebDAV();
 }
 
-void MainWindow::on_btnBackNoteRecycle_clicked() {
-  qInfo() << "m_NotesList->isDelNoteRecycle=" << m_NotesList->isDelNoteRecycle;
-  if (m_NotesList->isDelNoteRecycle) {
-    // m_NotesList->isDelNoteRecycle = false;
-    // m_NotesList->delRemoteWebDAVFiles();
-  }
-}
-
 void MainWindow::on_btnNoteRecycle_clicked() { m_NotesList->loadAllRecycle(); }
 
 void MainWindow::on_btnDelNoteRecycle_clicked() {
@@ -245,8 +151,6 @@ void MainWindow::on_btnFindNotes_clicked(const QString& kw) {
   mySearchText = str;
   m_NotesList->startFind(str);
 }
-
-void MainWindow::on_btnClearNoteFindText_clicked() {}
 
 void MainWindow::on_btnShowFindNotes_clicked() { m_NotesList->showFindNotes(); }
 
@@ -647,14 +551,6 @@ void MainWindow::on_btnOpen_clicked() {
   m_Reader->on_btnOpen_clicked();
 }
 
-void MainWindow::on_btnPageUp_clicked() { m_Reader->goUpPage(); }
-
-void MainWindow::on_btnPageNext_clicked() { m_Reader->goNextPage(); }
-
-void MainWindow::on_btnPages_clicked() { on_btnBackReaderSet_clicked(); }
-
-void MainWindow::on_btnOpenNote_clicked() { m_Notes->previewNote(); }
-
 void MainWindow::on_btnEditNote_clicked() { m_Notes->openEditUI(); }
 
 void MainWindow::on_btnToPDF_clicked() {
@@ -675,11 +571,7 @@ void MainWindow::on_btnTestWebDav_clicked() {
   }
 }
 
-void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
-
 void MainWindow::on_btnFind_clicked() { mw_one->ui->frameMain->hide(); }
-
-void MainWindow::on_btnTodo_clicked() { m_Todo->openTodo(); }
 
 void MainWindow::on_btnHome_clicked() {
   if (isAndroid) {

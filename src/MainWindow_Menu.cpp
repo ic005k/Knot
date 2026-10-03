@@ -296,40 +296,6 @@ void MainWindow::on_actionPreferences_triggered() {
   m_Preferences->openPreferences();
 }
 
-void MainWindow::on_actionRename_triggered() {
-  int index = mw_one->ui->tabWidget->currentIndex();
-  bool ok = false;
-
-  QString text;
-
-  if (m_RenameDlg != nullptr) delete m_RenameDlg;
-
-  m_RenameDlg =
-      m_Method->inputDialog(tr("Rename tab name : "), tr("Tab name : "),
-                            mw_one->ui->tabWidget->tabText(index));
-
-  if (QDialog::Accepted == m_RenameDlg->exec()) {
-    ok = true;
-    text = m_RenameDlg->textValue();
-    m_RenameDlg->close();
-  } else {
-    m_RenameDlg->close();
-    return;
-  }
-
-  if (ok && !text.isEmpty()) {
-    mw_one->ui->tabWidget->setTabText(index, text);
-
-    // m_Method->modifyItemText0(mw_one->ui->qwMainTab, index, text);
-
-    updateMainTab();
-
-    saveTab();
-  }
-
-  strLatestModify = tr("Rename Tab");
-}
-
 void MainWindow::renameTab(const QString& newName) {
   int index = ui->tabWidget->currentIndex();
   if (index < 0) return;
@@ -368,7 +334,6 @@ void MainWindow::on_actionShareFile() {
 void MainWindow::init_Menu(QMenu* mainMenu) {
   QAction* actAddTab = new QAction(tr("Add Tab"));
   QAction* actDelTab = new QAction(tr("Del Tab"));
-  QAction* actRenameTab = new QAction(tr("Rename Tab"));
 
   QAction* actOpenKnotBakDir = new QAction(tr("Open KnotBak Dir"));
 
@@ -393,8 +358,6 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
           &MainWindow::on_actionAdd_Tab_triggered);
   connect(actDelTab, &QAction::triggered, mw_one,
           &MainWindow::on_actionDel_Tab_triggered);
-  connect(actRenameTab, &QAction::triggered, mw_one,
-          &MainWindow::on_actionRename_triggered);
 
   connect(actBakFileList, &QAction::triggered, mw_one,
           &MainWindow::on_actionBakFileList);
@@ -426,7 +389,6 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
 
   mainMenu->addAction(actAddTab);
   mainMenu->addAction(actDelTab);
-  mainMenu->addAction(actRenameTab);
 
   mainMenu->addAction(actReport);
 
@@ -443,7 +405,6 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
   if (!mw_one->m_Preferences->devMode) {
     actAddTab->setVisible(false);
     actDelTab->setVisible(false);
-    actRenameTab->setVisible(false);
     actTabRecycle->setVisible(false);
   }
 #endif

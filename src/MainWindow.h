@@ -341,10 +341,6 @@ class MainWindow : public QMainWindow {
 
   void saveNeedSyncNotes();
 
-  void updateMainTab();
-
-  void on_btnPageUp_clicked();
-  void on_btnPageNext_clicked();
   void on_btnBackDir_clicked();
 
   void on_btnDownload_clicked();
@@ -405,13 +401,8 @@ class MainWindow : public QMainWindow {
 
   void GetGpsDataThreadDone();
 
-  void on_btnAutoStop_clicked();
-
-  void on_btnMove();
-
   void on_hSlider_sliderMoved(int position);
 
-  void on_btnTodo_clicked();
   void readEBookDone();
 
   void on_btnShowFindNotes_clicked();
@@ -424,8 +415,6 @@ class MainWindow : public QMainWindow {
 
   void on_timerSyncData();
   void timerUpdate();
-
-  void on_actionRename_triggered();
 
   void on_actionAdd_Tab_triggered();
 
@@ -467,11 +456,8 @@ class MainWindow : public QMainWindow {
 
   void on_btnAddTodo_clicked();
   void on_btnAddTodo_pressed();
-  void on_btnReader_clicked();
 
   void on_btnOpen_clicked();
-
-  void on_btnPages_clicked();
 
   void on_btnReadList_clicked();
 
@@ -491,8 +477,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnEditNote_clicked();
 
-  void on_btnOpenNote_clicked();
-
   void on_btnStartDate_clicked();
 
   void on_btnEndDate_clicked();
@@ -503,13 +487,9 @@ class MainWindow : public QMainWindow {
 
   void on_btnShowBookmark_clicked();
 
-  void on_btnBackBookList_clicked();
-
   void on_btnBackNoteList_clicked();
 
   void on_btnBackReaderSet_clicked();
-
-  void on_btnBackNoteRecycle_clicked();
 
   void on_btnReport();
 
@@ -565,8 +545,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnToPDF_clicked();
 
-  void on_btnManagement_clicked();
-
   void on_btnNoteRecycle_clicked();
 
   void on_btnAIReportAnalysis_clicked();
@@ -582,13 +560,9 @@ class MainWindow : public QMainWindow {
 
   void on_btnImportBakList_clicked();
 
-  void on_btnOkViewCate_clicked();
-
   void on_btnDelBakFile_clicked();
 
   void on_btnDelNoteRecycle_clicked();
-
-  void on_btnClearNoteFindText_clicked();
 
   void on_btnOkType_clicked();
 
@@ -604,45 +578,17 @@ class MainWindow : public QMainWindow {
 
   void on_editDetails_textChanged();
 
-  void on_btnOkBookList_clicked();
-
-  void on_btnClearAllRecords_clicked();
-
-  void on_btnAnd_clicked();
-
   void on_btnModify_clicked();
 
   void on_btnTabMoveUp_clicked();
 
   void on_btnTabMoveDown_clicked();
 
-  void on_btnHideFind_clicked();
-
-  void on_btnStepsOptions_clicked();
-
   void on_btnMenuReport_clicked();
-
-  void on_btnRemoveBookList_clicked();
 
   void on_ReceiveShare();
 
   void on_btnShareImage_clicked();
-
-  void on_btnDelImage_clicked();
-
-  void on_btnSetBookmark_clicked();
-
-  void on_btnFontLess_clicked();
-
-  void on_btnFontPlus_clicked();
-
-  void on_btnBackgroundColor_clicked();
-
-  void on_btnForegroundColor_clicked();
-
-  void on_editBackgroundColor_textChanged(const QString& arg1);
-
-  void on_editForegroundColor_textChanged(const QString& arg1);
 
   void on_hSlider_sliderReleased();
 
@@ -650,18 +596,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnShareBook_clicked();
 
-  void slotSetBookmark();
-  void on_btnAutoRun_clicked();
-
-  void on_btnLessen_clicked();
-
-  void on_btnDefault_clicked();
-
-  void on_btnPlus_clicked();
-
   void on_btnAddTodo_released();
-
-  void on_btnClearReaderFont_clicked();
 
   void on_StartRecordAudio();
 
@@ -669,11 +604,7 @@ class MainWindow : public QMainWindow {
 
   void on_sliderPlayAudio_sliderReleased();
 
-  void on_btnGPS_clicked();
-
   void on_btnSelGpsDate_clicked();
-
-  void on_btnGetGpsListData_clicked();
 
   void on_rbCycling_clicked();
 
@@ -692,8 +623,6 @@ class MainWindow : public QMainWindow {
   void on_cboxWebDAV_currentTextChanged(const QString& arg1);
 
   void on_btnShowCboxList_clicked();
-
-  void on_btnBackNoteDiff_clicked();
 
   void on_btnNewNote_clicked();
 
@@ -734,8 +663,6 @@ class MainWindow : public QMainWindow {
   void on_editTitleKey_textChanged(const QString& arg1);
 
   void on_btnOpenSearchView_clicked();
-
-  void on_btnOpenBookFile_clicked();
 
  private:
   QNetworkAccessManager* m_ainetMgr;

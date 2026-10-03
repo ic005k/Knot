@@ -72,8 +72,6 @@ MainWindow::MainWindow(QWidget* parent)
 
   QTimer::singleShot(10, this, [this]() {
     reloadMain();
-
-    updateMainTab();
   });
 
   m_CloudBackup->init_CloudBacup();

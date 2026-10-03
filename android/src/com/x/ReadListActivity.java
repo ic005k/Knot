@@ -118,11 +118,7 @@ public class ReadListActivity extends AppCompatActivity {
         btnRead.setOnClickListener(v -> {
             Book sel = bookAdapter.getSelectedItem();
             if (sel == null) {
-                Toast.makeText(
-                    this,
-                    "Please select a book first.",
-                    Toast.LENGTH_SHORT
-                ).show();
+                showSelectBookTip();
                 return;
             }
             String filePath = sel.getFilePath();
@@ -136,11 +132,7 @@ public class ReadListActivity extends AppCompatActivity {
         btnShare.setOnClickListener(v -> {
             Book sel = bookAdapter.getSelectedItem();
             if (sel == null) {
-                Toast.makeText(
-                    this,
-                    "Please select a book first.",
-                    Toast.LENGTH_SHORT
-                ).show();
+                showSelectBookTip();
                 return;
             }
             MyActivity.m_instance.shareImage(
@@ -154,11 +146,7 @@ public class ReadListActivity extends AppCompatActivity {
         btnRemove.setOnClickListener(v -> {
             Book sel = bookAdapter.getSelectedItem();
             if (sel == null) {
-                Toast.makeText(
-                    this,
-                    "Please select a book first.",
-                    Toast.LENGTH_SHORT
-                ).show();
+                showSelectBookTip();
                 return;
             }
             int index = bookList.indexOf(sel);
@@ -175,11 +163,7 @@ public class ReadListActivity extends AppCompatActivity {
         btnClear.setOnClickListener(v -> {
             Book sel = bookAdapter.getSelectedItem();
             if (sel == null) {
-                Toast.makeText(
-                    this,
-                    "Please select a book first.",
-                    Toast.LENGTH_SHORT
-                ).show();
+                showSelectBookTip();
                 return;
             }
             String rawName = sel.getRawBookName();
@@ -208,6 +192,16 @@ public class ReadListActivity extends AppCompatActivity {
                 .setNegativeButton(MyActivity.zh_cn ? "取消" : "Cancel", null)
                 .show();
         });
+    }
+
+    /**
+     * 双语Toast：请首先选择一本书籍。
+     */
+    private void showSelectBookTip() {
+        String msg = MyActivity.zh_cn
+            ? "请首先选择一本书籍。"
+            : "Please select a book first.";
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     @Override

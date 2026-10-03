@@ -1090,7 +1090,7 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
 
           if (strType == "note_recyclebin_back") {
             QTimer::singleShot(100, mw_one, [=]() {
-              mw_one->on_btnBackNoteRecycle_clicked();
+
             });
           }
 
