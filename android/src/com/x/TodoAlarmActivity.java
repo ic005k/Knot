@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
@@ -164,7 +165,6 @@ public class TodoAlarmActivity extends AppCompatActivity {
         btnSetAlarm = findViewById(R.id.btn_set_alarm);
         //==== 绑定TTS+测试按钮所在的父布局ID
         layoutTtsTestRow = findViewById(R.id.layout_tts_test_row);
-
         btnBack.setOnClickListener(v -> {
             PublicJavaCallCpp("todo_alarm_back");
             finish();
@@ -175,6 +175,8 @@ public class TodoAlarmActivity extends AppCompatActivity {
         swWeekAll.setOnCheckedChangeListener((compoundButton, b) ->
             onWeekAllChecked(b)
         );
+        // 新增：绑定周一到周日单项联动监听
+        bindWeekItemListeners();
     }
 
     /**
@@ -225,6 +227,7 @@ public class TodoAlarmActivity extends AppCompatActivity {
 
     //=========== 回调占位，事件全部转发C++ ===========
     private void onWeekAllChecked(boolean allChecked) {
+        setAllWeekSwitches(allChecked);
         PublicJavaCallCpp("todo_alarm_week_all|==|" + (allChecked ? 1 : 0));
     }
 
@@ -317,7 +320,16 @@ public class TodoAlarmActivity extends AppCompatActivity {
             npHour.setValue(hour);
             npMinute.setValue(minute);
             swTts.setChecked(ttsEnable);
-            // 根据掩码回写周开关
+
+            // 回显时，临时移除单项监听，防止反复触发联动
+            swWeek1.setOnCheckedChangeListener(null);
+            swWeek2.setOnCheckedChangeListener(null);
+            swWeek3.setOnCheckedChangeListener(null);
+            swWeek4.setOnCheckedChangeListener(null);
+            swWeek5.setOnCheckedChangeListener(null);
+            swWeek6.setOnCheckedChangeListener(null);
+            swWeek7.setOnCheckedChangeListener(null);
+
             swWeek1.setChecked((weekBits & (1 << 0)) != 0);
             swWeek2.setChecked((weekBits & (1 << 1)) != 0);
             swWeek3.setChecked((weekBits & (1 << 2)) != 0);
@@ -326,6 +338,9 @@ public class TodoAlarmActivity extends AppCompatActivity {
             swWeek6.setChecked((weekBits & (1 << 5)) != 0);
             swWeek7.setChecked((weekBits & (1 << 6)) != 0);
             swWeekAll.setChecked(weekBits == 0b1111111);
+
+            // 恢复单项监听
+            bindWeekItemListeners();
         });
     }
 
@@ -353,6 +368,63 @@ public class TodoAlarmActivity extends AppCompatActivity {
                 MyService.forceDisconnectInputMethod();
             });
         }
+    }
+
+    // 批量设置7个周开关选中状态，内部临时移除监听避免递归
+    private void setAllWeekSwitches(boolean checked) {
+        swWeek1.setOnCheckedChangeListener(null);
+        swWeek2.setOnCheckedChangeListener(null);
+        swWeek3.setOnCheckedChangeListener(null);
+        swWeek4.setOnCheckedChangeListener(null);
+        swWeek5.setOnCheckedChangeListener(null);
+        swWeek6.setOnCheckedChangeListener(null);
+        swWeek7.setOnCheckedChangeListener(null);
+
+        swWeek1.setChecked(checked);
+        swWeek2.setChecked(checked);
+        swWeek3.setChecked(checked);
+        swWeek4.setChecked(checked);
+        swWeek5.setChecked(checked);
+        swWeek6.setChecked(checked);
+        swWeek7.setChecked(checked);
+
+        bindWeekItemListeners(); // 重新绑定7个单项的监听
+    }
+
+    // 检查7个单项是否全部选中，用来同步swWeekAll状态
+    private boolean isAllWeekChecked() {
+        return (
+            swWeek1.isChecked() &&
+            swWeek2.isChecked() &&
+            swWeek3.isChecked() &&
+            swWeek4.isChecked() &&
+            swWeek5.isChecked() &&
+            swWeek6.isChecked() &&
+            swWeek7.isChecked()
+        );
+    }
+
+    // 绑定周一~周日7个switch的单项点击联动
+    private void bindWeekItemListeners() {
+        CompoundButton.OnCheckedChangeListener weekItemListener = (
+            compoundButton,
+            isChecked
+        ) -> {
+            // 单项周开关变更后，同步【每天】开关
+            boolean allNow = isAllWeekChecked();
+            swWeekAll.setOnCheckedChangeListener(null);
+            swWeekAll.setChecked(allNow);
+            swWeekAll.setOnCheckedChangeListener((btn, b) ->
+                onWeekAllChecked(b)
+            );
+        };
+        swWeek1.setOnCheckedChangeListener(weekItemListener);
+        swWeek2.setOnCheckedChangeListener(weekItemListener);
+        swWeek3.setOnCheckedChangeListener(weekItemListener);
+        swWeek4.setOnCheckedChangeListener(weekItemListener);
+        swWeek5.setOnCheckedChangeListener(weekItemListener);
+        swWeek6.setOnCheckedChangeListener(weekItemListener);
+        swWeek7.setOnCheckedChangeListener(weekItemListener);
     }
 
     @Override
