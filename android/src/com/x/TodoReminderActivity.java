@@ -72,7 +72,7 @@ public class TodoReminderActivity extends AppCompatActivity {
 
         root.addView(topRow);
 
-        //中间内容容器，占满剩余高度，实现内容完全居中
+        //中间内容容器，占满剩余高度，实现卡片整体居中
         LinearLayout centerContainer = new LinearLayout(this);
         centerContainer.setLayoutParams(
             new LinearLayout.LayoutParams(
@@ -83,14 +83,37 @@ public class TodoReminderActivity extends AppCompatActivity {
         );
         centerContainer.setGravity(Gravity.CENTER);
 
+        // ========== 卡片容器 ==========
+        LinearLayout cardLayout = new LinearLayout(this);
+        cardLayout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams cardLp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        cardLayout.setLayoutParams(cardLp);
+        //卡片内边距
+        cardLayout.setPadding(dp(24), dp(20), dp(24), dp(20));
+        //卡片背景（深色/浅色卡片底色）
+        int cardBg = mIsDark ? 0xFF272727 : 0xFFFFFFFF;
+        cardLayout.setBackgroundColor(cardBg);
+        //简易圆角（Android原生代码设置圆角）
+        android.graphics.drawable.GradientDrawable cardBgDraw =
+            new android.graphics.drawable.GradientDrawable();
+        cardBgDraw.setColor(cardBg);
+        cardBgDraw.setCornerRadius(dp(16));
+        cardLayout.setBackground(cardBgDraw);
+
+        // 文本控件
         mTvContent = new TextView(this);
         mTvContent.setTextSize(21);
         mTvContent.setTypeface(Typeface.DEFAULT_BOLD);
         mTvContent.setTextColor(textMain);
-        mTvContent.setGravity(Gravity.CENTER);
-        mTvContent.setPadding(dp(24), dp(12), dp(24), dp(12));
-        centerContainer.addView(mTvContent);
+        // 文字改为左对齐！重点
+        mTvContent.setGravity(Gravity.START);
+        mTvContent.setMaxWidth(dp(280)); //限制卡片最大宽度，避免平板拉太宽
 
+        cardLayout.addView(mTvContent);
+        centerContainer.addView(cardLayout);
         root.addView(centerContainer);
 
         //底部行布局：右下角激活时间
