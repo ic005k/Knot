@@ -1399,6 +1399,11 @@ void Steps::loadGpsList(int n_y, int n_m) {
       if (list.count() >= 8) t7 = list.at(7);  // 地形距离汇总
     }
 
+    QString s_type;
+    if (t0.contains("骑行") || t0.contains("Ride")) s_type = "🚴 ";
+    if (t0.contains("徒步") || t0.contains("Hike")) s_type = "🥾 ";
+    if (t0.contains("跑步") || t0.contains("Run")) s_type = "🏃 ";
+
     QString strGpsTime = t0 + "-=-" + t1 + "-=-" + t2 + "-=-" + t4;
     QString speedFile = getJsonRouteFile(strGpsTime);
     speedFile = speedFile.replace(".json", "_Speed.json");
@@ -1411,7 +1416,7 @@ void Steps::loadGpsList(int n_y, int n_m) {
               << QVariant(6.3) << QVariant(4.0);*/
 
     listText.append(t0 + "===" + t1 + "===" + t2 + "===" + t3 + "===" + t4 +
-                    "===" + t5 + "===" + t6 + "===" + t7);
+                    "===" + t5 + "===" + t6 + "===" + s_type + t7);
 
     int screenWidth = mw_one->width();
 

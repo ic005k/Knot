@@ -150,6 +150,10 @@ public class SportChartActivity extends AppCompatActivity {
                     tv.setTextColor(textColor);
                     tv.setPadding(0, dp(3), 0, dp(3));
                     tv.setText(sevenTexts[t]);
+                    // 第一行加粗
+                    if (t == 0) {
+                        tv.getPaint().setFakeBoldText(true);
+                    }
                     statContainer.addView(tv);
                 }
                 itemRoot.addView(statContainer);
