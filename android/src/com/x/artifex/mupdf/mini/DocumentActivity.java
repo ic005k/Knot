@@ -587,7 +587,15 @@ public class DocumentActivity extends Activity {
         worker.start();
 
         prefs = getPreferences(Context.MODE_PRIVATE);
-        layoutEm = prefs.getFloat("layoutEm", 8);
+
+        // ✅ 安全版本：始终尝试按 key 读取字号，找不到再用全局默认
+        float savedEmForThisDoc = prefs.getFloat(key + "_layoutEm", -1f);
+        if (savedEmForThisDoc > 0) {
+            layoutEm = savedEmForThisDoc;
+        } else {
+            layoutEm = prefs.getFloat("layoutEm", 8);
+        }
+
         fitPage = prefs.getBoolean("fitPage", false);
         currentPage = prefs.getInt(key, 0);
         searchHitPage = -1;
@@ -734,34 +742,40 @@ public class DocumentActivity extends Activity {
         layoutPopupMenu
             .getMenuInflater()
             .inflate(R.menu.layout_menu, layoutPopupMenu.getMenu());
-        layoutPopupMenu.setOnMenuItemClickListener(
-            new PopupMenu.OnMenuItemClickListener() {
-                public boolean onMenuItemClick(MenuItem item) {
-                    float oldLayoutEm = layoutEm;
-                    int id = item.getItemId();
-                    if (id == R.id.action_layout_6pt) layoutEm = 6;
-                    else if (id == R.id.action_layout_7pt) layoutEm = 7;
-                    else if (id == R.id.action_layout_8pt) layoutEm = 8;
-                    else if (id == R.id.action_layout_9pt) layoutEm = 9;
-                    else if (id == R.id.action_layout_10pt) layoutEm = 10;
-                    else if (id == R.id.action_layout_11pt) layoutEm = 11;
-                    else if (id == R.id.action_layout_12pt) layoutEm = 12;
-                    else if (id == R.id.action_layout_13pt) layoutEm = 13;
-                    else if (id == R.id.action_layout_14pt) layoutEm = 14;
-                    else if (id == R.id.action_layout_15pt) layoutEm = 15;
-                    else if (id == R.id.action_layout_16pt) layoutEm = 16;
-                    if (oldLayoutEm != layoutEm) relayoutDocument();
-                    return true;
+        layoutPopupMenu.setOnMenuItemClickListener(item -> {
+            float newEm = getEmForMenuId(item.getItemId());
+            if (newEm > 0 && Math.abs(newEm - layoutEm) > 0.01f) {
+                layoutEm = newEm;
+                relayoutDocument();
+            }
+            return true;
+        });
+        layoutButton.setOnClickListener(v -> {
+            // ✅ 每次弹出前，先重置所有菜单项标题（去掉旧标记）
+            Menu menu = layoutPopupMenu.getMenu();
+            for (int i = 0; i < menu.size(); i++) {
+                MenuItem item = menu.getItem(i);
+                CharSequence title = item.getTitle();
+                if (title != null) {
+                    String t = title.toString();
+                    // 去掉可能存在的 "✓ " 前缀
+                    if (t.startsWith("✓ ")) {
+                        item.setTitle(t.substring(2));
+                    }
                 }
             }
-        );
-        layoutButton.setOnClickListener(
-            new View.OnClickListener() {
-                public void onClick(View v) {
-                    layoutPopupMenu.show();
+
+            // ✅ 给当前字号对应的菜单项加上 "✓ " 前缀
+            int currentId = getMenuIdForEm(layoutEm);
+            if (currentId != -1) {
+                MenuItem currentItem = menu.findItem(currentId);
+                if (currentItem != null) {
+                    currentItem.setTitle("✓ " + currentItem.getTitle());
                 }
             }
-        );
+
+            layoutPopupMenu.show();
+        });
 
         topBar.setOnApplyWindowInsetsListener(
             new View.OnApplyWindowInsetsListener() {
@@ -997,12 +1011,12 @@ public class DocumentActivity extends Activity {
 
     public void onPause() {
         super.onPause();
-        if (prefs != null) {
+        if (prefs != null && key != null) {
             SharedPreferences.Editor editor = prefs.edit();
-            editor.putFloat("layoutEm", layoutEm);
+            // ✅ 无条件按 key 保存字号
+            editor.putFloat(key + "_layoutEm", layoutEm);
             editor.putBoolean("fitPage", fitPage);
             editor.putInt(key, currentPage);
-            // 保存睡眠定时开关
             editor.putBoolean("sleep_timer_enabled", mSleepTimerEnabled);
             editor.apply();
         }
@@ -3035,7 +3049,10 @@ public class DocumentActivity extends Activity {
                         float savedEm = Float.parseFloat(savedBookmark);
                         if (Math.abs(savedEm - layoutEm) > 0.01f) {
                             layoutEm = savedEm;
-                            prefs.edit().putFloat("layoutEm", layoutEm).apply();
+                            prefs
+                                .edit()
+                                .putFloat(key + "_layoutEm", layoutEm)
+                                .apply();
                         }
                     } catch (NumberFormatException ignored) {}
 
@@ -3743,6 +3760,53 @@ public class DocumentActivity extends Activity {
             return false;
         } finally {
             if (page != null) page.destroy();
+        }
+    }
+
+    /** 根据 MenuItem ID 返回对应的字号值，未匹配返回 -1 */
+    private float getEmForMenuId(int id) {
+        if (id == R.id.action_layout_6pt) return 6;
+        else if (id == R.id.action_layout_7pt) return 7;
+        else if (id == R.id.action_layout_8pt) return 8;
+        else if (id == R.id.action_layout_9pt) return 9;
+        else if (id == R.id.action_layout_10pt) return 10;
+        else if (id == R.id.action_layout_11pt) return 11;
+        else if (id == R.id.action_layout_12pt) return 12;
+        else if (id == R.id.action_layout_13pt) return 13;
+        else if (id == R.id.action_layout_14pt) return 14;
+        else if (id == R.id.action_layout_15pt) return 15;
+        else if (id == R.id.action_layout_16pt) return 16;
+        return -1;
+    }
+
+    /** 获取指定字号对应的 MenuItem ID */
+    private int getMenuIdForEm(float em) {
+        int pt = Math.round(em);
+        switch (pt) {
+            case 6:
+                return R.id.action_layout_6pt;
+            case 7:
+                return R.id.action_layout_7pt;
+            case 8:
+                return R.id.action_layout_8pt;
+            case 9:
+                return R.id.action_layout_9pt;
+            case 10:
+                return R.id.action_layout_10pt;
+            case 11:
+                return R.id.action_layout_11pt;
+            case 12:
+                return R.id.action_layout_12pt;
+            case 13:
+                return R.id.action_layout_13pt;
+            case 14:
+                return R.id.action_layout_14pt;
+            case 15:
+                return R.id.action_layout_15pt;
+            case 16:
+                return R.id.action_layout_16pt;
+            default:
+                return -1;
         }
     }
 }
