@@ -278,9 +278,21 @@ public class PageView
             clearSelection();
         }
 
-        boolean foundLink = false;
         float x = e.getX();
         float y = e.getY();
+
+        // ✅ 新增：边缘防误触检测（与 onLongPress 保持一致）
+        if (
+            x < edgeSafeZonePx ||
+            x > canvasW - edgeSafeZonePx ||
+            y < edgeSafeZonePx ||
+            y > canvasH - edgeSafeZonePx
+        ) {
+            Log.d(APP, "Single tap ignored: edge safe zone");
+            return true; // 消费事件，但不执行后续翻页/UI切换
+        }
+
+        boolean foundLink = false;
         if (showLinks && linkBounds != null) {
             float dx = bitmapW <= canvasW ? (bitmapW - canvasW) / 2 : scrollX;
             float dy = bitmapH <= canvasH ? (bitmapH - canvasH) / 2 : scrollY;

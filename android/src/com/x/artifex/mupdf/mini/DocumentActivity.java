@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -296,6 +297,39 @@ public class DocumentActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // ============ 屏幕方向控制 ============
+        Uri uri = getIntent().getData();
+        String fileName = "";
+        if (uri != null) {
+            Cursor cursor = getContentResolver().query(
+                uri,
+                null,
+                null,
+                null,
+                null
+            );
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIdx = cursor.getColumnIndex(
+                    OpenableColumns.DISPLAY_NAME
+                );
+                if (nameIdx >= 0) fileName = cursor.getString(nameIdx);
+                cursor.close();
+            }
+        }
+        // 判断是否PDF
+        boolean isPdf = fileName.toLowerCase().endsWith(".pdf");
+        if (isPdf) {
+            // 强制横屏
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+
+        // 强制横屏
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        // 强制竖屏
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        // 恢复：跟随手机传感器自动旋转
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+
         mPdfActivity = this;
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -389,7 +423,7 @@ public class DocumentActivity extends Activity {
         // 初始化同步状态栏图标
         updateStatusBarIconMode(mInvertMode);
 
-        Uri uri = getIntent().getData();
+        uri = getIntent().getData();
         mimetype = getIntent().getType();
 
         // 读取来自主Activity的暗黑标记
@@ -3430,18 +3464,44 @@ public class DocumentActivity extends Activity {
     private void applyFixedSpacing() {
         try {
             String css = String.format(
-                "body, p, div, span, li { " +
+                // 1. 全局盒模型重置：消除所有元素的默认外边距和内边距
+                "* { " +
+                    "  margin-left: 0 !important; " +
+                    "  margin-right: 0 !important; " +
+                    "  padding-left: 0 !important; " +
+                    "  padding-right: 0 !important; " +
+                    "} " +
+                    // 2. body 强制全宽 + 消除 UA 默认 1em margin
+                    "body { " +
+                    "  margin: 0 !important; " +
+                    "  padding: 0 !important; " +
+                    "  width: 100%% !important; " +
+                    "  max-width: none !important; " +
+                    "  box-sizing: border-box !important; " +
+                    "} " +
+                    // 3. 块级元素强制撑满宽度
+                    "p, div, section, article, blockquote, pre, ul, ol, li, table, h1, h2, h3, h4, h5, h6 { " +
+                    "  width: 100%% !important; " +
+                    "  max-width: none !important; " +
+                    "  box-sizing: border-box !important; " +
+                    "} " +
+                    // 4. ✅ 段落首行缩进2字符（关键修复）
+                    // text-indent: 2em 是纯文本缩进，不会被上面的 padding/margin 重置覆盖
+                    "p { " +
+                    "  text-indent: 2em !important; " +
+                    "} " +
+                    // 5. 保留原有排版参数
+                    "body, p, div, span, li { " +
                     "  letter-spacing: %.3fem !important; " +
                     "  line-height: %.3f !important; " +
                     "} " +
                     "h1, h2, h3, h4, h5, h6 { " +
                     "  line-height: 1.3 !important; " +
-                    "}",
+                    "} ",
                 FIXED_LETTER_SPACING,
                 FIXED_LINE_HEIGHT
             );
 
-            // ✅ Context.setUserCSS 是静态方法，invoke 第一个参数传 null
             java.lang.reflect.Method method =
                 com.artifex.mupdf.fitz.Context.class.getMethod(
                     "setUserCSS",
@@ -3449,7 +3509,7 @@ public class DocumentActivity extends Activity {
                 );
             method.invoke(null, css);
 
-            Log.i(APP, "Fixed spacing CSS applied via Context.setUserCSS");
+            Log.i(APP, "Fixed spacing + zero-margin + indent CSS applied");
         } catch (NoSuchMethodException e) {
             Log.w(APP, "Context.setUserCSS not available in this MuPDF build");
         } catch (Exception e) {
