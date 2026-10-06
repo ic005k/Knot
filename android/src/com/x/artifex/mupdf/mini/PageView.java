@@ -34,8 +34,8 @@ public class PageView
     private String pageTurnHintText = "";
     private final Paint hintBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint hintTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private static final float HINT_TEXT_SIZE_SP = 14f;
-    private static final int HINT_BG_COLOR = 0xCC000000; // 半透明黑底
+    private static final float HINT_TEXT_SIZE_SP = 16f;
+    private static final int HINT_BG_COLOR = 0xB3000000;
     private static final int HINT_TEXT_COLOR = 0xFFFFFFFF;
     private final Runnable hideHintRunnable = () -> {
         if (showPageTurnHint) {

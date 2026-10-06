@@ -61,6 +61,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -642,6 +643,8 @@ public class DocumentActivity extends Activity {
             }
         );
         searchText = (EditText) findViewById(R.id.search_text);
+        String searchHint = MyActivity.zh_cn ? "搜索..." : "Search...";
+        searchText.setHint(searchHint);
         searchText.setOnEditorActionListener(
             new TextView.OnEditorActionListener() {
                 public boolean onEditorAction(
@@ -1051,6 +1054,14 @@ public class DocumentActivity extends Activity {
             mConvertProgressDialog.dismiss();
         }
 
+        // ✅ 兜底关闭AI等待弹窗
+        if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
+            try {
+                mAiLoadingDialog.dismiss();
+            } catch (Exception ignored) {}
+            mAiLoadingDialog = null;
+        }
+
         // 退出全屏模式
         CallJavaNotify_0();
 
@@ -1086,6 +1097,8 @@ public class DocumentActivity extends Activity {
         searchHitPage = -1;
         searchNeedle = null;
         pageView.resetHits();
+        // ✅ 重置搜索时确保弹窗被关闭
+        dismissAiLoadingDialog();
     }
 
     protected void runSearch(
@@ -1117,23 +1130,34 @@ public class DocumentActivity extends Activity {
 
                 public void run() {
                     if (stopSearch || needle != searchNeedle) {
+                        // ✅ 搜索被取消或关键词变更，关闭弹窗
+                        dismissAiLoadingDialog();
                         showPageNumber(currentPage + 1);
                     } else if (searchHitPage == currentPage) {
+                        // ✅ 在当前页找到结果，关闭弹窗
+                        dismissAiLoadingDialog();
                         loadPage();
                     } else if (searchHitPage >= 0) {
+                        // ✅ 在其他页找到结果，关闭弹窗并跳转
+                        dismissAiLoadingDialog();
                         history.push(currentPage);
                         currentPage = searchHitPage;
                         loadPage();
                     } else {
                         if (searchPage >= 0 && searchPage < pageCount) {
+                            // 未找到但还有后续页面，继续搜索（弹窗保持显示）
                             showPageNumber(searchPage + 1);
                             worker.add(this);
                         } else {
+                            // ✅ 全部搜完未找到，关闭弹窗
+                            dismissAiLoadingDialog();
                             showPageNumber(currentPage + 1);
                             Log.i(APP, "search not found");
                             Toast.makeText(
                                 DocumentActivity.this,
-                                getString(R.string.toast_search_not_found),
+                                MyActivity.zh_cn
+                                    ? "搜索没有找到"
+                                    : "Search not found",
                                 Toast.LENGTH_SHORT
                             ).show();
                         }
@@ -1151,9 +1175,13 @@ public class DocumentActivity extends Activity {
         searchHitPage = -1;
         searchNeedle = searchText.getText().toString();
         if (searchNeedle.length() == 0) searchNeedle = null;
-        if (searchNeedle != null) if (
-            startPage >= 0 && startPage < pageCount
-        ) runSearch(startPage, direction, searchNeedle);
+        if (searchNeedle != null) {
+            if (startPage >= 0 && startPage < pageCount) {
+                // ✅ 搜索开始时显示等待弹窗
+                showAiLoadingDialog();
+                runSearch(startPage, direction, searchNeedle);
+            }
+        }
     }
 
     protected void loadDocument() {
@@ -1778,7 +1806,9 @@ public class DocumentActivity extends Activity {
             runOnUiThread(() ->
                 Toast.makeText(
                     this,
-                    "Finished reading the entire book.",
+                    MyActivity.zh_cn
+                        ? "全书朗读完毕。"
+                        : "Finished reading the entire book.",
                     Toast.LENGTH_SHORT
                 ).show()
             );
@@ -2216,7 +2246,9 @@ public class DocumentActivity extends Activity {
                         if (tempPath == null || doc == null) {
                             Toast.makeText(
                                 DocumentActivity.this,
-                                "EPUB conversion failed",
+                                MyActivity.zh_cn
+                                    ? "EPUB转换失败"
+                                    : "EPUB conversion failed",
                                 Toast.LENGTH_SHORT
                             ).show();
                             finish();
@@ -3441,26 +3473,102 @@ public class DocumentActivity extends Activity {
     }
 
     /**
-     * 显示AI分析等待弹窗，带转圈ProgressBar
+     * 显示AI分析等待弹窗（阅读界面独立实现）
+     * 避免调用主窗口导致非全屏状态下UI控件位置变化
      */
     public void showAiLoadingDialog() {
         runOnUiThread(() -> {
-            if (isFinishing()) return;
+            if (isFinishing() || isDestroyed()) return;
+
+            // 防止重复弹出
             if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
                 return;
             }
-            // 调用MyActivity公共方法，拿到dialog实例保存到本页面成员
-            mAiLoadingDialog = MyActivity.showAiLoadingDialog(this);
+
+            boolean isDark = mInvertMode;
+            String msg = MyActivity.zh_cn
+                ? "处理中，请稍后..."
+                : "Processing, please wait...";
+
+            // 构建自定义布局
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.HORIZONTAL);
+            layout.setPadding(
+                dp(this, 24),
+                dp(this, 16),
+                dp(this, 24),
+                dp(this, 16)
+            );
+            layout.setGravity(Gravity.CENTER_VERTICAL);
+
+            ProgressBar progressBar = new ProgressBar(this);
+            progressBar.setIndeterminate(true);
+            LinearLayout.LayoutParams progressLp =
+                new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+            progressLp.rightMargin = dp(this, 16);
+            progressBar.setLayoutParams(progressLp);
+
+            TextView tvMsg = new TextView(this);
+            tvMsg.setText(msg);
+            tvMsg.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            tvMsg.setTextColor(isDark ? 0xFFFFFFFF : 0xFF333333);
+
+            layout.addView(progressBar);
+            layout.addView(tvMsg);
+
+            androidx.appcompat.app.AlertDialog.Builder builder =
+                new androidx.appcompat.app.AlertDialog.Builder(this);
+            builder.setView(layout);
+            builder.setCancelable(false);
+
+            mAiLoadingDialog = builder.create();
+
+            // 适配暗黑模式背景
+            if (mAiLoadingDialog.getWindow() != null) {
+                mAiLoadingDialog
+                    .getWindow()
+                    .setBackgroundDrawableResource(
+                        isDark
+                            ? android.R.drawable.dialog_holo_dark_frame
+                            : android.R.drawable.dialog_holo_light_frame
+                    );
+            }
+
+            mAiLoadingDialog.show();
         });
     }
 
     /**
-     * 关闭AI等待弹窗
+     * 关闭AI等待弹窗（独立实现）
      */
     public void dismissAiLoadingDialog() {
         runOnUiThread(() -> {
-            MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
+            if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
+                try {
+                    mAiLoadingDialog.dismiss();
+                } catch (Exception e) {
+                    Log.w(
+                        APP,
+                        "Dismiss AI loading dialog failed: " + e.getMessage()
+                    );
+                }
+                mAiLoadingDialog = null;
+            }
         });
+    }
+
+    /**
+     * Dialog 专用 dp 转 px 静态辅助方法
+     */
+    private static int dp(Context context, int dpVal) {
+        return (int) TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dpVal,
+            context.getResources().getDisplayMetrics()
+        );
     }
 
     /**

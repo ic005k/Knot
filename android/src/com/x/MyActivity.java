@@ -2863,8 +2863,7 @@ public class MyActivity
             if (mdList != null && mdList.size() > 0) {
                 mdContent = mdList.get(0);
             }
-            // 读取暗黑模式
-            //boolean isDark = ImmersiveUtil.applyRealImmersive(act);
+
             int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
             int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
 
@@ -2949,7 +2948,7 @@ public class MyActivity
         if (act == null || act.isFinishing()) {
             return null;
         }
-        boolean isDark = ImmersiveUtil.applyRealImmersive(act);
+
         String msg = MyActivity.zh_cn
             ? "处理中，请稍后..."
             : "Processing, please wait...";
@@ -3011,8 +3010,6 @@ public class MyActivity
             return;
         }
         act.runOnUiThread(() -> {
-            // 暗黑模式，统一使用ImmersiveUtil获取
-            //boolean isDark = ImmersiveUtil.applyRealImmersive(act);
             int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
             int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
             // 外层滚动容器
