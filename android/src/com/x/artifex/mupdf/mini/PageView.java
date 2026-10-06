@@ -24,6 +24,26 @@ public class PageView
 
     private final String APP = "MuPDF";
 
+    // ✅ 水平手势翻页阈值（仅 Reflowable 生效）
+    private static final float H_FLING_VELOCITY_DP = 150f; // 速度门槛减半
+    private static final float H_FLING_DIRECTION_RATIO = 1.2f; // 方向容忍度放宽
+    private static final float H_FLING_DISTANCE_DP = 80f; // 最小水平滑动距离
+
+    // ✅ 翻页页码提示 UI
+    private boolean showPageTurnHint = false;
+    private String pageTurnHintText = "";
+    private final Paint hintBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint hintTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private static final float HINT_TEXT_SIZE_SP = 14f;
+    private static final int HINT_BG_COLOR = 0xCC000000; // 半透明黑底
+    private static final int HINT_TEXT_COLOR = 0xFFFFFFFF;
+    private final Runnable hideHintRunnable = () -> {
+        if (showPageTurnHint) {
+            showPageTurnHint = false;
+            invalidate();
+        }
+    };
+
     private static final int SCROLL_EPSILON = 2; // 容差像素
     protected int savedScrollX = 0; // 当前阅读水平位置，翻页时跨页恢复
 
@@ -116,6 +136,14 @@ public class PageView
         errorPath.lineTo(100, 100);
         errorPath.moveTo(100, -100);
         errorPath.lineTo(-100, 100);
+
+        // 翻页指示器
+        hintBgPaint.setColor(HINT_BG_COLOR);
+        hintBgPaint.setStyle(Paint.Style.FILL);
+
+        hintTextPaint.setColor(HINT_TEXT_COLOR);
+        hintTextPaint.setTextSize(HINT_TEXT_SIZE_SP * density);
+        hintTextPaint.setTextAlign(Paint.Align.CENTER);
     }
 
     public void setActionListener(DocumentActivity l) {
@@ -221,6 +249,7 @@ public class PageView
     public boolean onTouchEvent(MotionEvent event) {
         detector.onTouchEvent(event);
         scaleDetector.onTouchEvent(event);
+
         return true;
     }
 
@@ -340,28 +369,90 @@ public class PageView
         return true;
     }
 
+    @Override
     public synchronized boolean onFling(
         MotionEvent e1,
         MotionEvent e2,
-        float dx,
-        float dy
+        float velocityX,
+        float velocityY
     ) {
-        if (bitmap != null) {
-            int maxX = bitmapW > canvasW ? bitmapW - canvasW : 0;
-            int maxY = bitmapH > canvasH ? bitmapH - canvasH : 0;
-            scroller.forceFinished(true);
-            scroller.fling(
-                scrollX,
-                scrollY,
-                (int) -dx,
-                (int) -dy,
-                0,
-                maxX,
-                0,
-                maxY
-            );
-            invalidate();
+        if (bitmap == null || e1 == null || e2 == null) return false;
+
+        // ✅ 仅在未缩放时允许水平手势翻页
+        // 放大后水平滑动应走下方的 scroller.fling 平移逻辑
+        boolean isZoomed = viewScale > minScale + 0.01f;
+
+        // ✅ 边缘防误触：fling 起点在屏幕左/右边缘安全区内时，
+        // 视为系统手势残留，不触发翻页
+        boolean startInEdgeZone =
+            e1.getX() < edgeSafeZonePx || e1.getX() > canvasW - edgeSafeZonePx;
+
+        if (
+            !isZoomed &&
+            !startInEdgeZone &&
+            actionListener != null &&
+            actionListener.isReflowable
+        ) {
+            float absVx = Math.abs(velocityX);
+            float absVy = Math.abs(velocityY);
+            float density = getResources().getDisplayMetrics().density;
+            float deltaX = e2.getX() - e1.getX();
+            float absDeltaX = Math.abs(deltaX);
+
+            boolean fastEnough =
+                absVx > H_FLING_VELOCITY_DP * density &&
+                absVx > absVy * H_FLING_DIRECTION_RATIO;
+            boolean farEnough =
+                absDeltaX > H_FLING_DISTANCE_DP * density &&
+                absDeltaX >
+                    Math.abs(e2.getY() - e1.getY()) * H_FLING_DIRECTION_RATIO;
+
+            if (fastEnough || farEnough) {
+                scroller.forceFinished(true);
+
+                if (actionListener != null) {
+                    // ✅ （转为 1-based 显示值）
+                    int targetPage =
+                        deltaX < 0
+                            ? actionListener.currentPage + 2 // (current+1) 是下一页的0-based索引，再+1用于显示
+                            : actionListener.currentPage; // (current-1)+1 = current，刚好抵消
+                    targetPage = Math.max(
+                        1,
+                        Math.min(targetPage, actionListener.pageCount)
+                    );
+
+                    pageTurnHintText = String.valueOf(targetPage);
+                    showPageTurnHint = true;
+
+                    // ✅  600ms 后自动消失
+                    removeCallbacks(hideHintRunnable);
+                    postDelayed(hideHintRunnable, 600);
+
+                    invalidate();
+
+                    // ✅ 不再延迟翻页，立即执行
+                    if (deltaX < 0) actionListener.goForward();
+                    else actionListener.goBackward();
+                }
+                return true;
+            }
         }
+
+        // ===== 原有垂直滚动逻辑不变 =====
+        int maxX = bitmapW > canvasW ? bitmapW - canvasW : 0;
+        int maxY = bitmapH > canvasH ? bitmapH - canvasH : 0;
+        scroller.forceFinished(true);
+        scroller.fling(
+            scrollX,
+            scrollY,
+            (int) -velocityX,
+            (int) -velocityY,
+            0,
+            maxX,
+            0,
+            maxY
+        );
+        invalidate();
         return true;
     }
 
@@ -394,46 +485,6 @@ public class PageView
             viewScale
         );
     }
-
-    /*public void goBackward() {
-        scroller.forceFinished(true);
-        if (scrollY <= 0) {
-            if (scrollX <= 0) {
-                if (actionListener != null) actionListener.goBackward();
-                return;
-            }
-            scroller.startScroll(
-                scrollX,
-                scrollY,
-                (-canvasW * 9) / 10,
-                bitmapH - canvasH - scrollY,
-                500
-            );
-        } else {
-            scroller.startScroll(scrollX, scrollY, 0, (-canvasH * 9) / 10, 250);
-        }
-        invalidate();
-    }*/
-
-    /*public void goForward() {
-        scroller.forceFinished(true);
-        if (scrollY + canvasH >= bitmapH) {
-            if (scrollX + canvasW >= bitmapW) {
-                if (actionListener != null) actionListener.goForward();
-                return;
-            }
-            scroller.startScroll(
-                scrollX,
-                scrollY,
-                (canvasW * 9) / 10,
-                -scrollY,
-                500
-            );
-        } else {
-            scroller.startScroll(scrollX, scrollY, 0, (canvasH * 9) / 10, 250);
-        }
-        invalidate();
-    }*/
 
     public void goBackward() {
         scroller.forceFinished(true);
@@ -491,23 +542,6 @@ public class PageView
             invalidate(); /* keep animating */
         }
 
-        /*if (bitmapW <= canvasW) {
-            scrollX = 0;
-            x = (canvasW - bitmapW) / 2;
-        } else {
-            if (scrollX < 0) scrollX = 0;
-            if (scrollX > bitmapW - canvasW) scrollX = bitmapW - canvasW;
-            x = -scrollX;
-        }
-
-        if (bitmapH <= canvasH) {
-            scrollY = 0;
-            y = (canvasH - bitmapH) / 2;
-        } else {
-            if (scrollY < 0) scrollY = 0;
-            if (scrollY > bitmapH - canvasH) scrollY = bitmapH - canvasH;
-            y = -scrollY;
-        }*/
         // 钳位逻辑
         if (bitmapW <= canvasW) {
             scrollX = 0;
@@ -586,6 +620,44 @@ public class PageView
                 path.close();
                 canvas.drawPath(path, selectionPaint); // ✅ 使用独立的蓝色选区 Paint
             }
+        }
+
+        // ✅ 翻页页码提示气泡
+        if (showPageTurnHint && !pageTurnHintText.isEmpty()) {
+            float textY = canvasH * 0.35f; // 垂直偏上位置，不遮挡正文
+            float paddingX = 24f * getResources().getDisplayMetrics().density;
+            float paddingY = 12f * getResources().getDisplayMetrics().density;
+            float cornerRadius =
+                8f * getResources().getDisplayMetrics().density;
+
+            // 测量文字尺寸
+            float textWidth = hintTextPaint.measureText(pageTurnHintText);
+            float textHeight = hintTextPaint.getTextSize();
+
+            float left = (canvasW - textWidth) / 2f - paddingX;
+            float top = textY - textHeight / 2f - paddingY;
+            float right = (canvasW + textWidth) / 2f + paddingX;
+            float bottom = textY + textHeight / 2f + paddingY;
+
+            // 绘制圆角背景
+            canvas.drawRoundRect(
+                left,
+                top,
+                right,
+                bottom,
+                cornerRadius,
+                cornerRadius,
+                hintBgPaint
+            );
+            // 绘制页码文字（baseline 对齐）
+            Paint.FontMetrics fm = hintTextPaint.getFontMetrics();
+            float baseline = textY - (fm.ascent + fm.descent) / 2f;
+            canvas.drawText(
+                pageTurnHintText,
+                canvasW / 2f,
+                baseline,
+                hintTextPaint
+            );
         }
     }
 
