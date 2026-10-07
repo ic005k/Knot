@@ -10,11 +10,13 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo; // ✅ 用于按文件类型控制屏幕方向
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Insets;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
@@ -51,9 +53,14 @@ import android.widget.Toast;
 import android.widget.ViewAnimator;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.artifex.mupdf.fitz.*;
+import com.artifex.mupdf.fitz.Quad;
 import com.artifex.mupdf.fitz.SeekableInputStream;
+import com.artifex.mupdf.fitz.android.*;
 import com.x.MyActivity; // ✅ NEW
+import com.x.MyService;
 import com.x.R;
+import com.x.TTSUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream; // ✅ NEW
@@ -72,6 +79,52 @@ public class DocumentActivity extends Activity {
     // ✅ NEW: TXT 转换相关字段
     private boolean isTxtFile = false;
     private ProgressDialog mConvertProgressDialog = null;
+
+    // TTS /////////////////////////////////////////////////
+    private ImageButton ttsButton;
+    protected boolean mIsTtsReading = false;
+    protected int mTtsReadingPage = -1;
+    /** 缓存当前页提取的纯文本，用于末尾判断 */
+    private String mCurrentPageText = "";
+    /** 缓存当前页的变换矩阵，供高亮搜索使用 */
+    private Matrix mCurrentPageCtm = null;
+
+    // TTS睡眠定时//////////////////////////////////////////////
+    private ImageButton sleepTimerButton;
+    private boolean mSleepTimerEnabled = false;
+    private final android.os.Handler mSleepTimerHandler =
+        new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable mSleepStopTtsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // 2小时到，停止朗读
+            //stopTtsReading();
+            mSleepTimerEnabled = false;
+            updateSleepTimerButtonState();
+            runOnUiThread(() -> {
+                Toast.makeText(
+                    DocumentActivity.this,
+                    MyActivity.zh_cn
+                        ? "睡眠定时已结束，朗读停止"
+                        : "Sleep timer expired, reading stopped",
+                    Toast.LENGTH_SHORT
+                ).show();
+            });
+        }
+    };
+
+    //////////////////////////////////////////////////
+
+    // 固定排版参数（不允许用户调整）
+    private static final float FIXED_LETTER_SPACING = 0.08f; // 字间距：0.05~0.1em 最适宜，过大则散
+    private static final float FIXED_LINE_HEIGHT = 1.65f; // 行高：1.5~1.8 为中文舒适区，1.65 兼顾紧凑与透气
+    /////////////////////////////////////////////////
+
+    private ImageButton minimizeAppButton;
+    private ImageButton readingNoteButton;
+
+    private ImageButton mDarkModeButton;
+    protected boolean mInvertMode = false;
 
     /* The core rendering instance */
     enum TopBarMode {
@@ -120,11 +173,15 @@ public class DocumentActivity extends Activity {
     private int mLayoutEM = 10;
     private int mLayoutW = 312;
     private int mLayoutH = 504;
+    private static final int DEFAULT_LAYOUT_EM = 10;
 
     protected Insets systemInsets = Insets.NONE;
 
     protected View mLayoutButton;
     protected PopupMenu mLayoutPopupMenu;
+
+    protected PageView pageView;
+    protected String key;
 
     public static native void CallJavaNotify_0();
 
@@ -261,6 +318,32 @@ public class DocumentActivity extends Activity {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // ============ 屏幕方向控制（与旧版 Mini 实现一致）============
+        Uri uri = getIntent().getData();
+        String fileName = "";
+        if (uri != null) {
+            Cursor cursor = getContentResolver().query(
+                uri,
+                null,
+                null,
+                null,
+                null
+            );
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIdx = cursor.getColumnIndex(
+                    OpenableColumns.DISPLAY_NAME
+                );
+                if (nameIdx >= 0) fileName = cursor.getString(nameIdx);
+                cursor.close();
+            }
+        }
+        // 仅 PDF 强制横屏，TXT/EPUB 等流式文档保持系统默认方向
+        boolean isPdf = fileName.toLowerCase().endsWith(".pdf");
+        if (isPdf) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        // =========================================================
+
         mPdfActivity = this;
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -292,7 +375,7 @@ public class DocumentActivity extends Activity {
                 ) != 0;
 
             if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-                Uri uri = intent.getData();
+                uri = intent.getData();
                 String mimetype = getIntent().getType();
 
                 if (uri == null) {
@@ -472,7 +555,13 @@ public class DocumentActivity extends Activity {
     }
 
     public void relayoutDocument() {
-        int loc = core.layout(mDocView.mCurrent, mLayoutW, mLayoutH, mLayoutEM);
+        if (core == null || mDocView == null) return;
+        int current = mDocView.getDisplayedViewIndex();
+        int loc = core.layout(current, mLayoutW, mLayoutH, mLayoutEM);
+        // 边界保护：防止映射后页码越界
+        if (loc < 0 || loc >= core.countPages()) {
+            loc = Math.max(0, Math.min(current, core.countPages() - 1));
+        }
         mFlatOutline = null;
         mDocView.mHistory.clear();
         mDocView.refresh();
@@ -496,13 +585,18 @@ public class DocumentActivity extends Activity {
     public void createUI(Bundle savedInstanceState) {
         if (core == null) return;
 
+        // ✅ 同步 key 与 mDocKey（读书笔记等功能依赖 key）
+        key = mDocKey;
+
         // Now create the UI.
         // First create the document view
+        // ✅ 标记：createUI 中页码恢复完成前，禁止 onSizeChanged 触发 relayout
+        final boolean[] layoutReady = { false };
+
         mDocView = new ReaderView(this) {
             @Override
             protected void onMoveToChild(int i) {
                 if (core == null) return;
-
                 mPageNumberView.setText(
                     String.format(
                         Locale.ROOT,
@@ -532,12 +626,20 @@ public class DocumentActivity extends Activity {
 
             @Override
             public void onSizeChanged(int w, int h, int oldw, int oldh) {
-                if (core.isReflowable()) {
-                    mLayoutW = (w * 72) / mDisplayDPI;
-                    mLayoutH = (h * 72) / mDisplayDPI;
-                    relayoutDocument();
-                } else {
-                    refresh();
+                int newW = (w * 72) / mDisplayDPI;
+                int newH = (h * 72) / mDisplayDPI;
+
+                // 仅当尺寸真正变化时才更新（避免首次布局的虚假触发）
+                boolean sizeChanged = newW != mLayoutW || newH != mLayoutH;
+                mLayoutW = newW;
+                mLayoutH = newH;
+
+                if (layoutReady[0] && sizeChanged) {
+                    if (core.isReflowable()) {
+                        relayoutDocument();
+                    } else {
+                        refresh();
+                    }
                 }
             }
         };
@@ -558,6 +660,47 @@ public class DocumentActivity extends Activity {
         // Make the buttons overlay, and store all its
         // controls in variables
         makeButtonsView();
+
+        // ✅ 暗黑模式切换按钮
+        mDarkModeButton = (ImageButton) mButtonsView.findViewById(
+            R.id.dark_mode_button
+        );
+        if (mDarkModeButton != null) {
+            // 从 SharedPreferences 恢复状态
+            SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
+            mInvertMode = prefs.getBoolean("invert_mode_" + mDocKey, false);
+
+            mDarkModeButton.setOnClickListener(v -> {
+                mInvertMode = !mInvertMode;
+
+                // 持久化当前文档的暗黑模式状态
+                getPreferences(Context.MODE_PRIVATE)
+                    .edit()
+                    .putBoolean("invert_mode_" + mDocKey, mInvertMode)
+                    .apply();
+
+                // 同步更新状态栏图标颜色
+                updateStatusBarIconMode(mInvertMode);
+
+                // ✅ 通知 MuPDFCore 更新反色状态
+                if (core != null) {
+                    core.setInvertMode(mInvertMode);
+                }
+
+                // ✅ 刷新当前显示的页面（触发重新绘制）
+                if (mDocView != null) {
+                    mDocView.applyToChildren(view -> {
+                        if (view instanceof PageView) {
+                            ((PageView) view).setInvertMode(mInvertMode);
+                            ((PageView) view).invalidate();
+                        }
+                    });
+                }
+            });
+
+            // 初始化状态栏图标
+            updateStatusBarIconMode(mInvertMode);
+        }
 
         // Set up the page slider
         int smax = Math.max(core.countPages() - 1, 1);
@@ -712,7 +855,7 @@ public class DocumentActivity extends Activity {
             mLayoutPopupMenu.setOnMenuItemClickListener(
                 new PopupMenu.OnMenuItemClickListener() {
                     public boolean onMenuItemClick(MenuItem item) {
-                        float oldLayoutEM = mLayoutEM;
+                        int oldLayoutEM = mLayoutEM;
                         int id = item.getItemId();
                         if (id == R.id.action_layout_6pt) mLayoutEM = 6;
                         else if (id == R.id.action_layout_7pt) mLayoutEM = 7;
@@ -725,7 +868,14 @@ public class DocumentActivity extends Activity {
                         else if (id == R.id.action_layout_14pt) mLayoutEM = 14;
                         else if (id == R.id.action_layout_15pt) mLayoutEM = 15;
                         else if (id == R.id.action_layout_16pt) mLayoutEM = 16;
-                        if (oldLayoutEM != mLayoutEM) relayoutDocument();
+                        if (oldLayoutEM != mLayoutEM) {
+                            // ✅ 持久化字号
+                            getPreferences(Context.MODE_PRIVATE)
+                                .edit()
+                                .putInt("layoutEm_" + mDocKey, mLayoutEM)
+                                .apply();
+                            relayoutDocument();
+                        }
                         return true;
                     }
                 }
@@ -733,6 +883,28 @@ public class DocumentActivity extends Activity {
             mLayoutButton.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
+                        // ✅ 每次弹出前重置菜单标题（去掉旧 ✓ 标记）
+                        Menu menu = mLayoutPopupMenu.getMenu();
+                        for (int i = 0; i < menu.size(); i++) {
+                            MenuItem item = menu.getItem(i);
+                            CharSequence title = item.getTitle();
+                            if (title != null) {
+                                String t = title.toString();
+                                if (t.startsWith("✓ ")) {
+                                    item.setTitle(t.substring(2));
+                                }
+                            }
+                        }
+                        // ✅ 给当前字号加 ✓ 标记
+                        int currentId = getMenuIdForEm(mLayoutEM);
+                        if (currentId != -1) {
+                            MenuItem currentItem = menu.findItem(currentId);
+                            if (currentItem != null) {
+                                currentItem.setTitle(
+                                    "✓ " + currentItem.getTitle()
+                                );
+                            }
+                        }
                         mLayoutPopupMenu.show();
                     }
                 }
@@ -778,8 +950,87 @@ public class DocumentActivity extends Activity {
         }
 
         // Reenstate last state if it was recorded
+        /////////////////////////////////////////////////////////////////////
+        // ✅ 恢复保存的状态
         SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
-        mDocView.setDisplayedViewIndex(prefs.getInt("page" + mDocKey, 0));
+
+        // 1. 恢复字号（兼容旧版 Float 和新版 Int）
+        int savedEm = DEFAULT_LAYOUT_EM;
+        try {
+            savedEm = prefs.getInt("layoutEm_" + mDocKey, -1);
+        } catch (ClassCastException e) {
+            // 旧版遗留 Float，读取并迁移
+            try {
+                float oldVal = prefs.getFloat("layoutEm_" + mDocKey, -1f);
+                if (oldVal >= 6 && oldVal <= 16) {
+                    savedEm = Math.round(oldVal);
+                }
+            } catch (Exception ignored) {}
+            // 立即迁移为 Int，防止 onPause 再次写 Float 前就崩溃
+            prefs
+                .edit()
+                .putInt("layoutEm_" + mDocKey, savedEm)
+                .apply();
+        }
+        if (savedEm < 6 || savedEm > 16) savedEm = DEFAULT_LAYOUT_EM;
+        mLayoutEM = savedEm;
+
+        // 2. 恢复页码
+        int savedPage = prefs.getInt("page" + mDocKey, 0);
+
+        // 3. 对 reflowable 文档：先用恢复的字号 layout，再跳转
+        if (core.isReflowable()) {
+            // core.layout 返回映射后的安全页码
+            int mappedPage = core.layout(
+                savedPage,
+                mLayoutW,
+                mLayoutH,
+                mLayoutEM
+            );
+            // 边界保护
+            if (mappedPage < 0 || mappedPage >= core.countPages()) {
+                mappedPage = Math.max(
+                    0,
+                    Math.min(savedPage, core.countPages() - 1)
+                );
+            }
+            mDocView.setDisplayedViewIndex(mappedPage);
+            Log.i(
+                APP,
+                "Restored: em=" +
+                    mLayoutEM +
+                    ", savedPage=" +
+                    savedPage +
+                    ", mappedPage=" +
+                    mappedPage +
+                    ", pageCount=" +
+                    core.countPages()
+            );
+        } else {
+            // PDF 等固定排版文档：直接跳转，做边界保护
+            int safePage = Math.max(
+                0,
+                Math.min(savedPage, core.countPages() - 1)
+            );
+            mDocView.setDisplayedViewIndex(safePage);
+            Log.i(
+                APP,
+                "Restored: page=" +
+                    safePage +
+                    ", pageCount=" +
+                    core.countPages()
+            );
+        }
+
+        // ✅ 页码恢复完成，允许后续 onSizeChanged 触发 relayout
+        layoutReady[0] = true;
+
+        /////////////////////////////////////////////////////////
+
+        if (
+            savedInstanceState == null ||
+            !savedInstanceState.getBoolean("ButtonsHidden", false)
+        ) showButtons();
 
         if (
             savedInstanceState == null ||
@@ -907,7 +1158,18 @@ public class DocumentActivity extends Activity {
             SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
             SharedPreferences.Editor edit = prefs.edit();
             edit.putInt("page" + mDocKey, mDocView.getDisplayedViewIndex());
+            // ✅ 新增：按文档 key 保存字号
+            edit.putInt("layoutEm_" + mDocKey, mLayoutEM);
             edit.apply();
+        }
+
+        // ✅ 保存暗黑模式状态
+        if (mDocKey != null) {
+            SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
+            prefs
+                .edit()
+                .putBoolean("invert_mode_" + mDocKey, mInvertMode)
+                .apply();
         }
     }
 
@@ -1130,6 +1392,42 @@ public class DocumentActivity extends Activity {
         mTopBar.setVisibility(View.VISIBLE);
         mSearchBar.setVisibility(View.GONE);
         mBottomBar.setVisibility(View.INVISIBLE);
+
+        // 读书笔记按钮
+        readingNoteButton = (ImageButton) mButtonsView.findViewById(
+            R.id.reading_note_button
+        );
+        readingNoteButton.setOnClickListener(v -> {
+            MyActivity.mInstance.PublicJavaCallCpp(
+                "open_reading_notes|==|" + key
+            );
+        });
+
+        // 睡眠定时器按钮
+        sleepTimerButton = (ImageButton) mButtonsView.findViewById(
+            R.id.sleep_timer_button
+        );
+        sleepTimerButton.setOnClickListener(v -> {
+            mSleepTimerEnabled = !mSleepTimerEnabled;
+            updateSleepTimerButtonState();
+            if (mIsTtsReading) {
+                mSleepTimerHandler.removeCallbacks(mSleepStopTtsRunnable);
+                if (mSleepTimerEnabled) {
+                    mSleepTimerHandler.postDelayed(
+                        mSleepStopTtsRunnable,
+                        2 * 60 * 60 * 1000
+                    );
+                }
+            }
+        });
+
+        // ===== 最小化APP按钮 =====
+        minimizeAppButton = (ImageButton) mButtonsView.findViewById(
+            R.id.minimize_app_button
+        );
+        minimizeAppButton.setOnClickListener(v -> {
+            MyActivity.setMini();
+        });
     }
 
     private void showKeyboard() {
@@ -1289,6 +1587,165 @@ public class DocumentActivity extends Activity {
             return new String(data, "GBK");
         } catch (java.io.UnsupportedEncodingException e) {
             return new String(data); // 兜底使用平台默认编码（通常 UTF-8）
+        }
+    }
+
+    /** 更新睡眠按钮图标状态：开启时图标高亮 */
+    private void updateSleepTimerButtonState() {
+        if (sleepTimerButton == null) return;
+        if (mSleepTimerEnabled) {
+            sleepTimerButton.setColorFilter(0xFF42A5F5); //蓝色高亮，表示睡眠定时已启用
+        } else {
+            sleepTimerButton.clearColorFilter();
+        }
+    }
+
+    /**
+     * 根据暗黑模式切换状态栏图标颜色
+     */
+    private void updateStatusBarIconMode(boolean isDark) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+
+        Window window = getWindow();
+        int vis = window.getDecorView().getSystemUiVisibility();
+        int baseFlags =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+
+        if (!isDark) {
+            vis = baseFlags | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        } else {
+            vis = baseFlags;
+        }
+        window.getDecorView().setSystemUiVisibility(vis);
+    }
+
+    /** 根据 MenuItem ID 返回对应的字号值 */
+    private int getEmForMenuId(int id) {
+        if (id == R.id.action_layout_6pt) return 6;
+        else if (id == R.id.action_layout_7pt) return 7;
+        else if (id == R.id.action_layout_8pt) return 8;
+        else if (id == R.id.action_layout_9pt) return 9;
+        else if (id == R.id.action_layout_10pt) return 10;
+        else if (id == R.id.action_layout_11pt) return 11;
+        else if (id == R.id.action_layout_12pt) return 12;
+        else if (id == R.id.action_layout_13pt) return 13;
+        else if (id == R.id.action_layout_14pt) return 14;
+        else if (id == R.id.action_layout_15pt) return 15;
+        else if (id == R.id.action_layout_16pt) return 16;
+        return -1;
+    }
+
+    /** 获取指定字号对应的 MenuItem ID */
+    private int getMenuIdForEm(int em) {
+        switch (em) {
+            case 6:
+                return R.id.action_layout_6pt;
+            case 7:
+                return R.id.action_layout_7pt;
+            case 8:
+                return R.id.action_layout_8pt;
+            case 9:
+                return R.id.action_layout_9pt;
+            case 10:
+                return R.id.action_layout_10pt;
+            case 11:
+                return R.id.action_layout_11pt;
+            case 12:
+                return R.id.action_layout_12pt;
+            case 13:
+                return R.id.action_layout_13pt;
+            case 14:
+                return R.id.action_layout_14pt;
+            case 15:
+                return R.id.action_layout_15pt;
+            case 16:
+                return R.id.action_layout_16pt;
+            default:
+                return -1;
+        }
+    }
+
+    /**
+     * 非 PDF 笔记跳转：恢复字号 relayout 后，以保存页码为中心进行螺旋搜索
+     * @param savedPage 1-based 保存页码
+     * @param keyword   关键词
+     * @param savedBookmark 保存的字号字符串（如 "10"）
+     */
+    private void relayoutThenSearchNote(
+        final int savedPage,
+        final String keyword,
+        final String savedBookmark
+    ) {
+        // 1. 恢复字号
+        try {
+            int savedEm = Integer.parseInt(savedBookmark);
+            if (savedEm >= 6 && savedEm <= 16 && savedEm != mLayoutEM) {
+                mLayoutEM = savedEm;
+                getPreferences(Context.MODE_PRIVATE)
+                    .edit()
+                    .putInt("layoutEm_" + mDocKey, mLayoutEM)
+                    .apply();
+            }
+        } catch (NumberFormatException ignored) {}
+
+        // 2. 重新排版 + 螺旋搜索
+        new Thread(() -> {
+            int targetPage = -1;
+            try {
+                int centerPage = savedPage - 1; // 1-based → 0-based
+                int pageCount = core.countPages();
+                if (centerPage < 0) centerPage = 0;
+                if (centerPage >= pageCount) centerPage = pageCount - 1;
+
+                // 螺旋搜索：以 centerPage 为中心，向外扩展最多 50 页
+                int maxRadius = 50;
+                for (int radius = 0; radius <= maxRadius; radius++) {
+                    int pageToCheck = centerPage + radius;
+                    if (pageToCheck < pageCount) {
+                        if (checkPageForKeyword(pageToCheck, keyword)) {
+                            targetPage = pageToCheck;
+                            break;
+                        }
+                    }
+                    if (radius > 0) {
+                        pageToCheck = centerPage - radius;
+                        if (pageToCheck >= 0) {
+                            if (checkPageForKeyword(pageToCheck, keyword)) {
+                                targetPage = pageToCheck;
+                                break;
+                            }
+                        }
+                    }
+                    if (
+                        centerPage + radius >= pageCount &&
+                        centerPage - radius < 0
+                    ) {
+                        break;
+                    }
+                }
+
+                if (targetPage < 0) targetPage = centerPage;
+            } catch (Exception e) {
+                targetPage = 0;
+            }
+
+            final int finalPage = targetPage;
+            runOnUiThread(() -> {
+                if (mDocView != null) {
+                    mDocView.setDisplayedViewIndex(finalPage);
+                }
+            });
+        }).start();
+    }
+
+    /** 检查指定页面是否包含关键词 */
+    private boolean checkPageForKeyword(int pageNum, String keyword) {
+        try {
+            Quad[][] hits = core.searchPage(pageNum, keyword);
+            return hits != null && hits.length > 0;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

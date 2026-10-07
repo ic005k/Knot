@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
   RegJni("com/x/Desk_Exercise");
   RegJni("com/x/FilePicker");
   RegJni("com/xhh/pdfui/PDFActivity");
-  RegJni("com/x/artifex/mupdf/viewer/DocumentActivity");
+  RegJni("com/x/artifex/mupdf/mini/DocumentActivity");
   RegJni("com/x/DefaultOpen");
   RegJni("com/x/DateTimePicker");
   RegJni17("com/x/WebViewActivity");

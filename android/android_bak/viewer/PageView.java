@@ -58,6 +58,8 @@ public class PageView extends ViewGroup {
     private final String APP = "MuPDF";
     private final MuPDFCore mCore;
 
+    private boolean mInvertMode = false;
+
     private static final int HIGHLIGHT_COLOR = 0x80cc6600;
     private static final int LINK_COLOR = 0x800066cc;
     private static final int BOX_COLOR = 0xFF4444FF;
@@ -345,7 +347,9 @@ public class PageView extends ViewGroup {
                     final Paint paint = new Paint();
 
                     if (!mIsBlank && mSearchBoxes != null) {
-                        paint.setColor(HIGHLIGHT_COLOR);
+                        paint.setColor(
+                            mInvertMode ? 0x80FFD54F : HIGHLIGHT_COLOR
+                        );
                         for (Quad[] searchBox : mSearchBoxes) {
                             for (Quad q : searchBox) {
                                 Path path = new Path();
@@ -360,7 +364,7 @@ public class PageView extends ViewGroup {
                     }
 
                     if (!mIsBlank && mLinks != null && mHighlightLinks) {
-                        paint.setColor(LINK_COLOR);
+                        paint.setColor(mInvertMode ? 0x8064B5F6 : LINK_COLOR);
                         for (Link link : mLinks)
                             canvas.drawRect(
                                 link.getBounds().x0 * scale,
@@ -707,5 +711,92 @@ public class PageView extends ViewGroup {
         } catch (RuntimeException e) {
             return null;
         }
+    }
+
+    public void setInvertMode(boolean invert) {
+        mInvertMode = invert;
+        // ✅ 不再只是 invalidate，而是触发完整的重渲染
+        rerenderForColorMode();
+    }
+
+    // ✅ 新增：强制以当前模式重新渲染页面
+    public void rerenderForColorMode() {
+        // 更新背景色
+        setBackgroundColor(mInvertMode ? 0xFF000000 : BACKGROUND_COLOR);
+
+        // 清除旧的 bitmap 显示，避免用户看到旧图闪烁
+        if (mEntire != null) {
+            mEntire.setImageBitmap(null);
+            mEntire.invalidate();
+        }
+        if (mPatch != null) {
+            mPatch.setImageBitmap(null);
+            mPatch.invalidate();
+        }
+
+        // 取消正在进行的渲染任务（它们用的是旧模式）
+        if (mDrawEntire != null) {
+            mDrawEntire.cancel();
+            mDrawEntire = null;
+        }
+        if (mDrawPatch != null) {
+            mDrawPatch.cancel();
+            mDrawPatch = null;
+        }
+
+        // 如果页面已设置且非空白，重新触发 entire 渲染
+        if (!mIsBlank && mSize != null && mErrorIndicator == null) {
+            // 复用 setPage 中的渲染逻辑：创建新的 AsyncTask 渲染 mEntireBm
+            mDrawEntire = new CancellableAsyncTask<Void, Boolean>(
+                getDrawPageTask(
+                    mEntireBm,
+                    mSize.x,
+                    mSize.y,
+                    0,
+                    0,
+                    mSize.x,
+                    mSize.y
+                )
+            ) {
+                @Override
+                public void onPreExecute() {
+                    setBackgroundColor(
+                        mInvertMode ? 0xFF000000 : BACKGROUND_COLOR
+                    );
+                    mEntire.setImageBitmap(null);
+                    mEntire.invalidate();
+
+                    if (mBusyIndicator == null) {
+                        mBusyIndicator = new ProgressBar(mContext);
+                        mBusyIndicator.setIndeterminate(true);
+                        addView(mBusyIndicator);
+                        mBusyIndicator.setVisibility(INVISIBLE);
+                        mHandler.postDelayed(() -> {
+                            if (
+                                mBusyIndicator != null
+                            ) mBusyIndicator.setVisibility(VISIBLE);
+                        }, PROGRESS_DIALOG_DELAY);
+                    }
+                }
+
+                @Override
+                public void onPostExecute(Boolean result) {
+                    removeView(mBusyIndicator);
+                    mBusyIndicator = null;
+                    if (result.booleanValue()) {
+                        clearRenderError();
+                        mEntire.setImageBitmap(mEntireBm);
+                        mEntire.invalidate();
+                    } else {
+                        setRenderError("Error rendering page");
+                    }
+                    setBackgroundColor(Color.TRANSPARENT);
+                }
+            };
+            mDrawEntire.execute();
+        }
+
+        // 刷新搜索/链接叠加层
+        if (mSearchView != null) mSearchView.invalidate();
     }
 }

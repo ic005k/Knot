@@ -1,182 +1,236 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:keepScreenOn="true"
-	>
-
-	<ViewAnimator
-		android:id="@+id/switcher"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_alignParentTop="true"
-		android:layout_centerHorizontal="true"
-		>
-
+<?xml version="1.0" encoding="utf-8" ?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/background_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    android:background="#505050"
+>
+	<com.x.artifex.mupdf.mini.PageView
+        android:id="@+id/page_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#505050"
+        android:keepScreenOn="true"
+    />
+	<LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical"
+        android:background="#303030"
+        android:visibility="gone"
+    >
 		<LinearLayout
-			android:id="@+id/topBar"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="vertical"
-			android:background="@color/toolbar"
-			>
+            android:id="@+id/action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+        >
 
-			<LinearLayout
-				android:id="@+id/actionBar"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:orientation="horizontal"
-				>
+            <!-- Open按钮 -->
+            <ImageButton
+                android:id="@+id/open_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_open_in_new"
+            />
 
-				<TextView
-					android:id="@+id/docNameText"
-					android:layout_width="0dp"
-					android:layout_height="wrap_content"
-					android:layout_weight="1"
-					android:layout_gravity="center"
-					android:paddingLeft="16dp"
-					android:paddingRight="8dp"
-					android:singleLine="true"
-					android:ellipsize="end"
-					android:textSize="16sp"
-					android:textColor="@android:color/white"
-					/>
+            <!-- 暗黑模式切换按钮 -->
+                <ImageButton
+                android:id="@+id/dark_mode_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_dark_mode_white_24dp"
+                android:layout_marginRight="4dp"
+            />
 
-				<ImageButton
-					android:id="@+id/linkButton"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:background="@drawable/button"
-					android:src="@drawable/ic_link_white_24dp"
-					/>
+            <!-- 读书笔记按钮 -->
+            <ImageButton
+                android:id="@+id/reading_note_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_note_white_24dp"
+                android:layout_marginRight="4dp"
+                android:contentDescription="读书笔记"
+            />
 
-				<ImageButton
-					android:id="@+id/searchButton"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:background="@drawable/button"
-					android:src="@drawable/ic_search_white_24dp"
-					/>
-
-				<ImageButton
-					android:id="@+id/layoutButton"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:background="@drawable/button"
-					android:src="@drawable/ic_format_size_white_24dp"
-					android:visibility="gone"
-					/>
-
-				<ImageButton
-					android:id="@+id/outlineButton"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:background="@drawable/button"
-					android:src="@drawable/ic_toc_white_24dp"
-					/>
-
-			</LinearLayout>
-
-			<LinearLayout
-				android:id="@+id/searchBar"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:orientation="horizontal"
-				>
-
-				<ImageButton
-					android:id="@+id/searchClose"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:background="@drawable/button"
-					android:src="@drawable/ic_close_white_24dp"
-					/>
-
-				<EditText
-					android:id="@+id/searchText"
-					android:background="@android:color/transparent"
-					android:layout_width="0dp"
-					android:layout_height="wrap_content"
-					android:layout_weight="1"
-					android:layout_gravity="center"
-					android:inputType="text"
-					android:imeOptions="actionSearch"
-					android:singleLine="true"
-					android:hint="@string/search"
-					android:textSize="16sp"
-					android:textColor="@android:color/white"
-					android:textColorHighlight="#a0a0a0"
-					android:textColorHint="#a0a0a0"
-					/>
-
-				<ImageButton
-					android:id="@+id/searchBack"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:background="@drawable/button"
-					android:src="@drawable/ic_chevron_left_white_24dp"
-					/>
-
-				<ImageButton
-					android:id="@+id/searchForward"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:background="@drawable/button"
-					android:src="@drawable/ic_chevron_right_white_24dp"
-					/>
-
-			</LinearLayout>
-
+			<TextView
+                android:id="@+id/title_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
+                android:textColor="#FFFFFF"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textSize="16sp"
+            />
+			<ImageButton
+                android:id="@+id/search_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_search_white_24dp"
+            />
+			<ImageButton
+                android:id="@+id/zoom_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_zoom_out_map_white_24dp"
+                android:visibility="gone"
+            />
+			<ImageButton
+                android:id="@+id/layout_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_format_size_white_24dp"
+                android:visibility="gone"
+            />
+			<ImageButton
+                android:id="@+id/outline_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_toc_white_24dp"
+                android:visibility="gone"
+            />
 		</LinearLayout>
-
-	</ViewAnimator>
-
-	<RelativeLayout
-		android:id="@+id/lowerButtons"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:layout_centerHorizontal="true"
-		>
-
 		<LinearLayout
-			android:id="@+id/bottomBar"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:orientation="vertical"
-			android:background="@color/toolbar"
-			android:layout_alignParentBottom="true"
-			android:layout_centerHorizontal="true"
-			>
-
-			<SeekBar
-				android:id="@+id/pageSlider"
-				android:layout_width="match_parent"
-				android:layout_height="36dp"
-				android:layout_margin="0dp"
-				android:paddingLeft="16dp"
-				android:paddingRight="16dp"
-				android:paddingTop="12dp"
-				android:paddingBottom="8dp"
-				android:thumb="@drawable/seek_thumb"
-				android:progressDrawable="@drawable/seek_line"
-				/>
-
+            android:id="@+id/search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+        >
+			<ImageButton
+                android:id="@+id/search_close_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_close_white_24dp"
+            />
+			<EditText
+                android:id="@+id/search_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@android:color/transparent"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#a0a0a0"
+                android:singleLine="true"
+                android:textSize="16sp"
+                android:hint="@string/text_search_hint"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:importantForAutofill="no"
+            />
+			<ImageButton
+                android:id="@+id/search_backward_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_chevron_left_white_24dp"
+            />
+			<ImageButton
+                android:id="@+id/search_forward_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button"
+                android:src="@drawable/ic_chevron_right_white_24dp"
+            />
 		</LinearLayout>
+	</LinearLayout>
+	<LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:background="#303030"
+        android:visibility="gone"
+    >
+        <!-- ✅ TTS 播放/停止按钮 -->
+        <ImageButton
+            android:id="@+id/tts_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:background="@drawable/button"
+            android:src="@drawable/ic_volume_up_white_24dp"
+            android:contentDescription="TTS"
+            android:padding="12dp"
+        />
 
+        <!-- 睡眠定时器按钮：月亮图标，开启后高亮 -->
+        <ImageButton
+            android:id="@+id/sleep_timer_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:background="@drawable/button"
+            android:src="@drawable/ic_sleep_white_24dp"
+            android:contentDescription="Sleep Timer"
+            android:padding="12dp"
+        />
+
+        <!-- 最小化APP按钮 -->
+        <ImageButton
+            android:id="@+id/minimize_app_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:background="@drawable/button"
+            android:src="@drawable/ic_minimize_white_24dp"
+            android:contentDescription="Minimize"
+            android:padding="12dp"
+        />
+
+		<SeekBar
+            android:id="@+id/page_seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:thumb="@drawable/seek_thumb"
+            android:progressDrawable="@drawable/seek_line"
+            android:max="0"
+        />
 		<TextView
-			android:id="@+id/pageNumber"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_above="@+id/bottomBar"
-			android:layout_centerHorizontal="true"
-			android:layout_marginBottom="16dp"
-			android:background="@drawable/page_indicator"
-			android:textSize="16sp"
-			android:textColor="@android:color/white"
-			/>
-
-	</RelativeLayout>
-
+            android:id="@+id/page_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="#FFFFFF"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:text="- / -"
+        />
+	</LinearLayout>
 </RelativeLayout>

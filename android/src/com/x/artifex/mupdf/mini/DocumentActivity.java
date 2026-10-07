@@ -2015,7 +2015,7 @@ public class DocumentActivity extends Activity {
         runOnUiThread(() -> {
             // 调用C++方法，参数是txt的Uri字符串
             MyActivity.mInstance.PublicJavaCallCpp(
-                "txt_convert_to_pdf|==|" + txtUri.toString()
+                "txt_convert_to_epub|==|" + txtUri.toString()
             );
         });
     }

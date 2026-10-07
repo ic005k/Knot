@@ -22,6 +22,8 @@ public class MuPDFCore {
 
     private final String APP = "MuPDF";
 
+    private boolean mInvertMode = false;
+
     private final int MAXIMUM_OUTLINE_ITEMS = 1000;
     private final int MAXIMUM_OUTLINE_DEPTH = 4;
 
@@ -167,6 +169,11 @@ public class MuPDFCore {
         } finally {
             dev.destroy();
         }
+
+        // ✅ 渲染完成后，在后台线程直接做暖灰后处理
+        if (mInvertMode) {
+            applyWarmGray(bm);
+        }
     }
 
     public synchronized void updatePage(
@@ -269,5 +276,67 @@ public class MuPDFCore {
         pageCount = doc.countPages();
         reflowable = doc.isReflowable();
         return authenticated;
+    }
+
+    // ✅ 保留原有 setter（DocumentActivity 已调用此方法）
+    public void setInvertMode(boolean invert) {
+        mInvertMode = invert;
+    }
+
+    public boolean isInvertMode() {
+        return mInvertMode;
+    }
+
+    // ✅ 暖灰算法：直接移植旧版 invertBitmap 的三区间映射
+    // 放在 drawPage 末尾，渲染完 bitmap 后立即执行
+    private void applyWarmGray(Bitmap bm) {
+        if (bm == null || bm.isRecycled()) return;
+
+        int w = bm.getWidth();
+        int h = bm.getHeight();
+        int[] pixels = new int[w * h];
+        bm.getPixels(pixels, 0, w, 0, 0, w, h);
+
+        // 与旧版完全一致的参数
+        final int TARGET_R = 0xB8; // 184
+        final int TARGET_G = 0xA8; // 168
+        final int TARGET_B = 0x90; // 144
+        final float TEXT_THRESHOLD = 95f / 255f;
+        final float BG_THRESHOLD = 200f / 255f;
+
+        for (int i = 0; i < pixels.length; i++) {
+            int px = pixels[i];
+            int a = (px >> 24) & 0xFF;
+            int r = (px >> 16) & 0xFF;
+            int g = (px >> 8) & 0xFF;
+            int b = px & 0xFF;
+
+            float lum = (0.299f * r + 0.587f * g + 0.114f * b) / 255f;
+
+            int nr, ng, nb;
+            if (lum >= BG_THRESHOLD) {
+                // 背景 → 纯黑
+                nr = ng = nb = 0;
+            } else if (lum <= TEXT_THRESHOLD) {
+                // 文字 → 暖灰
+                float ratio = 1.0f - lum / TEXT_THRESHOLD;
+                float scale = 0.7f + 0.3f * ratio;
+                nr = (int) (TARGET_R * scale);
+                ng = (int) (TARGET_G * scale);
+                nb = (int) (TARGET_B * scale);
+            } else {
+                // 过渡区 → 平滑插值
+                float edge =
+                    (lum - TEXT_THRESHOLD) / (BG_THRESHOLD - TEXT_THRESHOLD);
+                float scale = 0.7f * (1.0f - edge);
+                nr = (int) (TARGET_R * scale);
+                ng = (int) (TARGET_G * scale);
+                nb = (int) (TARGET_B * scale);
+            }
+
+            pixels[i] = (a << 24) | (nr << 16) | (ng << 8) | nb;
+        }
+
+        bm.setPixels(pixels, 0, w, 0, 0, w, h);
     }
 }
