@@ -309,4 +309,7 @@
     <color name="md_blue_grey_800">#37474F</color>
     <color name="md_blue_grey_900">#263238</color>
 
+    <color name="page_indicator">#C0202020</color>
+    <color name="toolbar">#C0202020</color>
+
 </resources>

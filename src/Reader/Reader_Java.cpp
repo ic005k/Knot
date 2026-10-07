@@ -37,7 +37,7 @@ static QString decodeGbkViaJni(const QByteArray& gbk) {
                           reinterpret_cast<const jbyte*>(gbk.constData()));
 
   QJniObject result = QJniObject::callStaticObjectMethod(
-      "com/x/artifex/mupdf/mini/DocumentActivity", "decodeGbk",
+      "com/x/artifex/mupdf/viewer/DocumentActivity", "decodeGbk",
       "([B)Ljava/lang/String;", jBytes);
 
   env->DeleteLocalRef(jBytes);
@@ -75,8 +75,8 @@ void Reader::setPdfDataToJava(QString txtFile) {
   if (pdfData.isEmpty()) return;
 
   QJniObject instance = QJniObject::getStaticObjectField(
-      "com/x/artifex/mupdf/mini/DocumentActivity", "mPdfActivity",
-      "Lcom/x/artifex/mupdf/mini/DocumentActivity;");
+      "com/x/artifex/mupdf/viewer/DocumentActivity", "mPdfActivity",
+      "Lcom/x/artifex/mupdf/viewer/DocumentActivity;");
 
   if (instance.isValid()) {
     QJniEnvironment env;
@@ -170,8 +170,8 @@ void Reader::setFb2DataToJava(QString txtFile) {
   if (fb2Data.isEmpty()) return;
 
   QJniObject instance = QJniObject::getStaticObjectField(
-      "com/x/artifex/mupdf/mini/DocumentActivity", "mPdfActivity",
-      "Lcom/x/artifex/mupdf/mini/DocumentActivity;");
+      "com/x/artifex/mupdf/viewer/DocumentActivity", "mPdfActivity",
+      "Lcom/x/artifex/mupdf/viewer/DocumentActivity;");
 
   if (instance.isValid()) {
     QJniEnvironment env;
@@ -342,8 +342,8 @@ void Reader::setEpubDataToJava(const QString& txtFile) {
   if (epubData.isEmpty()) return;
 
   QJniObject instance = QJniObject::getStaticObjectField(
-      "com/x/artifex/mupdf/mini/DocumentActivity", "mPdfActivity",
-      "Lcom/x/artifex/mupdf/mini/DocumentActivity;");
+      "com/x/artifex/mupdf/viewer/DocumentActivity", "mPdfActivity",
+      "Lcom/x/artifex/mupdf/viewer/DocumentActivity;");
 
   if (instance.isValid()) {
     QJniEnvironment env;

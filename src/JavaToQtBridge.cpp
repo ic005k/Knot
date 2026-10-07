@@ -1401,9 +1401,9 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
                                []() { mw_one->on_btnAISteps_clicked(); });
           }
 
-          // txt to pdf
+          // txt to epub
           // /////////////////////////////////////////////////////////////
-          if (strType.startsWith("txt_convert_to_pdf|==|")) {
+          if (strType.startsWith("txt_convert_to_epub|==|")) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               QString file = fileName;  // list.at(1);

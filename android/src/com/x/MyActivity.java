@@ -1643,34 +1643,57 @@ public class MyActivity
         //if (PDFActivity.mPdfActivity != null) PDFActivity.mPdfActivity.finish();
     }
 
-    // 打开MuPDF‑mini阅读器
+    // 打开MuPDF阅读器
     public void openMuPDF(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            Toast.makeText(
+                getMyAppContext(),
+                "文件不存在",
+                Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
         Uri fileUri;
+        String mimeType = "application/pdf"; // 默认值，可根据后缀动态判断
+
+        // 根据后缀自动推断 MIME Type
+        String name = file.getName().toLowerCase();
+        if (name.endsWith(".pdf")) mimeType = "application/pdf";
+        else if (name.endsWith(".xps")) mimeType =
+            "application/vnd.ms-xpsdocument";
+        else if (name.endsWith(".cbz")) mimeType = "application/x-cbz";
+        else if (name.endsWith(".epub")) mimeType = "application/epub+zip";
+        else if (name.endsWith(".fb2")) mimeType =
+            "application/x-fictionbook+xml";
+
         if (Build.VERSION.SDK_INT >= 24) {
             fileUri = FileProvider.getUriForFile(
                 getMyAppContext(),
-                getMyAppContext().getPackageName(),
-                new File(path)
+                "com.x", // ✅ 与 Manifest 中 android:authorities 完全一致
+                file
             );
         } else {
-            fileUri = Uri.fromFile(new File(path));
+            fileUri = Uri.fromFile(file);
         }
 
-        Intent i = new Intent(
+        Intent i = new Intent(Intent.ACTION_VIEW); // ✅ 关键：设置 ACTION_VIEW
+        i.setClass(
             getMyAppContext(),
-            com.x.artifex.mupdf.mini.DocumentActivity.class
+            com.x.artifex.mupdf.viewer.DocumentActivity.class
         );
+        i.setDataAndType(fileUri, mimeType); // ✅ 关键：同时设置 Data 和 Type
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        i.setData(fileUri);
-        // 把主Activity的暗黑状态传递过去
-        i.putExtra("invert_mode", mPdfInvertMode);
         i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        i.putExtra("invert_mode", mPdfInvertMode);
+
         getMyAppContext().startActivity(i);
     }
 
     public void closeMuPDF() {
-        if (com.x.artifex.mupdf.mini.DocumentActivity.mPdfActivity != null) {
-            com.x.artifex.mupdf.mini.DocumentActivity.mPdfActivity.finish();
+        if (com.x.artifex.mupdf.viewer.DocumentActivity.mPdfActivity != null) {
+            com.x.artifex.mupdf.viewer.DocumentActivity.mPdfActivity.finish();
         }
     }
 
