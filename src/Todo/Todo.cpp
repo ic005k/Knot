@@ -35,7 +35,8 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
 
   /////////////////////////////////////////////////////////////////////
   // 1. 设置自定义委托
-  ui->listTodo->setItemDelegate(new TodoItemDelegate(this));
+  TodoItemDelegate* delegate = new TodoItemDelegate(this);
+  ui->listTodo->setItemDelegate(delegate);
 
   // 2. 优化 QListWidget 的显示效果
   ui->listTodo->setSelectionMode(
@@ -46,6 +47,30 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
       QAbstractItemView::ScrollPerPixel);  // 平滑滚动
   ui->listTodo->setHorizontalScrollBarPolicy(
       Qt::ScrollBarAlwaysOff);  // 隐藏水平滚动条
+
+  connect(delegate, &TodoItemDelegate::toolButtonClicked, this,
+          [this](const QModelIndex& index, const QString& actionId) {
+            // 从 model 获取该行数据
+            QString rawData = index.data(Qt::DisplayRole).toString();
+            QStringList parts = rawData.split("|==|");
+            if (parts.size() < 3) return;
+
+            if (actionId == QLatin1String("high")) {
+              on_btnHigh_clicked();
+
+            } else if (actionId == QLatin1String("low")) {
+              on_btnLow_clicked();
+
+            } else if (actionId == QLatin1String("edit")) {
+              on_btnEdit_clicked();
+
+            } else if (actionId == QLatin1String("schedule")) {
+              on_btnAlarm_clicked();
+
+            } else if (actionId == QLatin1String("done")) {
+              on_btnDone_clicked();
+            }
+          });
 
   // 回车键触发添加记录
   connect(ui->editTodoText, &QLineEdit::returnPressed, this,
@@ -275,13 +300,13 @@ void Todo::on_btnHigh(int index) {
   insertItem(strTime, 1, strText, 0);
   setCurrentIndex(0);
 
+  refreshAlarm();
+
   if (isAndroid) {
     cppRefreshTodoCardList();
   } else {
     setDataToTodoList();
   }
-
-  refreshAlarm();
 
   saveTodo();
 }
@@ -1611,8 +1636,6 @@ void Todo::on_btnTestSpeech() {
 }
 
 void Todo::setAlarmShowValue(bool value) { isTodoAlarmShow = value; }
-
-void Todo::showInputPanel() {}
 
 void Todo::on_btnHigh_clicked() {
   int idx = ui->listTodo->currentRow();

@@ -458,17 +458,11 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
   msg->showMsg(appName, res, 1);
 }
 
-void MainWindow::on_btnAddBookNote_clicked() { m_Reader->addBookNote(""); }
-
-void MainWindow::on_btnViewBookNote_clicked() { m_Reader->viewBookNote(); }
-
 void MainWindow::on_btnSpeak_clicked() {
   isPlayBook = true;
   m_Reader->setAutoStopPlayTime();
   m_Reader->startSpeak();
 }
-
-void MainWindow::on_btnStopSpeak_clicked() { m_Reader->stopSpeak(); }
 
 void MainWindow::on_btnSteps_clicked() { m_Steps->openStepsUI(); }
 
@@ -552,12 +546,6 @@ void MainWindow::on_btnOpen_clicked() {
 }
 
 void MainWindow::on_btnEditNote_clicked() { m_Notes->openEditUI(); }
-
-void MainWindow::on_btnToPDF_clicked() {
-  if (!QFile::exists(currentMDFile)) return;
-
-  m_Notes->on_btnPDF_clicked();
-}
 
 void MainWindow::on_btnTestWebDav_clicked() {
   auto msg = std::make_unique<ShowMessage>(mw_one);

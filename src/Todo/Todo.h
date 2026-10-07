@@ -118,8 +118,6 @@ class Todo : public QDialog {
 
   void setAlarmShowValue(bool value);
 
-  void showInputPanel();
-
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
   void closeEvent(QCloseEvent* event) override;

@@ -539,8 +539,6 @@ class MainWindow : public QMainWindow {
 
   void on_btnDelNote_NoteBook_clicked();
 
-  void on_btnToPDF_clicked();
-
   void on_btnNoteRecycle_clicked();
 
   void on_btnAIReportAnalysis_clicked();
@@ -621,13 +619,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnNewNote_clicked();
 
-  void on_btnAddBookNote_clicked();
-
-  void on_btnViewBookNote_clicked();
-
   void on_btnSpeak_clicked();
-
-  void on_btnStopSpeak_clicked();
 
   void on_chkPlayRunVoice_clicked(bool checked);
 
