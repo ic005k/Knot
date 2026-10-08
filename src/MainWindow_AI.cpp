@@ -13,7 +13,7 @@ void MainWindow::gotoEnd() {
     if (m_Reader->isAIReaderExplanation) {
       m_Reader->isAIReaderExplanation = false;
       m_Method->execJavaFunc("mPdfActivity", "dismissAiLoadingDialog",
-                             "artifex/mupdf/mini/DocumentActivity");
+                             "reader/DocumentActivity");
     }
 
     if (mw_one->m_Report->isAiMainEvent) {
@@ -187,9 +187,9 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
               if (isAndroid) {
                 QStringList list;
                 list.append(aiReplyText);
-                m_Method->refreshJavaData(
-                    "mPdfActivity", "showAiMarkdownDialog",
-                    "artifex/mupdf/mini/DocumentActivity", list);
+                m_Method->refreshJavaData("mPdfActivity",
+                                          "showAiMarkdownDialog",
+                                          "reader/DocumentActivity", list);
               } else {
                 m_MsgBox->ui->btnOk->setText(tr("Add Note"));
                 if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {

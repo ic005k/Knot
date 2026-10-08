@@ -441,7 +441,7 @@ QStringList Reader::readReadNote() {
   }
 
   m_Method->refreshJavaData("mPdfActivity", "showNoteListDialog",
-                            "artifex/mupdf/mini/DocumentActivity", result);
+                            "reader/DocumentActivity", result);
 
   return result;
 }

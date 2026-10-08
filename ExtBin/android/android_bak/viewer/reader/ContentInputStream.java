@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.util.Log;
 import com.artifex.mupdf.fitz.SeekableInputStream;
-import com.x.R;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
