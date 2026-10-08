@@ -612,12 +612,12 @@
 
 
         <activity
-            android:name="com.x.artifex.mupdf.mini.DocumentActivity"
+            android:name="com.x.reader.DocumentActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden"
         />
         <activity
-            android:name="com.x.artifex.mupdf.mini.OutlineActivity"
+            android:name="com.x.reader.OutlineActivity"
             android:exported="false"
         />
 

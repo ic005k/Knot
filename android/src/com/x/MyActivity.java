@@ -1644,7 +1644,7 @@ public class MyActivity
     }
 
     // 打开MuPDF‑mini阅读器
-    public void openMuPDF(String path) {
+    /*public void openMuPDF(String path) {
         Uri fileUri;
         if (Build.VERSION.SDK_INT >= 24) {
             fileUri = FileProvider.getUriForFile(
@@ -1658,7 +1658,7 @@ public class MyActivity
 
         Intent i = new Intent(
             getMyAppContext(),
-            com.x.artifex.mupdf.mini.DocumentActivity.class
+            com.x.reader.DocumentActivity.class
         );
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         i.setData(fileUri);
@@ -1666,11 +1666,61 @@ public class MyActivity
         i.putExtra("invert_mode", mPdfInvertMode);
         i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         getMyAppContext().startActivity(i);
+    }*/
+
+    public void openMuPDF(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            Toast.makeText(
+                getMyAppContext(),
+                "文件不存在",
+                Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        Uri fileUri;
+        String mimeType = "application/octet-stream"; // ← 改为更安全的默认值
+        String name = file.getName().toLowerCase();
+        if (name.endsWith(".pdf")) mimeType = "application/pdf";
+        else if (name.endsWith(".xps")) mimeType =
+            "application/vnd.ms-xpsdocument";
+        else if (name.endsWith(".cbz")) mimeType = "application/x-cbz";
+        else if (name.endsWith(".epub")) mimeType = "application/epub+zip";
+        else if (name.endsWith(".fb2")) mimeType =
+            "application/x-fictionbook+xml";
+        else if (name.endsWith(".txt")) mimeType = "text/plain";
+        // ← 新增
+        else if (
+            name.endsWith(".html") ||
+            name.endsWith(".htm") // ← 建议一并添加
+        ) mimeType = "text/html";
+        else if (name.endsWith(".xml")) mimeType = "text/xml"; // ← 可选
+
+        if (Build.VERSION.SDK_INT >= 24) {
+            // ✅ 只传 3 个参数，authority 必须与 AndroidManifest.xml 中一致
+            fileUri = FileProvider.getUriForFile(
+                getMyAppContext(),
+                getMyAppContext().getPackageName(),
+                file
+            );
+        } else {
+            fileUri = Uri.fromFile(file);
+        }
+
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setClass(getMyAppContext(), com.x.reader.DocumentActivity.class);
+        i.setDataAndType(fileUri, mimeType);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        i.putExtra("invert_mode", mPdfInvertMode);
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        getMyAppContext().startActivity(i);
     }
 
     public void closeMuPDF() {
-        if (com.x.artifex.mupdf.mini.DocumentActivity.mPdfActivity != null) {
-            com.x.artifex.mupdf.mini.DocumentActivity.mPdfActivity.finish();
+        if (com.x.reader.DocumentActivity.mPdfActivity != null) {
+            com.x.reader.DocumentActivity.mPdfActivity.finish();
         }
     }
 

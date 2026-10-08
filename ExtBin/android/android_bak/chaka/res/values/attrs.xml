@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="Theme">
+        <attr name="highlight" format="reference" />
+        <attr name="link" format="reference" />
+        <attr name="selection" format="reference" />
+        <attr name="highlight_button" format="reference" />
+        <attr name="highunlight_button" format="reference" />
+        <attr name="enabled_button" format="reference" />
+        <attr name="disabled_button" format="reference" />
+    </declare-styleable>
+</resources>

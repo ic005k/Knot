@@ -1,0 +1,51 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.MyApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- for App Title -->
+        <item name="colorPrimary">@color/toolbar</item>
+        <item name="colorPrimaryDark">@color/toolbar</item>
+        <item name="colorAccent">@color/mediumseagreen</item>
+        <!-- <item name="colorPrimaryVariant">@color/purple_700</item> -->
+        <!-- <item name="colorOnPrimary">@color/black</item> -->
+        <!-- for menu checkbox -->
+        <item name="colorSecondary">@android:color/white</item>
+
+        <!-- for menu background-->
+        <item name="android:colorBackground">@color/toolbar</item>
+        <!-- <item name="colorOnBackground">@android:color/white</item> -->
+        <!-- <item name="colorSurface">@color/toolbar</item> -->
+        <!-- <item name="colorOnSurface">@color/black</item> -->
+        <!-- <item name="colorError">@color/black</item> -->
+        <!-- <item name="colorOnError">@color/black</item> -->
+
+        <!-- for overscroll-->
+        <item name="android:colorEdgeEffect">@color/mediumseagreen</item>
+
+        <!-- for menu text -->
+        <item name="android:textColor">@android:color/white</item>
+        <!-- for system bars -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- on Android 10+ for true transparency -->
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+
+        <!-- for pageview -->
+        <item name="highlight">@color/highlight</item>
+        <item name="link">@color/link</item>
+        <item name="selection">@color/selection</item>
+
+        <!-- for document activity -->
+        <item name="highlight_button">@color/highlight_button</item>
+        <item name="highunlight_button">@color/highunlight_button</item>
+        <item name="enabled_button">@color/enabled_button</item>
+        <item name="disabled_button">@color/disabled_button</item>
+    </style>
+
+    <style name="MyDialog" parent="android:Theme.Material.Dialog.Alert">
+        <item name="android:windowNoTitle">false</item>
+    </style>
+
+    <style name="MyDialog2" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorSurface">@android:color/white</item>
+    </style>
+</resources>

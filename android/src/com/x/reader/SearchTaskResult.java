@@ -1,0 +1,25 @@
+package com.x.reader;
+
+import com.artifex.mupdf.fitz.Quad;
+
+public class SearchTaskResult {
+
+    public final String txt;
+    public final int pageNumber;
+    public final Quad searchBoxes[][];
+    private static SearchTaskResult singleton;
+
+    SearchTaskResult(String _txt, int _pageNumber, Quad[][] _searchBoxes) {
+        txt = _txt;
+        pageNumber = _pageNumber;
+        searchBoxes = _searchBoxes;
+    }
+
+    public static SearchTaskResult get() {
+        return singleton;
+    }
+
+    public static void set(SearchTaskResult r) {
+        singleton = r;
+    }
+}
