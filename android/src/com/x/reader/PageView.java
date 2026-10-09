@@ -59,7 +59,7 @@ public class PageView extends ViewGroup {
     private final Paint mTtsPaint = new Paint();
 
     private final String APP = "MuPDF";
-    private final MuPDFCore mCore;
+    public final MuPDFCore mCore;
 
     private boolean mInvertMode = false;
 
@@ -841,5 +841,34 @@ public class PageView extends ViewGroup {
     public void clearTtsHighlight() {
         this.mTtsQuads = null;
         if (mSearchView != null) mSearchView.invalidate();
+    }
+
+    public float getSourceScale() {
+        return mSourceScale;
+    }
+
+    public Point getPageSize() {
+        return mSize;
+    }
+
+    /**
+     * 【笔记专用】将 View 上的触摸坐标转换为文档坐标，并提取附近的文字片段
+     * @param viewX 相对于 PageView 左上角的 X 坐标
+     * @param viewY 相对于 PageView 左上角的 Y 坐标
+     * @return 附近的文字片段，如果没有命中文字则返回 null
+     */
+    public String getNearTextAt(float viewX, float viewY) {
+        if (mSize == null || mSize.x == 0 || mSize.y == 0) return null;
+
+        // 计算当前 View 坐标到文档坐标的缩放比
+        float scale = (mSourceScale * (float) getWidth()) / (float) mSize.x;
+        if (scale == 0) return null;
+
+        // 转换为文档坐标系
+        float docRelX = viewX / scale;
+        float docRelY = viewY / scale;
+
+        // 调用 MuPDFCore 提取附近文本
+        return mCore.getNearText(mPageNumber, docRelX, docRelY);
     }
 }

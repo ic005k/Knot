@@ -45,8 +45,19 @@ public class MuPDFCore {
 
     private boolean outlineTruncated;
 
+    // ✅ 固定排版参数（与 DocumentActivity 中的常量保持一致）
+    private static final float FIXED_LETTER_SPACING = 0.08f;
+    private static final float FIXED_LINE_HEIGHT = 1.65f;
+
     private MuPDFCore(Document doc) {
         this.doc = doc;
+
+        // ✅ 必须先获取 reflowable 状态，applyFixedSpacing() 内部依赖此变量
+        reflowable = doc.isReflowable();
+
+        // ✅ 首次 layout 前注入 CSS
+        applyFixedSpacing();
+
         doc.layout(layoutW, layoutH, layoutEM);
         pageCount = doc.countPages();
         reflowable = doc.isReflowable();
@@ -81,6 +92,10 @@ public class MuPDFCore {
             layoutH = h;
             layoutEM = em;
             long mark = doc.makeBookmark(doc.locationFromPageNumber(oldPage));
+
+            // ✅ 新增：每次重新排版前注入 CSS（确保全局 CSS 状态最新）
+            applyFixedSpacing();
+
             doc.layout(layoutW, layoutH, layoutEM);
             currentPage = -1;
             pageCount = doc.countPages();
@@ -377,6 +392,170 @@ public class MuPDFCore {
         } catch (Exception e) {
             Log.e(APP, "getPageText failed: " + e.getMessage());
             return "";
+        }
+    }
+
+    /**
+     * 注入固定的字间距、行间距和段落缩进 CSS。
+     * Context.setUserCSS 是进程级全局静态方法，对所有后续 doc.layout() 生效。
+     * 仅在 reflowable 文档（如 EPUB、转换后的 TXT）上执行。
+     */
+    private void applyFixedSpacing() {
+        if (!reflowable) return;
+
+        try {
+            String css = String.format(
+                // 1. 全局盒模型重置：消除所有元素的默认外边距和内边距
+                "* { " +
+                    "  margin-left: 0 !important; " +
+                    "  margin-right: 0 !important; " +
+                    "  padding-left: 0 !important; " +
+                    "  padding-right: 0 !important; " +
+                    "} " +
+                    // 2. body 强制全宽 + 消除 UA 默认 1em margin
+                    "body { " +
+                    "  margin: 0 !important; " +
+                    "  padding: 0 !important; " +
+                    "  width: 100%% !important; " +
+                    "  max-width: none !important; " +
+                    "  box-sizing: border-box !important; " +
+                    "} " +
+                    // 3. 块级元素强制撑满宽度
+                    "p, div, section, article, blockquote, pre, ul, ol, li, table, h1, h2, h3, h4, h5, h6 { " +
+                    "  width: 100%% !important; " +
+                    "  max-width: none !important; " +
+                    "  box-sizing: border-box !important; " +
+                    "} " +
+                    // 4. 段落首行缩进2字符
+                    "p { " +
+                    "  text-indent: 2em !important; " +
+                    "} " +
+                    // 5. 字间距和行高
+                    "body, p, div, span, li { " +
+                    "  letter-spacing: %.3fem !important; " +
+                    "  line-height: %.3f !important; " +
+                    "} " +
+                    "h1, h2, h3, h4, h5, h6 { " +
+                    "  line-height: 1.3 !important; " +
+                    "} ",
+                FIXED_LETTER_SPACING,
+                FIXED_LINE_HEIGHT
+            );
+
+            // 使用反射调用，兼容不同 MuPDF 构建版本
+            java.lang.reflect.Method method =
+                com.artifex.mupdf.fitz.Context.class.getMethod(
+                    "setUserCSS",
+                    String.class
+                );
+            method.invoke(null, css);
+
+            Log.i(
+                APP,
+                "Fixed spacing CSS applied (letter-spacing=" +
+                    FIXED_LETTER_SPACING +
+                    "em, line-height=" +
+                    FIXED_LINE_HEIGHT +
+                    ")"
+            );
+        } catch (NoSuchMethodException e) {
+            Log.w(APP, "Context.setUserCSS not available in this MuPDF build");
+        } catch (Exception e) {
+            Log.w(APP, "Context.setUserCSS failed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 提取指定页面的纯文本（用于 TTS 和 笔记全文提取）
+     * 已有的 getPageText 方法可直接复用，无需修改。
+     */
+
+    /**
+     * 【笔记专用】获取长按位置附近的文字片段（用于高亮定位）
+     * @param pageNum 页码
+     * @param docX 文档坐标系 X
+     * @param docY 文档坐标系 Y
+     * @return 附近的文字片段，可能为 null
+     */
+    public synchronized String getNearText(
+        int pageNum,
+        float docX,
+        float docY
+    ) {
+        gotoPage(pageNum);
+        if (page == null) return null;
+        try {
+            com.artifex.mupdf.fitz.StructuredText stext = page.toStructuredText(
+                "preserve-whitespace"
+            );
+            float r = 5f;
+            com.artifex.mupdf.fitz.Point p1 = new com.artifex.mupdf.fitz.Point(
+                docX - r,
+                docY - r
+            );
+            com.artifex.mupdf.fitz.Point p2 = new com.artifex.mupdf.fitz.Point(
+                docX + r,
+                docY + r
+            );
+            Quad[] hlQuads = stext.highlight(p1, p2);
+
+            String nearText = null;
+            if (hlQuads != null && hlQuads.length > 0) {
+                Quad nearest = hlQuads[0];
+                float minDist = Float.MAX_VALUE;
+                for (Quad q : hlQuads) {
+                    float cx = (q.ul_x + q.lr_x) / 2f;
+                    float cy = (q.ul_y + q.lr_y) / 2f;
+                    float dist =
+                        (cx - docX) * (cx - docX) + (cy - docY) * (cy - docY);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        nearest = q;
+                    }
+                }
+                float lineTop = nearest.ul_y - 2f;
+                float lineBottom = nearest.lr_y + 2f;
+                float lineLeft = Math.max(0, nearest.ul_x - 200f);
+                float lineRight = nearest.lr_x + 200f;
+                com.artifex.mupdf.fitz.Point qa =
+                    new com.artifex.mupdf.fitz.Point(lineLeft, lineTop);
+                com.artifex.mupdf.fitz.Point qb =
+                    new com.artifex.mupdf.fitz.Point(lineRight, lineBottom);
+                nearText = stext.copy(qa, qb);
+            }
+            stext.destroy();
+            return nearText;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 【笔记专用】生成当前页的 MuPDF 书签（Hex 字符串）
+     */
+    public synchronized String makeCurrentBookmark(int pageNum) {
+        try {
+            long mark = doc.makeBookmark(doc.locationFromPageNumber(pageNum));
+            return Long.toHexString(mark);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /**
+     * 【笔记专用】检查指定页面是否包含关键词
+     */
+    public synchronized boolean checkPageForKeyword(
+        int pageNum,
+        String keyword
+    ) {
+        gotoPage(pageNum);
+        if (page == null) return false;
+        try {
+            Quad[][] hits = page.search(keyword);
+            return hits != null && hits.length > 0;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

@@ -3,6 +3,7 @@ package com.x.reader;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog; // ✅ NEW
 import android.content.ContentResolver;
 import android.content.Context;
@@ -14,10 +15,14 @@ import android.content.pm.ActivityInfo; // ✅ 用于按文件类型控制屏幕
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.net.Uri;
@@ -26,15 +31,25 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.text.Editable;
+import android.text.Html;
+import android.text.InputType;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
+import android.text.style.BackgroundColorSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.ActionMode;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -42,11 +57,16 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -75,6 +95,8 @@ public class DocumentActivity extends Activity {
     public static DocumentActivity mPdfActivity;
 
     private final String APP = "MuPDF";
+
+    private androidx.appcompat.app.AlertDialog mAiLoadingDialog;
 
     // ✅ NEW: TXT 转换相关字段
     private boolean isTxtFile = false;
@@ -1218,6 +1240,13 @@ public class DocumentActivity extends Activity {
 
     public void onDestroy() {
         dismissConvertDialog(); // ✅ 兜底关闭弹窗
+        // ✅ 清理 AI 弹窗
+        if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
+            try {
+                mAiLoadingDialog.dismiss();
+            } catch (Exception ignored) {}
+            mAiLoadingDialog = null;
+        }
 
         mSleepTimerHandler.removeCallbacks(mSleepStopTtsRunnable);
         // ✅ 不再调用 stopTtsReading()
@@ -1770,9 +1799,30 @@ public class DocumentActivity extends Activity {
             }
 
             final int finalPage = targetPage;
+            final String finalKeyword = keyword;
             runOnUiThread(() -> {
                 if (mDocView != null) {
                     mDocView.setDisplayedViewIndex(finalPage);
+
+                    // ✅ 为非 PDF 文档也注入搜索高亮
+                    new Thread(() -> {
+                        Quad[][] hits = core.searchPage(
+                            finalPage,
+                            finalKeyword
+                        );
+                        runOnUiThread(() -> {
+                            if (hits != null && hits.length > 0) {
+                                // ✅ 直接使用带参构造器
+                                SearchTaskResult result = new SearchTaskResult(
+                                    finalKeyword,
+                                    finalPage,
+                                    hits
+                                );
+                                SearchTaskResult.set(result);
+                                mDocView.resetupChildren();
+                            }
+                        });
+                    }).start();
                 }
             });
         }).start();
@@ -1981,6 +2031,914 @@ public class DocumentActivity extends Activity {
         if (service != null) service.setTtsSentenceListener(
             mTtsSentenceListener
         );
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // ================= 笔记与 AI 弹窗相关方法开始 =================
+
+    /**
+     * 弹出独立文本窗口：显示当前页全文，高亮并定位到长按处的文字
+     */
+    public void showTextSelectionDialog(
+        String fullText,
+        String targetText,
+        int pageNum
+    ) {
+        SpannableString spannable = new SpannableString(fullText);
+        int highlightStart = -1;
+        int highlightEnd = -1;
+
+        if (targetText != null && !targetText.isEmpty()) {
+            int idx = fullText.indexOf(targetText);
+            if (idx < 0) {
+                String compressed = targetText.replaceAll("\\s+", " ").trim();
+                if (compressed.length() >= 3) idx = fullText.indexOf(
+                    compressed
+                );
+                if (idx >= 0) targetText = compressed;
+            }
+            if (idx >= 0) {
+                highlightStart = idx;
+                highlightEnd = Math.min(
+                    idx + targetText.length(),
+                    fullText.length()
+                );
+                int hlColor = mInvertMode ? 0x66FFD54F : 0x88FFEB3B;
+                spannable.setSpan(
+                    new CenteredHighlightSpan(hlColor),
+                    highlightStart,
+                    highlightEnd,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                );
+            }
+        }
+
+        final boolean dark = mInvertMode;
+        final int bgColor = dark ? 0xFF000000 : 0xFFFAFAFA;
+        final int textMain = dark ? 0xFFB8A890 : 0xFF333333;
+        final int textSub = dark ? 0xFF706858 : 0xFF999999;
+
+        int dp16 = dp2px(16);
+        int dp12 = dp2px(12);
+        int dp8 = dp2px(8);
+
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(bgColor);
+
+        TextView headerLabel = new TextView(this);
+        headerLabel.setText(
+            (MyActivity.zh_cn ? "第 " : "Page ") +
+                (pageNum + 1) +
+                (MyActivity.zh_cn ? " 页" : "")
+        );
+        headerLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        headerLabel.setTextColor(textSub);
+        headerLabel.setPadding(dp16, dp12, dp16, 0);
+        root.addView(
+            headerLabel,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        final TextView textView = new TextView(this);
+        textView.setText(spannable);
+        textView.setTextIsSelectable(true);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        textView.setTextColor(textMain);
+        textView.setLineSpacing(0, 1.4f);
+        textView.setPadding(dp16, dp12, dp16, dp16);
+
+        final ScrollView scrollView = new ScrollView(this);
+        scrollView.setFillViewport(true);
+        scrollView.setBackgroundColor(bgColor);
+        scrollView.addView(
+            textView,
+            new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+        root.addView(
+            scrollView,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
+                1f
+            )
+        );
+
+        LinearLayout btnBar = new LinearLayout(this);
+        btnBar.setOrientation(LinearLayout.HORIZONTAL);
+        btnBar.setGravity(Gravity.END);
+        btnBar.setPadding(dp8, dp8, dp8, dp8);
+        btnBar.setBackgroundColor(bgColor);
+        TextView btnClose = createButton(MyActivity.zh_cn ? "关闭" : "Close");
+        btnBar.addView(
+            btnClose,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+        root.addView(
+            btnBar,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(root);
+        dialog.setCancelable(true);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setDimAmount(0.5f);
+            dialog
+                .getWindow()
+                .setBackgroundDrawableResource(
+                    dark
+                        ? android.R.drawable.dialog_holo_dark_frame
+                        : android.R.drawable.dialog_holo_light_frame
+                );
+        }
+
+        textView.setCustomSelectionActionModeCallback(
+            new TextSelectionActionModeCallback(textView, dialog)
+        );
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        int dialogW = Math.min(
+            (int) (dm.widthPixels * 0.75f),
+            (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                1200,
+                dm
+            )
+        );
+        int dialogH = Math.min(
+            (int) (dm.heightPixels * 0.85f),
+            (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                900,
+                dm
+            )
+        );
+        if (dialog.getWindow() != null) dialog
+            .getWindow()
+            .setLayout(dialogW, dialogH);
+
+        if (highlightStart >= 0) {
+            final int fStart = highlightStart;
+            final int fEnd = highlightEnd;
+            textView.post(() -> {
+                android.text.Layout layout = textView.getLayout();
+                if (layout == null) textView.post(() ->
+                    scrollToHighlight(textView, scrollView, fStart, fEnd)
+                );
+                else scrollToHighlight(textView, scrollView, fStart, fEnd);
+            });
+        }
+    }
+
+    private class TextSelectionActionModeCallback
+        implements ActionMode.Callback
+    {
+
+        private final TextView textView;
+        private final Dialog parentDialog;
+        private static final int ID_AI_SEARCH = 1001;
+        private static final int ID_WEB_SEARCH = 1002;
+        private static final int ID_ADD_NOTE = 1003;
+        private static final int CONTEXT_RADIUS = 50;
+
+        public TextSelectionActionModeCallback(
+            TextView textView,
+            Dialog parentDialog
+        ) {
+            this.textView = textView;
+            this.parentDialog = parentDialog;
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            int order = 100;
+            menu.add(
+                Menu.NONE,
+                ID_AI_SEARCH,
+                order++,
+                MyActivity.zh_cn ? "AI 搜索" : "AI Search"
+            ).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            menu.add(
+                Menu.NONE,
+                ID_WEB_SEARCH,
+                order++,
+                MyActivity.zh_cn ? "网页搜索" : "Web Search"
+            ).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            menu.add(
+                Menu.NONE,
+                ID_ADD_NOTE,
+                order++,
+                MyActivity.zh_cn ? "添加笔记" : "Add Note"
+            ).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            int start = textView.getSelectionStart();
+            int end = textView.getSelectionEnd();
+            if (start < 0 || end < 0 || start == end) return false;
+            String selectedText = textView
+                .getText()
+                .subSequence(start, end)
+                .toString()
+                .trim();
+            if (selectedText.isEmpty()) return false;
+
+            switch (item.getItemId()) {
+                case ID_AI_SEARCH:
+                    showAiLoadingDialog();
+                    MyActivity.mInstance.PublicJavaCallCpp(
+                        "pdf_ai_search|==|" + selectedText
+                    );
+                    return true;
+                case ID_WEB_SEARCH:
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+                        intent.putExtra(
+                            android.app.SearchManager.QUERY,
+                            selectedText
+                        );
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Toast.makeText(
+                            DocumentActivity.this,
+                            "Cannot launch web search",
+                            Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                    mode.finish();
+                    if (
+                        parentDialog != null && parentDialog.isShowing()
+                    ) parentDialog.dismiss();
+                    return true;
+                case ID_ADD_NOTE:
+                    CharSequence fullText = textView.getText();
+                    int totalLen = fullText.length();
+                    int ctxStart = Math.max(0, start - CONTEXT_RADIUS);
+                    int ctxEnd = Math.min(totalLen, end + CONTEXT_RADIUS);
+                    String searchContext = fullText
+                        .subSequence(ctxStart, ctxEnd)
+                        .toString()
+                        .replaceAll("\\s+", " ")
+                        .trim();
+                    showNoteInputDialog(
+                        selectedText,
+                        null,
+                        searchContext,
+                        null,
+                        parentDialog
+                    );
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {}
+    }
+
+    private void scrollToHighlight(
+        TextView textView,
+        ScrollView scrollView,
+        int start,
+        int end
+    ) {
+        android.text.Layout layout = textView.getLayout();
+        if (layout == null) return;
+        int lineTop = layout.getLineTop(layout.getLineForOffset(start));
+        int lineBottom = layout.getLineBottom(
+            layout.getLineForOffset(
+                Math.min(end, layout.getText().length() - 1)
+            )
+        );
+        int highlightCenterY =
+            (lineTop + lineBottom) / 2 + textView.getPaddingTop();
+        int scrollTarget = Math.max(
+            0,
+            highlightCenterY - scrollView.getHeight() / 3
+        );
+        scrollView.smoothScrollTo(0, scrollTarget);
+    }
+
+    private static class CenteredHighlightSpan extends BackgroundColorSpan {
+
+        private static final float VERTICAL_PADDING_RATIO = 0.15f;
+
+        public CenteredHighlightSpan(int color) {
+            super(color);
+        }
+
+        public void drawBackground(
+            Canvas canvas,
+            CharSequence text,
+            int start,
+            int end,
+            float x,
+            int top,
+            int y,
+            int bottom,
+            Paint paint
+        ) {
+            int lineHeight = bottom - top;
+            float padding = lineHeight * VERTICAL_PADDING_RATIO;
+            Paint.FontMetrics fm = paint.getFontMetrics();
+            float textHeight = fm.descent - fm.ascent;
+            float visualCenter = y + (fm.ascent + fm.descent) / 2f;
+            float halfBar = textHeight / 2f + padding;
+            float drawTop = visualCenter - halfBar;
+            float drawBottom = visualCenter + halfBar;
+            float textWidth = paint.measureText(text, start, end);
+            int savedColor = paint.getColor();
+            paint.setColor(getBackgroundColor());
+            canvas.drawRect(x, drawTop, x + textWidth, drawBottom, paint);
+            paint.setColor(savedColor);
+        }
+    }
+
+    public void showNoteListDialog(ArrayList<String> noteList) {
+        runOnUiThread(() -> {
+            if (noteList == null || noteList.isEmpty()) return;
+            final ArrayList<String> rawNoteData = new ArrayList<>(noteList);
+            final int[] selectedPos = { -1 };
+            final boolean dark = mInvertMode;
+            int bgRoot = dark ? 0xFF202020 : 0xFFFFFFFF;
+            int textColorMain = dark ? 0xFFEFEFEF : 0xFF222222;
+            int textColorSub = dark ? 0xFFB0B0B0 : 0xFF555555;
+            int itemSelectedBg = dark ? 0xFF354259 : 0xFFE0EDFF;
+            int dividerColor = dark ? 0xFF444444 : 0xFFDDDDDD;
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this,
+                0,
+                rawNoteData
+            ) {
+                @Override
+                public View getView(
+                    int position,
+                    View convertView,
+                    ViewGroup parent
+                ) {
+                    View itemView = convertView;
+                    ViewHolder holder;
+                    if (itemView == null) {
+                        LinearLayout layout = new LinearLayout(
+                            DocumentActivity.this
+                        );
+                        layout.setOrientation(LinearLayout.VERTICAL);
+                        layout.setPadding(
+                            dp2px(12),
+                            dp2px(12),
+                            dp2px(12),
+                            dp2px(12)
+                        );
+                        TextView tvPageTime = new TextView(
+                            DocumentActivity.this
+                        );
+                        tvPageTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                        TextView tvHtml = new TextView(DocumentActivity.this);
+                        tvHtml.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+                        tvHtml.setTypeface(
+                            Typeface.create(
+                                tvHtml.getTypeface(),
+                                Typeface.ITALIC
+                            )
+                        );
+                        TextView tvNote = new TextView(DocumentActivity.this);
+                        tvNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                        tvNote.setTypeface(
+                            Typeface.create(tvNote.getTypeface(), Typeface.BOLD)
+                        );
+                        layout.addView(tvPageTime);
+                        layout.addView(tvHtml);
+                        layout.addView(tvNote);
+                        itemView = layout;
+                        holder = new ViewHolder();
+                        holder.tvPageTime = tvPageTime;
+                        holder.tvHtml = tvHtml;
+                        holder.tvNote = tvNote;
+                        itemView.setTag(holder);
+                    } else {
+                        holder = (ViewHolder) itemView.getTag();
+                    }
+                    holder.tvPageTime.setTextColor(textColorSub);
+                    holder.tvHtml.setTextColor(textColorMain);
+                    holder.tvNote.setTextColor(textColorMain);
+                    String fullStr = rawNoteData.get(position);
+                    String[] parts = fullStr.split("===", 9);
+                    if (parts.length < 8) return itemView;
+                    String pageStr = parts[1].trim();
+                    if (
+                        !core.isReflowable() && !pageStr.equals("-1")
+                    ) holder.tvPageTime.setText(
+                        (MyActivity.zh_cn ? "页码：" : "Page:") +
+                            pageStr +
+                            " | " +
+                            parts[2].trim()
+                    );
+                    else holder.tvPageTime.setText(parts[2].trim());
+                    Spanned spannedHtml =
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                            ? Html.fromHtml(
+                                  parts[3].trim(),
+                                  Html.FROM_HTML_MODE_LEGACY
+                              )
+                            : Html.fromHtml(parts[3].trim());
+                    holder.tvHtml.setText(spannedHtml);
+                    holder.tvNote.setText(parts[4].trim());
+                    itemView.setBackgroundColor(
+                        selectedPos[0] == position ? itemSelectedBg : 0x00000000
+                    );
+                    return itemView;
+                }
+
+                class ViewHolder {
+
+                    TextView tvPageTime;
+                    TextView tvHtml;
+                    TextView tvNote;
+                }
+            };
+
+            ListView listView = new ListView(this);
+            listView.setAdapter(adapter);
+            listView.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
+            listView.setDividerHeight(dp2px(8));
+            listView.setDivider(new ColorDrawable(dividerColor));
+            listView.setBackgroundColor(bgRoot);
+
+            LinearLayout root = new LinearLayout(this);
+            root.setOrientation(LinearLayout.VERTICAL);
+            root.setBackgroundColor(bgRoot);
+            root.addView(
+                listView,
+                new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    0,
+                    1.0f
+                )
+            );
+
+            LinearLayout btnBar = new LinearLayout(this);
+            btnBar.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
+            btnBar.setWeightSum(4);
+            btnBar.setOrientation(LinearLayout.HORIZONTAL);
+            btnBar.setBackgroundColor(bgRoot);
+            TextView btnGo = createButton(MyActivity.zh_cn ? "转到" : "Go");
+            TextView btnEdit = createButton(MyActivity.zh_cn ? "编辑" : "Edit");
+            TextView btnDel = createButton(
+                MyActivity.zh_cn ? "删除" : "Delete"
+            );
+            TextView btnClose = createButton(
+                MyActivity.zh_cn ? "关闭" : "Close"
+            );
+            LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1.0f
+            );
+            btnBar.addView(btnGo, btnLp);
+            btnBar.addView(btnEdit, btnLp);
+            btnBar.addView(btnDel, btnLp);
+            btnBar.addView(btnClose, btnLp);
+            root.addView(
+                btnBar,
+                new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            );
+
+            final Dialog dialog = new Dialog(this);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(root);
+            dialog.setCancelable(true);
+            DisplayMetrics dm = getResources().getDisplayMetrics();
+            int dialogW = (int) (dm.widthPixels * 0.95f);
+            int dialogH = (int) (dm.heightPixels * 0.95f);
+
+            listView.setOnItemClickListener((parent, view, position, id) -> {
+                selectedPos[0] = position;
+                adapter.notifyDataSetChanged();
+            });
+
+            btnGo.setOnClickListener(v -> {
+                if (selectedPos[0] < 0) return;
+                String[] parts = rawNoteData
+                    .get(selectedPos[0])
+                    .split("===", 9);
+                final String keyword = parts[6].trim();
+                final int savedPage = Integer.parseInt(parts[1].trim());
+                final String savedBookmark =
+                    parts.length > 8 ? parts[8].trim() : "";
+                dialog.dismiss();
+                if (keyword.isEmpty()) {
+                    Toast.makeText(
+                        DocumentActivity.this,
+                        "Keyword empty",
+                        Toast.LENGTH_SHORT
+                    ).show();
+                    return;
+                }
+                mDocView.pushHistory();
+                if (core.isReflowable()) relayoutThenSearchNote(
+                    savedPage,
+                    keyword,
+                    savedBookmark
+                );
+                else {
+                    // ✅ 【PDF 策略】先跳页，再手动注入搜索结果以触发高亮
+                    int targetPage = savedPage - 1;
+                    if (targetPage < 0 || targetPage >= core.countPages()) {
+                        targetPage = mDocView.getDisplayedViewIndex();
+                    }
+
+                    mDocView.pushHistory();
+                    mDocView.setDisplayedViewIndex(targetPage);
+
+                    // ✅ 使用 final 变量供 lambda/匿名类捕获
+                    final int finalTargetPage = targetPage;
+                    final String finalKeyword = keyword;
+
+                    new Thread(() -> {
+                        Quad[][] hits = core.searchPage(
+                            finalTargetPage,
+                            finalKeyword
+                        );
+                        runOnUiThread(() -> {
+                            if (hits != null && hits.length > 0) {
+                                // ✅ 直接使用带参构造器创建 SearchTaskResult
+                                SearchTaskResult result = new SearchTaskResult(
+                                    finalKeyword,
+                                    finalTargetPage,
+                                    hits
+                                );
+                                SearchTaskResult.set(result);
+
+                                if (mDocView != null) {
+                                    mDocView.resetupChildren();
+                                }
+                            } else {
+                                Toast.makeText(
+                                    DocumentActivity.this,
+                                    MyActivity.zh_cn
+                                        ? "未找到关键词高亮"
+                                        : "Keyword highlight not found",
+                                    Toast.LENGTH_SHORT
+                                ).show();
+                            }
+                        });
+                    }).start();
+                }
+            });
+
+            btnEdit.setOnClickListener(v -> {
+                if (selectedPos[0] < 0) return;
+                String[] parts = rawNoteData
+                    .get(selectedPos[0])
+                    .split("===", 9);
+                showNoteInputDialog(
+                    parts[6].trim(),
+                    parts[4].trim(),
+                    parts[5].trim(),
+                    parts[0].trim(),
+                    dialog
+                );
+            });
+
+            btnDel.setOnClickListener(v -> {
+                if (selectedPos[0] < 0) return;
+                String[] parts = rawNoteData
+                    .get(selectedPos[0])
+                    .split("===", 9);
+                String id = parts[0].trim();
+                new AlertDialog.Builder(DocumentActivity.this)
+                    .setTitle(MyActivity.zh_cn ? "确认删除" : "Confirm Delete")
+                    .setMessage(
+                        MyActivity.zh_cn
+                            ? "确定删除这条笔记？"
+                            : "Are you sure?"
+                    )
+                    .setPositiveButton(
+                        MyActivity.zh_cn ? "删除" : "Delete",
+                        (d, w) -> {
+                            MyActivity.mInstance.PublicJavaCallCpp(
+                                "pdf_note_delete|==|" + id
+                            );
+                            rawNoteData.remove(selectedPos[0]);
+                            selectedPos[0] = -1;
+                            adapter.notifyDataSetChanged();
+                        }
+                    )
+                    .setNegativeButton(
+                        MyActivity.zh_cn ? "取消" : "Cancel",
+                        null
+                    )
+                    .show();
+            });
+
+            btnClose.setOnClickListener(v -> dialog.dismiss());
+            dialog.show();
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setLayout(dialogW, dialogH);
+                dialog.getWindow().setDimAmount(0.5f);
+                dialog
+                    .getWindow()
+                    .setBackgroundDrawableResource(
+                        mInvertMode
+                            ? android.R.drawable.dialog_holo_dark_frame
+                            : android.R.drawable.dialog_holo_light_frame
+                    );
+            }
+        });
+    }
+
+    private void showNoteInputDialog(
+        String keyword,
+        String existingNote,
+        String searchContext,
+        String noteId,
+        Dialog parentDialog
+    ) {
+        boolean isEditMode = noteId != null && !noteId.isEmpty();
+        int dp16 = dp2px(16);
+        int dp12 = dp2px(12);
+        int dp8 = dp2px(8);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp16, dp12, dp16, dp12);
+        LinearLayout titleRow = new LinearLayout(this);
+        titleRow.setOrientation(LinearLayout.HORIZONTAL);
+        titleRow.setGravity(Gravity.CENTER_VERTICAL);
+        titleRow.setPadding(0, 0, 0, dp8);
+        TextView labelNote = new TextView(this);
+        labelNote.setText(MyActivity.zh_cn ? "笔记" : "Note");
+        labelNote.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        labelNote.setTypeface(Typeface.DEFAULT_BOLD);
+        labelNote.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
+        titleRow.addView(
+            labelNote,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+        TextView separator = new TextView(this);
+        separator.setText(" · ");
+        separator.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        separator.setTextColor(mInvertMode ? 0xFF888888 : 0xFF999999);
+        titleRow.addView(
+            separator,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+        String titleText =
+            keyword.length() > 50 ? keyword.substring(0, 50) + "…" : keyword;
+        TextView titleView = new TextView(this);
+        titleView.setText(titleText);
+        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        titleView.setTextColor(mInvertMode ? 0xFFBBDEFB : 0xFF1565C0);
+        titleView.setSingleLine(true);
+        titleView.setEllipsize(TextUtils.TruncateAt.END);
+        titleRow.addView(
+            titleView,
+            new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        );
+        root.addView(
+            titleRow,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        final EditText noteEdit = new EditText(this);
+        noteEdit.setHint(
+            MyActivity.zh_cn ? "输入笔记内容..." : "Enter note content..."
+        );
+        noteEdit.setGravity(Gravity.TOP | Gravity.START);
+        noteEdit.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        noteEdit.setTextColor(mInvertMode ? 0xFFDDDDDD : 0xFF333333);
+        noteEdit.setHintTextColor(mInvertMode ? 0xFF666666 : 0xFF999999);
+        if (mInvertMode) noteEdit.setBackgroundColor(0xFF2D2D2D);
+        noteEdit.setPadding(dp12, dp12, dp12, dp12);
+        noteEdit.setInputType(
+            InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        );
+        if (isEditMode) {
+            noteEdit.setText(existingNote);
+            noteEdit.setSelection(existingNote.length());
+        }
+        LinearLayout.LayoutParams editParams = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            0,
+            1.0f
+        );
+        editParams.topMargin = dp8;
+        editParams.bottomMargin = dp8;
+        root.addView(noteEdit, editParams);
+
+        LinearLayout btnBar = new LinearLayout(this);
+        btnBar.setOrientation(LinearLayout.HORIZONTAL);
+        btnBar.setGravity(Gravity.END);
+        btnBar.setWeightSum(2);
+        TextView btnCancel = createButton(MyActivity.zh_cn ? "取消" : "Cancel");
+        TextView btnSave = createButton(MyActivity.zh_cn ? "保存" : "Save");
+        btnSave.setTypeface(Typeface.DEFAULT_BOLD);
+        btnSave.setTextColor(mInvertMode ? 0xFF90CAF9 : 0xFF1565C0);
+        btnBar.addView(
+            btnCancel,
+            new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        );
+        btnBar.addView(
+            btnSave,
+            new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        );
+        root.addView(
+            btnBar,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        final Dialog noteDialog = new Dialog(this);
+        noteDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        noteDialog.setContentView(root);
+        noteDialog.setCancelable(true);
+        if (noteDialog.getWindow() != null) {
+            noteDialog.getWindow().setDimAmount(0.3f);
+            noteDialog
+                .getWindow()
+                .setBackgroundDrawableResource(
+                    mInvertMode
+                        ? android.R.drawable.dialog_holo_dark_frame
+                        : android.R.drawable.dialog_holo_light_frame
+                );
+        }
+
+        btnCancel.setOnClickListener(v -> noteDialog.dismiss());
+        btnSave.setOnClickListener(v -> {
+            String noteContent = noteEdit.getText().toString().trim();
+            if (noteContent.isEmpty()) {
+                Toast.makeText(
+                    DocumentActivity.this,
+                    MyActivity.zh_cn
+                        ? "笔记内容不能为空"
+                        : "Note cannot be empty",
+                    Toast.LENGTH_SHORT
+                ).show();
+                return;
+            }
+            String bookmark = "";
+            int currentPage = mDocView.getDisplayedViewIndex();
+            int pageForNote = currentPage + 1;
+            if (core.isReflowable()) bookmark = String.valueOf(mLayoutEM);
+            else bookmark = core.makeCurrentBookmark(currentPage);
+
+            String payload;
+            if (isEditMode) payload =
+                "pdf_note_update|==|" +
+                noteId +
+                "|==|" +
+                searchContext +
+                "|==|" +
+                keyword +
+                "|==|" +
+                noteContent;
+            else payload =
+                "pdf_save_note|==|" +
+                searchContext +
+                "|==|" +
+                keyword +
+                "|==|" +
+                noteContent +
+                "|==|" +
+                pageForNote +
+                "|==|" +
+                bookmark;
+
+            MyActivity.mInstance.PublicJavaCallCpp(payload);
+            Toast.makeText(
+                DocumentActivity.this,
+                MyActivity.zh_cn ? "已保存" : "Saved",
+                Toast.LENGTH_SHORT
+            ).show();
+            noteDialog.dismiss();
+            if (
+                parentDialog != null && parentDialog.isShowing()
+            ) parentDialog.dismiss();
+        });
+
+        noteDialog.show();
+        if (noteDialog.getWindow() != null) {
+            DisplayMetrics dm = getResources().getDisplayMetrics();
+            noteDialog
+                .getWindow()
+                .setLayout(
+                    (int) (dm.widthPixels * 0.9),
+                    (int) (dm.heightPixels * 0.9)
+                );
+            noteDialog
+                .getWindow()
+                .setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
+                );
+        }
+        noteEdit.requestFocus();
+    }
+
+    // ================= 辅助方法 =================
+    private TextView createButton(String text) {
+        TextView tv = new TextView(this);
+        tv.setText(text);
+        tv.setPadding(dp2px(8), dp2px(8), dp2px(8), dp2px(8));
+        tv.setGravity(Gravity.CENTER);
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        tv.setTextColor(mInvertMode ? 0xFFEFEFEF : 0xFF222222);
+        return tv;
+    }
+
+    private int dp2px(int dpVal) {
+        return (int) (dpVal * getResources().getDisplayMetrics().density +
+            0.5f);
+    }
+
+    public void showAiLoadingDialog() {
+        runOnUiThread(() -> {
+            if (
+                isFinishing() ||
+                isDestroyed() ||
+                (mAiLoadingDialog != null && mAiLoadingDialog.isShowing())
+            ) return;
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.HORIZONTAL);
+            layout.setPadding(dp2px(24), dp2px(16), dp2px(24), dp2px(16));
+            layout.setGravity(Gravity.CENTER_VERTICAL);
+            layout.addView(new ProgressBar(this));
+            TextView tvMsg = new TextView(this);
+            tvMsg.setText(MyActivity.zh_cn ? "处理中..." : "Processing...");
+            tvMsg.setTextColor(mInvertMode ? 0xFFFFFFFF : 0xFF333333);
+            layout.addView(tvMsg);
+            androidx.appcompat.app.AlertDialog.Builder builder =
+                new androidx.appcompat.app.AlertDialog.Builder(this);
+            builder.setView(layout).setCancelable(false);
+            mAiLoadingDialog = builder.create();
+            mAiLoadingDialog.show();
+        });
+    }
+
+    public void dismissAiLoadingDialog() {
+        runOnUiThread(() -> {
+            if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
+                try {
+                    mAiLoadingDialog.dismiss();
+                } catch (Exception ignored) {}
+                mAiLoadingDialog = null;
+            }
+        });
+    }
+
+    public void showAiMarkdownDialog(ArrayList<String> mdList) {
+        dismissAiLoadingDialog();
+        MyActivity.showAiMarkdownDialog(this, mdList);
     }
     /////////////////////////////////////////////////////////////////////////////////
 }

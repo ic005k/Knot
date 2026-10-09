@@ -16,6 +16,7 @@ import android.view.WindowManager;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Scroller;
+import android.widget.Toast;
 import com.artifex.mupdf.fitz.Link;
 import com.x.R;
 import java.util.LinkedList;
@@ -499,7 +500,53 @@ public class ReaderView
         return true;
     }
 
-    public void onLongPress(MotionEvent e) {}
+    @Override
+    public void onLongPress(MotionEvent e) {
+        // 1. 获取当前显示的 PageView
+        View v = mChildViews.get(mCurrent);
+        if (!(v instanceof PageView)) return;
+        PageView pageView = (PageView) v;
+
+        // 2. 计算触摸点相对于 PageView 的坐标
+        float viewX = e.getX() - v.getLeft();
+        float viewY = e.getY() - v.getTop();
+
+        // 3. 边缘防误触（可选，与 mini 版保持一致）
+        float density = mContext.getResources().getDisplayMetrics().density;
+        int edgeSafeZonePx = (int) (24 * density + 0.5f);
+        if (
+            viewX < edgeSafeZonePx ||
+            viewX > v.getWidth() - edgeSafeZonePx ||
+            viewY < edgeSafeZonePx ||
+            viewY > v.getHeight() - edgeSafeZonePx
+        ) {
+            return;
+        }
+
+        // 4. 提取全页文本和附近文本
+        String fullText = pageView.mCore.getPageText(pageView.getPage());
+        if (fullText == null || fullText.trim().isEmpty()) {
+            Toast.makeText(
+                mContext,
+                com.x.MyActivity.zh_cn
+                    ? "此页无可提取文字"
+                    : "No extractable text",
+                Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        String nearText = pageView.getNearTextAt(viewX, viewY);
+
+        // 5. 回调 DocumentActivity 弹出选词弹窗
+        if (mContext instanceof DocumentActivity) {
+            ((DocumentActivity) mContext).showTextSelectionDialog(
+                fullText.trim(),
+                nearText != null ? nearText.trim() : null,
+                pageView.getPage()
+            );
+        }
+    }
 
     public boolean onScroll(
         MotionEvent e1,
@@ -1098,9 +1145,9 @@ public class ReaderView
         PageView pv = (PageView) v;
 
         // 获取 PageView 的内部缩放比 (sourceScale)
-        // 由于 mSourceScale 是 private，我们通过反射或计算获取
-        // 这里简单计算：scale = 实际显示宽度 / 文档宽度
-        float viewScale = (float) v.getWidth() / pv.mSize.x;
+        Point pageSize = pv.getPageSize();
+        if (pageSize == null || pageSize.x == 0) return;
+        float viewScale = (float) v.getWidth() / pageSize.x;
 
         // 目标 Y 在屏幕上的像素位置
         float targetScreenY = docY * viewScale;
