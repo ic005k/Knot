@@ -732,7 +732,18 @@ public class DocumentActivity extends Activity {
                 }
             }
         };
-        mDocView.setAdapter(new PageAdapter(this, core));
+
+        //mDocView.setAdapter(new PageAdapter(this, core));
+
+        PageAdapter adapter = new PageAdapter(this, core);
+        // ✅ PDF 横屏时以宽度为基准自适应
+        boolean isLandscape =
+            getResources().getConfiguration().orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+        if (!core.isReflowable() && isLandscape) {
+            adapter.setFitWidth(true);
+        }
+        mDocView.setAdapter(adapter);
 
         mSearchTask = new SearchTask(this, core) {
             @Override

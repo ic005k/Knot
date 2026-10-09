@@ -699,11 +699,18 @@ public class ReaderView
         View cv = mChildViews.get(mCurrent);
         Point cvOffset;
 
+        // ✅ 标记本次 layout 是否发生了翻页
+        boolean pageChanged = false;
+
         if (!mResetLayout) {
             // Move to next or previous if current is sufficiently off center
             if (cv != null) {
                 boolean move;
                 cvOffset = subScreenSizeOffset(cv);
+
+                // ✅ 记录翻页前的页码，用于检测是否发生了翻页
+                int oldCurrent = mCurrent;
+
                 // cv.getRight() may be out of date with the current scale
                 // so add left to the measured width for the correct position
                 if (HORIZONTAL_SCROLLING) move =
@@ -747,6 +754,13 @@ public class ReaderView
                     mCurrent--;
                     onMoveToChild(mCurrent);
                 }
+
+                // ✅ 【关键】翻页时重置滚动并标记
+                if (oldCurrent != mCurrent) {
+                    mYScroll = 0;
+                    mXScroll = 0;
+                    pageChanged = true;
+                }
             }
 
             // Remove not needed children and hold them for reuse
@@ -768,6 +782,7 @@ public class ReaderView
         } else {
             mResetLayout = false;
             mXScroll = mYScroll = 0;
+            pageChanged = true; // ✅ resetLayout 也视为页面变化
 
             // Remove all children and hold them for reuse
             int numChildren = mChildViews.size();
@@ -783,20 +798,18 @@ public class ReaderView
             mStepper.prod();
         }
 
+        //////////////////////////////////////////////
         // Ensure current view is present
         int cvLeft, cvRight, cvTop, cvBottom;
-        boolean notPresent = mChildViews.get(mCurrent) == null;
+        // ✅ 【核心】翻页时强制走初始化路径，不继承旧 View 的坐标
+        boolean notPresent = mChildViews.get(mCurrent) == null || pageChanged;
         cv = getOrCreateChild(mCurrent);
-        // When the view is sub-screen-size in either dimension we
-        // offset it to center within the screen area, and to keep
-        // the views spaced out
         cvOffset = subScreenSizeOffset(cv);
         if (notPresent) {
-            // Main item not already present. Just place it top left
+            // ✅ 翻页后新页面从顶部居中开始
             cvLeft = cvOffset.x;
             cvTop = cvOffset.y;
         } else {
-            // Main item already present. Adjust by scroll offsets
             cvLeft = cv.getLeft() + mXScroll;
             cvTop = cv.getTop() + mYScroll;
         }
@@ -804,6 +817,8 @@ public class ReaderView
         mXScroll = mYScroll = 0;
         cvRight = cvLeft + cv.getMeasuredWidth();
         cvBottom = cvTop + cv.getMeasuredHeight();
+
+        //////////////////////////////////////////
 
         if (!mUserInteracting && mScroller.isFinished()) {
             Point corr = getCorrection(
@@ -942,12 +957,23 @@ public class ReaderView
         // See what size the view wants to be
         v.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
 
-        // Work out a scale that will fit it to this view
+        // ✅ fit-width 模式下，PageView 已经按宽度算好了尺寸
+        // 不再做二次 fit-to-screen 缩放，直接用 PageView 报告的尺寸 × mScale
+        if (v instanceof PageView && ((PageView) v).isFitWidth()) {
+            v.measure(
+                View.MeasureSpec.EXACTLY |
+                    (int) (v.getMeasuredWidth() * mScale),
+                View.MeasureSpec.EXACTLY |
+                    (int) (v.getMeasuredHeight() * mScale)
+            );
+            return;
+        }
+
+        // 默认逻辑：fit to screen
         float scale = Math.min(
             (float) getWidth() / (float) v.getMeasuredWidth(),
             (float) getHeight() / (float) v.getMeasuredHeight()
         );
-        // Use the fitting values scaled by our current scale factor
         v.measure(
             View.MeasureSpec.EXACTLY |
                 (int) (v.getMeasuredWidth() * scale * mScale),

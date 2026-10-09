@@ -55,6 +55,8 @@ class OpaqueImageView extends ImageView {
 
 public class PageView extends ViewGroup {
 
+    private boolean mFitWidth = false;
+
     private Quad[] mTtsQuads;
     private final Paint mTtsPaint = new Paint();
 
@@ -267,12 +269,68 @@ public class PageView extends ViewGroup {
 
         // Calculate scaled size that fits within the screen limits
         // This is the size at minimum zoom
-        mSourceScale = Math.min(mParentSize.x / size.x, mParentSize.y / size.y);
+        if (mFitWidth) {
+            // ✅ 横屏 PDF：以宽度为基准填满屏幕
+            mSourceScale = mParentSize.x / size.x;
+        } else {
+            // 默认：fit to screen（整页可见）
+            mSourceScale = Math.min(
+                mParentSize.x / size.x,
+                mParentSize.y / size.y
+            );
+        }
         Point newSize = new Point(
             (int) (size.x * mSourceScale),
             (int) (size.y * mSourceScale)
         );
         mSize = newSize;
+
+        // ✅ 【关键】Fit-Width 模式下，Bitmap 必须与实际页面尺寸一致
+        // 否则 ImageView 放大后，超出原始 Bitmap 区域的部分就是黑的
+        if (mFitWidth) {
+            if (
+                mEntireBm == null ||
+                mEntireBm.getWidth() != mSize.x ||
+                mEntireBm.getHeight() != mSize.y
+            ) {
+                if (mEntireBm != null) mEntireBm.recycle();
+                try {
+                    mEntireBm = Bitmap.createBitmap(
+                        mSize.x,
+                        mSize.y,
+                        Bitmap.Config.ARGB_8888
+                    );
+                } catch (OutOfMemoryError e) {
+                    Log.e(
+                        APP,
+                        "OOM creating fit-width bitmap: " +
+                            mSize.x +
+                            "x" +
+                            mSize.y
+                    );
+                    // 降级：回退到屏幕尺寸
+                    mEntireBm = Bitmap.createBitmap(
+                        mParentSize.x,
+                        mParentSize.y,
+                        Bitmap.Config.ARGB_8888
+                    );
+                }
+            }
+        } else {
+            // 默认模式：确保 Bitmap 是屏幕尺寸
+            if (
+                mEntireBm == null ||
+                mEntireBm.getWidth() != mParentSize.x ||
+                mEntireBm.getHeight() != mParentSize.y
+            ) {
+                if (mEntireBm != null) mEntireBm.recycle();
+                mEntireBm = Bitmap.createBitmap(
+                    mParentSize.x,
+                    mParentSize.y,
+                    Bitmap.Config.ARGB_8888
+                );
+            }
+        }
 
         if (mErrorIndicator != null) return;
 
@@ -870,5 +928,13 @@ public class PageView extends ViewGroup {
 
         // 调用 MuPDFCore 提取附近文本
         return mCore.getNearText(mPageNumber, docRelX, docRelY);
+    }
+
+    public void setFitWidth(boolean fitWidth) {
+        mFitWidth = fitWidth;
+    }
+
+    public boolean isFitWidth() {
+        return mFitWidth;
     }
 }

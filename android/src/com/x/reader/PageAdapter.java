@@ -20,9 +20,16 @@ public class PageAdapter extends BaseAdapter {
     private Bitmap mSharedHqBm1;
     private Bitmap mSharedHqBm2;
 
+    private boolean mFitWidth = false;
+
     public PageAdapter(Context c, MuPDFCore core) {
         mContext = c;
         mCore = core;
+    }
+
+    // ✅ setter
+    public void setFitWidth(boolean fitWidth) {
+        mFitWidth = fitWidth;
     }
 
     public int getCount() {
@@ -92,6 +99,9 @@ public class PageAdapter extends BaseAdapter {
         } else {
             pageView = (PageView) convertView;
         }
+
+        // ✅ 每次 getView 都同步标记（处理复用场景）
+        pageView.setFitWidth(mFitWidth);
 
         PointF pageSize = mPageSizes.get(position);
         if (pageSize != null) {

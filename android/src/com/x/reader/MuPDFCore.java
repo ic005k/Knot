@@ -558,4 +558,8 @@ public class MuPDFCore {
             return false;
         }
     }
+
+    public boolean isFixedLayout() {
+        return !reflowable;
+    }
 }
