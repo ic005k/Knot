@@ -303,7 +303,6 @@ public class MuPDFCore {
     }
 
     // ✅ 暖灰算法：直接移植旧版 invertBitmap 的三区间映射
-    // 放在 drawPage 末尾，渲染完 bitmap 后立即执行
     private void applyWarmGray(Bitmap bm) {
         if (bm == null || bm.isRecycled()) return;
 
@@ -312,12 +311,19 @@ public class MuPDFCore {
         int[] pixels = new int[w * h];
         bm.getPixels(pixels, 0, w, 0, 0, w, h);
 
-        // 与旧版完全一致的参数
-        final int TARGET_R = 0xB8; // 184
-        final int TARGET_G = 0xA8; // 168
-        final int TARGET_B = 0x90; // 144
-        final float TEXT_THRESHOLD = 95f / 255f;
-        final float BG_THRESHOLD = 200f / 255f;
+        // ✅ 降低全黑环境下的文字亮度
+        // 旧值: R=0xB8(184) G=0xA8(168) B=0x90(144) → 感知亮度 ~170
+        // 新值: R=0x80(128) G=0x74(116) B=0x64(100) → 感知亮度 ~118
+        // 对比度 (118+5)/(0+5) ≈ 24.6:1，仍远高于 WCAG AA 4.5:1 要求
+        // 但绝对亮度降低 35%，全黑环境下不再刺眼
+        final int TARGET_R = 0x80; // 128 (was 184)
+        final int TARGET_G = 0x74; // 116 (was 168)
+        final int TARGET_B = 0x64; // 100 (was 144)
+
+        // ✅ 放宽文字判定阈值，让更多"深灰"像素也走暖灰映射
+        // 避免阈值边缘出现突兀的亮度跳变
+        final float TEXT_THRESHOLD = 110f / 255f; // was 95/255
+        final float BG_THRESHOLD = 190f / 255f; // was 200/255
 
         for (int i = 0; i < pixels.length; i++) {
             int px = pixels[i];
@@ -333,7 +339,7 @@ public class MuPDFCore {
                 // 背景 → 纯黑
                 nr = ng = nb = 0;
             } else if (lum <= TEXT_THRESHOLD) {
-                // 文字 → 暖灰
+                // 文字 → 暖灰（降低后的目标色）
                 float ratio = 1.0f - lum / TEXT_THRESHOLD;
                 float scale = 0.7f + 0.3f * ratio;
                 nr = (int) (TARGET_R * scale);
