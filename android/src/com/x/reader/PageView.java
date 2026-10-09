@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -265,6 +266,19 @@ public class PageView extends ViewGroup {
         if (size == null) {
             setRenderError("Error loading page");
             size = new PointF(612, 792);
+        }
+
+        // ✅ 【关键】动态刷新 mParentSize
+        // 防止 View 在 parent 尺寸为 0 时创建导致的永久 (0,0) 问题
+        ViewParent vp = getParent();
+        if (vp instanceof View) {
+            View parentView = (View) vp;
+            if (parentView.getWidth() > 0 && parentView.getHeight() > 0) {
+                mParentSize = new Point(
+                    parentView.getWidth(),
+                    parentView.getHeight()
+                );
+            }
         }
 
         // Calculate scaled size that fits within the screen limits

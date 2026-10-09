@@ -22,6 +22,10 @@ public class PageAdapter extends BaseAdapter {
 
     private boolean mFitWidth = false;
 
+    // ✅ layout 版本号，每次 refresh() 递增
+    // 用于让旧 AsyncTask 的 onPostExecute 自动失效
+    private int mLayoutVersion = 0;
+
     public PageAdapter(Context c, MuPDFCore core) {
         mContext = c;
         mCore = core;
@@ -58,6 +62,7 @@ public class PageAdapter extends BaseAdapter {
 
     public void refresh() {
         mPageSizes.clear();
+        mLayoutVersion++; // ✅ 使所有飞行中的旧 sizingTask 失效
     }
 
     public synchronized View getView(
@@ -112,6 +117,10 @@ public class PageAdapter extends BaseAdapter {
             // Page size as yet unknown. Blank it for now, and
             // start a background task to find the size
             pageView.blank(position);
+
+            // ✅ 捕获当前版本号
+            final int versionAtCreation = mLayoutVersion;
+
             AsyncTask<Void, Void, PointF> sizingTask = new AsyncTask<
                 Void,
                 Void,
@@ -129,6 +138,10 @@ public class PageAdapter extends BaseAdapter {
                 @Override
                 protected void onPostExecute(PointF result) {
                     super.onPostExecute(result);
+
+                    // ✅ 【关键】如果 layout 已刷新，丢弃这个过时结果
+                    if (versionAtCreation != mLayoutVersion) return;
+
                     // We now know the page size
                     mPageSizes.put(position, result);
                     // Check that this view hasn't been reused for

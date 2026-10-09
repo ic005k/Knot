@@ -693,8 +693,15 @@ public class DocumentActivity extends Activity {
                         core.countPages()
                     )
                 );
-                mPageSlider.setMax((core.countPages() - 1) * mPageSliderRes);
+
                 mPageSlider.setProgress(i * mPageSliderRes);
+
+                // ✅ 【关键】仅对固定排版(PDF)在翻页后自动滚到顶部
+                // isReflowable() == false 即 PDF；EPUB/TXT 等流式文档不受影响
+                if (!core.isReflowable()) {
+                    scrollToTopAfterSettle();
+                }
+
                 super.onMoveToChild(i);
             }
 
@@ -1078,30 +1085,23 @@ public class DocumentActivity extends Activity {
         // 3. 统一处理：先确保 core 使用正确的字号完成首次 layout
         //    再跳转页码，最后才允许 onSizeChanged 触发 relayout
         if (core.isReflowable()) {
-            // ✅ 先用初始尺寸做一次 layout，仅用于获取 pageCount 等元数据
-            core.layout(0, mLayoutW, mLayoutH, mLayoutEM);
-
-            Log.i(
-                APP,
-                "Restore reflowable: em=" +
-                    mLayoutEM +
-                    ", savedPage=" +
-                    savedPage +
-                    ", pageCount=" +
-                    core.countPages()
-            );
-
-            // ✅ 延迟到 View 布局完成后，用真实尺寸重新排版，然后直接跳转到 savedPage
+            // ✅ 【核心修改】不再用假尺寸做首次 layout
+            // 直接用保存的字号，但延迟到拿到真实屏幕尺寸后才做唯一一次正确的 layout
             final int finalSavedPage = savedPage;
+
             mDocView.post(() -> {
                 if (mDocView == null || core == null) return;
 
-                // 此时 onSizeChanged 已更新 mLayoutW/H 为真实尺寸
-                // ✅ 关键：anchor 传 0，不把 savedPage 作为 hint 传给 layout
-                // 避免 MuPDF 的 anchor 映射导致页码偏移
+                // 此时 onSizeChanged 已将 mLayoutW/H 更新为真实屏幕尺寸
+                // ✅ 这是整个生命周期中第一次也是唯一一次 layout，尺寸绝对正确
                 core.layout(0, mLayoutW, mLayoutH, mLayoutEM);
 
-                // ✅ 直接跳转到保存的页码（clamp 到合法范围）
+                // 现在 pageCount 是真实的，初始化 SeekBar
+                mPageSlider.setMax((core.countPages() - 1) * mPageSliderRes);
+
+                // refresh 确保 Adapter 丢弃任何可能在 post 之前被意外创建的缓存 View
+                mDocView.refresh();
+
                 int safePage = Math.max(
                     0,
                     Math.min(finalSavedPage, core.countPages() - 1)
@@ -1109,7 +1109,7 @@ public class DocumentActivity extends Activity {
 
                 Log.i(
                     APP,
-                    "Real size restore: " +
+                    "Reflowable init: " +
                         mLayoutW +
                         "x" +
                         mLayoutH +
@@ -1127,10 +1127,13 @@ public class DocumentActivity extends Activity {
 
                 // ✅ 现在才启用 onSizeChanged 响应
                 layoutReady[0] = true;
-                Log.i(APP, "layoutReady enabled after real-size restore");
+                Log.i(APP, "layoutReady enabled after reflowable init");
+
+                // ✅ showButtons 延迟到真实 layout 之后
+                showButtons();
             });
         } else {
-            // PDF 等固定排版：直接跳转
+            // PDF 等固定排版：不依赖 layout 参数，可以直接跳转
             int safePage = Math.max(
                 0,
                 Math.min(savedPage, core.countPages() - 1)
@@ -1147,20 +1150,13 @@ public class DocumentActivity extends Activity {
             mDocView.post(() -> {
                 layoutReady[0] = true;
                 Log.i(APP, "layoutReady enabled after fixed restore");
+
+                // ✅ PDF 路径也延迟
+                showButtons();
             });
         }
 
         /////////////////////////////////////////////////////////
-
-        if (
-            savedInstanceState == null ||
-            !savedInstanceState.getBoolean("ButtonsHidden", false)
-        ) showButtons();
-
-        if (
-            savedInstanceState == null ||
-            !savedInstanceState.getBoolean("ButtonsHidden", false)
-        ) showButtons();
 
         if (
             savedInstanceState != null &&
@@ -3005,7 +3001,9 @@ public class DocumentActivity extends Activity {
             layout.setGravity(Gravity.CENTER_VERTICAL);
             layout.addView(new ProgressBar(this));
             TextView tvMsg = new TextView(this);
-            tvMsg.setText(MyActivity.zh_cn ? "处理中..." : "Processing...");
+            tvMsg.setText(
+                MyActivity.zh_cn ? "处理中，请稍后..." : "Processing..."
+            );
             tvMsg.setTextColor(mInvertMode ? 0xFFFFFFFF : 0xFF333333);
             layout.addView(tvMsg);
             androidx.appcompat.app.AlertDialog.Builder builder =

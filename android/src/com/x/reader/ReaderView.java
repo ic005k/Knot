@@ -33,6 +33,8 @@ public class ReaderView
 
     private final String APP = "MuPDF";
 
+    private boolean mPendingScrollToTop = false;
+
     private Context mContext;
     private boolean mLinksEnabled = false;
     private boolean tapDisabled = false;
@@ -699,18 +701,11 @@ public class ReaderView
         View cv = mChildViews.get(mCurrent);
         Point cvOffset;
 
-        // ✅ 标记本次 layout 是否发生了翻页
-        boolean pageChanged = false;
-
         if (!mResetLayout) {
             // Move to next or previous if current is sufficiently off center
             if (cv != null) {
                 boolean move;
                 cvOffset = subScreenSizeOffset(cv);
-
-                // ✅ 记录翻页前的页码，用于检测是否发生了翻页
-                int oldCurrent = mCurrent;
-
                 // cv.getRight() may be out of date with the current scale
                 // so add left to the measured width for the correct position
                 if (HORIZONTAL_SCROLLING) move =
@@ -754,13 +749,6 @@ public class ReaderView
                     mCurrent--;
                     onMoveToChild(mCurrent);
                 }
-
-                // ✅ 【关键】翻页时重置滚动并标记
-                if (oldCurrent != mCurrent) {
-                    mYScroll = 0;
-                    mXScroll = 0;
-                    pageChanged = true;
-                }
             }
 
             // Remove not needed children and hold them for reuse
@@ -782,7 +770,6 @@ public class ReaderView
         } else {
             mResetLayout = false;
             mXScroll = mYScroll = 0;
-            pageChanged = true; // ✅ resetLayout 也视为页面变化
 
             // Remove all children and hold them for reuse
             int numChildren = mChildViews.size();
@@ -798,18 +785,20 @@ public class ReaderView
             mStepper.prod();
         }
 
-        //////////////////////////////////////////////
         // Ensure current view is present
         int cvLeft, cvRight, cvTop, cvBottom;
-        // ✅ 【核心】翻页时强制走初始化路径，不继承旧 View 的坐标
-        boolean notPresent = mChildViews.get(mCurrent) == null || pageChanged;
+        boolean notPresent = mChildViews.get(mCurrent) == null;
         cv = getOrCreateChild(mCurrent);
+        // When the view is sub-screen-size in either dimension we
+        // offset it to center within the screen area, and to keep
+        // the views spaced out
         cvOffset = subScreenSizeOffset(cv);
         if (notPresent) {
-            // ✅ 翻页后新页面从顶部居中开始
+            // Main item not already present. Just place it top left
             cvLeft = cvOffset.x;
             cvTop = cvOffset.y;
         } else {
+            // Main item already present. Adjust by scroll offsets
             cvLeft = cv.getLeft() + mXScroll;
             cvTop = cv.getTop() + mYScroll;
         }
@@ -817,8 +806,6 @@ public class ReaderView
         mXScroll = mYScroll = 0;
         cvRight = cvLeft + cv.getMeasuredWidth();
         cvBottom = cvTop + cv.getMeasuredHeight();
-
-        //////////////////////////////////////////
 
         if (!mUserInteracting && mScroller.isFinished()) {
             Point corr = getCorrection(
@@ -1145,9 +1132,27 @@ public class ReaderView
     protected void onMoveOffChild(int i) {}
 
     protected void onSettle(View v) {
-        // When the layout has settled ask the page to render
-        // in HQ
+        // When the layout has settled ask the page to render in HQ
         ((PageView) v).updateHq();
+
+        // ✅ 【核心】翻页稳定后，如果待归位标记为真，启动垂直滚动到顶部
+        if (mPendingScrollToTop) {
+            mPendingScrollToTop = false;
+
+            // 计算当前垂直偏移量
+            // cv.getTop() 为负值表示页面向上滚动了，需要正向滚回来
+            int currentTop = v.getTop();
+            Point offset = subScreenSizeOffset(v);
+            int targetTop = offset.y; // 目标位置：顶部对齐（或小于屏幕时居中）
+            int dy = targetTop - currentTop;
+
+            if (Math.abs(dy) > 5) {
+                mScrollerLastX = mScrollerLastY = 0;
+                // 用较短时长(250ms)做垂直归位，与水平翻页动画衔接自然
+                mScroller.startScroll(0, 0, 0, dy, 250);
+                mStepper.prod();
+            }
+        }
     }
 
     protected void onUnsettle(View v) {
@@ -1169,27 +1174,45 @@ public class ReaderView
         if (v == null || !(v instanceof PageView)) return;
 
         PageView pv = (PageView) v;
-
-        // 获取 PageView 的内部缩放比 (sourceScale)
         Point pageSize = pv.getPageSize();
         if (pageSize == null || pageSize.x == 0) return;
-        float viewScale = (float) v.getWidth() / pageSize.x;
 
-        // 目标 Y 在屏幕上的像素位置
-        float targetScreenY = docY * viewScale;
+        // ✅ 1：使用与 PageView.onDraw 完全一致的缩放比
+        // PageView 内部: scale = (mSourceScale * getWidth()) / mSize.x
+        float scale =
+            (pv.getSourceScale() * (float) v.getWidth()) / (float) pageSize.x;
 
-        // 我们希望它显示在屏幕垂直中心偏上 1/3 处
+        // 目标句子在屏幕像素坐标系中的 Y 位置（相对于 PageView 左上角）
+        float targetInViewY = docY * scale;
+
+        // 我们希望句子显示在屏幕垂直方向 1/3 处
         float desiredScreenY = getHeight() / 3.0f;
 
-        // 需要滚动的差值 (注意 ReaderView 的 mYScroll 是反向的)
-        int dy = (int) (desiredScreenY - targetScreenY);
+        // ✅ 2：必须减去 v.getTop()，将 PageView 的布局偏移纳入计算
+        // v.getTop() 是 PageView 在 ReaderView 中的当前位置（滚动后为负值）
+        // 当前句子在屏幕上的实际 Y = v.getTop() + targetInViewY
+        // 需要滚动的增量 = desiredScreenY - (v.getTop() + targetInViewY)
+        float currentOnScreenY = v.getTop() + targetInViewY;
+        int dy = (int) (desiredScreenY - currentOnScreenY);
 
         // 如果偏移量太小，就不滚动，避免画面抖动
         if (Math.abs(dy) < 20) return;
 
-        // 启动平滑滚动
+        // ✅ 3：先终止可能正在进行的翻页归位动画，避免两个 Scroller 冲突
+        if (!mScroller.isFinished()) {
+            mScroller.forceFinished(true);
+        }
+
         mScrollerLastX = mScrollerLastY = 0;
         mScroller.startScroll(0, 0, 0, dy, 300);
         mStepper.prod();
+    }
+
+    /**
+     * 仅对固定排版文档（PDF）生效：
+     * 在当前翻页动画结束后，平滑滚动到页面顶部。
+     */
+    public void scrollToTopAfterSettle() {
+        mPendingScrollToTop = true;
     }
 }
