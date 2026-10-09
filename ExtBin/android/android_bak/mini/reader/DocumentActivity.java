@@ -88,6 +88,10 @@ import java.util.Stack;
 
 public class DocumentActivity extends Activity {
 
+    // ✅ UI 动画状态追踪
+    private boolean mUiAnimating = false;
+    private static final long UI_ANIM_DURATION = 200L;
+
     private boolean isTxtFile = false;
     private android.app.ProgressDialog mConvertProgressDialog = null;
 
@@ -357,6 +361,11 @@ public class DocumentActivity extends Activity {
         searchBar = findViewById(R.id.search_bar);
         bottomBar = findViewById(R.id.bottom_bar);
         backgroundLayout = findViewById(R.id.background_layout);
+        if (backgroundLayout != null) {
+            backgroundLayout.setBackgroundColor(
+                mInvertMode ? Color.BLACK : Color.DKGRAY
+            );
+        }
         topBar = findViewById(R.id.top_bar);
 
         ttsButton = findViewById(R.id.tts_button);
@@ -398,18 +407,18 @@ public class DocumentActivity extends Activity {
         mInvertMode = MyActivity.mPdfInvertMode;
         ImageButton darkModeButton = findViewById(R.id.dark_mode_button);
         darkModeButton.setOnClickListener(v -> {
-            //MyActivity.mPdfInvertMode = !MyActivity.mPdfInvertMode;
-            //finish();
-            //CallJavaNotify_13();
-
-            // 原地刷新
             mInvertMode = !mInvertMode;
             MyActivity.mPdfInvertMode = mInvertMode;
-            // 同步更新状态栏图标颜色
+            // ✅ 同步更新根布局背景色
+            if (backgroundLayout != null) {
+                backgroundLayout.setBackgroundColor(
+                    mInvertMode ? Color.BLACK : Color.DKGRAY
+                );
+            }
             if (bottomBar.getVisibility() == View.VISIBLE) {
                 updateStatusBarIconMode(true);
             }
-            loadPage(); // 仅重新渲染当前页，invertBitmap 会自动生效
+            loadPage();
         });
 
         // 读书笔记按钮
@@ -933,6 +942,9 @@ public class DocumentActivity extends Activity {
     }
 
     protected void openDocument() {
+        // ✅ 文件解析可能很慢（尤其 EPUB），提前显示加载弹窗
+        showAiLoadingDialog();
+
         worker.add(
             new Worker.Task() {
                 boolean needsPassword;
@@ -948,6 +960,9 @@ public class DocumentActivity extends Activity {
                 }
 
                 public void run() {
+                    // ✅ 解析完成，先关闭弹窗再决定下一步
+                    dismissAiLoadingDialog();
+
                     if (needsPassword) askPassword(
                         R.string.dlog_password_message
                     );
@@ -1185,6 +1200,9 @@ public class DocumentActivity extends Activity {
     }
 
     protected void loadDocument() {
+        // ✅ reflowable 文档 layout 可能耗时数秒，显示加载弹窗
+        showAiLoadingDialog();
+
         worker.add(
             new Worker.Task() {
                 public void work() {
@@ -1218,6 +1236,9 @@ public class DocumentActivity extends Activity {
                 }
 
                 public void run() {
+                    // ✅ 排版完成，关闭弹窗
+                    dismissAiLoadingDialog();
+
                     pageCountChanged = true;
 
                     // ✅ TTS 恢复：基于 key 判断（与 onCreate 一致）
@@ -1433,24 +1454,150 @@ public class DocumentActivity extends Activity {
 
     public void toggleUI() {
         toggledUI = true;
-        if (bottomBar.getVisibility() == View.VISIBLE) {
-            topBar.setVisibility(View.GONE);
-            currentBar.setVisibility(View.GONE);
-            bottomBar.setVisibility(View.GONE);
-            if (currentBar == searchBar) hideKeyboard();
+        if (mUiAnimating) return; // ✅ 防止动画期间重复触发
 
-            updateStatusBarIconMode(mInvertMode);
+        final boolean isShowing = bottomBar.getVisibility() == View.VISIBLE;
+
+        if (isShowing) {
+            // ===== 隐藏 UI =====
+            mUiAnimating = true;
+            hideKeyboard();
+
+            // TopBar 向上滑出
+            android.view.animation.TranslateAnimation topAnim =
+                new android.view.animation.TranslateAnimation(
+                    0,
+                    0,
+                    0,
+                    -(topBar.getHeight() + systemInsets.top)
+                );
+            topAnim.setDuration(UI_ANIM_DURATION);
+            topAnim.setFillAfter(true);
+            topAnim.setAnimationListener(
+                new android.view.animation.Animation.AnimationListener() {
+                    public void onAnimationStart(
+                        android.view.animation.Animation a
+                    ) {}
+
+                    public void onAnimationRepeat(
+                        android.view.animation.Animation a
+                    ) {}
+
+                    public void onAnimationEnd(
+                        android.view.animation.Animation a
+                    ) {
+                        topBar.setVisibility(View.GONE);
+                        currentBar.setVisibility(View.GONE);
+                        mUiAnimating = false;
+                    }
+                }
+            );
+            topBar.startAnimation(topAnim);
+
+            // BottomBar 向下滑出
+            android.view.animation.TranslateAnimation bottomAnim =
+                new android.view.animation.TranslateAnimation(
+                    0,
+                    0,
+                    0,
+                    bottomBar.getHeight() + systemInsets.bottom
+                );
+            bottomAnim.setDuration(UI_ANIM_DURATION);
+            bottomAnim.setFillAfter(true);
+            bottomAnim.setAnimationListener(
+                new android.view.animation.Animation.AnimationListener() {
+                    public void onAnimationStart(
+                        android.view.animation.Animation a
+                    ) {
+                        pageLabel.setVisibility(View.INVISIBLE); // ✅ 页码先隐
+                    }
+
+                    public void onAnimationRepeat(
+                        android.view.animation.Animation a
+                    ) {}
+
+                    public void onAnimationEnd(
+                        android.view.animation.Animation a
+                    ) {
+                        bottomBar.setVisibility(View.GONE);
+                        // ✅ 隐藏完成后重新确保沉浸式全屏
+                        enterSystemFullscreen();
+                    }
+                }
+            );
+            bottomBar.startAnimation(bottomAnim);
         } else {
+            // ===== 显示 UI =====
+            mUiAnimating = true;
+
             topBar.setVisibility(View.VISIBLE);
             currentBar.setVisibility(View.VISIBLE);
             bottomBar.setVisibility(View.VISIBLE);
             showPageNumber(currentPage + 1);
+
+            // TopBar 从上方滑入
+            android.view.animation.TranslateAnimation topAnim =
+                new android.view.animation.TranslateAnimation(
+                    0,
+                    0,
+                    -(topBar.getHeight() + systemInsets.top),
+                    0
+                );
+            topAnim.setDuration(UI_ANIM_DURATION);
+            topAnim.setAnimationListener(
+                new android.view.animation.Animation.AnimationListener() {
+                    public void onAnimationStart(
+                        android.view.animation.Animation a
+                    ) {}
+
+                    public void onAnimationRepeat(
+                        android.view.animation.Animation a
+                    ) {}
+
+                    public void onAnimationEnd(
+                        android.view.animation.Animation a
+                    ) {
+                        mUiAnimating = false;
+                    }
+                }
+            );
+            topBar.startAnimation(topAnim);
+
+            // BottomBar 从下方滑入
+            android.view.animation.TranslateAnimation bottomAnim =
+                new android.view.animation.TranslateAnimation(
+                    0,
+                    0,
+                    bottomBar.getHeight() + systemInsets.bottom,
+                    0
+                );
+            bottomAnim.setDuration(UI_ANIM_DURATION);
+            bottomAnim.setAnimationListener(
+                new android.view.animation.Animation.AnimationListener() {
+                    public void onAnimationStart(
+                        android.view.animation.Animation a
+                    ) {}
+
+                    public void onAnimationRepeat(
+                        android.view.animation.Animation a
+                    ) {}
+
+                    public void onAnimationEnd(
+                        android.view.animation.Animation a
+                    ) {
+                        pageLabel.setVisibility(View.VISIBLE); // ✅ 动画结束再显示页码
+                    }
+                }
+            );
+            bottomBar.startAnimation(bottomAnim);
+
             if (currentBar == searchBar) {
                 searchBar.requestFocus();
                 showKeyboard();
             }
 
-            updateStatusBarIconMode(true);
+            // ✅ 显示 UI 时退出沉浸式，让状态栏/导航栏可见
+            exitSystemFullscreen();
         }
     }
 
@@ -1520,18 +1667,21 @@ public class DocumentActivity extends Activity {
 
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
 
-        // ===== 无光夜晚阅读环境优化参数 =====
-        // 暖灰文字：R>G>B，降低蓝光比例，模拟纸质书泛黄感
-        final int TARGET_R = 0xB8; // 184 - 暖色主通道
-        final int TARGET_G = 0xA8; // 168 - 略低，减少绿光
-        final int TARGET_B = 0x90; // 144 - 明显压低，减少蓝光刺激
+        // ===== ✅ v3 无光环境优化：降低文字峰值亮度，收窄动态范围 =====
+        // 原 #B8A890 (42%) → #8A7E6C (27%)，峰值亮度降低 36%
+        // 暖色调比例保持不变(R>G>B)，仅整体压低
+        final int TARGET_R = 0x8A; // 138 (原 0xB8=184)
+        final int TARGET_G = 0x7E; // 126 (原 0xA8=168)
+        final int TARGET_B = 0x6C; // 108 (原 0x90=144)
 
-        // 等效平均亮度 ≈ #A8A8A8 (66%)，比之前的 #C8C8C8 (78%) 柔和很多
-        // 对比度(对纯黑底) ≈ 6.8:1，处于 WCAG AAA 舒适区下限
+        // ✅ scale 区间从 [0.7, 1.0] 收窄为 [0.82, 1.0]
+        // 最暗笔画不再过度压暗，保证可读性；
+        // 同时最亮笔画也同步降低，整体更柔和均匀
+        final float SCALE_MIN = 0.82f; // 原 0.7f
+        final float SCALE_RANGE = 0.18f; // 原 0.3f (即 1.0 - 0.7)
 
-        // 文字阈值放宽：确保中等粗细笔画不被过度压暗
-        final float TEXT_THRESHOLD = 95f / 255f; // 原80 → 95
-        // 背景阈值保持不变
+        // 阈值保持不变
+        final float TEXT_THRESHOLD = 95f / 255f;
         final float BG_THRESHOLD = 200f / 255f;
 
         for (int i = 0; i < pixels.length; i++) {
@@ -1546,27 +1696,22 @@ public class DocumentActivity extends Activity {
             int nr, ng, nb;
 
             if (luminance >= BG_THRESHOLD) {
-                // ✅ 背景区域：强制纯黑
                 nr = 0;
                 ng = 0;
                 nb = 0;
             } else if (luminance <= TEXT_THRESHOLD) {
-                // ✅ 文字区域：映射到柔和浅灰
-                // 原始越黑 → 目标越亮（反转关系）
-                // luminance=0 → TARGET; luminance=TEXT_THRESHOLD → TARGET*0.7
                 float textRatio = 1.0f - luminance / TEXT_THRESHOLD;
-                float scale = 0.7f + 0.3f * textRatio; // [0.7, 1.0]
+                // ✅ 使用新的 scale 区间
+                float scale = SCALE_MIN + SCALE_RANGE * textRatio; // [0.82, 1.0]
                 nr = (int) (TARGET_R * scale);
                 ng = (int) (TARGET_G * scale);
                 nb = (int) (TARGET_B * scale);
             } else {
-                // ✅ 过渡区域(抗锯齿边缘)：从浅灰平滑过渡到纯黑
-                // luminance 从 TEXT_THRESHOLD → BG_THRESHOLD
-                // 输出从 TARGET*0.7 → 0
                 float edgeRatio =
                     (luminance - TEXT_THRESHOLD) /
                     (BG_THRESHOLD - TEXT_THRESHOLD);
-                float scale = 0.7f * (1.0f - edgeRatio);
+                // ✅ 过渡区也使用新 scale，确保边缘平滑衔接
+                float scale = SCALE_MIN * (1.0f - edgeRatio);
                 nr = (int) (TARGET_R * scale);
                 ng = (int) (TARGET_G * scale);
                 nb = (int) (TARGET_B * scale);
@@ -1579,29 +1724,46 @@ public class DocumentActivity extends Activity {
     }
 
     /**
-     * 根据暗黑模式切换状态栏图标颜色
-     * @param isDark true=暗黑模式，状态栏图标白色；false=亮色模式，状态栏图标黑色
+     * 控制状态栏图标亮暗
+     * @param isDark 调用方期望的模式（保留参数以兼容未来明暗适配）
+     *
+     * ✅ 当前阶段：阅读界面仅有暗黑模式，无论 isDark 传何值，
+     *    都强制使用白色图标，避免"黑底黑字"不可见的问题。
+     *    将来接入明暗模式时，只需删除下方 forceLight 兜底逻辑即可。
      */
     private void updateStatusBarIconMode(boolean isDark) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            // Android6.0以下不支持状态栏图标变色，直接返回
-            return;
-        }
-        Window window = getWindow();
-        int vis = window.getDecorView().getSystemUiVisibility();
-        // 基础flag保持不变：LAYOUT_STABLE | LAYOUT_FULLSCREEN
-        int baseFlags =
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        // ✅ 当前纯暗黑模式兜底：强制 isDark = true
+        // 将来需要明暗适配时，删除这一行即可恢复参数控制
+        final boolean effectiveDark = true; // ← 未来改为: final boolean effectiveDark = isDark;
 
-        if (!isDark) {
-            // 亮色模式：开启轻量状态栏，图标黑色
-            vis = baseFlags | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        } else {
-            // 暗黑模式：移除LIGHT_STATUS_BAR，图标白色
-            vis = baseFlags;
+        Window window = getWindow();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = window.getInsetsController();
+            if (controller != null) {
+                if (effectiveDark) {
+                    // 暗黑模式：清除 LIGHT 标志 → 图标白色
+                    controller.setSystemBarsAppearance(
+                        0,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    );
+                } else {
+                    // 亮色模式：设置 LIGHT 标志 → 图标黑色
+                    controller.setSystemBarsAppearance(
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    );
+                }
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int vis = window.getDecorView().getSystemUiVisibility();
+            if (!effectiveDark) {
+                vis |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            } else {
+                vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            }
+            window.getDecorView().setSystemUiVisibility(vis);
         }
-        window.getDecorView().setSystemUiVisibility(vis);
     }
 
     @Override
@@ -1612,7 +1774,13 @@ public class DocumentActivity extends Activity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
+        // ✅ 仅在获得焦点且 UI 处于隐藏状态时才恢复全屏
+        // 避免与 toggleUI() 显示 UI 时的 exitSystemFullscreen 冲突
+        if (
+            hasFocus &&
+            bottomBar != null &&
+            bottomBar.getVisibility() != View.VISIBLE
+        ) {
             enterSystemFullscreen();
         }
     }
@@ -3700,6 +3868,10 @@ public class DocumentActivity extends Activity {
     protected void relayoutDocument(
         final java.util.function.IntConsumer onComplete
     ) {
+        // ✅ 重排版（doc.layout）对大 EPUB 很耗时，提前显示进度弹窗
+        //    字号菜单 / 屏幕旋转 / 笔记跳页都会走到这里，统一覆盖
+        showAiLoadingDialog();
+
         worker.add(
             new Worker.Task() {
                 int safePage = 0; // ✅ 在 work() 中计算，run() 中传递
@@ -3742,6 +3914,9 @@ public class DocumentActivity extends Activity {
                 }
 
                 public void run() {
+                    // ✅ 排版完成，关闭进度弹窗
+                    dismissAiLoadingDialog();
+
                     pageCountChanged = true;
 
                     if (onComplete != null) {
