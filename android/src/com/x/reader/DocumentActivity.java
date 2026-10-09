@@ -340,8 +340,15 @@ public class DocumentActivity extends Activity {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // ============ 屏幕方向控制（与旧版 Mini 实现一致）============
         Uri uri = getIntent().getData();
+        if (uri != null) {
+            // 使用完整 toString() 作为 key，与 Mini 完全一致
+            // 这样无论 TXT/EPUB/PDF、无论哪种入口，key 都稳定
+            mDocKey = uri.toString();
+        }
+        Log.i(APP, "STABLE DOC KEY: " + mDocKey);
+
+        // ============ 屏幕方向控制（与旧版 Mini 实现一致）============
         String fileName = "";
         if (uri != null) {
             Cursor cursor = getContentResolver().query(
@@ -404,8 +411,6 @@ public class DocumentActivity extends Activity {
                     showCannotOpenDialog("No document uri to open");
                     return;
                 }
-
-                mDocKey = uri.toString();
 
                 Log.i(APP, "OPEN URI " + uri.toString());
                 Log.i(APP, "  MAGIC (Intent) " + mimetype);
@@ -656,7 +661,8 @@ public class DocumentActivity extends Activity {
                 mLayoutW = newW;
                 mLayoutH = newH;
 
-                if (layoutReady[0] && sizeChanged) {
+                // ✅ 增加双重保护：layoutReady + 尺寸真正变化 + 非首次布局
+                if (layoutReady[0] && sizeChanged && oldw != 0 && oldh != 0) {
                     if (core.isReflowable()) {
                         relayoutDocument();
                     } else {
@@ -973,7 +979,8 @@ public class DocumentActivity extends Activity {
 
         // Reenstate last state if it was recorded
         /////////////////////////////////////////////////////////////////////
-        // ✅ 恢复保存的状态
+
+        // ✅ 恢复保存的状态（重构版）
         SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
 
         // 1. 恢复字号（兼容旧版 Float 和新版 Int）
@@ -981,14 +988,10 @@ public class DocumentActivity extends Activity {
         try {
             savedEm = prefs.getInt("layoutEm_" + mDocKey, -1);
         } catch (ClassCastException e) {
-            // 旧版遗留 Float，读取并迁移
             try {
                 float oldVal = prefs.getFloat("layoutEm_" + mDocKey, -1f);
-                if (oldVal >= 6 && oldVal <= 16) {
-                    savedEm = Math.round(oldVal);
-                }
+                if (oldVal >= 6 && oldVal <= 16) savedEm = Math.round(oldVal);
             } catch (Exception ignored) {}
-            // 立即迁移为 Int，防止 onPause 再次写 Float 前就崩溃
             prefs
                 .edit()
                 .putInt("layoutEm_" + mDocKey, savedEm)
@@ -1000,52 +1003,80 @@ public class DocumentActivity extends Activity {
         // 2. 恢复页码
         int savedPage = prefs.getInt("page" + mDocKey, 0);
 
-        // 3. 对 reflowable 文档：先用恢复的字号 layout，再跳转
+        // 3. 统一处理：先确保 core 使用正确的字号完成首次 layout
+        //    再跳转页码，最后才允许 onSizeChanged 触发 relayout
         if (core.isReflowable()) {
-            // core.layout 返回映射后的安全页码
-            int mappedPage = core.layout(
-                savedPage,
-                mLayoutW,
-                mLayoutH,
-                mLayoutEM
-            );
-            // 边界保护
-            if (mappedPage < 0 || mappedPage >= core.countPages()) {
-                mappedPage = Math.max(
-                    0,
-                    Math.min(savedPage, core.countPages() - 1)
-                );
-            }
-            mDocView.setDisplayedViewIndex(mappedPage);
+            // ✅ 先用初始尺寸做一次 layout，仅用于获取 pageCount 等元数据
+            core.layout(0, mLayoutW, mLayoutH, mLayoutEM);
+
             Log.i(
                 APP,
-                "Restored: em=" +
+                "Restore reflowable: em=" +
                     mLayoutEM +
                     ", savedPage=" +
                     savedPage +
-                    ", mappedPage=" +
-                    mappedPage +
                     ", pageCount=" +
                     core.countPages()
             );
+
+            // ✅ 延迟到 View 布局完成后，用真实尺寸重新排版，然后直接跳转到 savedPage
+            final int finalSavedPage = savedPage;
+            mDocView.post(() -> {
+                if (mDocView == null || core == null) return;
+
+                // 此时 onSizeChanged 已更新 mLayoutW/H 为真实尺寸
+                // ✅ 关键：anchor 传 0，不把 savedPage 作为 hint 传给 layout
+                // 避免 MuPDF 的 anchor 映射导致页码偏移
+                core.layout(0, mLayoutW, mLayoutH, mLayoutEM);
+
+                // ✅ 直接跳转到保存的页码（clamp 到合法范围）
+                int safePage = Math.max(
+                    0,
+                    Math.min(finalSavedPage, core.countPages() - 1)
+                );
+
+                Log.i(
+                    APP,
+                    "Real size restore: " +
+                        mLayoutW +
+                        "x" +
+                        mLayoutH +
+                        ", em=" +
+                        mLayoutEM +
+                        ", savedPage=" +
+                        finalSavedPage +
+                        ", safePage=" +
+                        safePage +
+                        ", pageCount=" +
+                        core.countPages()
+                );
+
+                mDocView.setDisplayedViewIndex(safePage);
+
+                // ✅ 现在才启用 onSizeChanged 响应
+                layoutReady[0] = true;
+                Log.i(APP, "layoutReady enabled after real-size restore");
+            });
         } else {
-            // PDF 等固定排版文档：直接跳转，做边界保护
+            // PDF 等固定排版：直接跳转
             int safePage = Math.max(
                 0,
                 Math.min(savedPage, core.countPages() - 1)
             );
-            mDocView.setDisplayedViewIndex(safePage);
             Log.i(
                 APP,
-                "Restored: page=" +
+                "Restore fixed: page=" +
                     safePage +
                     ", pageCount=" +
                     core.countPages()
             );
-        }
+            mDocView.setDisplayedViewIndex(safePage);
 
-        // ✅ 页码恢复完成，允许后续 onSizeChanged 触发 relayout
-        layoutReady[0] = true;
+            mDocView.post(() -> {
+                layoutReady[0] = true;
+                Log.i(APP, "layoutReady enabled after fixed restore");
+            });
+        }
 
         /////////////////////////////////////////////////////////
 
@@ -1184,22 +1215,10 @@ public class DocumentActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        if (mDocKey != null && mDocView != null) {
-            if (mDocTitle != null) outState.putString("DocTitle", mDocTitle);
-
-            // Store current page in the prefs against the file name,
-            // so that we can pick it up each time the file is loaded
-            // Other info is needed only for screen-orientation change,
-            // so it can go in the bundle
-            SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.putInt("page" + mDocKey, mDocView.getDisplayedViewIndex());
-            edit.apply();
-        }
-
+        // ✅ 不再在 onSaveInstanceState 中保存页码到 prefs
+        // 页码持久化统一由 onPause 负责，避免重复写入和竞态
+        if (mDocTitle != null) outState.putString("DocTitle", mDocTitle);
         if (!mButtonsVisible) outState.putBoolean("ButtonsHidden", true);
-
         if (mTopBarMode == TopBarMode.Search) outState.putBoolean(
             "SearchMode",
             true
