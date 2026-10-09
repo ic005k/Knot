@@ -499,13 +499,74 @@ public class DocumentActivity extends Activity {
                     Log.i(APP, "  MAGIC (Filename) " + mimetype);
                 }
 
-                try {
+                /*try {
                     core = openCore(uri, size, mimetype);
                     SearchTaskResult.set(null);
                 } catch (Exception x) {
                     showCannotOpenDialog(x.toString());
                     return;
-                }
+                }*/
+
+                // === 改为异步 ===
+                showAiLoadingDialog(); // ✅ 先显示"处理中..."
+
+                final Uri finalUri = uri;
+                final long finalSize = size;
+                final String finalMimetype = mimetype;
+
+                new Thread(() -> {
+                    MuPDFCore result = null;
+                    Exception error = null;
+                    try {
+                        result = openCore(finalUri, finalSize, finalMimetype);
+                    } catch (Exception x) {
+                        error = x;
+                    }
+
+                    final MuPDFCore openedCore = result;
+                    final Exception openError = error;
+
+                    runOnUiThread(() -> {
+                        if (isFinishing() || isDestroyed()) {
+                            // ✅ Activity 已销毁，释放后台创建的 core
+                            if (openedCore != null) openedCore.onDestroy();
+                            return;
+                        }
+                        dismissAiLoadingDialog(); // ✅ 关闭弹窗
+
+                        if (openError != null) {
+                            showCannotOpenDialog(openError.toString());
+                            return;
+                        }
+
+                        core = openedCore;
+                        SearchTaskResult.set(null);
+
+                        if (core != null && core.needsPassword()) {
+                            requestPassword(savedInstanceState);
+                            return;
+                        }
+                        if (core != null && core.countPages() == 0) {
+                            core = null;
+                        }
+                        if (core == null) {
+                            AlertDialog alert = mAlertBuilder.create();
+                            alert.setTitle(R.string.cannot_open_document);
+                            alert.setButton(
+                                AlertDialog.BUTTON_POSITIVE,
+                                getString(R.string.dismiss),
+                                (d, w) -> finish()
+                            );
+                            alert.setOnCancelListener(d -> finish());
+                            alert.show();
+                            return;
+                        }
+
+                        createUI(savedInstanceState);
+                    });
+                }).start();
+
+                return; // ✅ 提前返回，等待后台线程回调
             }
             if (core != null && core.needsPassword()) {
                 requestPassword(savedInstanceState);
