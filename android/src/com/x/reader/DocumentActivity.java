@@ -3004,7 +3004,7 @@ public class DocumentActivity extends Activity {
             tvMsg.setText(
                 MyActivity.zh_cn ? "处理中，请稍后..." : "Processing..."
             );
-            tvMsg.setTextColor(mInvertMode ? 0xFFFFFFFF : 0xFF333333);
+            tvMsg.setTextColor(MyActivity.isDark ? 0xFFFFFFFF : 0xFF333333);
             layout.addView(tvMsg);
             androidx.appcompat.app.AlertDialog.Builder builder =
                 new androidx.appcompat.app.AlertDialog.Builder(this);
@@ -3029,5 +3029,224 @@ public class DocumentActivity extends Activity {
         dismissAiLoadingDialog();
         MyActivity.showAiMarkdownDialog(this, mdList);
     }
+
     /////////////////////////////////////////////////////////////////////////////////
+    /**
+     * 【矩形选框专用】选框完成后弹出操作菜单
+     * 提供：复制、AI搜索、网页搜索、添加笔记
+     */
+    public void showRectSelectionMenu(
+        final String selectedText,
+        final int pageNum,
+        final float docLeft,
+        final float docTop,
+        final float docRight,
+        final float docBottom
+    ) {
+        if (selectedText == null || selectedText.trim().isEmpty()) return;
+
+        final String text = selectedText.trim();
+
+        // ✅ 预览文本（截取前 100 字符）
+        String preview =
+            text.length() > 100 ? text.substring(0, 100) + "…" : text;
+
+        final boolean dark = mInvertMode;
+        int dp16 = dp2px(16);
+        int dp12 = dp2px(12);
+        int dp8 = dp2px(8);
+
+        int bgColor = dark ? 0xFF1A1A1A : 0xFFFFFFFF;
+        int textMain = dark ? 0xFFE0E0E0 : 0xFF333333;
+        int textSub = dark ? 0xFF888888 : 0xFF999999;
+        int btnBg = dark ? 0xFF2D2D2D : 0xFFF5F5F5;
+
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp16, dp16, dp16, dp16);
+        root.setBackgroundColor(bgColor);
+
+        // 标题
+        TextView titleView = new TextView(this);
+        titleView.setText(MyActivity.zh_cn ? "已选择文字" : "Text Selected");
+        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        titleView.setTextColor(textSub);
+        root.addView(
+            titleView,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        // 预览文本
+        TextView previewView = new TextView(this);
+        previewView.setText(preview);
+        previewView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        previewView.setTextColor(textMain);
+        previewView.setPadding(0, dp8, 0, dp16);
+        previewView.setMaxLines(4);
+        previewView.setEllipsize(TextUtils.TruncateAt.END);
+        root.addView(
+            previewView,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        // 按钮区
+        LinearLayout btnBar = new LinearLayout(this);
+        btnBar.setOrientation(LinearLayout.HORIZONTAL);
+        btnBar.setWeightSum(4);
+
+        String[] labels = MyActivity.zh_cn
+            ? new String[] { "复制", "AI搜索", "网页搜索", "笔记" }
+            : new String[] { "Copy", "AI", "Web", "Note" };
+
+        for (int i = 0; i < labels.length; i++) {
+            TextView btn = new TextView(this);
+            btn.setText(labels[i]);
+            btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            btn.setGravity(Gravity.CENTER);
+            btn.setPadding(dp8, dp12, dp8, dp12);
+            btn.setTextColor(dark ? 0xFF90CAF9 : 0xFF1565C0);
+            btn.setBackgroundColor(btnBg);
+
+            final int btnIndex = i;
+            btn.setOnClickListener(v -> {
+                switch (btnIndex) {
+                    case 0: // 复制
+                        android.content.ClipboardManager cm =
+                            (android.content.ClipboardManager) getSystemService(
+                                Context.CLIPBOARD_SERVICE
+                            );
+                        if (cm != null) {
+                            cm.setPrimaryClip(
+                                android.content.ClipData.newPlainText(
+                                    "selected_text",
+                                    text
+                                )
+                            );
+                        }
+                        Toast.makeText(
+                            this,
+                            MyActivity.zh_cn ? "已复制" : "Copied",
+                            Toast.LENGTH_SHORT
+                        ).show();
+                        break;
+                    case 1: // AI 搜索
+                        showAiLoadingDialog();
+                        MyActivity.mInstance.PublicJavaCallCpp(
+                            "pdf_ai_search|==|" + text
+                        );
+                        break;
+                    case 2: // 网页搜索
+                        try {
+                            Intent intent = new Intent(
+                                Intent.ACTION_WEB_SEARCH
+                            );
+                            intent.putExtra(
+                                android.app.SearchManager.QUERY,
+                                text
+                            );
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        } catch (Exception ex) {
+                            Toast.makeText(
+                                this,
+                                "Cannot launch web search",
+                                Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                        break;
+                    case 3: // 添加笔记
+                        // ✅ 提取选区附近的上下文
+                        String fullPageText = core.getPageText(pageNum);
+                        String searchContext = "";
+                        if (fullPageText != null) {
+                            int idx = fullPageText.indexOf(text);
+                            if (idx >= 0) {
+                                int ctxStart = Math.max(0, idx - 50);
+                                int ctxEnd = Math.min(
+                                    fullPageText.length(),
+                                    idx + text.length() + 50
+                                );
+                                searchContext = fullPageText
+                                    .substring(ctxStart, ctxEnd)
+                                    .replaceAll("\\s+", " ")
+                                    .trim();
+                            } else {
+                                searchContext = text;
+                            }
+                        }
+                        showNoteInputDialog(
+                            text,
+                            null,
+                            searchContext,
+                            null,
+                            null
+                        );
+                        break;
+                }
+            });
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1.0f
+            );
+            if (i > 0) lp.leftMargin = dp8;
+            btnBar.addView(btn, lp);
+        }
+
+        root.addView(
+            btnBar,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        // 关闭按钮
+        TextView btnClose = new TextView(this);
+        btnClose.setText(MyActivity.zh_cn ? "关闭" : "Close");
+        btnClose.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        btnClose.setGravity(Gravity.CENTER);
+        btnClose.setPadding(dp8, dp12, dp8, dp8);
+        btnClose.setTextColor(textSub);
+        root.addView(
+            btnClose,
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        );
+
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(root);
+        dialog.setCancelable(true);
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setDimAmount(0.4f);
+            dialog
+                .getWindow()
+                .setBackgroundDrawableResource(
+                    dark
+                        ? android.R.drawable.dialog_holo_dark_frame
+                        : android.R.drawable.dialog_holo_light_frame
+                );
+        }
+
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        int dialogW = (int) (dm.widthPixels * 0.9);
+        if (dialog.getWindow() != null) {
+            dialog
+                .getWindow()
+                .setLayout(dialogW, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
 }

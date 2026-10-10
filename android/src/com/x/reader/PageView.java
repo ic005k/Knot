@@ -66,6 +66,16 @@ public class PageView extends ViewGroup {
 
     private boolean mInvertMode = false;
 
+    // ===== 矩形选框相关 =====
+    private SelectionOverlayView mSelectionOverlay;
+    private SelectionOverlayView.OnTextSelectedListener mSelectionListener;
+
+    public void setOnTextSelectedListener(
+        SelectionOverlayView.OnTextSelectedListener listener
+    ) {
+        mSelectionListener = listener;
+    }
+
     private static final int HIGHLIGHT_COLOR = 0x80cc6600;
     private static final int LINK_COLOR = 0x800066cc;
     private static final int BOX_COLOR = 0xFF4444FF;
@@ -172,6 +182,9 @@ public class PageView extends ViewGroup {
         mLinks = null;
 
         clearRenderError();
+
+        // ✅ 清理选框覆盖层
+        cancelSelection();
     }
 
     public void releaseResources() {
@@ -591,6 +604,12 @@ public class PageView extends ViewGroup {
                 (h + bh) / 2
             );
         }
+
+        // ✅ 选框覆盖层始终铺满整个 PageView
+        if (mSelectionOverlay != null) {
+            mSelectionOverlay.layout(0, 0, w, h);
+            mSelectionOverlay.bringToFront();
+        }
     }
 
     public void updateHq() {
@@ -950,5 +969,50 @@ public class PageView extends ViewGroup {
 
     public boolean isFitWidth() {
         return mFitWidth;
+    }
+
+    /**
+     * 启动矩形选框选择模式
+     * @param viewX 长按点在 PageView 中的 X 坐标
+     * @param viewY 长按点在 PageView 中的 Y 坐标
+     */
+    public void startSelection(float viewX, float viewY) {
+        cancelSelection();
+
+        mSelectionOverlay = new SelectionOverlayView(mContext);
+        mSelectionOverlay.setPageView(this);
+        mSelectionOverlay.setInvertMode(mInvertMode);
+        mSelectionOverlay.setListener(mSelectionListener);
+
+        // ✅ 添加到 PageView 最顶层
+        addView(
+            mSelectionOverlay,
+            new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        );
+
+        // ✅ 延迟到 layout 完成后初始化矩形位置
+        mSelectionOverlay.post(() -> {
+            mSelectionOverlay.initRect(viewX, viewY);
+        });
+    }
+
+    /**
+     * 取消当前选框
+     */
+    public void cancelSelection() {
+        if (mSelectionOverlay != null) {
+            removeView(mSelectionOverlay);
+            mSelectionOverlay = null;
+        }
+    }
+
+    /**
+     * 是否正在选框模式
+     */
+    public boolean isSelecting() {
+        return mSelectionOverlay != null;
     }
 }

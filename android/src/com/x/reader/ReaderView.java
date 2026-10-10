@@ -502,6 +502,7 @@ public class ReaderView
         return true;
     }
 
+    // 长按出现文本选择视图
     @Override
     public void onLongPress(MotionEvent e) {
         // 1. 获取当前显示的 PageView
@@ -549,6 +550,85 @@ public class ReaderView
             );
         }
     }
+
+    // 新实现,效果不好，暂时搁置
+    /*@Override
+    public void onLongPress(MotionEvent e) {
+        // 1. 获取当前显示的 PageView
+        View v = mChildViews.get(mCurrent);
+        if (!(v instanceof PageView)) return;
+        PageView pageView = (PageView) v;
+
+        // 2. 如果已经在选框模式中，忽略
+        if (pageView.isSelecting()) return;
+
+        // 3. 计算触摸点相对于 PageView 的坐标
+        float viewX = e.getX() - v.getLeft();
+        float viewY = e.getY() - v.getTop();
+
+        // 4. 边缘防误触
+        float density = mContext.getResources().getDisplayMetrics().density;
+        int edgeSafeZonePx = (int) (24 * density + 0.5f);
+        if (
+            viewX < edgeSafeZonePx ||
+            viewX > v.getWidth() - edgeSafeZonePx ||
+            viewY < edgeSafeZonePx ||
+            viewY > v.getHeight() - edgeSafeZonePx
+        ) {
+            return;
+        }
+
+        // 5. 检查该页是否有可提取文字
+        String fullText = pageView.mCore.getPageText(pageView.getPage());
+        if (fullText == null || fullText.trim().isEmpty()) {
+            Toast.makeText(
+                mContext,
+                com.x.MyActivity.zh_cn
+                    ? "此页无可提取文字"
+                    : "No extractable text",
+                Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        // 6. ✅ 设置选框回调（提取到文字后弹出操作菜单）
+        pageView.setOnTextSelectedListener(
+            new SelectionOverlayView.OnTextSelectedListener() {
+                @Override
+                public void onTextSelected(
+                    String text,
+                    float docLeft,
+                    float docTop,
+                    float docRight,
+                    float docBottom,
+                    int pageNum
+                ) {
+                    // ✅ 选框完成，移除覆盖层
+                    pageView.cancelSelection();
+
+                    // ✅ 回调 DocumentActivity 弹出操作菜单
+                    if (mContext instanceof DocumentActivity) {
+                        ((DocumentActivity) mContext).showRectSelectionMenu(
+                            text,
+                            pageNum,
+                            docLeft,
+                            docTop,
+                            docRight,
+                            docBottom
+                        );
+                    }
+                }
+
+                @Override
+                public void onSelectionCancelled() {
+                    pageView.post(() -> pageView.cancelSelection());
+                }
+            }
+        );
+
+        // 7. ✅ 启动矩形选框
+        pageView.startSelection(viewX, viewY);
+    }*/
 
     public boolean onScroll(
         MotionEvent e1,

@@ -568,4 +568,128 @@ public class MuPDFCore {
     public boolean isFixedLayout() {
         return !reflowable;
     }
+
+    /**
+     * 【矩形选框专用】提取指定矩形区域内的文字（精确到字符级别）
+     *
+     * 原理：MuPDF copy() 按行提取，会返回整行。
+     * 我们用 highlight() 获取精确 Quad，然后对 copy 的结果
+     * 按 Quad 覆盖的字符数进行截断。
+     */
+    public synchronized String getTextInRect(
+        int pageNum,
+        float left,
+        float top,
+        float right,
+        float bottom
+    ) {
+        gotoPage(pageNum);
+        if (page == null) return "";
+        try {
+            com.artifex.mupdf.fitz.StructuredText stext = page.toStructuredText(
+                "preserve-whitespace"
+            );
+
+            com.artifex.mupdf.fitz.Point p1 = new com.artifex.mupdf.fitz.Point(
+                left,
+                top
+            );
+            com.artifex.mupdf.fitz.Point p2 = new com.artifex.mupdf.fitz.Point(
+                right,
+                bottom
+            );
+
+            // 1. 获取精确 Quad
+            Quad[] quads = stext.highlight(p1, p2);
+            if (quads == null || quads.length == 0) {
+                stext.destroy();
+                return "";
+            }
+
+            // 2. 计算 Quad 联合边界
+            float qLeft = Float.MAX_VALUE,
+                qTop = Float.MAX_VALUE;
+            float qRight = Float.MIN_VALUE,
+                qBottom = Float.MIN_VALUE;
+            for (Quad q : quads) {
+                qLeft = Math.min(qLeft, Math.min(q.ul_x, q.ll_x));
+                qTop = Math.min(qTop, Math.min(q.ul_y, q.ur_y));
+                qRight = Math.max(qRight, Math.max(q.lr_x, q.ur_x));
+                qBottom = Math.max(qBottom, Math.max(q.ll_y, q.lr_y));
+            }
+
+            // 3. 获取整页纯文本和全页尺寸用于比例计算
+            String fullText = stext.asText();
+            if (fullText == null || fullText.isEmpty()) {
+                // 降级尝试
+                try {
+                    java.lang.reflect.Method m = stext
+                        .getClass()
+                        .getMethod("toPlainText");
+                    fullText = (String) m.invoke(stext);
+                } catch (Exception ignored) {}
+            }
+
+            // 4. 用 Quad 精确边界调 copy
+            float pad = 0.5f;
+            com.artifex.mupdf.fitz.Point qa = new com.artifex.mupdf.fitz.Point(
+                qLeft - pad,
+                qTop - pad
+            );
+            com.artifex.mupdf.fitz.Point qb = new com.artifex.mupdf.fitz.Point(
+                qRight + pad,
+                qBottom + pad
+            );
+            String copiedText = stext.copy(qa, qb);
+
+            stext.destroy();
+
+            if (copiedText == null || copiedText.trim().isEmpty()) {
+                return "";
+            }
+
+            copiedText = copiedText.trim();
+
+            // ✅ 5. 后处理：如果 copy 返回的文字明显超出 Quad 覆盖范围
+            // 通过字符密度估算合理长度并截断
+            // Quad 宽度占页面宽度的比例 ≈ 选中文字占整行文字的比例
+            Rect pageBounds = page.getBounds();
+            float pageWidth = pageBounds.x1 - pageBounds.x0;
+            float quadWidth = qRight - qLeft;
+
+            if (pageWidth > 0 && quadWidth > 0) {
+                // 估算：选中区域的字符数 ≈ 总字符数 × (quadWidth / pageWidth)
+                // 但这个估算对多行不准，所以只在单行时裁剪
+                if (quads.length <= 2) {
+                    float ratio = quadWidth / pageWidth;
+                    // 如果 copy 结果的长度远超预期（超过预估的 2 倍），则截断
+                    int estimatedChars = Math.max(
+                        1,
+                        (int) (copiedText.length() * ratio * 1.5f)
+                    );
+                    if (copiedText.length() > estimatedChars + 5) {
+                        // 尝试在全文中定位这段文字，精确截取
+                        if (fullText != null && !fullText.isEmpty()) {
+                            int idx = fullText.indexOf(copiedText.charAt(0));
+                            // 在全文中找到与 Quad 位置最匹配的子串
+                            // 简化处理：直接用 copy 结果的前 N 个字符
+                            // （因为 copy 是从左到右、从上到下提取的）
+                            copiedText = copiedText.substring(
+                                0,
+                                Math.min(
+                                    copiedText.length(),
+                                    estimatedChars + 2
+                                )
+                            );
+                        }
+                    }
+                }
+            }
+
+            return copiedText.trim();
+        } catch (Exception e) {
+            Log.e(APP, "getTextInRect failed: " + e.getMessage());
+            return "";
+        }
+    }
 }
