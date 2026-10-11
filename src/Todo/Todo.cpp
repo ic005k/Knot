@@ -72,6 +72,16 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
             }
           });
 
+  connect(delegate, &TodoItemDelegate::expandedIndexChanged, this,
+          [this](const QModelIndex& index) {
+            if (!index.isValid()) return;
+
+            // ✅ 在展开的同时，手动设置选中（与 dataChanged 同帧生效）
+            ui->listTodo->setCurrentIndex(index);
+            ui->listTodo->selectionModel()->select(
+                index, QItemSelectionModel::ClearAndSelect);
+          });
+
   // 回车键触发添加记录
   connect(ui->editTodoText, &QLineEdit::returnPressed, this,
           &Todo::on_btnAddText_clicked);

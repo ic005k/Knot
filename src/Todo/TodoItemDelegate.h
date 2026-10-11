@@ -31,6 +31,8 @@ class TodoItemDelegate : public QStyledItemDelegate {
  signals:
   // 当工具按钮被点击时发出信号，外部连接处理业务逻辑
   void toolButtonClicked(const QModelIndex& index, const QString& actionId);
+  /** 当条目展开状态改变时发出，携带新的展开索引 */
+  void expandedIndexChanged(const QModelIndex& index);
 
  private:
   QColor getColorByIndex(int index) const;

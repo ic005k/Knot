@@ -54,6 +54,144 @@ QVector<ToolButtonInfo> TodoItemDelegate::getButtonLayout(
   return buttons;
 }
 
+// 将按钮纳入选中状态
+/*void TodoItemDelegate::paint(QPainter* painter,
+                             const QStyleOptionViewItem& option,
+                             const QModelIndex& index) const {
+  QStyleOptionViewItem opt = option;
+  initStyleOption(&opt, index);
+
+  painter->save();
+  painter->setRenderHint(QPainter::Antialiasing);
+
+  bool isExpanded = (m_expandedIndex == index);
+  QRect rect = opt.rect;
+
+  // ========== 核心改动：统一背景绘制 ==========
+  // 不再拆分 contentRect 和 toolBarRect 的背景
+  // 整个条目（无论是否展开）使用同一个选中/悬停背景
+  if (opt.state & QStyle::State_Selected) {
+    painter->fillRect(rect, opt.palette.highlight());
+  } else if (opt.state & QStyle::State_MouseOver) {
+    painter->fillRect(rect, opt.palette.base().color().darker(105));
+  } else {
+    painter->fillRect(rect, opt.palette.base());
+  }
+
+  // ========== 内容区域计算（仅用于文本和颜色条布局）==========
+  QRect contentRect = rect;
+  QRect toolBarRect;
+
+  if (isExpanded) {
+    contentRect.setHeight(rect.height() - kToolBarHeight);
+    toolBarRect = QRect(rect.left(), rect.bottom() - kToolBarHeight + 1,
+                        rect.width(), kToolBarHeight);
+  }
+
+  // 3. 解析数据
+  QString rawData = index.data(Qt::DisplayRole).toString();
+  QStringList parts = rawData.split("|==|");
+  if (parts.size() < 3) {
+    painter->restore();
+    return;
+  }
+
+  QString timeText = parts[0].trimmed();
+  int colorIndex = parts[1].trimmed().toInt();
+  QString todoText = parts[2].trimmed();
+  QColor barColor = getColorByIndex(colorIndex);
+
+  // 4. 布局参数
+  int leftPadding = 12, barWidth = 5, barGap = 10, rightPadding = 10;
+  int topMargin = 8, gapBetweenLines = 4, bottomMargin = 8;
+
+  int textX = contentRect.left() + leftPadding + barWidth + barGap;
+  int textW =
+      contentRect.width() - leftPadding - barWidth - barGap - rightPadding;
+
+  // 5. 绘制左侧颜色条 (基于 contentRect)
+  painter->setPen(Qt::NoPen);
+  painter->setBrush(barColor);
+  QRect barRect(contentRect.left() + leftPadding, contentRect.top() + topMargin,
+                barWidth, contentRect.height() - topMargin - bottomMargin);
+  painter->drawRoundedRect(barRect, 2.5, 2.5);
+
+  // 6. 文本颜色（保持原有逻辑不变）
+  bool isSelected = (opt.state & QStyle::State_Selected);
+  QColor mainTextColor = isSelected ? opt.palette.highlightedText().color()
+                                    : opt.palette.text().color();
+  QColor subTextColor = isSelected
+                            ? QColor(mainTextColor.red(), mainTextColor.green(),
+                                     mainTextColor.blue(), 180)
+                            : QColor(mainTextColor.red(), mainTextColor.green(),
+                                     mainTextColor.blue(), 140);
+
+  // --- 第一行：时间 ---
+  QFont timeFont = opt.font;
+  timeFont.setPointSize(qMax(8, timeFont.pointSize() - 3));
+  QFontMetrics timeFm(timeFont);
+  painter->setFont(timeFont);
+  painter->setPen(subTextColor);
+
+  int currentY = contentRect.top() + topMargin;
+  QRect timeRect(textX, currentY, textW, timeFm.height());
+  painter->drawText(timeRect,
+                    Qt::AlignLeft | Qt::AlignVCenter | Qt::TextSingleLine,
+                    timeText);
+  currentY += timeFm.height() + gapBetweenLines;
+
+  // --- 第二行：Todo文本 ---
+  QFont todoFont = opt.font;
+  todoFont.setBold(true);
+  QFontMetrics todoFm(todoFont);
+  painter->setFont(todoFont);
+  painter->setPen(mainTextColor);
+
+  int remainingHeight = contentRect.bottom() - currentY - bottomMargin;
+  QRect todoRect(textX, currentY, textW, qMax(0, remainingHeight));
+  painter->drawText(todoRect, Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap,
+                    todoText);
+
+  // ========== 7. 绘制工具按钮（仅展开时）==========
+  if (isExpanded) {
+    // 分隔线：在选中状态下降低透明度，避免与高亮背景冲突
+    QColor lineColor =
+        isSelected ? QColor(255, 255, 255, 40) : QColor(128, 128, 128, 60);
+    painter->setPen(lineColor);
+    painter->drawLine(toolBarRect.topLeft(),
+                      QPoint(toolBarRect.right(), toolBarRect.top()));
+
+    auto buttons = getButtonLayout(rect, opt.font);
+    QFont btnFont = opt.font;
+    btnFont.setPointSize(qMax(8, btnFont.pointSize() - 2));
+    painter->setFont(btnFont);
+
+    for (const auto& btn : buttons) {
+      // ✅ 按钮背景：根据选中状态自适应，保持与整体背景的层次感
+      QColor btnBg;
+      if (isSelected) {
+        // 选中时：使用半透明白色，在高亮背景上形成微妙层次
+        btnBg = QColor(255, 255, 255, 35);
+      } else {
+        // 未选中时：保持原有的浅色
+        btnBg = QColor(0, 0, 0, 20);
+      }
+
+      painter->setPen(Qt::NoPen);
+      painter->setBrush(btnBg);
+      painter->drawRoundedRect(btn.rect, 4, 4);
+
+      // ✅ 按钮文字：选中时使用高亮文字色，保持可读性
+      QColor btnTextColor = isSelected ? opt.palette.highlightedText().color()
+                                       : opt.palette.text().color();
+      painter->setPen(btnTextColor);
+      painter->drawText(btn.rect, Qt::AlignCenter, btn.text);
+    }
+  }
+
+  painter->restore();
+}*/
+
 void TodoItemDelegate::paint(QPainter* painter,
                              const QStyleOptionViewItem& option,
                              const QModelIndex& index) const {
@@ -238,36 +376,57 @@ QSize TodoItemDelegate::sizeHint(const QStyleOptionViewItem& option,
 bool TodoItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model,
                                    const QStyleOptionViewItem& option,
                                    const QModelIndex& index) {
+  // ✅ 核心修复：拦截鼠标按下事件，阻止 QListWidget 默认的提前选中行为
+  if (event->type() == QEvent::MouseButtonPress) {
+    auto* mouseEvent = static_cast<QMouseEvent*>(event);
+    // 仅左键点击条目内容区时拦截（右键/中键不影响）
+    if (mouseEvent->button() == Qt::LeftButton) {
+      // 返回 true 消费掉 Press 事件，QListWidget 就不会在按下时设置选中态
+      // 注意：不要在这里做任何视觉更新，保持当前画面不变
+      return true;
+    }
+  }
+
   if (event->type() == QEvent::MouseButtonRelease) {
     auto* mouseEvent = static_cast<QMouseEvent*>(event);
-    QPoint clickPos = mouseEvent->pos();
+    // 只处理左键释放
+    if (mouseEvent->button() != Qt::LeftButton) {
+      return QStyledItemDelegate::editorEvent(event, model, option, index);
+    }
 
+    QPoint clickPos = mouseEvent->pos();
     bool wasExpanded = (m_expandedIndex == index);
 
+    // 如果已展开，优先检查是否点击了按钮
     if (wasExpanded) {
-      // 检查是否点击了某个按钮
       auto buttons = getButtonLayout(option.rect, option.font);
       for (const auto& btn : buttons) {
         if (btn.rect.contains(clickPos)) {
           emit toolButtonClicked(index, btn.actionId);
-          return true;  // 消费事件，不触发选择切换
+          return true;  // 按钮点击不改变选中/展开状态
         }
       }
     }
 
-    // 点击条目本身 → 切换展开状态
+    // ✅ 关键：在同一帧内同时完成【选中】+【展开切换】+【重绘】
+    // 1. 手动设置选中状态（替代被我们拦截掉的默认行为）
+    // auto* selectionModel = const_cast<QAbstractItemModel*>(model)
+    //                           ->parent() /* 获取 view 的方式可能因架构而异
+    //                           */;
+    // ⚠️ 更稳妥的做法：通过外部连接或直接操作 view
+    // 这里推荐在 Delegate 中保存 view 指针，或通过信号让外部处理
+
+    // 2. 切换展开状态
     if (wasExpanded) {
-      m_expandedIndex = QPersistentModelIndex();  // 收起
+      m_expandedIndex = QPersistentModelIndex();
     } else {
-      m_expandedIndex =
-          QPersistentModelIndex(index);  // 展开新项（自动收起旧项）
+      m_expandedIndex = QPersistentModelIndex(index);
     }
 
-    // ⚠️ 关键：通知 View 重新计算布局并重绘
+    // 3. 通知重绘（此时选中态和展开态已同步更新）
     const_cast<QAbstractItemModel*>(model)->dataChanged(index, index);
+    emit expandedIndexChanged(wasExpanded ? QModelIndex() : index);
 
-    // 提示：如果视图没有自动更新高度，请在外部连接 dataChanged 信号并调用
-    // view->doItemsLayout()
     return true;
   }
 
