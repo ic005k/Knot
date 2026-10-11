@@ -1549,6 +1549,7 @@ public class DocumentActivity extends Activity {
             R.id.searchClose
         );
         mSearchText = (EditText) mButtonsView.findViewById(R.id.searchText);
+        mSearchText.setHint(MyActivity.zh_cn ? "搜索..." : "Search...");
         mLinkButton = (ImageButton) mButtonsView.findViewById(R.id.linkButton);
         mLayoutButton = mButtonsView.findViewById(R.id.layoutButton);
         mTopBarSwitcher.setVisibility(View.INVISIBLE);
