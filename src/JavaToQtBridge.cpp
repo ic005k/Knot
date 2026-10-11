@@ -588,6 +588,8 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
 
           if (strType == "cancel_add_event_record") {
             QTimer::singleShot(100, mw_one, [=]() {
+              m_Method->execJavaFunc("mInstance", "closeWindow",
+                                     "MyEventActivity");
               if (mw_one->ui->frameMain->isHidden()) {
                 m_Method->openMainEntranceWindow();
               }

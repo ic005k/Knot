@@ -311,9 +311,24 @@ public class MyEventActivity extends AppCompatActivity {
         return (int) (dpVal * density + 0.5f);
     }
 
+    /**
+     * JNI供C++调用，关闭当前MyEventActivity窗口
+     */
+    public void closeWindow() {
+        runOnUiThread(() -> {
+            if (!isFinishing()) {
+                finish();
+            }
+        });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mInstance = null;
+        if (mBackCallback != null) {
+            mBackCallback.remove();
+            mBackCallback = null;
+        }
     }
 }
