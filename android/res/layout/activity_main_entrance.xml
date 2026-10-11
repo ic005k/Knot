@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         app:layout_constraintTop_toTopOf="@id/layout_root"
     >
         <LinearLayout
@@ -26,8 +26,8 @@
         >
             <ImageView
                 android:id="@+id/iv_top_menu"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_top_menu"
             />
             <TextView
@@ -35,10 +35,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="菜单"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
+                android:textSize="10sp"
+                android:layout_marginTop="2dp"
             />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/top_btn_home_layout"
             android:layout_width="0dp"
@@ -49,8 +50,8 @@
         >
             <ImageView
                 android:id="@+id/iv_top_home"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_top_home"
             />
             <TextView
@@ -58,10 +59,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="主页"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
+                android:textSize="10sp"
+                android:layout_marginTop="2dp"
             />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/top_btn_add_layout"
             android:layout_width="0dp"
@@ -72,8 +74,8 @@
         >
             <ImageView
                 android:id="@+id/iv_top_add"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_top_add"
             />
             <TextView
@@ -81,10 +83,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="增加"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
+                android:textSize="10sp"
+                android:layout_marginTop="2dp"
             />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/top_btn_search_layout"
             android:layout_width="0dp"
@@ -95,8 +98,8 @@
         >
             <ImageView
                 android:id="@+id/iv_top_search"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_top_search"
             />
             <TextView
@@ -104,10 +107,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="查找"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
+                android:textSize="10sp"
+                android:layout_marginTop="2dp"
             />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/top_btn_upload_layout"
             android:layout_width="0dp"
@@ -118,8 +122,8 @@
         >
             <ImageView
                 android:id="@+id/iv_top_upload"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_top_upload"
             />
             <TextView
@@ -127,11 +131,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="上传"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"
+                android:textSize="10sp"
+                android:layout_marginTop="2dp"
             />
         </LinearLayout>
     </LinearLayout>
+
     <!-- 中间主Tab分类网格，数据由C++ QStringList驱动 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_maintab_grid"
@@ -144,6 +149,7 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar_layout"
         app:layout_constraintBottom_toTopOf="@id/bottom_tab_layout"
     />
+
     <!-- 底部Tab栏容器 -->
     <LinearLayout
         android:id="@+id/bottom_tab_layout"
@@ -151,8 +157,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="4"
-        android:paddingTop="10dp"
-        android:paddingBottom="12dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="8dp"
         app:layout_constraintBottom_toBottomOf="@id/layout_root"
     >
         <LinearLayout
@@ -165,8 +171,8 @@
         >
             <ImageView
                 android:id="@+id/iv_tab_read"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_tab_read"
             />
             <TextView
@@ -174,10 +180,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="阅读"
-                android:textSize="14sp"
-                android:layout_marginTop="3dp"
+                android:textSize="10sp"
+                android:layout_marginTop="2dp"
             />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/tab_todo_layout"
             android:layout_width="0dp"
@@ -188,8 +195,8 @@
         >
             <ImageView
                 android:id="@+id/iv_tab_todo"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_tab_todo"
             />
             <TextView
@@ -197,10 +204,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="待办"
-                android:textSize="14sp"
-                android:layout_marginTop="3dp"
+                android:textSize="10sp"
+                android:layout_marginTop="2dp"
             />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/tab_note_layout"
             android:layout_width="0dp"
@@ -211,8 +219,8 @@
         >
             <ImageView
                 android:id="@+id/iv_tab_note"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_tab_note"
             />
             <TextView
@@ -220,10 +228,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="笔记"
-                android:textSize="14sp"
-                android:layout_marginTop="3dp"
+                android:textSize="10sp"
+                android:layout_marginTop="2dp"
             />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/tab_sport_layout"
             android:layout_width="0dp"
@@ -234,8 +243,8 @@
         >
             <ImageView
                 android:id="@+id/iv_tab_sport"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_tab_sport"
             />
             <TextView
@@ -243,8 +252,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="运动"
-                android:textSize="14sp"
-                android:layout_marginTop="3dp"
+                android:textSize="10sp"
+                android:layout_marginTop="2dp"
             />
         </LinearLayout>
     </LinearLayout>

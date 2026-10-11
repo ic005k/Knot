@@ -3250,4 +3250,46 @@ public class DocumentActivity extends Activity {
                 .setLayout(dialogW, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
     }
+
+    /**
+     * 拦截音量键：TTS 未运行时用于翻页，TTS 运行时交还系统调节音量
+     * + (VOLUME_UP) → 上一页
+     * - (VOLUME_DOWN) → 下一页
+     */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // ✅ 仅在 TTS 未朗读且文档已加载时拦截音量键
+        if (!mIsTtsReading && mDocView != null && core != null) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_VOLUME_UP:
+                    goBackward(); // + 上一页
+                    return true; // 消费事件，阻止系统调音量
+                case KeyEvent.KEYCODE_VOLUME_DOWN:
+                    goForward(); // - 下一页
+                    return true; // 消费事件，阻止系统调音量
+            }
+        }
+        // TTS 运行中 或 文档未加载 → 不拦截，走 super 让系统正常调节音量
+        return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * 翻到上一页 (Viewer 版本实现)
+     */
+    private void goBackward() {
+        int current = mDocView.getDisplayedViewIndex();
+        if (current > 0) {
+            mDocView.setDisplayedViewIndex(current - 1);
+        }
+    }
+
+    /**
+     * 翻到下一页 (Viewer 版本实现)
+     */
+    private void goForward() {
+        int current = mDocView.getDisplayedViewIndex();
+        if (current < core.countPages() - 1) {
+            mDocView.setDisplayedViewIndex(current + 1);
+        }
+    }
 }
