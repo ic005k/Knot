@@ -377,6 +377,9 @@ class MainWindow : public QMainWindow {
   void delTab();
   void clickMainDate(int index);
 
+  void cleanOldBackups(const QString& dirPath, const QString& pattern,
+                       int maxKeep);
+
  protected:
   void closeEvent(QCloseEvent* event) override;
   bool eventFilter(QObject* watch, QEvent* evn) override;
@@ -682,6 +685,7 @@ class MainWindow : public QMainWindow {
   void init_Thread_Timer();
 
   void setDisplayResult(const QVariantList& list);
+
  signals:
   void androidBackSignal();
 };

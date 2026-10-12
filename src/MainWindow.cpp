@@ -772,6 +772,9 @@ void MainWindow::clearWidgetFocus() {
 void MainWindow::hideEvent(QHideEvent* event) { QWidget::hideEvent(event); }
 
 bool MainWindow::bakData() {
+  // ✅ 先清理（总共只保留最新10个）
+  cleanOldBackups(bakfileDir, "*_Knot.zip", 9);
+
   errorInfo = "";
   m_NotesList->clearFiles();
 
@@ -798,6 +801,54 @@ bool MainWindow::bakData() {
   if (enc_file != "") zipfile = enc_file;
 
   return true;
+}
+
+/**
+ * @brief 清理旧备份，仅保留最新的 maxKeep 个文件
+ * @param dirPath 备份目录
+ * @param pattern 文件名匹配模式（通配符）
+ * @param maxKeep 保留数量
+ */
+void MainWindow::cleanOldBackups(const QString& dirPath, const QString& pattern,
+                                 int maxKeep) {
+  QDir dir(dirPath);
+  if (!dir.exists()) return;
+
+  // 参数保护
+  if (maxKeep < 0) maxKeep = 0;
+
+  // 1. 获取所有匹配文件，不使用QDir任何内置排序
+  QFileInfoList allFiles =
+      dir.entryInfoList({pattern}, QDir::Files | QDir::NoDotAndDotDot);
+
+  // 2. 手动按【最后修改时间lastModified】降序排序
+  // 新文件放前面，旧文件放列表尾部
+  std::sort(allFiles.begin(), allFiles.end(),
+            [](const QFileInfo& fa, const QFileInfo& fb) {
+              return fa.lastModified() > fb.lastModified();
+            });
+
+  qInfo() << "[Backup] Total matched files:" << allFiles.size()
+          << ", keep latest" << maxKeep;
+  for (int i = 0; i < allFiles.size(); ++i) {
+    qInfo() << i << allFiles[i].fileName() << "mtime:"
+            << allFiles[i].lastModified().toString("yyyy-MM-dd HH:mm:ss");
+  }
+
+  if (allFiles.size() <= maxKeep) {
+    qInfo() << "[Backup] No files to delete.";
+    return;
+  }
+
+  // 3. 删除：从maxKeep下标开始，全部是更早的旧文件
+  for (int i = maxKeep; i < allFiles.size(); ++i) {
+    const QFileInfo& fi = allFiles[i];
+    if (QFile::remove(fi.absoluteFilePath())) {
+      qInfo() << "[Backup] Deleted:" << fi.fileName();
+    } else {
+      qWarning() << "[Backup] Failed to delete:" << fi.fileName();
+    }
+  }
 }
 
 void MainWindow::showProgress() {
