@@ -51,6 +51,7 @@
 #include <QToolTip>
 #include <QTreeWidgetItem>
 
+#include "BakFileList.h"
 #include "Comm/ui_ShowMessage.h"
 #include "Exercise/ui_StepsOptions.h"
 #include "MainHelper.h"
@@ -250,6 +251,7 @@ class MainWindow : public QMainWindow {
   SearchThread* mySearchThread;
   UpdateGpsMapThread* myUpdateGpsMapThread;
   GetGpsDataThread* myGetGpsDataThread;
+  BakFileList* m_BakFileList;
 
   QThread* m_workerThread;
 
@@ -553,8 +555,6 @@ class MainWindow : public QMainWindow {
   void on_btnMenu_clicked();
 
   void on_btnSync_clicked();
-
-  void on_btnImportBakList_clicked();
 
   void on_btnDelBakFile_clicked();
 

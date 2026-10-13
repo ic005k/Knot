@@ -139,6 +139,24 @@
     </message>
 </context>
 <context>
+    <name>BakFileList</name>
+    <message>
+        <location filename="BakFileList.ui" line="14"/>
+        <source>Dialog</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="BakFileList.ui" line="20"/>
+        <source>Backup File List</source>
+        <translation>备份文件列表</translation>
+    </message>
+    <message>
+        <location filename="BakFileList.ui" line="32"/>
+        <source>Restore</source>
+        <translation>恢复</translation>
+    </message>
+</context>
+<context>
     <name>CategoryList</name>
     <message>
         <location filename="CategoryList.ui" line="14"/>
@@ -673,7 +691,7 @@
         <translation>是否删除</translation>
     </message>
     <message>
-        <location filename="MainHelper.cpp" line="307"/>
+        <location filename="MainHelper.cpp" line="301"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
@@ -786,7 +804,7 @@
         <translation type="vanished">输入待办文本  [Ctrl+Enter]</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="402"/>
+        <location filename="MainWindow_Init.cpp" line="404"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
@@ -1465,13 +1483,13 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="1297"/>
-        <location filename="MainWindow_Menu.cpp" line="305"/>
+        <location filename="MainWindow_Menu.cpp" line="301"/>
         <source>Rename Tab</source>
         <translation>重命名标签页</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="1347"/>
-        <location filename="MainWindow_Menu.cpp" line="346"/>
+        <location filename="MainWindow_Menu.cpp" line="342"/>
         <source>Preferences</source>
         <translation>偏好设置</translation>
     </message>
@@ -1485,7 +1503,7 @@
     </message>
     <message>
         <location filename="MainWindow.cpp" line="344"/>
-        <location filename="MainWindow_Init.cpp" line="401"/>
+        <location filename="MainWindow_Init.cpp" line="403"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
@@ -1516,7 +1534,7 @@
         <translation type="vanished">减少一次</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="433"/>
+        <location filename="MainWindow_Init.cpp" line="435"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
@@ -1541,7 +1559,7 @@
         <location filename="MainWindow.ui" line="1302"/>
         <location filename="MainWindow_Menu.cpp" line="103"/>
         <location filename="MainWindow_Menu.cpp" line="119"/>
-        <location filename="MainWindow_Menu.cpp" line="335"/>
+        <location filename="MainWindow_Menu.cpp" line="331"/>
         <source>Add Tab</source>
         <translation>增加标签页</translation>
     </message>
@@ -1549,25 +1567,25 @@
         <location filename="MainWindow.ui" line="1307"/>
         <location filename="MainWindow_Menu.cpp" line="133"/>
         <location filename="MainWindow_Menu.cpp" line="198"/>
-        <location filename="MainWindow_Menu.cpp" line="336"/>
+        <location filename="MainWindow_Menu.cpp" line="332"/>
         <source>Del Tab</source>
         <translation>删除标签页</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="1317"/>
-        <location filename="MainWindow_Menu.cpp" line="350"/>
+        <location filename="MainWindow_Menu.cpp" line="346"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="1322"/>
-        <location filename="MainWindow_Menu.cpp" line="343"/>
+        <location filename="MainWindow_Menu.cpp" line="339"/>
         <source>Export Data</source>
         <translation>导出数据</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="1327"/>
-        <location filename="MainWindow_Menu.cpp" line="344"/>
+        <location filename="MainWindow_Menu.cpp" line="340"/>
         <source>Import Data</source>
         <translation>导入数据</translation>
     </message>
@@ -1583,7 +1601,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="1342"/>
-        <location filename="MainWindow_Menu.cpp" line="340"/>
+        <location filename="MainWindow_Menu.cpp" line="336"/>
         <source>Report</source>
         <translation>报表</translation>
     </message>
@@ -1625,7 +1643,7 @@
         <translation type="vanished">最后的一条记录将被删除或移动</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="196"/>
+        <location filename="MainWindow_Init.cpp" line="198"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
@@ -1650,7 +1668,7 @@
         <translation type="vanished">滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="400"/>
+        <location filename="MainWindow_Init.cpp" line="402"/>
         <source>Freq</source>
         <translation>频次</translation>
     </message>
@@ -1669,7 +1687,7 @@
     </message>
     <message>
         <location filename="MainWindow.cpp" line="558"/>
-        <location filename="MainWindow_Init.cpp" line="399"/>
+        <location filename="MainWindow_Init.cpp" line="401"/>
         <source>Date</source>
         <translation>日期</translation>
     </message>
@@ -1752,9 +1770,9 @@
         <translation type="vanished">分类：</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="267"/>
-        <location filename="MainWindow_Menu.cpp" line="270"/>
-        <location filename="MainWindow_Menu.cpp" line="324"/>
+        <location filename="MainWindow_Menu.cpp" line="263"/>
+        <location filename="MainWindow_Menu.cpp" line="266"/>
+        <location filename="MainWindow_Menu.cpp" line="320"/>
         <source>KnotBak</source>
         <translation></translation>
     </message>
@@ -1847,7 +1865,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="348"/>
+        <location filename="MainWindow_Menu.cpp" line="344"/>
         <source>Copy Log to Clipboard</source>
         <translation>复制日志到剪贴板</translation>
     </message>
@@ -1958,27 +1976,27 @@
         <translation>只允许修改当前年的数据。</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="792"/>
+        <location filename="MainWindow.cpp" line="795"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="324"/>
+        <location filename="MainWindow_Menu.cpp" line="320"/>
         <source>File (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="268"/>
+        <location filename="MainWindow_Menu.cpp" line="264"/>
         <source>Zip File (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="271"/>
+        <location filename="MainWindow_Menu.cpp" line="267"/>
         <source>Zip File (*.zip);;All(*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="278"/>
+        <location filename="MainWindow_Menu.cpp" line="274"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
@@ -1995,12 +2013,12 @@
         <translation type="vanished">总阅读时间：</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="554"/>
+        <location filename="MainWindow_Btn.cpp" line="550"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="558"/>
+        <location filename="MainWindow_Btn.cpp" line="554"/>
         <source>WebDav connection successful.</source>
         <translation>WebDav连接成功</translation>
     </message>
@@ -2022,7 +2040,7 @@
         <translation type="vanished">滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="351"/>
+        <location filename="MainWindow_Menu.cpp" line="347"/>
         <source>Cloud Backup and Restore Data</source>
         <translation>云备份与恢复数据</translation>
     </message>
@@ -2039,7 +2057,7 @@
         <translation type="vanished">总距离</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="355"/>
+        <location filename="MainWindow_Menu.cpp" line="351"/>
         <source>Share File</source>
         <translation>分享文件</translation>
     </message>
@@ -2057,7 +2075,7 @@
     </message>
     <message>
         <location filename="MainWindow_Btn.cpp" line="62"/>
-        <location filename="MainWindow_Menu.cpp" line="330"/>
+        <location filename="MainWindow_Menu.cpp" line="326"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
@@ -2066,12 +2084,12 @@
         <translation type="vanished">隐藏查找</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="353"/>
+        <location filename="MainWindow_Menu.cpp" line="349"/>
         <source>Backup File List</source>
         <translation>备份文件列表</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="354"/>
+        <location filename="MainWindow_Menu.cpp" line="350"/>
         <source>Tab Recycle</source>
         <translation>标签页回收箱</translation>
     </message>
@@ -2105,7 +2123,7 @@
         <translation type="vanished">请输入密码</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="338"/>
+        <location filename="MainWindow_Menu.cpp" line="334"/>
         <source>Open KnotBak Dir</source>
         <translation>打开KnotBak目录</translation>
     </message>
@@ -2211,12 +2229,12 @@
         <translation type="vanished">跳</translation>
     </message>
     <message>
-        <location filename="MainWindow.h" line="203"/>
+        <location filename="MainWindow.h" line="204"/>
         <source>None</source>
         <translation>无</translation>
     </message>
     <message>
-        <location filename="MainWindow.h" line="223"/>
+        <location filename="MainWindow.h" line="224"/>
         <source>Latest Time</source>
         <translation>最新的时间</translation>
     </message>
@@ -9523,42 +9541,42 @@ Model ID: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="85"/>
+        <location filename="Todo/Todo.cpp" line="95"/>
         <source>Modi Todo</source>
         <translation>修改待办</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="387"/>
-        <location filename="Todo/Todo.cpp" line="390"/>
-        <location filename="Todo/Todo.cpp" line="831"/>
+        <location filename="Todo/Todo.cpp" line="397"/>
+        <location filename="Todo/Todo.cpp" line="400"/>
+        <location filename="Todo/Todo.cpp" line="841"/>
         <source>Alarm</source>
         <translation>定时提醒</translation>
     </message>
     <message>
         <location filename="Todo/Todo.cpp" line="22"/>
-        <location filename="Todo/Todo.cpp" line="631"/>
+        <location filename="Todo/Todo.cpp" line="641"/>
         <source>Todo</source>
         <translation>待办事项</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1077"/>
-        <location filename="Todo/Todo.cpp" line="1259"/>
-        <location filename="Todo/Todo.cpp" line="1271"/>
-        <location filename="Todo/Todo.cpp" line="1283"/>
-        <location filename="Todo/Todo.cpp" line="1296"/>
-        <location filename="Todo/Todo.cpp" line="1309"/>
+        <location filename="Todo/Todo.cpp" line="1087"/>
+        <location filename="Todo/Todo.cpp" line="1269"/>
+        <location filename="Todo/Todo.cpp" line="1281"/>
+        <location filename="Todo/Todo.cpp" line="1293"/>
+        <location filename="Todo/Todo.cpp" line="1306"/>
+        <location filename="Todo/Todo.cpp" line="1319"/>
         <source>Voice</source>
         <translation>语音</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="794"/>
-        <location filename="Todo/Todo.cpp" line="861"/>
+        <location filename="Todo/Todo.cpp" line="804"/>
+        <location filename="Todo/Todo.cpp" line="871"/>
         <location filename="Todo/Todo_Java.cpp" line="117"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="260"/>
+        <location filename="Todo/Todo.cpp" line="270"/>
         <source>An error occurred while compressing the file.</source>
         <translation>压缩文件时发生错误。</translation>
     </message>
@@ -9567,57 +9585,57 @@ Model ID: %1</source>
         <translation type="vanished">待办闹钟</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1108"/>
+        <location filename="Todo/Todo.cpp" line="1118"/>
         <source>Editor</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1140"/>
+        <location filename="Todo/Todo.cpp" line="1150"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1141"/>
+        <location filename="Todo/Todo.cpp" line="1151"/>
         <source>Copy</source>
         <translation>拷贝</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1142"/>
+        <location filename="Todo/Todo.cpp" line="1152"/>
         <source>Share</source>
         <translation>分享</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1143"/>
+        <location filename="Todo/Todo.cpp" line="1153"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1197"/>
+        <location filename="Todo/Todo.cpp" line="1207"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1659"/>
+        <location filename="Todo/Todo.cpp" line="1669"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1659"/>
+        <location filename="Todo/Todo.cpp" line="1669"/>
         <source>Enter new content:</source>
         <translation>编辑内容：</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1669"/>
+        <location filename="Todo/Todo.cpp" line="1679"/>
         <source>Edit Failed</source>
         <translation>编辑失败</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1670"/>
+        <location filename="Todo/Todo.cpp" line="1680"/>
         <source>Content cannot be empty!</source>
         <translation>内容不能为空！</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1235"/>
+        <location filename="Todo/Todo.cpp" line="1245"/>
         <source>Done</source>
         <translation>完成</translation>
     </message>
@@ -9626,12 +9644,12 @@ Model ID: %1</source>
         <translation type="vanished">音频记录进行中...</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1393"/>
+        <location filename="Todo/Todo.cpp" line="1403"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
         <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="Todo/Todo.cpp" line="1470"/>
+        <location filename="Todo/Todo.cpp" line="1480"/>
         <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation>解压文件不成功，请在偏好设置里面检查各平台的密码是否一致。</translation>
     </message>

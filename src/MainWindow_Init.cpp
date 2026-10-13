@@ -103,6 +103,8 @@ void MainWindow::init_Instance() {
 
   m_ReceiveShare = new ReceiveShare(this);
 
+  m_BakFileList = new BakFileList(this);
+
   // AI
   m_ainetMgr = new QNetworkAccessManager(nullptr);
   m_ainetMgr->setTransferTimeout(90000);

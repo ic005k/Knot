@@ -293,13 +293,7 @@ void MainHelper::delTabRecycleFile(const QString& tabFilePath) {
   }
 }
 
-void MainHelper::importBakFileList() {
-  // if (m_Method->getCountFromQW(mw_one->ui->qwBakList) == 0) return;
-
-  int cur_index = 0;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwBakList);
-  QString str = "";   // m_Method->getText3(mw_one->ui->qwBakList, cur_index);
-  zipfile = str.trimmed();
-
+void MainHelper::importBakFileList(const QString& zipfile) {
   if (!zipfile.isNull()) {
     auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     if (!m_ShowMsg->showMsg(

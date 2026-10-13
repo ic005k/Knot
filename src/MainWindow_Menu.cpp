@@ -232,11 +232,7 @@ void MainWindow::delTab() {
   saveTab();
 }
 
-void MainWindow::on_actionBakFileList() {
-  mw_one->ui->frameMain->hide();
-
-  m_MainHelper->startBackgroundTaskUpdateBakFileList();
-}
+void MainWindow::on_actionBakFileList() { m_BakFileList->loadBakFile(); }
 
 void MainWindow::on_actionOneDriveBackupData() {
   mw_one->ui->frameMain->hide();
@@ -401,7 +397,7 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
   actShareFile->setVisible(false);
 #else
   actShareFile->setVisible(false);
-  actBakFileList->setVisible(false);
+
   if (!mw_one->m_Preferences->devMode) {
     actAddTab->setVisible(false);
     actDelTab->setVisible(false);

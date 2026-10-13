@@ -94,10 +94,6 @@ void MainWindow::on_btnBackBakList_clicked() {
     m_Method->openMainEntranceWindow();
 }
 
-void MainWindow::on_btnImportBakList_clicked() {
-  m_MainHelper->importBakFileList();
-}
-
 void MainWindow::on_btnBackTabRecycle_clicked() {
   if (!isAndroid) {
     mw_one->ui->frameMain->show();
@@ -786,6 +782,12 @@ void MainWindow::onAndroidBackHandle() {
   }
 
   if (mw_one->dlgProg != nullptr || m_Method->infoWindow != nullptr) {
+    return;
+  }
+
+  if (mw_one->m_BakFileList->isVisible()) {
+    mw_one->m_BakFileList->close();
+    m_Method->openMainEntranceWindow();
     return;
   }
 
