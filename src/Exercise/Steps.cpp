@@ -1443,7 +1443,7 @@ void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : listText) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   QJniEnvironment env;
@@ -1458,7 +1458,7 @@ void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
     }
     env->SetDoubleArrayRegion(jArr, 0, item.size(), buffer.constData());
     QJniObject jItem = QJniObject::fromLocalRef(jArr);
-    jArrayListSpeed.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+    jArrayListSpeed.callMethod<void>("add", "(Ljava/lang/Object;)Z",
                                      jItem.object());
   }
 
@@ -1472,7 +1472,7 @@ void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
     }
     env->SetDoubleArrayRegion(jArr, 0, item.size(), buffer.constData());
     QJniObject jItem = QJniObject::fromLocalRef(jArr);
-    jArrayListAlt.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+    jArrayListAlt.callMethod<void>("add", "(Ljava/lang/Object;)Z",
                                    jItem.object());
   }
 

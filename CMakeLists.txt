@@ -522,7 +522,56 @@ if(TARGET Knot_update_translations)
 endif()
 
 # ============================================================
-# 14. 最终化目标 (⚠️ 必须在所有 QT_ANDROID_* 属性设置之后)
+# 14. [Workaround] Qt 6.5.x Android Java 增量编译修复
+# ============================================================
+if(ANDROID)
+    file(GLOB_RECURSE _android_java_deps CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/android/src/*.java"
+        "${CMAKE_CURRENT_SOURCE_DIR}/android/src/*.kt"
+        "${CMAKE_CURRENT_SOURCE_DIR}/android/AndroidManifest.xml"
+        "${CMAKE_CURRENT_SOURCE_DIR}/android/build.gradle"
+        "${CMAKE_CURRENT_SOURCE_DIR}/android/res/values/*.xml"
+    )
+
+    set(_java_stamp "${CMAKE_BINARY_DIR}/android_java_rebuild.stamp")
+
+    add_custom_command(
+        OUTPUT "${_java_stamp}"
+        COMMAND ${CMAKE_COMMAND} -E touch "${_java_stamp}"
+        DEPENDS ${_android_java_deps}
+        COMMENT "🔧 Android Java source changed, triggering Gradle rebuild"
+    )
+
+    target_sources(${PROJECT_NAME} PRIVATE "${_java_stamp}")
+
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+        ${_android_java_deps}
+    )
+
+    # ✅ 创建独立 target 来 touch APK 中的 .so 副本
+    # 不直接给 Knot 加对 Knot_prepare_apk_dir 的依赖，避免循环
+    set(_apk_so "${CMAKE_BINARY_DIR}/android-build/libs/${CMAKE_ANDROID_ARCH_ABI}/lib${PROJECT_NAME}_${CMAKE_ANDROID_ARCH_ABI}.so")
+
+    add_custom_target(Knot_touch_apk_so ALL
+        COMMAND ${CMAKE_COMMAND} -E sleep 1
+        COMMAND ${CMAKE_COMMAND} -E touch "${_apk_so}"
+        BYPRODUCTS "${_apk_so}"
+        COMMENT "⏱️ Touching APK .so copy to prevent --no-build"
+    )
+
+    # Knot_touch_apk_so 必须在 prepare_apk_dir 之后执行（此时副本已存在）
+    add_dependencies(Knot_touch_apk_so Knot_prepare_apk_dir)
+
+    # 同时确保 Knot 本体先于 touch 完成（stamp 触发 .so 重链接必须先发生）
+    add_dependencies(Knot_touch_apk_so ${PROJECT_NAME})
+
+    message(STATUS "🔧 Qt 6.5.x Android Java incremental build fix enabled")
+    message(STATUS "   Tracking ${CMAKE_CURRENT_SOURCE_DIR}/android/src/")
+    message(STATUS "   Touch target: ${_apk_so}")
+endif()
+
+# ============================================================
+# 15. 最终化目标 (⚠️ 必须在所有 QT_ANDROID_* 属性设置之后)
 # ============================================================
 if(ANDROID)
     qt_finalize_target(${PROJECT_NAME})

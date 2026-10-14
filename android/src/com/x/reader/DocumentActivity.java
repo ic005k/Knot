@@ -657,17 +657,48 @@ public class DocumentActivity extends Activity {
     }
 
     protected void applyInsets(WindowInsets windowInsets) {
-        systemInsets = Insets.NONE;
-        Insets systemBarInsets = windowInsets.getInsets(
-            WindowInsets.Type.systemBars()
-        );
-        systemInsets = Insets.max(systemInsets, systemBarInsets);
-        Insets cutoutInsets = windowInsets.getInsets(
-            WindowInsets.Type.displayCutout()
-        );
-        systemInsets = Insets.max(systemInsets, cutoutInsets);
-        mTopBar.setPadding(0, systemInsets.top, 0, 0);
-        mBottomBar.setPadding(0, 0, 0, systemInsets.bottom);
+        int left = 0,
+            top = 0,
+            right = 0,
+            bottom = 0;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // API 30+: 使用新 API
+            Insets systemBarInsets = WindowInsetsHelper.getInsetsApi30(
+                windowInsets
+            );
+            Insets cutoutInsets = WindowInsetsHelper.getCutoutApi30(
+                windowInsets
+            );
+            left = Math.max(systemBarInsets.left, cutoutInsets.left);
+            top = Math.max(systemBarInsets.top, cutoutInsets.top);
+            right = Math.max(systemBarInsets.right, cutoutInsets.right);
+            bottom = Math.max(systemBarInsets.bottom, cutoutInsets.bottom);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // API 28-29: 有 DisplayCutout，但没有 Insets.max / Insets.of
+            left = windowInsets.getSystemWindowInsetLeft();
+            top = windowInsets.getSystemWindowInsetTop();
+            right = windowInsets.getSystemWindowInsetRight();
+            bottom = windowInsets.getSystemWindowInsetBottom();
+
+            android.view.DisplayCutout cutout = windowInsets.getDisplayCutout();
+            if (cutout != null) {
+                left = Math.max(left, cutout.getSafeInsetLeft());
+                top = Math.max(top, cutout.getSafeInsetTop());
+                right = Math.max(right, cutout.getSafeInsetRight());
+                bottom = Math.max(bottom, cutout.getSafeInsetBottom());
+            }
+        } else {
+            // API < 28: 仅系统栏 insets，无 cutout
+            left = windowInsets.getSystemWindowInsetLeft();
+            top = windowInsets.getSystemWindowInsetTop();
+            right = windowInsets.getSystemWindowInsetRight();
+            bottom = windowInsets.getSystemWindowInsetBottom();
+        }
+
+        // ✅ 不再使用 Insets.max() 或 Insets.of()，直接用 int 值设置 padding
+        mTopBar.setPadding(left, top, right, 0);
+        mBottomBar.setPadding(left, 0, right, bottom);
     }
 
     public void createUI(Bundle savedInstanceState) {

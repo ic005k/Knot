@@ -65,9 +65,6 @@ class Reader : public QDialog {
 
   bool isAIReaderExplanation = false;
 
-  QDialog* dlgAddBookNote = nullptr;
-  QDialog* dlgEditBookNote = nullptr;
-
   QDateTime m_autoStopDeadline;  // 自动停止的截止时间（带日期，跨天也没问题）
 
   bool isAutoRun = false;
@@ -254,7 +251,7 @@ class Reader : public QDialog {
   void goUpPage();
 
   void delReadNote(const QString& noteId);
-  void editBookNote(int index, int page, const QString& content);
+
   void closeViewBookNote();
   void setShowNoteValue(bool value);
   void setNoteListCurrentIndexValue(int value);

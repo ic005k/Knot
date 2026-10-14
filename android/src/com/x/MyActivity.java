@@ -940,21 +940,32 @@ public class MyActivity
                         this,
                         zh_cn
                             ? "运动权限已授予，可统计步数"
-                            : "Activity recognition permission granted, step counting available",
+                            : "Activity recognition permission granted",
                         Toast.LENGTH_SHORT
                     ).show();
 
-                    // 权限授予后初始化传感器
+                    // ★ 新增：权限授予后，确保标记已请求
+                    getSharedPreferences("step_perm_pref", Context.MODE_PRIVATE)
+                        .edit()
+                        .putBoolean("has_requested_step_perm", true)
+                        .apply();
+
                     MyService service = MyService.getInstance();
                     if (service != null) {
                         service.initStepSensor(getApplicationContext());
                     }
                 } else {
+                    // 用户拒绝了，标记已请求过（下次进入时 shouldShow 可能为 true 或 false）
+                    getSharedPreferences("step_perm_pref", Context.MODE_PRIVATE)
+                        .edit()
+                        .putBoolean("has_requested_step_perm", true)
+                        .apply();
+
                     Toast.makeText(
                         this,
                         zh_cn
                             ? "运动权限被拒绝，无法统计步数"
-                            : "Activity recognition permission denied, step counting unavailable",
+                            : "Activity recognition permission denied",
                         Toast.LENGTH_SHORT
                     ).show();
                 }
@@ -2689,102 +2700,97 @@ public class MyActivity
             return MyService.isStepCounter;
         }
 
-        String perm = Manifest.permission.ACTIVITY_RECOGNITION;
-        // 关键：权限检测必须传Activity，不能用application context
-        int permStatus = ContextCompat.checkSelfPermission(activity, perm);
-        if (permStatus != PackageManager.PERMISSION_GRANTED) {
-            MyService.isStepCounter = 0;
-            boolean needRationale =
-                ActivityCompat.shouldShowRequestPermissionRationale(
-                    activity,
-                    perm
-                );
-
-            activity.runOnUiThread(() -> {
-                try {
-                    if (needRationale) {
-                        // 场景1：用户之前拒绝过，但未勾选永久禁止 → 弹窗说明，再申请权限
-                        new android.app.AlertDialog.Builder(activity)
-                            .setMessage(
-                                zh_cn
-                                    ? "需要运动权限才能统计每日步数，请授予权限"
-                                    : "Activity recognition permission is required to record daily steps"
-                            )
-                            .setPositiveButton(
-                                zh_cn ? "去授权" : "Allow",
-                                (dialog, which) -> {
-                                    // 调用系统原生授权弹窗
-                                    activity.requestPermissions(
-                                        new String[] { perm },
-                                        REQ_ACTIVITY_RECOGNITION
-                                    );
-                                }
-                            )
-                            .setNegativeButton(
-                                zh_cn ? "稍后再说" : "Later",
-                                null
-                            )
-                            .show();
-                    } else {
-                        // 细分两种false场景：
-                        // 1. 新装APP，从未申请权限：直接拉起系统授权框
-                        // 2. 用户勾选永久拒绝：跳应用设置页
-                        // 区分方式：判断是否首次申请（用SharedPreferences标记）
-                        SharedPreferences sp = activity.getSharedPreferences(
-                            "step_perm_pref",
-                            Context.MODE_PRIVATE
-                        );
-                        boolean isFirstRequest = sp.getBoolean(
-                            "first_step_perm",
-                            true
-                        );
-                        if (isFirstRequest) {
-                            // 首次请求：直接弹出系统授权框
-                            sp.edit()
-                                .putBoolean("first_step_perm", false)
-                                .apply();
-                            activity.requestPermissions(
-                                new String[] { perm },
-                                REQ_ACTIVITY_RECOGNITION
-                            );
-                        } else {
-                            // 非首次+不能弹授权框 = 永久禁用
-                            new android.app.AlertDialog.Builder(activity)
-                                .setMessage(
-                                    zh_cn
-                                        ? "运动权限已被永久禁用，请前往系统设置手动开启"
-                                        : "Activity permission is permanently denied, please enable it in system settings"
-                                )
-                                .setPositiveButton(
-                                    zh_cn ? "去设置" : "Settings",
-                                    (dialog, which) -> {
-                                        Intent intent = new Intent(
-                                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                                        );
-                                        intent.setData(
-                                            Uri.parse(
-                                                "package:" +
-                                                    activity.getPackageName()
-                                            )
-                                        );
-                                        activity.startActivity(intent);
-                                    }
-                                )
-                                .setNegativeButton(
-                                    zh_cn ? "取消" : "Cancel",
-                                    null
-                                )
-                                .show();
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "步数权限弹窗异常，跳过弹窗", e);
-                }
-            });
+        // ★ 关键修复1：Android 10 以下不需要运行时权限，直接初始化传感器
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            MyService.initStepSensor(activity);
             return MyService.isStepCounter;
         }
 
-        MyService.initStepSensor(activity);
+        String perm = Manifest.permission.ACTIVITY_RECOGNITION;
+        int permStatus = ContextCompat.checkSelfPermission(activity, perm);
+
+        // ★ 关键修复2：已有权限，直接初始化，不做任何弹窗判断
+        if (permStatus == PackageManager.PERMISSION_GRANTED) {
+            MyService.initStepSensor(activity);
+            return MyService.isStepCounter;
+        }
+
+        // 以下为无权限时的处理逻辑（仅 Android 10+ 会走到这里）
+        MyService.isStepCounter = 0;
+
+        boolean needRationale =
+            ActivityCompat.shouldShowRequestPermissionRationale(activity, perm);
+
+        activity.runOnUiThread(() -> {
+            try {
+                SharedPreferences sp = activity.getSharedPreferences(
+                    "step_perm_pref",
+                    Context.MODE_PRIVATE
+                );
+                boolean hasRequestedBefore = sp.getBoolean(
+                    "has_requested_step_perm",
+                    false
+                );
+
+                if (needRationale) {
+                    // 用户之前拒绝过，但未勾选"不再询问" → 解释后重新申请
+                    new android.app.AlertDialog.Builder(activity)
+                        .setMessage(
+                            zh_cn
+                                ? "需要运动权限才能统计每日步数，请授予权限"
+                                : "Activity recognition permission is required to record daily steps"
+                        )
+                        .setPositiveButton(
+                            zh_cn ? "去授权" : "Allow",
+                            (dialog, which) -> {
+                                activity.requestPermissions(
+                                    new String[] { perm },
+                                    REQ_ACTIVITY_RECOGNITION
+                                );
+                            }
+                        )
+                        .setNegativeButton(zh_cn ? "稍后再说" : "Later", null)
+                        .show();
+                } else if (!hasRequestedBefore) {
+                    // ★ 关键修复3：首次请求，直接弹系统授权框，先标记再请求
+                    sp.edit()
+                        .putBoolean("has_requested_step_perm", true)
+                        .apply();
+                    activity.requestPermissions(
+                        new String[] { perm },
+                        REQ_ACTIVITY_RECOGNITION
+                    );
+                } else {
+                    // ★ 关键修复4：只有「之前请求过」+「现在不需要Rationale」= 真正的永久拒绝
+                    // 避免在系统弹窗显示期间误判
+                    new android.app.AlertDialog.Builder(activity)
+                        .setMessage(
+                            zh_cn
+                                ? "运动权限已被永久禁用，请前往系统设置手动开启"
+                                : "Activity permission is permanently denied, please enable it in system settings"
+                        )
+                        .setPositiveButton(
+                            zh_cn ? "去设置" : "Settings",
+                            (dialog, which) -> {
+                                Intent intent = new Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                );
+                                intent.setData(
+                                    Uri.parse(
+                                        "package:" + activity.getPackageName()
+                                    )
+                                );
+                                activity.startActivity(intent);
+                            }
+                        )
+                        .setNegativeButton(zh_cn ? "取消" : "Cancel", null)
+                        .show();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "步数权限弹窗异常，跳过弹窗", e);
+            }
+        });
+
         return MyService.isStepCounter;
     }
 

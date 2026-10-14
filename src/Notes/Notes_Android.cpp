@@ -172,7 +172,7 @@ void Notes::openNoteWindow() {
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list1) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   QJniObject instance = QJniObject::getStaticObjectField(
@@ -194,7 +194,7 @@ void Notes::setNoteEntryList() {
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list1) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   QJniObject instance = QJniObject::getStaticObjectField(

@@ -214,7 +214,7 @@ void Todo::openTodoListWindow(QStringList list) {
 
   for (const QString& item : list) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   activity.callMethod<void>("openTodoListWindow", "(Ljava/util/ArrayList;)V",
@@ -232,7 +232,7 @@ void Todo::cppRefreshTodoCardList() {
 
   for (const QString& item : list) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   activity.callMethod<void>("cppRefreshTodoCardList",
@@ -250,7 +250,7 @@ void Todo::openTodoRecycleWindow(QStringList list) {
 
   for (const QString& item : list) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   activity.callMethod<void>("openTodoRecycleWindow", "(Ljava/util/ArrayList;)V",
@@ -266,7 +266,7 @@ void Todo::openTodoAlarmWindow(QStringList list) {
 
   for (const QString& item : list) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   activity.callMethod<void>("openTodoAlarmWindow", "(Ljava/util/ArrayList;)V",

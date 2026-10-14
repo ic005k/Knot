@@ -727,21 +727,6 @@ void MainWindow::onAndroidBackHandle() {
     return;
   }
 
-  // Reader
-  if (m_Reader->dlgAddBookNote != nullptr) {
-    if (m_Reader->dlgAddBookNote->isVisible()) {
-      m_Reader->dlgAddBookNote->close();
-      return;
-    }
-  }
-
-  if (m_Reader->dlgEditBookNote != nullptr) {
-    if (m_Reader->dlgEditBookNote->isVisible()) {
-      m_Reader->dlgEditBookNote->close();
-      return;
-    }
-  }
-
   if (!mw_one->ui->frameOne->isHidden()) {
     on_btnBack_One_clicked();
     return;

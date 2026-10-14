@@ -1256,7 +1256,10 @@ double Method::updateMicStatus() {
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
-  a = jo.callMethod<double>("updateMicStatus", "()D");
+  // a = jo.callMethod<double>("updateMicStatus", "()D");
+
+  jdouble retVal = jo.callMethod<jdouble>("updateMicStatus", "()D");
+  a = static_cast<double>(retVal);
 
 #endif
   return a;
@@ -1271,7 +1274,9 @@ int Method::getPlayDuration() {
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
-  a = jo.callMethod<int>("getPlayDuration", "()I");
+  // a = jo.callMethod<int>("getPlayDuration", "()I");
+
+  a = static_cast<int>(jo.callMethod<jint>("getPlayDuration", "()I"));
 
 #endif
   return a;
@@ -1286,7 +1291,9 @@ int Method::getPlayPosition() {
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
-  a = jo.callMethod<int>("getPlayPosition", "()I");
+  // a = jo.callMethod<int>("getPlayPosition", "()I");
+
+  a = static_cast<int>(jo.callMethod<jint>("getPlayPosition", "()I"));
 
 #endif
   return a;
@@ -1301,7 +1308,9 @@ bool Method::getPlaying() {
       QJniObject(QCoreApplication::instance()
                      ->nativeInterface<QNativeInterface::QAndroidApplication>()
                      ->context());
-  a = jo.callMethod<int>("isPlaying", "()I");
+  // a = jo.callMethod<int>("isPlaying", "()I");
+
+  a = static_cast<int>(jo.callMethod<jint>("isPlaying", "()I"));
 
 #endif
   return a;
@@ -3065,7 +3074,8 @@ QString Method::getFileUTCString(const QString& file) {
   if (!fileInfo.exists()) return "00000000000000";
 
   // 直接读取文件修改时间，强制指定UTC时区，一步到位
-  QDateTime standardUTC = fileInfo.lastModified(QTimeZone::UTC);
+  // QDateTime standardUTC = fileInfo.lastModified(QTimeZone::UTC);
+  QDateTime standardUTC = fileInfo.fileTime(QFile::FileModificationTime);
 
   if (!standardUTC.isValid()) return "00000000000000";
 

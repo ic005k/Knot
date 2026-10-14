@@ -76,7 +76,10 @@ void Method::openMainEntranceWindow() {
 
   for (const QString& item : list1) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    // jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+    // jItem.object());
+    bool ok = static_cast<bool>(jArrayList.callMethod<jboolean>(
+        "add", "(Ljava/lang/Object;)Z", jItem.object()));
   }
 
   activity.callMethod<void>("openMainEntranceWindow",
@@ -142,7 +145,10 @@ void Method::refreshMainEntranceCards() {
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list1) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    // jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+    // jItem.object());
+    bool ok = static_cast<bool>(jArrayList.callMethod<jboolean>(
+        "add", "(Ljava/lang/Object;)Z", jItem.object()));
   }
 
   // 3. 通过静态实例调用 refreshCardList
@@ -179,7 +185,10 @@ void Method::openMyEventWindow() {
 
   for (const QString& item : list1) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    // jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+    // jItem.object());
+    bool ok = static_cast<bool>(jArrayList.callMethod<jboolean>(
+        "add", "(Ljava/lang/Object;)Z", jItem.object()));
   }
 
   activity.callMethod<void>("openMyEventWindow", "(Ljava/util/ArrayList;)V",
@@ -198,7 +207,9 @@ void Method::refreshMainDate() {
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list1) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    // jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+    // jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   // 3. 通过静态实例调用
@@ -226,7 +237,9 @@ void Method::refreshMainDateDetail() {
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list1) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    // jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+    // jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   QJniObject instance = QJniObject::getStaticObjectField(
@@ -250,7 +263,7 @@ void Method::openTabRecycleBinActivity(QStringList list) {
 
   for (const QString& item : list) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   activity.callMethod<void>("openTabRecycleBinActivity",
@@ -266,7 +279,7 @@ void Method::openActivity(QString callJavaName, QStringList list) {
 
   for (const QString& item : list) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   activity.callMethod<void>(callJavaName.toUtf8().constData(),
@@ -283,7 +296,7 @@ void Method::refreshJavaData(QString callJavaName, QString className,
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   QString c1, c2;
@@ -310,7 +323,7 @@ void Method::refreshJavaData(QString mInstance, QString callJavaName,
   QJniObject jArrayList("java/util/ArrayList", "()V");
   for (const QString& item : list) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   QString c1, c2;
@@ -418,7 +431,7 @@ void Method::execJavaFunc(QString mInstance, QString callJavaName,
   if (instance.isValid()) {
     QJniObject jArrayList("java/util/ArrayList", "()V");
     for (const auto& s : arg) {
-      jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
+      jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z",
                                   QJniObject::fromString(s).object());
     }
     instance.callMethod<void>(callJavaName.toUtf8().constData(),
@@ -439,7 +452,9 @@ QString Method::getJavaFunc(QString mInstance, QString callJavaName,
       c1.toUtf8().constData(), mInstance.toUtf8().constData(),
       c2.toUtf8().constData());
   if (instance.isValid()) {
-    QJniObject retObj = instance.callMethod<QJniObject>(
+    // QJniObject retObj = instance.callMethod<QJniObject>(
+    //     callJavaName.toUtf8().constData(), "()Ljava/lang/String;");
+    QJniObject retObj = instance.callObjectMethod(
         callJavaName.toUtf8().constData(), "()Ljava/lang/String;");
     if (retObj.isValid()) return retObj.toString();
   }
@@ -459,7 +474,10 @@ bool Method::getJavaFuncBool(QString mInstance, QString callJavaName,
       c1.toUtf8().constData(), mInstance.toUtf8().constData(),
       c2.toUtf8().constData());
   if (instance.isValid()) {
-    return instance.callMethod<bool>(callJavaName.toUtf8().constData(), "()Z");
+    // return instance.callMethod<bool>(callJavaName.toUtf8().constData(),
+    // "()Z");
+    return static_cast<bool>(instance.callMethod<jboolean>(
+        callJavaName.toUtf8().constData(), "()Z"));
   }
 #endif
   qInfo() << mInstance << callJavaName << className;
@@ -477,7 +495,10 @@ int Method::getJavaFuncInt(QString mInstance, QString callJavaName,
       c1.toUtf8().constData(), mInstance.toUtf8().constData(),
       c2.toUtf8().constData());
   if (instance.isValid()) {
-    return instance.callMethod<int>(callJavaName.toUtf8().constData(), "()I");
+    // return instance.callMethod<int>(callJavaName.toUtf8().constData(),
+    // "()I");
+    return static_cast<int>(
+        instance.callMethod<jint>(callJavaName.toUtf8().constData(), "()I"));
   }
 #endif
   qInfo() << mInstance << callJavaName << className;
@@ -495,8 +516,10 @@ double Method::getJavaFuncDouble(QString mInstance, QString callJavaName,
       c1.toUtf8().constData(), mInstance.toUtf8().constData(),
       c2.toUtf8().constData());
   if (instance.isValid()) {
-    return instance.callMethod<double>(callJavaName.toUtf8().constData(),
-                                       "()D");
+    // return instance.callMethod<double>(callJavaName.toUtf8().constData(),
+    //                                    "()D");
+    return static_cast<double>(
+        instance.callMethod<jdouble>(callJavaName.toUtf8().constData(), "()D"));
   }
 #endif
   qInfo() << mInstance << callJavaName << className;
@@ -515,15 +538,21 @@ QStringList Method::getJavaFuncStringList(QString mInstance,
       c1.toUtf8().constData(), mInstance.toUtf8().constData(),
       c2.toUtf8().constData());
   if (instance.isValid()) {
-    QJniObject jList = instance.callMethod<QJniObject>(
+    // QJniObject jList = instance.callMethod<QJniObject>(
+    //     callJavaName.toUtf8().constData(), "()Ljava/util/ArrayList;");
+    QJniObject jList = instance.callObjectMethod(
         callJavaName.toUtf8().constData(), "()Ljava/util/ArrayList;");
     if (!jList.isValid()) return {};
 
-    int size = jList.callMethod<int>("size", "()I");
+    // int size = jList.callMethod<int>("size", "()I");
+    int size = static_cast<int>(jList.callMethod<jint>("size", "()I"));
+
     QStringList res;
     for (int i = 0; i < size; ++i) {
+      // QJniObject elem =
+      //     jList.callMethod<QJniObject>("get", "(I)Ljava/lang/Object;", i);
       QJniObject elem =
-          jList.callMethod<QJniObject>("get", "(I)Ljava/lang/Object;", i);
+          jList.callObjectMethod("get", "(I)Ljava/lang/Object;", i);
       if (elem.isValid()) res << elem.toString();
     }
     return res;

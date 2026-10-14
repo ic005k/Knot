@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFont>
+#include <QGuiApplication>
 #include <QIODevice>
 #include <QPageLayout>
 #include <QPageSize>
@@ -54,13 +55,16 @@ static QString decodeGbkViaJni(const QByteArray& gbk) {
 
 void Reader::openReadListWindow(QStringList list) {
 #ifdef Q_OS_ANDROID
-  QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  // QJniObject activity = QNativeInterface::QAndroidApplication::context();
+  auto* androidApp =
+      qGuiApp->nativeInterface<QNativeInterface::QAndroidApplication>();
+  QJniObject activity = androidApp->context();
   // 构造 Java ArrayList<String>
   QJniObject jArrayList("java/util/ArrayList", "()V");
 
   for (const QString& item : list) {
     QJniObject jItem = QJniObject::fromString(item);
-    jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z", jItem.object());
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   // 调用Java方法 openReadListWindow(ArrayList<String>)
