@@ -354,6 +354,8 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
 
             resetProgBar();
 
+            mw_one->safeCloseProgress();
+
             zipfile = localSavePath;
             auto showbox = std::make_unique<ShowMessage>(mw_one);
             showbox->showMsg(
@@ -376,6 +378,9 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
                 }
               }
               isZipOK = true;
+
+              mw_one->ui->frameOne->hide();
+              mw_one->ui->frameMain->show();
 
               mw_one->showProgress();
 
@@ -1043,11 +1048,7 @@ void CloudBackup::backExit() {
   mw_one->m_Preferences->saveOptions();
   mw_one->m_Preferences->setEncSyncStatusTip();
 
-  if (!isAndroid) {
-    mw_one->ui->frameMain->show();
-  } else
-    m_Method->openMainEntranceWindow();
-
+  mw_one->ui->frameMain->show();
   mw_one->ui->frameOne->hide();
 }
 
@@ -1170,6 +1171,9 @@ void CloudBackup::webDAVRestoreData() {
               tr("This action overwrites local files with files in the cloud."),
           2))
     return;
+
+  mw_one->showProgress();
+
   WEBDAV_URL = m_CloudBackup->getWebDAVArgument();
   USERNAME = mw_one->ui->editWebDAVUsername->text().trimmed();
   APP_PASSWORD = mw_one->ui->editWebDAVPassword->text().trimmed();

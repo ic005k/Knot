@@ -227,6 +227,7 @@ void MainWindow::importDataDone() {
     safeCloseProgress();
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("The password of the encrypted file is wrong!"), 1);
+    m_Method->openMainEntranceWindow();
     return;
   }
 
@@ -270,6 +271,10 @@ void MainWindow::importDataDone() {
 
   auto msg = std::make_unique<ShowMessage>(mw_one);
   msg->showMsg("Knot", tr("Data import was successful."), 1);
+
+  if (mw_one->m_BakFileList->isVisible()) {
+    mw_one->m_BakFileList->close();
+  }
 
   m_Method->openMainEntranceWindow();
 }

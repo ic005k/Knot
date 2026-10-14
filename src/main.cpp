@@ -3,8 +3,10 @@
 #include <QDir>
 
 #ifdef Q_OS_ANDROID
+
 #include <QJniEnvironment>
 #include <QJniObject>
+
 #endif
 
 #include <ggml-cpu.h>
@@ -50,6 +52,34 @@ QString defaultModel = "multilingual-e5-small-fp32.gguf";
 
 void loadTheme(bool isDark);
 void loadLocal();
+float getJavaFuncFloat(QString mInstance, QString callJavaName,
+                       QString className);
+
+void applyAndroidFont() {
+#ifdef Q_OS_ANDROID
+  QJniObject ctx = QNativeInterface::QAndroidApplication::context();
+  if (!ctx.isValid()) return;
+
+  QJniObject resources =
+      ctx.callObjectMethod("getResources", "()Landroid/content/res/Resources;");
+  if (!resources.isValid()) return;
+
+  QJniObject config = resources.callObjectMethod(
+      "getConfiguration", "()Landroid/content/res/Configuration;");
+  if (!config.isValid()) return;
+
+  float fontScale = config.getField<jfloat>("fontScale");
+
+  QFont font = qApp->font();
+  // 仅对Qt自带pointSizeF乘以安卓fontScale，不再引入density，消除二次放大
+  qreal pt = font.pointSizeF();
+  font.setPointSizeF(pt * fontScale);
+  qApp->setFont(font);
+
+  qInfo() << "fontScale:" << fontScale << "old pt:" << pt
+          << "new pt:" << font.pointSizeF();
+#endif
+}
 
 QPalette createDarkPalette();
 QPalette createLightPalette();
@@ -139,6 +169,12 @@ int main(int argc, char* argv[]) {
   loadLocal();
 
 #ifdef Q_OS_ANDROID
+
+  // float fontScale = 1.0f;
+  // fontScale =
+  //     getJavaFuncFloat("m_instance", "getSystemFontScale", "MyActivity");
+
+  applyAndroidFont();
 
 #else
   sharedMemory.setKey(uniqueKey);
@@ -301,7 +337,8 @@ int main(int argc, char* argv[]) {
                      if (newIsDark != g_currentIsDark) {
                        isDark = newIsDark;           // 同步原有全局isDark
                        g_currentIsDark = newIsDark;  // 更新当前状态
-                       loadTheme(isDark);            // 仅在主题变化时执行
+                       m_Method->setDark(isDark);
+                       loadTheme(isDark);  // 仅在主题变化时执行
                      }
                    });
 
@@ -690,4 +727,22 @@ int init_main_ai() {
   printf("[backend] loaded: %s\n", ggml_backend_reg_name(g_global_cpu_backend));
 
   return 0;
+}
+
+float getJavaFuncFloat(QString mInstance, QString callJavaName,
+                       QString className) {
+#ifdef Q_OS_ANDROID
+  QString c1, c2;
+  c1 = "com/x/" + className;
+  c2 = "Lcom/x/" + className + ";";
+  QJniObject instance = QJniObject::getStaticObjectField(
+      c1.toUtf8().constData(), mInstance.toUtf8().constData(),
+      c2.toUtf8().constData());
+  if (instance.isValid()) {
+    return static_cast<float>(
+        instance.callMethod<jfloat>(callJavaName.toUtf8().constData(), "()F"));
+  }
+#endif
+  qInfo() << mInstance << callJavaName << className;
+  return 0.0f;
 }

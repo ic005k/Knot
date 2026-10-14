@@ -853,7 +853,7 @@ public class DocumentActivity extends Activity {
         mPageSlider.setOnSeekBarChangeListener(
             new SeekBar.OnSeekBarChangeListener() {
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    mDocView.pushHistory();
+                    //mDocView.pushHistory();
                     mDocView.setDisplayedViewIndex(
                         (seekBar.getProgress() + mPageSliderRes / 2) /
                             mPageSliderRes

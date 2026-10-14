@@ -3129,4 +3129,9 @@ public class MyActivity
         }
         showCommonMsgDialogInner(act, contentText);
     }
+
+    public float getSystemFontScale() {
+        if (m_instance == null) return 1.0f;
+        return m_instance.getResources().getConfiguration().fontScale;
+    }
 }

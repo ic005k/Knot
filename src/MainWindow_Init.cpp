@@ -293,6 +293,7 @@ void MainWindow::init_Theme() {
 void MainWindow::init_UIWidget() {
   if (isAndroid) {
     mw_one->ui->tabWidget->hide();
+    ui->lblStats->hide();
   }
 
   mw_one->loginTime = m_Method->setCurrentDateTimeValue();
