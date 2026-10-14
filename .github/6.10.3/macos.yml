@@ -1,156 +1,147 @@
-name: MacOS
+name: MacOS-x86_64 CI
+
 on:
   push:
     branches: [main]
-    paths:
-      - '**'
-      - '!stats.txt'  # 排除根目录下的 stats.txt
-      - '!README.md'
-
+    paths: ['**', '!stats.txt', '!README.md']
   pull_request:
-    paths:
-      - '**'
-
+    paths: ['**']
   release:
-    types: [published] # 监听发布事件
+    types: [published]
 
 jobs:
   build:
-    name: Build
-    runs-on: ${{ matrix.os }}
-    # 添加权限声明
+    name: Build-x86_64
+    runs-on: macos-14
     permissions:
       contents: write
+
     strategy:
       matrix:
-        os: [macos-14]  # 使用固定版本（macOS-14，对应Xcode 15，更稳定）
-        # os: [macos-latest 或者 11.0]
-        # qt_ver: [5.9.9,5.12.10,5.15.2]
-        qt_ver: [6.10.3]
+        qt_ver: ["6.9.3"]
         qt_arch: [clang_64]
-        
+
     env:
       targetName: Knot
-      VERSION: Mac
+      VERSION: Mac-x86_64
       orgName: Knot
       ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
-      QT_DIR: ${{ github.workspace }}/Qt/6.6.0/clang_64  # 自定义路径
-      
+      QT_ROOT_DIR: ${{ github.workspace }}/Qt/${{ matrix.qt_ver }}/macos
+      OPENSSL_VERSION: "3.3.2"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
-     
         with:
           version: ${{ matrix.qt_ver }}
-          cached: 'false'
+          cached: false
           host: mac
           target: desktop
-          arch: clang_64 
-          # qtwebengine
+          arch: ${{ matrix.qt_arch }}
           modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
           install-deps: true
           source: false
-          dir: ${{ env.QT_DIR }}  # 关键：指定安装到正确路径
+          dir: ${{ github.workspace }}/Qt
 
-      #- name: 克隆 Qt 源码
-      #  run: |
-      #    git clone --depth 1 --branch v5.15.2 https://code.qt.io/qt/qt5.git
-      #    cd qt5
-      #    git submodule update --init qtmacextras
-
-      #- name: 编译 qtmacextras
-      #  run: |
-      #    cd qt5/qtmacextras
-      #    qmake -o Makefile qtmacextras.pro
-      #    make -j4
-      #    sudo make install INSTALL_ROOT=${{ env.QT_DIR }}
-
-      - name: Install Homebrew (x86_64)
+      # ✅ 【核心修复】从源码编译纯 x86_64 的 OpenSSL，彻底解决架构不匹配问题
+      - name: Build OpenSSL (x86_64 from source)
         run: |
-         # 卸载已存在的 arm64 Homebrew（如有）
-         if [ -d "/opt/homebrew" ]; then
-          sudo rm -rf /opt/homebrew
-         fi
+          brew install cmake ninja perl
 
-         # 安装 x86_64 版 Homebrew
-         arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-         echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
-         source ~/.bash_profile
-       
-      - name: Install OpenSSL via Homebrew (x86_64)
+          OPENSSL_SRC="${{ runner.temp }}/openssl-src"
+          OPENSSL_INSTALL="${{ runner.temp }}/openssl-x86_64"
+
+          curl -fsSL "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" | tar xz -C "${{ runner.temp }}"
+          mv "${{ runner.temp }}/openssl-${OPENSSL_VERSION}" "$OPENSSL_SRC"
+
+          cd "$OPENSSL_SRC"
+          # 强制指定 darwin64-x86_64-cc 目标，确保生成纯 x86_64 二进制
+          ./Configure darwin64-x86_64-cc \
+            --prefix="$OPENSSL_INSTALL" \
+            --openssldir="$OPENSSL_INSTALL/ssl" \
+            no-shared no-tests no-docs
+
+          make -j$(sysctl -n hw.ncpu)
+          make install_sw
+
+          echo "OPENSSL_ROOT=$OPENSSL_INSTALL" >> $GITHUB_ENV
+
+          echo "=== Verify x86_64 OpenSSL ==="
+          file "$OPENSSL_INSTALL/lib/libcrypto.a" || true
+          file "$OPENSSL_INSTALL/lib/libssl.a" || true
+
+      - name: Build macOS (x86_64)
+        timeout-minutes: 60
         run: |
-         arch -x86_64 brew update
-         arch -x86_64 brew install openssl
-         arch -x86_64 brew link openssl --force
-                    
+          export PATH="/opt/homebrew/bin:$PATH"
+          OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
+          QT_LIB_PATH="${QT_ROOT_DIR}/lib"
 
-      - name: build macos
+          echo "=== Environment Info ==="
+          echo "OpenSSL Root: $OPENSSL_ROOT"
+          echo "Runner Arch:  $(uname -m)"
+          echo "Qt Lib Path:  $QT_LIB_PATH"
+
+          echo "=== CMake Configure (x86_64 Cross-Compile) ==="
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
+            -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
+            -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT" \
+            -DOPENSSL_USE_STATIC_LIBS=TRUE \
+            -DGGML_NATIVE=OFF \
+            -DLLAMA_NATIVE=OFF \
+            -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations" \
+            -DCMAKE_C_FLAGS="-Wno-deprecated-declarations"
+
+          echo "=== Build ==="
+          set +e
+          cmake --build build --config Release -- -v 2>&1 | tee build.log
+          BUILD_EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$BUILD_EXIT_CODE" -ne 0 ]; then
+            echo "========== REAL ERRORS FOUND =========="
+            grep -iE "error:|fatal error:|undefined reference|ld: |symbol not found" build.log | head -50
+            echo "========================================="
+            exit 1
+          fi
+
+          mkdir -p bin/release
+          [ ! -d "bin/release/${targetName}.app" ] && cp -R "build/${targetName}.app" "bin/release/${targetName}.app"
+          file "bin/release/${targetName}.app/Contents/MacOS/${targetName}"
+
+      - name: Package DMG
         run: |
-          #QT_INSTALL_PATH="/Users/runner/Qt/5.15.2/clang_64"
-          # 设置私有头文件路径和宏
-          # export CPLUS_INCLUDE_PATH="${QT_INSTALL_PATH}/include/QtGui/5.15.2/QtGui/private:${QT_INSTALL_PATH}/include"
-    
-          # 添加 qmake 参数
-          #qmake "INCLUDEPATH += ${QT_INSTALL_PATH}/include/QtGui/5.15.2/QtGui/private" \
-          #"DEFINES += QT_PRIVATE_HEADERS" \
-          #"LIBS += -lQt5Gui -framework Cocoa"
-          #make -j$(sysctl -n hw.ncpu)
+          export PATH="$QT_ROOT_DIR/bin:/opt/homebrew/bin:$PATH"
+          [ -f "ExtBin/mac/Info.plist" ] && cp -f ExtBin/mac/Info.plist "bin/release/${targetName}.app/Contents/Info.plist"
+          cp -R -p "bin/release/${targetName}.app" "${targetName}.app"
 
-          # 确保所有命令在 Rosetta 2 下运行
-          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.bash_profile
-          source ~/.bash_profile
+          QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
+          macdeployqt "${targetName}.app" -verbose=1 -dmg \
+            -libpath="$QT_ACTUAL_LIB" -libpath="./lib"
 
-          export ARCHFLAGS="-arch x86_64"
-          export CFLAGS="-arch x86_64"
-          export CXXFLAGS="-arch x86_64"
-          export LDFLAGS="-arch x86_64"
+          cp "${targetName}.dmg" "bin/release/${targetName}.dmg"
+          ls -lh "bin/release/${targetName}.dmg"
 
-          # 编译项目
-          #qmake
-          #make
-
-          # 强制 Release 模式和单一架构
-          arch -x86_64 qmake "CONFIG += release" "QMAKE_APPLE_DEVICE_ARCHS=x86_64"
-          arch -x86_64 make -j$(sysctl -n hw.ncpu)
-
-          
-      # 打包
-      - name: package
-        run: |
-          # 拷贝依赖
-         
-          #cp -r devDatabase bin/release/${targetName}.app/Contents/MacOS/devDatabase
-
-          cp -f ExtBin/mac/Info.plist bin/release/${targetName}.app/Contents/Info.plist
-
-          cp -R -p -f bin/release/${targetName}.app ${targetName}.app
-
-          macdeployqt ${targetName}.app -qmldir=. -verbose=1 -dmg
-
-          cp ${targetName}.dmg bin/release/${targetName}.dmg 
-          
-      # 上传artifacts          
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          #name: ${{ env.targetName }}_${{ matrix.os }}_${{matrix.qt_ver}} # .zip
           name: ${{ env.orgName }}-${{ env.VERSION }}
           path: bin/release/${{ env.targetName }}.dmg
-          
-      # tag 上传Release
-      - name: uploadRelease
-        #if: startsWith(github.event.ref, 'refs/tags/')
+          retention-days: 30
+
+      - name: Upload to Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: bin/release/${{ env.targetName }}.dmg
-          
-          #asset_name: ${{ env.targetName }}_${{ matrix.os }}_${{ matrix.qt_ver }}.dmg
           asset_name: ${{ env.orgName }}-${{ env.VERSION }}.dmg
-          
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }}
           overwrite: true

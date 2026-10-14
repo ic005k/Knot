@@ -1,0 +1,140 @@
+name: MacOS-arm64 CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**'
+      - '!stats.txt'
+      - '!README.md'
+  pull_request:
+    paths:
+      - '**'
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build-arm64
+    runs-on: macos-14
+    permissions:
+      contents: write
+
+    strategy:
+      matrix:
+        qt_ver: ["6.9.3"]
+        qt_arch: [clang_64]
+
+    env:
+      targetName: Knot
+      VERSION: Mac-arm64
+      orgName: Knot
+      ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ matrix.qt_ver }}
+          cached: false
+          host: mac
+          target: desktop
+          arch: ${{ matrix.qt_arch }}
+          #modules: qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
+          modules: qtcharts qtsensors qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
+          install-deps: true
+          source: false
+          dir: ${{ github.workspace }}/Qt
+
+      - name: Install Homebrew & OpenSSL (arm64)
+        run: |
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          brew update
+          brew install openssl@3 cmake
+
+          # ✅ 改用 keg-only 方式导出环境变量
+          OPENSSL_PREFIX="$(brew --prefix openssl@3)"
+          echo "OPENSSL_ROOT_DIR=${OPENSSL_PREFIX}" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=${OPENSSL_PREFIX}" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${OPENSSL_PREFIX}/lib/pkgconfig" >> $GITHUB_ENV
+          echo "LDFLAGS=-L${OPENSSL_PREFIX}/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I${OPENSSL_PREFIX}/include" >> $GITHUB_ENV
+
+      - name: Build macOS (arm64)
+        timeout-minutes: 30
+        run: |
+          export PATH="/opt/homebrew/bin:$PATH"
+
+          OPENSSL_ROOT="$(brew --prefix openssl@3)"
+          OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
+
+          echo "=== Environment Info ==="
+          echo "OpenSSL Root: $OPENSSL_ROOT"
+          echo "macOS SDK:    $OSX_SYSROOT"
+          echo "Runner Arch:  $(uname -m)"
+
+          echo "=== CMake Configure (arm64) ==="
+          cmake -B build \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
+                -DCMAKE_OSX_ARCHITECTURES=arm64 \
+                -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" \
+                -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT"
+
+          echo "=== CMake Build (arm64) ==="
+          cmake --build build --config Release --parallel $(sysctl -n hw.ncpu)
+
+          echo "=== Align Output ==="
+          mkdir -p bin/release
+          if [ ! -d "bin/release/${{ env.targetName }}.app" ]; then
+            echo "App bundle not in bin/release, copying from build..."
+            cp -R "build/${{ env.targetName }}.app" "bin/release/${{ env.targetName }}.app"
+          else
+            echo "App bundle already in bin/release."
+          fi
+
+          echo "=== Verify Binary Architecture ==="
+          file "bin/release/${{ env.targetName }}.app/Contents/MacOS/${{ env.targetName }}"
+
+      - name: Package DMG
+        run: |
+          export PATH="$QT_ROOT_DIR/bin:/opt/homebrew/bin:$PATH"
+
+          if [ -f "ExtBin/mac/Info.plist" ]; then
+            cp -f ExtBin/mac/Info.plist "bin/release/${{ env.targetName }}.app/Contents/Info.plist"
+          fi
+
+          cp -R -p "bin/release/${{ env.targetName }}.app" "${{ env.targetName }}.app"
+
+          # 自动读取 Qt 真实库路径，兼容 Qt6.10 macdeployqt 检索缺陷
+          QT_ACTUAL_LIB=$(qmake -query QT_INSTALL_LIBS 2>/dev/null || echo "$QT_ROOT_DIR/lib")
+          macdeployqt "${{ env.targetName }}.app" \
+            -verbose=1 \
+            -dmg \
+            -libpath="$QT_ACTUAL_LIB" \
+            -libpath="./lib"
+
+          cp "${{ env.targetName }}.dmg" "bin/release/${{ env.targetName }}.dmg"
+
+          echo "=== Final Artifact ==="
+          ls -lh "bin/release/${{ env.targetName }}.dmg"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.orgName }}-${{ env.VERSION }}
+          path: bin/release/${{ env.targetName }}.dmg
+          retention-days: 30
+
+      - name: Upload to Release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: bin/release/${{ env.targetName }}.dmg
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}.dmg
+          tag: ${{ github.ref_name }}
+          overwrite: true

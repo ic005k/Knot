@@ -47,14 +47,18 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type);
 static void JavaNotify_0() {
   // pdf关闭后退出全屏
 
-  QTimer::singleShot(100, mw_one, []() {
-    m_Method->exitSystemFullscreen();
+  QMetaObject::invokeMethod(
+      mw_one,
+      []() {
+        m_Method->exitSystemFullscreen();
 
-    if (isAndroid) {
-      m_Reader->openReadListWindow(m_Reader->bookList);
-    } else
-      m_Reader->getReadList();
-  });
+        if (isAndroid) {
+          m_Reader->openReadListWindow(m_Reader->bookList);
+        } else {
+          m_Reader->getReadList();
+        }
+      },
+      Qt::QueuedConnection);
 
   qDebug() << "C++ JavaNotify_0：退出全屏模式";
 }

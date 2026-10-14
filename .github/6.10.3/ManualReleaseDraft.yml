@@ -1,0 +1,107 @@
+name: Manual Release (Draft)
+
+on:
+  workflow_dispatch:
+    # ✅ 不再需要 bump_type 输入，版本号完全由 CMakeLists.txt 决定
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
+
+      # ✅ 核心改动：split 语义提取版本号，不对格式做任何假设
+      - name: Extract version from CMakeLists.txt
+        id: version
+        shell: bash
+        run: |
+          # 等价于 Qt 的 split(" ").at(2) 逻辑：
+          # 1. 找到 project(...) 行
+          # 2. 提取括号内内容
+          # 3. 按空格拆分为 token 数组
+          # 4. 找到 VERSION 关键字，取其下一个 token
+          LINE=$(grep -E "project\s*\(" CMakeLists.txt | head -n1)
+
+          if [ -z "$LINE" ]; then
+            echo "❌ No project() declaration found in CMakeLists.txt"
+            exit 1
+          fi
+
+          # 去掉 project( 和 ) ，只保留内部参数
+          INNER=$(echo "$LINE" | sed 's/.*project\s*(//; s/).*//')
+
+          # 按空格拆分数组，动态查找 VERSION 并取下一个 token
+          read -ra TOKENS <<< "$INNER"
+          VERSION=""
+          for i in "${!TOKENS[@]}"; do
+            if [[ "${TOKENS[$i]}" == "VERSION" ]]; then
+              VERSION="${TOKENS[$((i+1))]}"
+              break
+            fi
+          done
+
+          # ✅ 显式去除所有空白字符（空格、\t、\r、\n）
+          # read -ra 正常情况下已处理，此处防御不可见字符 / Windows \r 等边界情况
+          VERSION=$(echo "$VERSION" | tr -d '[:space:]')
+
+          if [ -z "$VERSION" ]; then
+            echo "❌ Failed to extract version from CMakeLists.txt"
+            echo "   Found project() line: $LINE"
+            echo "   But no VERSION keyword followed by a value."
+            exit 1
+          fi
+
+          # ✅ 防护：检查该版本是否已经打过 Tag（防止忘记改版本号就触发发布）
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "❌ Tag '$VERSION' already exists!"
+            echo "   Please bump VERSION in CMakeLists.txt before creating a release."
+            exit 1
+          fi
+
+          # 获取上一个 Tag（用于生成 Changelog 的 diff 范围）
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          echo "next_tag=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "prev_tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
+          echo "✅ Version from CMakeLists.txt: ${VERSION}"
+          echo "📌 Previous tag: ${PREV_TAG:-'(none, first release)'}"
+
+      - name: Generate Changelog via git log
+        id: changelog
+        shell: bash
+        run: |
+          PREV_TAG="${{ steps.version.outputs.prev_tag }}"
+
+          # 如果没有历史 Tag，则生成全量 Changelog
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --pretty=format:"- %s" --no-merges)
+          else
+            LOG=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s" --no-merges)
+          fi
+
+          if [ -z "$LOG" ]; then
+            LOG="- No changes recorded."
+            echo "⚠️  No new commits since ${PREV_TAG}"
+          else
+            COUNT=$(echo "$LOG" | wc -l)
+            echo "📝 Generated ${COUNT} changelog entries"
+          fi
+
+          echo "$LOG" > /tmp/changelog.md
+          echo "$LOG" | head -20
+
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.next_tag }}
+          name: Release ${{ steps.version.outputs.next_tag }}
+          body_path: /tmp/changelog.md
+          draft: true
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
