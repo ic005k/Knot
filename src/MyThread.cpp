@@ -121,10 +121,7 @@ void UpdateGpsMapThread::run() {
   emit isDone();
 }
 
-void MainWindow::updateGpsMapDone() {
-  m_Steps->updateGpsMapUi();
-  safeCloseProgress();
-}
+void MainWindow::updateGpsMapDone() { m_Steps->updateGpsMapUi(); }
 
 void GetGpsDataThread::stop() { m_running = false; }
 

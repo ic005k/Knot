@@ -552,11 +552,13 @@ public class TencentMapActivity extends MapActivity {
             MyActivity.osmTrackPoints.isEmpty()
         ) return;
 
-        for (Object obj : MyActivity.osmTrackPoints) {
+        // ✅ 创建快照副本，彻底隔离并发修改
+        List<Object> snapshot = new ArrayList<>(MyActivity.osmTrackPoints);
+
+        for (Object obj : snapshot) {
             if (obj instanceof org.osmdroid.util.GeoPoint) {
                 org.osmdroid.util.GeoPoint osmPoint =
                     (org.osmdroid.util.GeoPoint) obj;
-                // 关键修改：GPS坐标（WGS84）转GCJ02
                 LatLng gcjPoint = wgs84ToGcj02(
                     osmPoint.getLatitude(),
                     osmPoint.getLongitude()

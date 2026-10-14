@@ -329,7 +329,7 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   cfg.timeoutSec = 10;
   cfg.maxTokens = 1024;
 
-  if (!m_Notes->isAIQA && !isAndroidAIQA) {
+  if (!isAndroid && !m_Notes->isAIQA && !isAndroidAIQA) {
     showProgress();
   }
 

@@ -73,7 +73,6 @@ void Report::readReportDone() {
 void Report::updateTable() {}
 
 void Report::getData(QString y) {
-  mw_one->showProgress();
   isReport = true;
 
   isWholeMonth = true;
@@ -88,7 +87,6 @@ void Report::getData(QString y) {
 }
 
 void Report::getData(QString y, QString m) {
-  mw_one->showProgress();
   isReport = true;
 
   isWholeMonth = true;
@@ -103,7 +101,6 @@ void Report::getData(QString y, QString m) {
 }
 
 void Report::getData(int y1, int m1, int d1, int y2, int m2, int d2) {
-  mw_one->showProgress();
   isReport = true;
 
   isWholeMonth = false;

@@ -210,7 +210,8 @@ public class MyActivity
     public static int MapType = 1;
 
     public static MapActivity mapActivityInstance = null;
-    public static List<GeoPoint> osmTrackPoints = new ArrayList<>();
+    public static List<GeoPoint> osmTrackPoints =
+        new java.util.concurrent.CopyOnWriteArrayList<>();
     public static String lblDate = "Date";
     public static String lblInfo = "Speed";
 
@@ -314,7 +315,7 @@ public class MyActivity
     public void setDark(boolean dark) {
         isDark = dark;
         // 使用重载版本，传入当前应用的暗黑状态
-        ImmersiveUtil.applyRealImmersive(this, isDark);
+        //ImmersiveUtil.applyRealImmersive(this, isDark);
         updateSystemBars();
     }
 
@@ -494,7 +495,7 @@ public class MyActivity
                 }
 
                 // updateSystemBars();
-                ImmersiveUtil.applyRealImmersive(this, isDark);
+                //ImmersiveUtil.applyRealImmersive(this, isDark);
             } catch (Exception e) {
                 Log.e(TAG, "初始化异常", e);
             }
@@ -627,7 +628,7 @@ public class MyActivity
         System.out.println("onResume...");
         super.onResume();
 
-        ImmersiveUtil.applyRealImmersive(this, isDark);
+        //ImmersiveUtil.applyRealImmersive(this, isDark);
 
         forceRestoreSystemBars();
     }
@@ -641,13 +642,14 @@ public class MyActivity
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        int nightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+
+        /*int nightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
         boolean newIsDark = nightMode == Configuration.UI_MODE_NIGHT_YES;
         if (isDark != newIsDark) {
             isDark = newIsDark;
-            ImmersiveUtil.applyRealImmersive(this, isDark);
+            //ImmersiveUtil.applyRealImmersive(this, isDark);
             updateSystemBars(); // 核心：立刻刷新状态栏、导航栏颜色
-        }
+        }*/
     }
 
     @Override
@@ -2844,10 +2846,12 @@ public class MyActivity
             }
 
             // 再调用原有沉浸式工具，恢复主Activity暗黑模式下状态栏图标颜色
-            ImmersiveUtil.applyRealImmersive(this, isDark);
+            //ImmersiveUtil.applyRealImmersive(this, isDark);
+
+            updateSystemBars();
 
             // 强制 Qt 感知窗口变化并重绘（仅使用标准 Android API）
-            getWindow()
+            /*getWindow()
                 .getDecorView()
                 .post(() -> {
                     View content = findViewById(android.R.id.content);
@@ -2855,7 +2859,7 @@ public class MyActivity
                         content.requestLayout();
                         content.invalidate();
                     }
-                });
+                });*/
         });
     }
 

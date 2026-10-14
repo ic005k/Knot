@@ -159,9 +159,6 @@ public class TodoActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {}
-
     public interface OnTodoItemActionListener {
         /** 请求编辑，直接触发弹窗 */
         void onRequestEdit(int pos);

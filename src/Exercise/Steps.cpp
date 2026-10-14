@@ -403,6 +403,7 @@ void Steps::openStepsUI() {
     strGpsInfoShow = QString(" \n") + " \n" + " \n" + " \n" + " \n" + " \n" +
                      " \n" + " \n" + " \n" + tr("Total Distance") + " : " +
                      strTotalDistance;
+    strGpsInfoShow = tr("Total Distance") + " : " + strTotalDistance;
     ui->lblGpsInfo->setText(strGpsInfoShow);
   }
 
@@ -1087,6 +1088,7 @@ void Steps::updateGetGpsData() {
                    "\nLon.-Lat.: " + QString::number(longitude) + " - " +
                    QString::number(latitude) + "\n" + strGpsStatus + "\n" +
                    tr("Total Distance") + " : " + strTotalDistance;
+  strGpsInfoShow = tr("Total Distance") + " : " + strTotalDistance;
 
   if (m_distance > 0 || isGpsTest) {
     // 先校验经纬度是否在有效范围（-90~90纬度，-180~180经度）
@@ -1572,16 +1574,12 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
 }
 
 void Steps::getGpsTrack(int index) {
-  if (isGpsRun) {
-    openMapWindow();
-  } else {
-    mw_one->showProgress();
+  openMapWindow();
 
-    QString str = listText.at(index);
-    strGpsList = str.replace("===", "-=-");
+  QString str = listText.at(index);
+  strGpsList = str.replace("===", "-=-");
 
-    mw_one->myUpdateGpsMapThread->start();
-  }
+  mw_one->myUpdateGpsMapThread->start();
 }
 
 void Steps::updateGpsTrack() {
@@ -1746,16 +1744,6 @@ void Steps::updateGpsMapUi() {
     if (list.count() > 1) strGpsMapSpeed = list.at(0);
     setInfoLabelToAndroid(strGpsMapDistnce + " | " + strGpsMapSpeed + "\n" +
                           strGpsTerrain);
-
-    openMapWindow();
-
-    return;
-
-    /////////////////////////////////////////////////////
-
-    updateMapTrackUi(lastLat, lastLon);
-    // mw_one->ui->lblGpsDateTime->setText(strGpsMapDateTime);
-    updateInfoText(strGpsMapDistnce, strGpsMapSpeed);
   }
 }
 

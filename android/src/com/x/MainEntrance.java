@@ -573,11 +573,6 @@ public class MainEntrance extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        // 拦截，不调用super.onBackPressed()
-    }
-
     //菜单对话框
 
     /**
