@@ -1,11 +1,15 @@
 package com.x;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -13,20 +17,25 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListPopupWindow;
 import android.widget.TextView;
-import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 原生主入口窗口 MainEntrance
  * Java仅负责视图渲染、事件转发；业务逻辑全部在C++
  */
 public class MainEntrance extends AppCompatActivity {
+
+    private static final int REQ_ALL_PERMISSIONS = 200;
+    private static final int REQ_BACKGROUND_LOCATION = 201;
 
     private static boolean isDark = false;
 
@@ -253,6 +262,9 @@ public class MainEntrance extends AppCompatActivity {
 
         // 初始化全部UI：文字+图标颜色
         refreshUi();
+
+        // ✅ UI 初始化完成后，立即自主申请所有权限
+        requestAllPermissions();
     }
 
     /**
@@ -758,4 +770,193 @@ public class MainEntrance extends AppCompatActivity {
             !mInstance.isDestroyed()
         );
     }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // ===== 统一权限申请（纯 Java 内部闭环）=====
+    private void requestAllPermissions() {
+        List<String> neededPerms = new ArrayList<>();
+
+        // 存储权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                // Android 11+ 跳转系统设置页，不走 requestPermissions
+                Intent intent = new Intent(
+                    Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                );
+                startActivity(intent);
+            }
+        } else {
+            if (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                neededPerms.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+                neededPerms.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+        }
+
+        // 录音
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            neededPerms.add(Manifest.permission.RECORD_AUDIO);
+        }
+
+        // 相机
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            neededPerms.add(Manifest.permission.CAMERA);
+        }
+
+        // 定位（前台）
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            neededPerms.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+
+        // 运动传感器（Android 10+）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                neededPerms.add(Manifest.permission.ACTIVITY_RECOGNITION);
+            }
+        }
+
+        // 通知（Android 13+）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                neededPerms.add(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+
+        // 批量申请
+        if (!neededPerms.isEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                neededPerms.toArray(new String[0]),
+                REQ_ALL_PERMISSIONS
+            );
+        } else {
+            // 全部已授权 → 直接执行授权后的副作用
+            onAllPermissionsReady();
+        }
+    }
+
+    // ===== 权限回调 =====
+    @Override
+    public void onRequestPermissionsResult(
+        int requestCode,
+        @NonNull String[] permissions,
+        @NonNull int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(
+            requestCode,
+            permissions,
+            grantResults
+        );
+
+        if (requestCode == REQ_ALL_PERMISSIONS) {
+            // 检查前台定位是否授予 → 链式申请后台定位
+            for (int i = 0; i < permissions.length; i++) {
+                if (
+                    permissions[i].equals(
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) &&
+                    grantResults[i] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    requestBackgroundLocation();
+                    break;
+                }
+            }
+
+            // 无论用户同意还是拒绝，都执行"就绪"逻辑
+            // （C++ 侧在实际使用功能时再检查具体权限状态即可）
+            onAllPermissionsReady();
+        }
+
+        if (requestCode == REQ_BACKGROUND_LOCATION) {
+            // 后台定位结果不影响主流程，仅记录日志
+            boolean granted =
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            Log.d(
+                "MainEntrance",
+                "后台定位: " + (granted ? "已授予" : "被拒绝")
+            );
+        }
+    }
+
+    // ===== 授权后副作用（纯 Java 处理，不通知 C++）=====
+    private void onAllPermissionsReady() {
+        // 运动权限已授予 → 初始化步数传感器
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                MyService service = MyService.getInstance();
+                if (service != null) {
+                    service.initStepSensor(getApplicationContext());
+                }
+            }
+        }
+
+        // GPS 已授予 → 如果 C++ 之前标记过需要启动 GPS，这里兜底启动
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            // 通过 SharedPreferences 或静态标记判断是否需要自动启动
+            // 如果没有这个需求，删掉这段即可
+        }
+
+        Log.d("MainEntrance", "所有权限申请流程完成");
+    }
+
+    // ===== 后台定位链式申请 =====
+    private void requestBackgroundLocation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    new String[] {
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                    },
+                    REQ_BACKGROUND_LOCATION
+                );
+            }
+        }
+    }
+    /////////////////////////////////////////////////////////////////////////////
 }

@@ -729,6 +729,7 @@ void MainWindow::onAndroidBackHandle() {
 
   if (!mw_one->ui->frameOne->isHidden()) {
     on_btnBack_One_clicked();
+    m_Method->openMainEntranceWindow();
     return;
   }
 

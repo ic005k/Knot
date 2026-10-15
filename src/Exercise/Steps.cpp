@@ -1574,8 +1574,6 @@ void Steps::writeGpsPos(double lat, double lon, int i, int count) {
 }
 
 void Steps::getGpsTrack(int index) {
-  openMapWindow();
-
   QString str = listText.at(index);
   strGpsList = str.replace("===", "-=-");
 
@@ -1737,6 +1735,7 @@ void Steps::updateGpsTrack() {
 
 void Steps::updateGpsMapUi() {
   if (isGpsMapTrackFile) {
+    openMapWindow();
     appendTrackPointAndroid(lastLat, lastLon);
     setDateLabelToAndroid(strGpsMapDateTime);
 

@@ -380,7 +380,7 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
               isZipOK = true;
 
               mw_one->ui->frameOne->hide();
-              mw_one->ui->frameMain->show();
+              if (!isAndroid) mw_one->ui->frameMain->show();
 
               mw_one->showProgress();
 
@@ -1048,7 +1048,8 @@ void CloudBackup::backExit() {
   mw_one->m_Preferences->saveOptions();
   mw_one->m_Preferences->setEncSyncStatusTip();
 
-  mw_one->ui->frameMain->show();
+  if (!isAndroid) mw_one->ui->frameMain->show();
+
   mw_one->ui->frameOne->hide();
 }
 

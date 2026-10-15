@@ -295,8 +295,9 @@
             android:name="com.x.AddEventRecord"
             android:exported="false"
             android:screenOrientation="portrait"
-        >
-        </activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+        />
 
         <!-- 原生窗口 MainEntrance，普通内部窗口，无启动器filter -->
         <activity

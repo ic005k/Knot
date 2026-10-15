@@ -222,21 +222,27 @@ static void JavaNotify_7() {
 }
 
 static void JavaNotify_8() {
-  if (isInitThemeEnd) {
-    // 如果当前窗口不是主入口界面，则不执行快捷方式
-    bool isInstanceValid = m_Method->getJavaFuncBool(
-        "mInstance", "isInstanceValid", "MainEntrance");
-    if (!isInstanceValid) return;
+  qDebug() << "C++ JavaNotify_8 (JNI thread)";
 
-    m_Method->closeMainEntranceWindow();
+  // ✅ 将整个处理逻辑派发到 Qt 主线程
+  QMetaObject::invokeMethod(
+      qApp,
+      []() {
+        if (!isInitThemeEnd) {
+          isNeedExecDeskShortcut = true;
+          return;
+        }
 
-    QTimer::singleShot(100, mw_one, []() { mw_one->execDeskShortcut(); });
+        bool isInstanceValid = m_Method->getJavaFuncBool(
+            "mInstance", "isInstanceValid", "MainEntrance");
+        if (!isInstanceValid) return;
 
-  } else {
-    isNeedExecDeskShortcut = true;
-  }
+        m_Method->closeMainEntranceWindow();
 
-  qDebug() << "C++ JavaNotify_8";
+        // ✅ 现在在主线程中，QTimer 能正常触发
+        QTimer::singleShot(100, mw_one, []() { mw_one->execDeskShortcut(); });
+      },
+      Qt::QueuedConnection);
 }
 
 static void JavaNotify_9() { qDebug() << "C++ JavaNotify_9"; }

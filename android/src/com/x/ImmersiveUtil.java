@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 public class ImmersiveUtil {
@@ -129,12 +130,51 @@ public class ImmersiveUtil {
             );
         }
 
+        View decorView = window.getDecorView();
+        View contentView = activity.findViewById(android.R.id.content);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // ===== API 30+（含 Android 16）=====
+            // 必须设为 false，否则高版本无法控制状态栏外观
+            window.setDecorFitsSystemWindows(false);
+
+            // ✅ 关键：在 contentView 上拦截 insets 并转为 padding
+            // 这样 Qt SurfaceView 尺寸不变，但内容区域被 padding 推到安全区内
+            if (contentView != null && contentView.getTag() == null) {
+                contentView.setTag(Boolean.TRUE);
+                contentView.setOnApplyWindowInsetsListener((v, insets) -> {
+                    int top = insets
+                        .getInsets(WindowInsetsCompat.Type.systemBars())
+                        .top;
+                    int bottom = insets
+                        .getInsets(WindowInsetsCompat.Type.systemBars())
+                        .bottom;
+                    v.setPadding(0, top, 0, bottom);
+                    // 返回 CONSUMED 以外的值，让 Qt 内部也能收到原始 insets
+                    return insets;
+                });
+            }
+        } else {
+            // ===== API 21-29（含 Android 8.0）=====
+            // 默认 DecorFitsSystemWindows=true，内容天然在状态栏下方
+            // 仅清理残留 Flag，保持布局稳定
+            int vis = decorView.getSystemUiVisibility();
+            vis &= ~(
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_IMMERSIVE |
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            );
+            vis |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            decorView.setSystemUiVisibility(vis);
+        }
+
         WindowInsetsControllerCompat controller =
-            new WindowInsetsControllerCompat(window, window.getDecorView());
+            new WindowInsetsControllerCompat(window, decorView);
         controller.setAppearanceLightStatusBars(!isAppDark);
         controller.setAppearanceLightNavigationBars(!isAppDark);
-
-        // !!! Qt分支：绝不执行contentView的OnApplyWindowInsetsListener，不修改content padding，完全交给Qt内部处理
     }
 
     private static boolean isDarkColor(int color) {

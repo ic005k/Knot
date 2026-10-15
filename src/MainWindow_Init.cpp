@@ -224,12 +224,11 @@ void MainWindow::initMainQW() {}
 void MainWindow::initNotesQW() {}
 
 void MainWindow::init_Theme() {
-  // Get the background color to fit the dark mode
-  QPalette pal = mw_one->palette();
-  QBrush brush = pal.window();
-  red = brush.color().red();
-
-  qDebug() << "red=" << red;
+  QColor bgColor = isDark ? QColor(25, 35, 45) : QColor(243, 243, 243);
+  QPalette pal = palette();
+  pal.setColor(QPalette::Window, bgColor);
+  setPalette(pal);
+  setAutoFillBackground(true);
 
   if (!isDark) {
     mw_one->ui->btnReader->setIcon(QIcon(":/res/reader.svg"));

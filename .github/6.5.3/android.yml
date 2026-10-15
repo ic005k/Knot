@@ -1,0 +1,232 @@
+name: Android CI (CMake)
+
+on:
+  push:
+    branches: [main]
+    paths: ['**', '!stats.txt', '!README.md']
+  pull_request:
+    paths: ['**']
+  release:
+    types: [published]
+
+env:
+  QT_VERSION: "6.5.3"
+  QT_ARCH_ANDROID: "android_arm64_v8a"
+  DESKTOP_ARCH: "win64_mingw"
+  NDK_VERSION: "r25c"
+  ANDROID_API_LEVEL: "34"
+  JAVA_VERSION: "17"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable Windows Long Paths
+        shell: pwsh
+        run: reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install NDK
+        shell: pwsh
+        run: |
+          $ndkUrl = "https://dl.google.com/android/repository/android-ndk-${{ env.NDK_VERSION }}-windows.zip"
+          Invoke-WebRequest -Uri $ndkUrl -OutFile "ndk.zip"
+          Expand-Archive -Path "ndk.zip" -DestinationPath "android-sdk\ndk" -Force
+          $ndkPath = "${{ github.workspace }}\android-sdk\ndk\android-ndk-${{ env.NDK_VERSION }}"
+          echo "ANDROID_NDK_HOME=$ndkPath" >> $env:GITHUB_ENV
+          echo "$ndkPath\toolchains\llvm\prebuilt\windows-x86_64\bin" >> $env:GITHUB_PATH
+
+      - name: Install Desktop Qt
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade aqtinstall
+          aqt install-qt windows desktop ${{ env.QT_VERSION }} ${{ env.DESKTOP_ARCH }} `
+            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
+            --outputdir "${{ github.workspace }}/Qt"
+
+      - name: Install Android Qt
+        shell: pwsh
+        run: |
+          aqt install-qt windows android ${{ env.QT_VERSION }} ${{ env.QT_ARCH_ANDROID }} `
+            -m qtcharts qtsensors qtwebview qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia `
+            --outputdir "${{ github.workspace }}/Qt"
+
+      - name: Decode Keystore
+        shell: pwsh
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          $ksDir = "${{ github.workspace }}/signing"
+          New-Item -ItemType Directory -Force -Path $ksDir | Out-Null
+          $ksPath = "$ksDir/release.keystore"
+          $bytes = [Convert]::FromBase64String($env:KEYSTORE_BASE64)
+          [IO.File]::WriteAllBytes($ksPath, $bytes)
+          if ((Get-Item $ksPath).Length -lt 100) {
+            throw "Keystore 解码异常，文件大小: $((Get-Item $ksPath).Length) bytes"
+          }
+          Write-Host "✅ Keystore decoded: $((Get-Item $ksPath).Length) bytes"
+          echo "KEYSTORE_PATH=$ksPath" >> $env:GITHUB_ENV
+
+      - name: CMake Configure & Build
+        shell: pwsh
+        run: |
+          $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
+          $qtAndroid = "$qtBase/${{ env.QT_ARCH_ANDROID }}"
+
+          $desktopCandidates = @("${{ env.DESKTOP_ARCH }}", "mingw_64", "mingw1310_64", "gcc_64")
+          $qtDesktop = ""
+          foreach ($candidate in $desktopCandidates) {
+            $testPath = Join-Path $qtBase $candidate
+            if (Test-Path "$testPath/bin/moc.exe") {
+              $qtDesktop = $testPath
+              Write-Host "✅ Found Desktop Qt at: $qtDesktop"
+              break
+            }
+          }
+          if ([string]::IsNullOrEmpty($qtDesktop)) {
+            Get-ChildItem $qtBase -Directory | ForEach-Object { Write-Host "  - $($_.Name)" }
+            throw "❌ Cannot find Desktop Qt!"
+          }
+
+          cmake -B build -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_PREFIX_PATH="$qtAndroid" `
+            -DQT_HOST_PATH="$qtDesktop" `
+            -DCMAKE_TOOLCHAIN_FILE="$qtAndroid/lib/cmake/Qt6/qt.toolchain.cmake" `
+            -DANDROID_ABI=arm64-v8a `
+            -DANDROID_NATIVE_API_LEVEL=${{ env.ANDROID_API_LEVEL }} `
+            -DANDROID_PLATFORM=${{ env.ANDROID_API_LEVEL }} `
+            -DANDROID_NDK_HOME="$env:ANDROID_NDK_HOME" `
+            -DCMAKE_C_FLAGS_RELEASE="-Oz -DNDEBUG -ffunction-sections -fdata-sections" `
+            -DCMAKE_CXX_FLAGS_RELEASE="-Oz -DNDEBUG -ffunction-sections -fdata-sections" `
+            -DCMAKE_SHARED_LINKER_FLAGS_RELEASE="-Wl,--gc-sections,--strip-all,-s" `
+            -DCMAKE_EXE_LINKER_FLAGS_RELEASE="-Wl,--gc-sections,--strip-all,-s" `
+            -DQT_NO_DEBUG_OUTPUT=ON `
+            -DQT_NO_WARNING_OUTPUT=ON
+
+          cmake --build build --config Release -j8
+
+          # 构建后强制 strip（双重保险）
+          $stripTool = "$env:ANDROID_NDK_HOME/toolchains/llvm/prebuilt/windows-x86_64/bin/llvm-strip.exe"
+          $soFiles = Get-ChildItem "build" -Recurse -Filter "libKnot*.so"
+          foreach ($so in $soFiles) {
+            $beforeSize = [math]::Round($so.Length/1MB, 2)
+            Write-Host "✂️ Stripping: $($so.Name) ($beforeSize MB)"
+            & $stripTool --strip-all $so.FullName
+            $afterSize = [math]::Round($so.Length/1MB, 2)
+            Write-Host "   → After strip: $afterSize MB (saved $([math]::Round($beforeSize - $afterSize, 2)) MB)"
+          }
+
+      - name: Diagnose libKnot Size
+        shell: pwsh
+        run: |
+          $so = Get-ChildItem "build" -Recurse -Filter "libKnot*.so" | Select-Object -First 1
+          if (-not $so) { Write-Host "⚠️ libKnot not found"; exit 0 }
+
+          Write-Host "📦 libKnot: $($so.Name) ($([math]::Round($so.Length/1MB, 2)) MB)"
+
+          $readelf = "$env:ANDROID_NDK_HOME/toolchains/llvm/prebuilt/windows-x86_64/bin/llvm-readelf.exe"
+          if (Test-Path $readelf) {
+            Write-Host "`n🔍 ELF Sections (debug/symbol):"
+            & $readelf -S $so.FullName | Select-String -Pattern "\.debug|\.symtab|\.strtab" | ForEach-Object { Write-Host "  $_" }
+
+            Write-Host "`n🔍 Dynamic symbols count:"
+            $dynsymCount = (& $readelf --dyn-syms $so.FullName | Measure-Object -Line).Lines
+            Write-Host "  Dynamic symbols: $dynsymCount"
+          }
+
+          Write-Host "`n🔍 Linked libraries (NEEDED):"
+          $objdump = "$env:ANDROID_NDK_HOME/toolchains/llvm/prebuilt/windows-x86_64/bin/llvm-objdump.exe"
+          if (Test-Path $objdump) {
+            & $objdump -p $so.FullName | Select-String "NEEDED" | ForEach-Object { Write-Host "  $_" }
+          }
+
+      - name: Build APK (Deploy + Gradle Sign)
+        shell: pwsh
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          $qtBase = "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}"
+          $desktopCandidates = @("${{ env.DESKTOP_ARCH }}", "mingw_64", "mingw1310_64", "gcc_64")
+          $qtDesktop = ""
+          foreach ($candidate in $desktopCandidates) {
+            $testPath = Join-Path $qtBase $candidate
+            if (Test-Path "$testPath/bin/androiddeployqt.exe") {
+              $qtDesktop = $testPath
+              break
+            }
+          }
+          if ([string]::IsNullOrEmpty($qtDesktop)) { throw "❌ Cannot find androiddeployqt.exe!" }
+
+          $deployQt = "$qtDesktop/bin/androiddeployqt.exe"
+          $settingsFile = Get-ChildItem "build/" -Filter "*deployment-settings.json" | Select-Object -First 1
+          if (-not $settingsFile) { throw "❌ No deployment-settings.json found!" }
+
+          Write-Host "🚀 Running androiddeployqt..."
+          & $deployQt --input $settingsFile.FullName --output "${{ github.workspace }}/build/android-build" --android-platform "android-${{ env.ANDROID_API_LEVEL }}" --jdk "$env:JAVA_HOME" --release --verbose
+
+          Write-Host "`n📦 Building signed APK via Gradle..."
+          Push-Location "${{ github.workspace }}/build/android-build"
+          $gradleArgs = @(
+              "assembleRelease",
+              "--no-daemon",
+              "-Pandroid.injected.signing.store.file=$env:KEYSTORE_PATH",
+              "-Pandroid.injected.signing.store.password=$env:KEYSTORE_PASSWORD",
+              "-Pandroid.injected.signing.key.alias=$env:KEY_ALIAS",
+              "-Pandroid.injected.signing.key.password=$env:KEY_PASSWORD"
+          )
+          & ./gradlew @gradleArgs
+          Pop-Location
+          Write-Host "✅ APK build completed."
+
+      - name: Diagnose APK Size
+        shell: pwsh
+        run: |
+          $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          if (-not $apk) { Write-Host "⚠️ No APK found"; exit 0 }
+          Write-Host "📦 APK: $($apk.Name) ($([math]::Round($apk.Length/1MB, 2)) MB)"
+          Add-Type -Assembly System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($apk.FullName)
+          Write-Host "`n🔍 Top 15 largest entries:"
+          $zip.Entries | Sort-Object Length -Descending | Select-Object -First 15 |
+            Format-Table @{L='Size(MB)';E={[math]::Round($_.Length/1MB,2)}}, FullName -AutoSize
+          $zip.Dispose()
+
+      - name: Upload signed APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Knot-APK-signed
+          path: build/android-build/build/outputs/apk/release/*.apk
+
+      - name: Prepare Release APK
+        if: github.event_name == 'release'
+        shell: pwsh
+        run: |
+          $apk = Get-ChildItem "build/android-build/build/outputs/apk/release/*.apk" | Select-Object -First 1
+          if (-not $apk) { throw "❌ No APK found for release!" }
+          $dest = "${{ github.workspace }}/Knot-release.apk"
+          Copy-Item $apk.FullName $dest -Force
+          Write-Host "📦 Prepared: $dest ($([math]::Round((Get-Item $dest).Length/1MB, 2)) MB)"
+
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: Knot-release.apk
+          asset_name: Knot-release.apk
+          tag: ${{ github.ref_name }}
+          overwrite: true

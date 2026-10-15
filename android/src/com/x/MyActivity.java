@@ -37,6 +37,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Icon;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -83,7 +84,9 @@ import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
@@ -315,8 +318,8 @@ public class MyActivity
     public void setDark(boolean dark) {
         isDark = dark;
         // 使用重载版本，传入当前应用的暗黑状态
-        //ImmersiveUtil.applyRealImmersive(this, isDark);
-        updateSystemBars();
+        ImmersiveUtil.applyRealImmersive(this, isDark);
+        //updateSystemBars();
     }
 
     // ------------------------------------------------------------------------
@@ -431,6 +434,10 @@ public class MyActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // ✅ 方案A：直接设置 Window 背景（在 setContentView 之前或之后均可）
+        int bgColor = isDark ? 0xFF19232D : 0xFFF3F3F3;
+        getWindow().setBackgroundDrawable(new ColorDrawable(bgColor));
+
         // 原有配置变更标记逻辑保留
         if (savedInstanceState != null) {
             isConfigChangeRecreate = true;
@@ -454,11 +461,6 @@ public class MyActivity
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             // 仅在主线程执行初始化（避免JNI跨线程问题）
             try {
-                // 权限请求（仅首次创建执行）
-                if (!isConfigChangeRecreate) {
-                    requestPermission();
-                }
-
                 // 注册广播接收器（配置变更重构时重新注册）
                 if (mScreenStatusReceiver != null) {
                     try {
@@ -495,7 +497,7 @@ public class MyActivity
                 }
 
                 // updateSystemBars();
-                //ImmersiveUtil.applyRealImmersive(this, isDark);
+                ImmersiveUtil.applyRealImmersive(this, isDark);
             } catch (Exception e) {
                 Log.e(TAG, "初始化异常", e);
             }
@@ -528,6 +530,14 @@ public class MyActivity
                 mBackCallback
             );
         }
+
+        // ✅ 方案B：强制 QtSurfaceView 透明 + 取消 ZOrderOnTop
+        getWindow()
+            .getDecorView()
+            .post(() -> {
+                View rootView = getWindow().getDecorView().getRootView();
+                makeQtSurfaceTransparent(rootView);
+            });
     }
 
     // ===== 处理共享Intent的简化方法 =====
@@ -628,7 +638,7 @@ public class MyActivity
         System.out.println("onResume...");
         super.onResume();
 
-        //ImmersiveUtil.applyRealImmersive(this, isDark);
+        ImmersiveUtil.applyRealImmersive(this, isDark);
 
         forceRestoreSystemBars();
     }
@@ -2181,32 +2191,6 @@ public class MyActivity
         isBackMainUI = value;
     }
 
-    private void requestPermission() {
-        // 安卓11及以上的存储权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            checkStoragePermission();
-        } else {
-            // 安卓11以下的存储授权
-            verifyStoragePermissions(this);
-        }
-
-        // 请求通知权限 Android 12+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // 请求权限
-                requestPermissions(
-                    new String[] { Manifest.permission.POST_NOTIFICATIONS },
-                    REQ_NOTIFICATION
-                );
-            }
-        }
-    }
-
     private void requestSensorPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (
@@ -2846,9 +2830,9 @@ public class MyActivity
             }
 
             // 再调用原有沉浸式工具，恢复主Activity暗黑模式下状态栏图标颜色
-            //ImmersiveUtil.applyRealImmersive(this, isDark);
+            ImmersiveUtil.applyRealImmersive(this, isDark);
 
-            updateSystemBars();
+            //updateSystemBars();
 
             // 强制 Qt 感知窗口变化并重绘（仅使用标准 Android API）
             /*getWindow()
@@ -3133,5 +3117,22 @@ public class MyActivity
     public float getSystemFontScale() {
         if (m_instance == null) return 1.0f;
         return m_instance.getResources().getConfiguration().fontScale;
+    }
+
+    private void makeQtSurfaceTransparent(View view) {
+        if (view instanceof SurfaceView) {
+            SurfaceView sv = (SurfaceView) view;
+            // 关键1：设为透明，让 WindowBackground 透出来
+            sv.setBackgroundColor(Color.TRANSPARENT);
+            // 关键2：确保不在顶层，否则 WindowBackground 会被遮挡
+            sv.setZOrderOnTop(false);
+            // 关键3：强制触发一次重绘
+            sv.invalidate();
+        } else if (view instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) view;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                makeQtSurfaceTransparent(vg.getChildAt(i));
+            }
+        }
     }
 }

@@ -59,6 +59,8 @@ void Method::setTempSwapStr(const QString& str) {
 
 void Method::openMainEntranceWindow() {
 #ifdef Q_OS_ANDROID
+  mw_one->ui->frameMain->hide();
+
   QStringList list1;
 
   for (int i = 0; i < tabData->count(); i++) {
@@ -76,10 +78,7 @@ void Method::openMainEntranceWindow() {
 
   for (const QString& item : list1) {
     QJniObject jItem = QJniObject::fromString(item);
-    // jArrayList.callMethod<bool>("add", "(Ljava/lang/Object;)Z",
-    // jItem.object());
-    bool ok = static_cast<bool>(jArrayList.callMethod<jboolean>(
-        "add", "(Ljava/lang/Object;)Z", jItem.object()));
+    jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
 
   activity.callMethod<void>("openMainEntranceWindow",
