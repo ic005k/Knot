@@ -6,9 +6,12 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
@@ -19,6 +22,10 @@ public class ImmersiveUtil {
     private static final int NAV_BAR_DARK = Color.parseColor("#121212");
     private static final int STATUS_BAR_LIGHT = Color.parseColor("#F3F3F3");
     private static final int NAV_BAR_LIGHT = Color.parseColor("#FFFFFF");
+
+    // DecorView 背景色条的 tag（用私有常量，避免和 contentView 上的 setTag(Boolean.TRUE) 冲突）
+    private static final int TAG_KEY_STATUS = 0x7f0f0001;
+    private static final int TAG_KEY_NAV = 0x7f0f0002;
 
     /**
      * 【原生Java Activity调用】原版逻辑：读取页面背景色，content设置padding避让系统栏，内容不会顶状态栏
@@ -68,10 +75,8 @@ public class ImmersiveUtil {
             controller.setAppearanceLightNavigationBars(!isDark);
         }
 
-        // ========== 仅原生Activity执行：给content设置padding避让系统栏 ==========
         View contentView = activity.findViewById(android.R.id.content);
         if (contentView != null) {
-            // 使用View单tag标记是否已经安装insets listener
             if (contentView.getTag() == null) {
                 contentView.setTag(Boolean.TRUE);
                 contentView.setOnApplyWindowInsetsListener((v, insets) -> {
@@ -90,9 +95,9 @@ public class ImmersiveUtil {
     }
 
     /**
-     * 【Qt MyActivity专用调用】双参数版本：只设置系统栏颜色+图标，完全跳过content padding/insets逻辑，Qt自己处理渲染避让
-     * @param activity Qt主Activity
-     * @param isAppDark 应用暗黑模式开关
+     * 【Qt MyActivity专用调用】兼容 Android 15 edge-to-edge：
+     * 系统栏着色 API 在 API 35 已失效，改为在 DecorView 底层垫两条目标色条，
+     * 状态栏/导航栏透明区透出即为目标色；字色仍用 setAppearanceLight*。
      */
     public static void applyRealImmersive(
         Activity activity,
@@ -111,35 +116,27 @@ public class ImmersiveUtil {
         Window window = activity.getWindow();
         if (window == null) return;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-            );
-            window.clearFlags(
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-            );
-            window.clearFlags(
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
-            );
+        final int statusColor = isAppDark ? STATUS_BAR_DARK : STATUS_BAR_LIGHT;
+        final int navColor = isAppDark ? NAV_BAR_DARK : NAV_BAR_LIGHT;
 
-            window.setStatusBarColor(
-                isAppDark ? STATUS_BAR_DARK : STATUS_BAR_LIGHT
-            );
-            window.setNavigationBarColor(
-                isAppDark ? NAV_BAR_DARK : NAV_BAR_LIGHT
-            );
-        }
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+        );
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.clearFlags(
+            WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+        );
+        // 仍设一次：API<35 生效，API35 无害（被系统忽略）
+        window.setStatusBarColor(statusColor);
+        window.setNavigationBarColor(navColor);
 
         View decorView = window.getDecorView();
         View contentView = activity.findViewById(android.R.id.content);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // ===== API 30+（含 Android 16）=====
-            // 必须设为 false，否则高版本无法控制状态栏外观
             window.setDecorFitsSystemWindows(false);
 
-            // ✅ 关键：在 contentView 上拦截 insets 并转为 padding
-            // 这样 Qt SurfaceView 尺寸不变，但内容区域被 padding 推到安全区内
+            // Qt 内容 padding 避让（保持原逻辑）
             if (contentView != null && contentView.getTag() == null) {
                 contentView.setTag(Boolean.TRUE);
                 contentView.setOnApplyWindowInsetsListener((v, insets) -> {
@@ -150,14 +147,52 @@ public class ImmersiveUtil {
                         .getInsets(WindowInsetsCompat.Type.systemBars())
                         .bottom;
                     v.setPadding(0, top, 0, bottom);
-                    // 返回 CONSUMED 以外的值，让 Qt 内部也能收到原始 insets
                     return insets;
                 });
             }
+
+            // ★ 关键：DecorView 上垫/更新两条背景色条
+            final View statusStrip = ensureBar(
+                decorView,
+                TAG_KEY_STATUS,
+                statusColor,
+                true
+            );
+            final View navStrip = ensureBar(
+                decorView,
+                TAG_KEY_NAV,
+                navColor,
+                false
+            );
+            if (statusStrip != null) statusStrip.setBackgroundColor(
+                statusColor
+            );
+            if (navStrip != null) navStrip.setBackgroundColor(navColor);
+
+            // insets 变化时同步色条高度（顶部=状态栏高，底部=导航栏高）
+            decorView.setOnApplyWindowInsetsListener((v, insets) -> {
+                android.graphics.Insets bars = insets.getInsets(
+                    android.view.WindowInsets.Type.systemBars()
+                );
+                if (statusStrip != null) {
+                    ViewGroup.LayoutParams lp = statusStrip.getLayoutParams();
+                    if (lp != null) {
+                        lp.height = bars.top;
+                        statusStrip.setLayoutParams(lp);
+                    }
+                }
+                if (navStrip != null) {
+                    ViewGroup.LayoutParams lp = navStrip.getLayoutParams();
+                    if (lp != null) {
+                        lp.height = bars.bottom;
+                        navStrip.setLayoutParams(lp);
+                    }
+                }
+                return insets; // 不消费，继续派发
+            });
+            ViewCompat.requestApplyInsets(decorView);
         } else {
-            // ===== API 21-29（含 Android 8.0）=====
-            // 默认 DecorFitsSystemWindows=true，内容天然在状态栏下方
-            // 仅清理残留 Flag，保持布局稳定
+            // API 21~29
             int vis = decorView.getSystemUiVisibility();
             vis &= ~(
                 View.SYSTEM_UI_FLAG_FULLSCREEN |
@@ -175,6 +210,32 @@ public class ImmersiveUtil {
             new WindowInsetsControllerCompat(window, decorView);
         controller.setAppearanceLightStatusBars(!isAppDark);
         controller.setAppearanceLightNavigationBars(!isAppDark);
+    }
+
+    // 在 DecorView 上确保存在一条贴顶/贴底背景色条（addView(bar,0) 放最底层，不挡 Qt）
+    private static View ensureBar(
+        View decorView,
+        int tagKey,
+        int color,
+        boolean isTop
+    ) {
+        if (!(decorView instanceof ViewGroup)) return null;
+        ViewGroup decor = (ViewGroup) decorView;
+        View bar = decor.findViewWithTag(tagKey);
+        if (bar == null) {
+            bar = new View(decor.getContext());
+            bar.setTag(tagKey);
+            bar.setBackgroundColor(color);
+            android.widget.FrameLayout.LayoutParams flp =
+                new android.widget.FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    0
+                );
+            flp.gravity = isTop ? Gravity.TOP : Gravity.BOTTOM;
+            bar.setLayoutParams(flp);
+            decor.addView(bar, 0); // 最底层
+        }
+        return bar;
     }
 
     private static boolean isDarkColor(int color) {

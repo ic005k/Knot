@@ -319,7 +319,8 @@ public class MyActivity
         isDark = dark;
         // 使用重载版本，传入当前应用的暗黑状态
         ImmersiveUtil.applyRealImmersive(this, isDark);
-        //updateSystemBars();
+
+        System.out.println("设置暗黑模式完成...");
     }
 
     // ------------------------------------------------------------------------
@@ -434,10 +435,6 @@ public class MyActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // ✅ 方案A：直接设置 Window 背景（在 setContentView 之前或之后均可）
-        int bgColor = isDark ? 0xFF19232D : 0xFFF3F3F3;
-        getWindow().setBackgroundDrawable(new ColorDrawable(bgColor));
-
         // 原有配置变更标记逻辑保留
         if (savedInstanceState != null) {
             isConfigChangeRecreate = true;
@@ -496,7 +493,6 @@ public class MyActivity
                     Log.d(TAG, "配置变更初始化完成，Qt已就绪，可以调用C++");
                 }
 
-                // updateSystemBars();
                 ImmersiveUtil.applyRealImmersive(this, isDark);
             } catch (Exception e) {
                 Log.e(TAG, "初始化异常", e);
@@ -530,14 +526,6 @@ public class MyActivity
                 mBackCallback
             );
         }
-
-        // ✅ 方案B：强制 QtSurfaceView 透明 + 取消 ZOrderOnTop
-        getWindow()
-            .getDecorView()
-            .post(() -> {
-                View rootView = getWindow().getDecorView().getRootView();
-                makeQtSurfaceTransparent(rootView);
-            });
     }
 
     // ===== 处理共享Intent的简化方法 =====
@@ -639,7 +627,6 @@ public class MyActivity
         super.onResume();
 
         ImmersiveUtil.applyRealImmersive(this, isDark);
-
         forceRestoreSystemBars();
     }
 
@@ -653,13 +640,12 @@ public class MyActivity
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        /*int nightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        int nightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
         boolean newIsDark = nightMode == Configuration.UI_MODE_NIGHT_YES;
         if (isDark != newIsDark) {
             isDark = newIsDark;
-            //ImmersiveUtil.applyRealImmersive(this, isDark);
-            updateSystemBars(); // 核心：立刻刷新状态栏、导航栏颜色
-        }*/
+            ImmersiveUtil.applyRealImmersive(this, isDark);
+        }
     }
 
     @Override
@@ -2208,38 +2194,6 @@ public class MyActivity
         }
     }
 
-    // 统一刷新：状态栏 + 导航栏（与 NoteEditor 完全对齐）
-    private void updateSystemBars() {
-        // ✅ 确保所有 Window/View 操作在主线程执行
-        runOnUiThread(() -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Window window = getWindow();
-                window.addFlags(
-                    WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-                );
-
-                if (isDark) {
-                    window.setStatusBarColor(Color.parseColor("#19232D"));
-                    window.setNavigationBarColor(Color.parseColor("#121212"));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        window.getDecorView().setSystemUiVisibility(0);
-                    }
-                } else {
-                    window.setStatusBarColor(Color.parseColor("#F3F3F3"));
-                    window.setNavigationBarColor(Color.parseColor("#FFFFFF"));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        window
-                            .getDecorView()
-                            .setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR |
-                                    View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                            );
-                    }
-                }
-            }
-        });
-    }
-
     public static void setQtMainEnd(boolean isEnd) {
         isQtMainEnd = isEnd;
     }
@@ -2832,10 +2786,8 @@ public class MyActivity
             // 再调用原有沉浸式工具，恢复主Activity暗黑模式下状态栏图标颜色
             ImmersiveUtil.applyRealImmersive(this, isDark);
 
-            //updateSystemBars();
-
             // 强制 Qt 感知窗口变化并重绘（仅使用标准 Android API）
-            /*getWindow()
+            getWindow()
                 .getDecorView()
                 .post(() -> {
                     View content = findViewById(android.R.id.content);
@@ -2843,7 +2795,7 @@ public class MyActivity
                         content.requestLayout();
                         content.invalidate();
                     }
-                });*/
+                });
         });
     }
 
@@ -3117,22 +3069,5 @@ public class MyActivity
     public float getSystemFontScale() {
         if (m_instance == null) return 1.0f;
         return m_instance.getResources().getConfiguration().fontScale;
-    }
-
-    private void makeQtSurfaceTransparent(View view) {
-        if (view instanceof SurfaceView) {
-            SurfaceView sv = (SurfaceView) view;
-            // 关键1：设为透明，让 WindowBackground 透出来
-            sv.setBackgroundColor(Color.TRANSPARENT);
-            // 关键2：确保不在顶层，否则 WindowBackground 会被遮挡
-            sv.setZOrderOnTop(false);
-            // 关键3：强制触发一次重绘
-            sv.invalidate();
-        } else if (view instanceof ViewGroup) {
-            ViewGroup vg = (ViewGroup) view;
-            for (int i = 0; i < vg.getChildCount(); i++) {
-                makeQtSurfaceTransparent(vg.getChildAt(i));
-            }
-        }
     }
 }

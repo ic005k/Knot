@@ -337,8 +337,7 @@ int main(int argc, char* argv[]) {
                      if (newIsDark != g_currentIsDark) {
                        isDark = newIsDark;           // 同步原有全局isDark
                        g_currentIsDark = newIsDark;  // 更新当前状态
-                       m_Method->setDark(isDark);
-                       loadTheme(isDark);  // 仅在主题变化时执行
+                       loadTheme(isDark);            // 仅在主题变化时执行
                      }
                    });
 

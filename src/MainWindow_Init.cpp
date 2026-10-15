@@ -224,12 +224,6 @@ void MainWindow::initMainQW() {}
 void MainWindow::initNotesQW() {}
 
 void MainWindow::init_Theme() {
-  QColor bgColor = isDark ? QColor(25, 35, 45) : QColor(243, 243, 243);
-  QPalette pal = palette();
-  pal.setColor(QPalette::Window, bgColor);
-  setPalette(pal);
-  setAutoFillBackground(true);
-
   if (!isDark) {
     mw_one->ui->btnReader->setIcon(QIcon(":/res/reader.svg"));
     mw_one->ui->btnTodo->setIcon(QIcon(":/res/todo.svg"));
