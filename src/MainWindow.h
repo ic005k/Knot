@@ -350,8 +350,7 @@ class MainWindow : public QMainWindow {
   void sendFakeTouch();
 
   void init_ButtonStyle();
-  void initMainQW();
-  void initNotesQW();
+
   void setToolButtonAnimation(QToolButton* btn, bool setMyStyle);
   void init_Menu(QMenu* mainMenu);
   void init_Theme();

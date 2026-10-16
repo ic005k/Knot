@@ -58,7 +58,6 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
     ui->btnAILink->show();
   else
     ui->btnAILink->hide();
-  ui->f_NoteLink->setMaximumWidth(320);
 
   m_Method->set_ToolButtonStyle(this);
 

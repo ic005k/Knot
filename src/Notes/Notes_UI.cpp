@@ -474,6 +474,8 @@ void Notes::insertNoteLink(const QString& title, const QString& path) {
 }
 
 void Notes::on_btnInsertNoteLink_clicked() {
+  if (ui->listNoteLink->currentRow() < 0) return;
+
   onPopupItemClicked(ui->listNoteLink->currentItem());
 }
 

@@ -219,10 +219,6 @@ void MainWindow::init_ButtonStyle() {
   }
 }
 
-void MainWindow::initMainQW() {}
-
-void MainWindow::initNotesQW() {}
-
 void MainWindow::init_Theme() {
   if (!isDark) {
     mw_one->ui->btnReader->setIcon(QIcon(":/res/reader.svg"));

@@ -22,9 +22,8 @@ void Notes::initEditor() {
   connect(m_EditSource, &QsciScintilla::textChanged, this,
           &Notes::editSource_textChanged);
 
-  ui->frameEdit->layout()->removeWidget(ui->f_NoteLink);
   ui->frameEdit->layout()->addWidget(m_EditSource);
-  ui->frameEdit->layout()->addWidget(ui->f_NoteLink);
+
   m_EditSource->setFocus();
 
   // ⚠ 可以使用 textChanged + cursorPositionChanged 组合，
@@ -650,6 +649,7 @@ void Notes::updateImagePreview(const QString& lineText, int cursorPos) {
 
   // ✅ 统一重置样式（防止状态切换时残留）
   ui->lblNoteImage->clear();
+  ui->lblNoteImage->setText(tr("Link Preview"));
   ui->lblNoteImage->setWordWrap(false);
   ui->lblNoteImage->setStyleSheet("");
   ui->lblNoteImage->setAlignment(Qt::AlignCenter);
