@@ -73,14 +73,17 @@ class CloudBackup : public QDialog {
 
   void changeComBoxWebDAV(const QString& arg1);
   bool checkWebDAVConnection();
+  void checkWebDAVConnectionAsync();
   void on_pushButton_downloadFile_clicked();
   void on_btnBack_clicked();
 
   QString unifyWebDAVBaseUrlToDavEnd(QString url);
 
   QString getRemoteKnotDataFullPath(const QString& remoteFile);
+
  signals:
   void uploadAllFinished();  // 所有上传完成
+  void connectionCheckFinished(bool success, const QString& message);
 
  protected:
   bool eventFilter(QObject* obj, QEvent* evn) override;
@@ -89,7 +92,7 @@ class CloudBackup : public QDialog {
  private slots:
   void updateUploadProgress(qint64 bytesSent, qint64 bytesTotal);
   void startNextUpload();
-
+  void onWebDAVCheckFinished();
   void handleUploadFinished(QNetworkReply* reply, const QString& filePath);
 
  private:
@@ -100,6 +103,7 @@ class CloudBackup : public QDialog {
   QtOneDrive* oneDrive = nullptr;
   QString initUserInfo(QString info);
 
+  QNetworkAccessManager* m_chk_manager = nullptr;
   QNetworkAccessManager* m_manager = nullptr;
   QHash<QNetworkReply*, QFile*> m_activeDownloads;  // 必须声明为类成员
 

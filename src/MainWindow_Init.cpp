@@ -116,6 +116,19 @@ void MainWindow::init_Instance() {
 
   connect(this, &MainWindow::androidBackSignal, this,
           &MainWindow::onAndroidBackHandle, Qt::QueuedConnection);
+
+  connect(m_CloudBackup, &CloudBackup::connectionCheckFinished, this,
+          [this](bool success, const QString& message) {
+            // 1. 恢复 UI 状态
+            ui->btnTestWebDav->setEnabled(true);
+
+            // 2. 根据结果显示反馈
+            if (success) {
+              QMessageBox::information(this, tr("Success"), message);
+            } else {
+              QMessageBox::warning(this, tr("Failed"), message);
+            }
+          });
 }
 
 void MainWindow::init_Thread_Timer() {

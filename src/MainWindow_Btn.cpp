@@ -509,7 +509,10 @@ void MainWindow::on_btnDownload_clicked() {
   m_CloudBackup->on_pushButton_downloadFile_clicked();
 }
 
-void MainWindow::on_btnBack_One_clicked() { m_CloudBackup->backExit(); }
+void MainWindow::on_btnBack_One_clicked() {
+  m_CloudBackup->backExit();
+  if (isAndroid) m_Method->openMainEntranceWindow();
+}
 
 void MainWindow::on_btnReport() { on_actionReport_triggered(); }
 
@@ -544,15 +547,8 @@ void MainWindow::on_btnOpen_clicked() {
 void MainWindow::on_btnEditNote_clicked() { m_Notes->openEditUI(); }
 
 void MainWindow::on_btnTestWebDav_clicked() {
-  auto msg = std::make_unique<ShowMessage>(mw_one);
-  if (!m_CloudBackup->checkWebDAVConnection()) {
-    msg->showMsg(appName,
-                 tr("WebDAV connection failed. Please check the network, "
-                    "website address or login information."),
-                 1);
-  } else {
-    msg->showMsg(appName, tr("WebDav connection successful."), 1);
-  }
+  ui->btnTestWebDav->setEnabled(false);
+  m_CloudBackup->checkWebDAVConnectionAsync();
 }
 
 void MainWindow::on_btnFind_clicked() { mw_one->ui->frameMain->hide(); }

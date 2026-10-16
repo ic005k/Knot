@@ -30,6 +30,7 @@ CloudBackup::CloudBackup(QWidget* parent)
   init();
 
   m_networkManager = new QNetworkAccessManager(nullptr);
+  m_chk_manager = new QNetworkAccessManager(this);
 
   QString secret;
   // 先从环境变量读取，便于CI运行
@@ -1234,6 +1235,64 @@ bool CloudBackup::checkWebDAVConnection() {
   if (ok) save_WebDav();
 
   return ok;
+}
+
+void CloudBackup::checkWebDAVConnectionAsync() {
+  QString urlText = m_CloudBackup->getWebDAVArgument();
+  QUrl url(urlText);
+
+  if (!url.isValid() || url.scheme() != "https") {
+    qDebug() << "URL无效，必须使用https协议";
+    emit connectionCheckFinished(false, tr("Invalid URL"));
+    return;
+  }
+
+  QString username = mw_one->ui->editWebDAVUsername->text().trimmed();
+  QString password = mw_one->ui->editWebDAVPassword->text().trimmed();
+
+  QNetworkRequest request(url);
+  QByteArray auth = username.toUtf8() + ":" + password.toUtf8();
+  request.setRawHeader("Authorization", "Basic " + auth.toBase64());
+  request.setRawHeader("User-Agent", "Zotero/5.0");
+  request.setRawHeader("Depth", "0");
+
+  QString xml =
+      "<?xml version=\"1.0\"?><d:propfind "
+      "xmlns:d=\"DAV:\"><d:allprop/></d:propfind>";
+
+  QNetworkReply* reply =
+      m_chk_manager->sendCustomRequest(request, "PROPFIND", xml.toUtf8());
+
+  // 异步连接：当请求完成时，调用处理函数
+  connect(reply, &QNetworkReply::finished, this,
+          &CloudBackup::onWebDAVCheckFinished);
+
+  // 此时函数直接返回，不阻塞主线程！UI 可以正常响应，不会触发死锁。
+}
+
+void CloudBackup::onWebDAVCheckFinished() {
+  QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+  if (!reply) return;
+
+  int status =
+      reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+  bool ok = (reply->error() == QNetworkReply::NoError &&
+             (status == 207 || status == 200));
+
+  QString strError =
+      ok ? tr("Connection succeeded")
+         : QString(tr("Connection failed, status code: %1")).arg(status);
+
+  qDebug() << strError;
+
+  if (ok) {
+    save_WebDav();
+  }
+
+  // 通知 UI 更新状态（例如关闭 loading 动画，显示成功/失败提示）
+  emit connectionCheckFinished(ok, strError);
+
+  reply->deleteLater();  // 安全删除 reply
 }
 
 QString CloudBackup::unifyWebDAVBaseUrlToDavEnd(QString url) {

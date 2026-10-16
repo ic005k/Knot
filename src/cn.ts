@@ -250,7 +250,7 @@
         <translation type="vanished">获取用户信息成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="217"/>
+        <location filename="CloudBackup.cpp" line="218"/>
         <source>Success Upload File:</source>
         <translation>上传文件成功</translation>
     </message>
@@ -259,7 +259,7 @@
         <translation type="vanished">下载文件成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1171"/>
+        <location filename="CloudBackup.cpp" line="1172"/>
         <source>Downloading data?</source>
         <translation>下载数据？</translation>
     </message>
@@ -268,30 +268,45 @@
         <translation type="vanished">此操作将使用 OneDrive 上的数据覆盖本地数据。</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="126"/>
+        <location filename="CloudBackup.cpp" line="127"/>
         <source>Uploading data?</source>
         <translation>上传数据？</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="127"/>
+        <location filename="CloudBackup.cpp" line="128"/>
         <source>This action updates the data in the cloud.</source>
         <translation>此操作将更新云端的数据</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="232"/>
-        <location filename="CloudBackup.cpp" line="402"/>
+        <location filename="CloudBackup.cpp" line="233"/>
+        <location filename="CloudBackup.cpp" line="403"/>
         <source>Authentication failed.</source>
         <translation>认证失败，请检查网址、用户名、密码。如果使用坚果云，请使用“应用密码”而不是主密码，“应用密码”可通过坚果云网页端登录后进行设置。</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="236"/>
+        <location filename="CloudBackup.cpp" line="237"/>
         <source>Upload error</source>
         <translation>上传错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="406"/>
+        <location filename="CloudBackup.cpp" line="407"/>
         <source>Download error</source>
         <translation>下载错误</translation>
+    </message>
+    <message>
+        <location filename="CloudBackup.cpp" line="1246"/>
+        <source>Invalid URL</source>
+        <translation type="unfinished">无效的网址</translation>
+    </message>
+    <message>
+        <location filename="CloudBackup.cpp" line="1284"/>
+        <source>Connection succeeded</source>
+        <translation type="unfinished">连接成功</translation>
+    </message>
+    <message>
+        <location filename="CloudBackup.cpp" line="1285"/>
+        <source>Connection failed, status code: %1</source>
+        <translation type="unfinished">连接失败，状态码：%1</translation>
     </message>
     <message>
         <source>Invalid URL: </source>
@@ -310,17 +325,17 @@
         <translation type="vanished">最终大小：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1172"/>
+        <location filename="CloudBackup.cpp" line="1173"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation>此操作将会用云端的文件覆盖本地文件</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="363"/>
+        <location filename="CloudBackup.cpp" line="364"/>
         <source>Successfully downloaded file,File saved to</source>
         <translation>文件下载成功，已保存到</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="373"/>
+        <location filename="CloudBackup.cpp" line="374"/>
         <source>Import this data?</source>
         <translation>是否导入这个数据？</translation>
     </message>
@@ -804,7 +819,12 @@
         <translation type="vanished">输入待办文本  [Ctrl+Enter]</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="394"/>
+        <location filename="MainWindow_Init.cpp" line="129"/>
+        <source>Failed</source>
+        <translation type="unfinished">失败</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_Init.cpp" line="407"/>
         <source>Year</source>
         <translation>年</translation>
     </message>
@@ -1503,7 +1523,7 @@
     </message>
     <message>
         <location filename="MainWindow.cpp" line="344"/>
-        <location filename="MainWindow_Init.cpp" line="393"/>
+        <location filename="MainWindow_Init.cpp" line="406"/>
         <source>Amount</source>
         <translation>金额</translation>
     </message>
@@ -1534,7 +1554,7 @@
         <translation type="vanished">减少一次</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="425"/>
+        <location filename="MainWindow_Init.cpp" line="438"/>
         <source>Month</source>
         <translation>月</translation>
     </message>
@@ -1643,7 +1663,7 @@
         <translation type="vanished">最后的一条记录将被删除或移动</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="198"/>
+        <location filename="MainWindow_Init.cpp" line="211"/>
         <source>Total</source>
         <translation>总计</translation>
     </message>
@@ -1668,7 +1688,7 @@
         <translation type="vanished">滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainWindow_Init.cpp" line="392"/>
+        <location filename="MainWindow_Init.cpp" line="405"/>
         <source>Freq</source>
         <translation>频次</translation>
     </message>
@@ -1687,7 +1707,7 @@
     </message>
     <message>
         <location filename="MainWindow.cpp" line="558"/>
-        <location filename="MainWindow_Init.cpp" line="391"/>
+        <location filename="MainWindow_Init.cpp" line="404"/>
         <source>Date</source>
         <translation>日期</translation>
     </message>
@@ -1923,6 +1943,7 @@
     </message>
     <message>
         <location filename="MainWindow_AI.cpp" line="138"/>
+        <location filename="MainWindow_Init.cpp" line="127"/>
         <source>Success</source>
         <translation>成功</translation>
     </message>
@@ -2013,14 +2034,12 @@
         <translation type="vanished">总阅读时间：</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="550"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
-        <translation>WebDAV连接失败，请检查网络、网址或登录信息</translation>
+        <translation type="vanished">WebDAV连接失败，请检查网络、网址或登录信息</translation>
     </message>
     <message>
-        <location filename="MainWindow_Btn.cpp" line="554"/>
         <source>WebDav connection successful.</source>
-        <translation>WebDav连接成功</translation>
+        <translation type="vanished">WebDav连接成功</translation>
     </message>
     <message>
         <source>Launched</source>

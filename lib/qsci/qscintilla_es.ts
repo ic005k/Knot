@@ -179,54 +179,69 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="217"/>
+        <location filename="../../src/CloudBackup.cpp" line="218"/>
         <source>Success Upload File:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="126"/>
+        <location filename="../../src/CloudBackup.cpp" line="127"/>
         <source>Uploading data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="127"/>
+        <location filename="../../src/CloudBackup.cpp" line="128"/>
         <source>This action updates the data in the cloud.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="232"/>
-        <location filename="../../src/CloudBackup.cpp" line="402"/>
+        <location filename="../../src/CloudBackup.cpp" line="233"/>
+        <location filename="../../src/CloudBackup.cpp" line="403"/>
         <source>Authentication failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="236"/>
+        <location filename="../../src/CloudBackup.cpp" line="237"/>
         <source>Upload error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="363"/>
+        <location filename="../../src/CloudBackup.cpp" line="364"/>
         <source>Successfully downloaded file,File saved to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="373"/>
+        <location filename="../../src/CloudBackup.cpp" line="374"/>
         <source>Import this data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="406"/>
+        <location filename="../../src/CloudBackup.cpp" line="407"/>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1171"/>
+        <location filename="../../src/CloudBackup.cpp" line="1172"/>
         <source>Downloading data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1172"/>
+        <location filename="../../src/CloudBackup.cpp" line="1173"/>
         <source>This action overwrites local files with files in the cloud.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/CloudBackup.cpp" line="1246"/>
+        <source>Invalid URL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/CloudBackup.cpp" line="1284"/>
+        <source>Connection succeeded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/CloudBackup.cpp" line="1285"/>
+        <source>Connection failed, status code: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -438,7 +453,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Init.cpp" line="425"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="438"/>
         <source>Month</source>
         <translation type="unfinished"></translation>
     </message>
@@ -461,7 +476,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.cpp" line="344"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="393"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="406"/>
         <source>Amount</source>
         <translation type="unfinished"></translation>
     </message>
@@ -639,12 +654,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Init.cpp" line="394"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="407"/>
         <source>Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Init.cpp" line="198"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="211"/>
         <source>Total</source>
         <translation type="unfinished"></translation>
     </message>
@@ -766,7 +781,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Init.cpp" line="392"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="129"/>
+        <source>Failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_Init.cpp" line="405"/>
         <source>Freq</source>
         <translation type="unfinished"></translation>
     </message>
@@ -900,6 +920,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow_AI.cpp" line="138"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="127"/>
         <source>Success</source>
         <translation type="unfinished"></translation>
     </message>
@@ -941,7 +962,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.cpp" line="558"/>
-        <location filename="../../src/MainWindow_Init.cpp" line="391"/>
+        <location filename="../../src/MainWindow_Init.cpp" line="404"/>
         <source>Date</source>
         <translation type="unfinished"></translation>
     </message>
@@ -991,16 +1012,6 @@
     <message>
         <location filename="../../src/MainWindow_Menu.cpp" line="6"/>
         <source>Startup Time</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/MainWindow_Btn.cpp" line="550"/>
-        <source>WebDAV connection failed. Please check the network, website address or login information.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/MainWindow_Btn.cpp" line="554"/>
-        <source>WebDav connection successful.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
