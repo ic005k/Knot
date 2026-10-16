@@ -367,30 +367,7 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
                 1);
 
             if (QFile(localSavePath).exists()) {
-              if (!localSavePath.isNull()) {
-                auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-                if (!m_ShowMsg->showMsg(
-                        "Kont",
-                        tr("Import this data?") + "\n" +
-                            m_Reader->getUriRealPath(localSavePath),
-                        2)) {
-                  isZipOK = false;
-                  return;
-                }
-              }
-              isZipOK = true;
-
-              mw_one->ui->frameOne->hide();
-              if (!isAndroid) mw_one->ui->frameMain->show();
-
-              mw_one->showProgress();
-
-              isMenuImport = false;
-
-              isDownData = true;
-              mw_one->myImportDataThread->start();
-
-              if (isZipOK) mw_one->on_btnBack_One_clicked();
+              mw_one->m_MainHelper->importBakFileList(localSavePath);
             }
           } else {
             resetProgBar();

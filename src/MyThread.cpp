@@ -215,7 +215,7 @@ ImportDataThread::ImportDataThread(QObject* parent) : QThread{parent} {
   setObjectName("ImportDataThread");
 }
 void ImportDataThread::run() {
-  if (isMenuImport || isDownData) mw_one->importBakData(zipfile);
+  mw_one->importBakData(zipfile);
 
   emit isDone();
 }
@@ -227,7 +227,12 @@ void MainWindow::importDataDone() {
     safeCloseProgress();
     auto msg = std::make_unique<ShowMessage>(mw_one);
     msg->showMsg("Knot", tr("The password of the encrypted file is wrong!"), 1);
-    m_Method->openMainEntranceWindow();
+    if (isAndroid) {
+      if (mw_one->ui->frameOne->isHidden() &&
+          mw_one->m_BakFileList->isHidden()) {
+        m_Method->openMainEntranceWindow();
+      }
+    }
     return;
   }
 
@@ -256,27 +261,14 @@ void MainWindow::importDataDone() {
 
   safeCloseProgress();
 
-  if (isMenuImport) {
-    if (!isZipOK) {
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg("Knot",
-                   tr("Invalid data file.") + "\n\n" +
-                       tr("Or the operation is canceled by the user."),
-                   1);
-
-      m_Method->openMainEntranceWindow();
-      return;
-    }
-  }
-
   auto msg = std::make_unique<ShowMessage>(mw_one);
   msg->showMsg("Knot", tr("Data import was successful."), 1);
 
-  if (mw_one->m_BakFileList->isVisible()) {
-    mw_one->m_BakFileList->close();
+  if (isAndroid) {
+    if (mw_one->ui->frameOne->isHidden() && mw_one->m_BakFileList->isHidden()) {
+      m_Method->openMainEntranceWindow();
+    }
   }
-
-  m_Method->openMainEntranceWindow();
 }
 
 BakDataThread::BakDataThread(QObject* parent) : QThread{parent} {

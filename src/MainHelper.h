@@ -83,7 +83,7 @@ class MainHelper : public QDialog {
 
   void delBakFile();
   void delTabRecycleFile(const QString& tabFilePath);
-  void importBakFileList(const QString& zipfile);
+  void importBakFileList(const QString& mzipfile);
 
   void sort_childItem(QTreeWidgetItem* item);
 

@@ -332,7 +332,7 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   if (!isAndroid) {
     showProgress();
   } else {
-    if (m_Steps->isVisible()) showProgress();
+    if (m_Steps->isVisible() || m_Preferences->isVisible()) showProgress();
   }
 
   // 复用统一连通检测函数，连通成功后执行提问

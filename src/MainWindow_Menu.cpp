@@ -257,35 +257,44 @@ void MainWindow::on_actionExport_Data_triggered() {
 void MainWindow::on_actionImport_Data_triggered() {
   if (!isSaveEnd) return;
 
-  zipfile = "";
-#ifdef Q_OS_ANDROID
+  QFileDialog* dialog = new QFileDialog(this, tr("KnotBak"), bakfileDir);
 
-  zipfile = QFileDialog::getOpenFileName(this, tr("KnotBak"), bakfileDir,
-                                         tr("Zip File (*.*)"));
+#ifdef Q_OS_ANDROID
+  dialog->setNameFilter(tr("Zip File (*.*)"));
 #else
-  zipfile = QFileDialog::getOpenFileName(this, tr("KnotBak"), bakfileDir,
-                                         tr("Zip File (*.zip);;All(*.*)"));
+  dialog->setNameFilter(tr("Zip File (*.zip);;All(*.*)"));
 #endif
 
-  if (!zipfile.isNull()) {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-    if (!m_ShowMsg->showMsg(
-            "Kont",
-            tr("Import this data?") + "\n" + m_Reader->getUriRealPath(zipfile),
-            2)) {
-      isZipOK = false;
+  dialog->setFileMode(QFileDialog::ExistingFile);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
 
-      m_Method->openMainEntranceWindow();
-      return;
+  // ✅ 关键：用 accepted 替代 fileSelected
+  // accepted 在 Android SAF 返回结果时触发可靠性远高于 fileSelected
+  connect(dialog, &QFileDialog::accepted, this, [this, dialog]() {
+    // 主动从 dialog 获取选中的文件列表
+    QStringList files = dialog->selectedFiles();
+    if (!files.isEmpty()) {
+      zipfile = files.first();
+      qDebug() << "Android file accepted:" << zipfile;
+
+      // ✅ 关键：延迟 300ms 执行，让 Android Activity 完全完成 onResume 和
+      // UI 重建
+      QTimer::singleShot(300, this, [this]() {
+        qDebug() << "Executing import after delay...";
+        mw_one->m_MainHelper->importBakFileList(zipfile);
+      });
     }
-  }
+  });
 
-  showProgress();
+  connect(dialog, &QFileDialog::rejected, this, [this]() {
+    qDebug() << "User cancelled file selection";
+    zipfile = "";
+    if (isAndroid) {
+      m_Method->openMainEntranceWindow();
+    }
+  });
 
-  isMenuImport = true;
-  isDownData = false;
-
-  myImportDataThread->start();
+  dialog->open();
 }
 
 void MainWindow::on_actionPreferences_triggered() {

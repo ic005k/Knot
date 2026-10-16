@@ -182,7 +182,7 @@ void Steps::initUI() {
   ui->rbRunning->setStyleSheet(rbStyle);
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
 
-  ui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 0).toBool());
+  ui->rbCycling->setChecked(Reg.value("/GPS/isCycling", 1).toBool());
   ui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
   ui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
 
