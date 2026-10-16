@@ -29,6 +29,9 @@ public class AddEventRecord extends AppCompatActivity {
 
     public static AddEventRecord mInstance = null;
 
+    private boolean isDark;
+    private View layoutRoot;
+
     private Button etTitle;
     private AutoCompleteTextView etCategory;
     private EditText etNote;
@@ -75,13 +78,9 @@ public class AddEventRecord extends AppCompatActivity {
         };
         getOnBackPressedDispatcher().addCallback(this, mBackCallback);
 
-        if (MyActivity.isDark) {
-            setContentView(R.layout.activity_add_event_record_dark);
-        } else {
-            setContentView(R.layout.activity_add_event_record);
-        }
+        setContentView(R.layout.activity_add_event_record);
 
-        ImmersiveUtil.applyRealImmersive(this);
+        isDark = ImmersiveUtil.applyRealImmersive(this);
 
         bindViews();
 
@@ -117,7 +116,22 @@ public class AddEventRecord extends AppCompatActivity {
 
     private void bindViews() {
         etTitle = findViewById(R.id.et_title);
+
         etCategory = findViewById(R.id.et_category);
+        // ===== 下拉弹窗配置代码 =====
+        etCategory.setDropDownHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        etCategory.setDropDownWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+        if (isDark) {
+            etCategory.setDropDownBackgroundDrawable(
+                new android.graphics.drawable.ColorDrawable(0xFF2B2B2B)
+            );
+        } else {
+            etCategory.setDropDownBackgroundDrawable(
+                new android.graphics.drawable.ColorDrawable(0xFFFFFFFF)
+            );
+        }
+        // ====================================
+
         etNote = findViewById(R.id.et_note);
         etAmount = findViewById(R.id.et_amount);
         tvTimeDisplay = findViewById(R.id.tv_time_display);
@@ -138,6 +152,9 @@ public class AddEventRecord extends AppCompatActivity {
         btnConfirm = findViewById(R.id.btn_confirm);
         tvHourLabel = findViewById(R.id.tv_hour_label);
         tvMinuteLabel = findViewById(R.id.tv_minute_label);
+
+        layoutRoot = findViewById(R.id.layout_root);
+        refreshUi();
 
         // 根据全局语言标记动态设置 hint
         if (MyActivity.zh_cn) {
@@ -165,21 +182,6 @@ public class AddEventRecord extends AppCompatActivity {
 
         // ==========自动完成适配器==========
         refreshCategoryAutoComplete();
-
-        int iconColor;
-        if (MyActivity.isDark) {
-            iconColor = 0xFFFFFFFF; //暗黑：白色图标
-        } else {
-            iconColor = 0xFF000000; //亮色：黑色图标
-        }
-
-        iconJe.setColorFilter(iconColor);
-        iconXq.setColorFilter(iconColor);
-        iconCategory.setColorFilter(iconColor);
-
-        btnClearCategory.setTextColor(iconColor);
-        btnClearNote.setTextColor(iconColor);
-        btnClearAmount.setTextColor(iconColor);
     }
 
     /**
@@ -607,7 +609,7 @@ public class AddEventRecord extends AppCompatActivity {
                 View v = super.getView(position, convertView, parent);
                 TextView tv = v.findViewById(android.R.id.text1);
                 boolean sel = position == mSelectedIndex;
-                if (MyActivity.isDark) {
+                if (isDark) {
                     if (sel) {
                         v.setBackgroundColor(0xFF3A3A3A);
                         tv.setTextColor(0xFFFFFFFF);
@@ -752,5 +754,80 @@ public class AddEventRecord extends AppCompatActivity {
     private int dip2px(Context context, int dpValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
+    }
+
+    private void updateAllColor() {
+        int iconColor;
+        int textColor;
+        int rootBgColor;
+        int timeContainerBg;
+        if (isDark) {
+            iconColor = 0xFFFFFFFF;
+            textColor = 0xFFE0E0E0;
+            rootBgColor = 0xFF212121;
+            timeContainerBg = 0xFF303030;
+        } else {
+            iconColor = 0xFF000000;
+            textColor = 0xFF000000;
+            rootBgColor = 0xFFF4F4F4;
+            timeContainerBg = 0xFFECECEC;
+        }
+        // 根背景
+        layoutRoot.setBackgroundColor(rootBgColor);
+        // 图标
+        iconJe.setColorFilter(iconColor);
+        iconXq.setColorFilter(iconColor);
+        iconCategory.setColorFilter(iconColor);
+        btnClearCategory.setTextColor(iconColor);
+        btnClearNote.setTextColor(iconColor);
+        btnClearAmount.setTextColor(iconColor);
+
+        // 输入框文字与hint
+        etCategory.setTextColor(textColor);
+        etCategory.setHintTextColor(isDark ? 0xFFAAAAAA : 0xFF666666);
+        etNote.setTextColor(textColor);
+        etNote.setHintTextColor(isDark ? 0xFFAAAAAA : 0xFF666666);
+        etAmount.setTextColor(textColor);
+        etAmount.setHintTextColor(isDark ? 0xFFAAAAAA : 0xFF666666);
+
+        // 按钮文字
+        // ========= 删掉 etTitle 相关颜色代码，完全不动et_title =========
+        btnCancel.setTextColor(textColor);
+        btnCategory.setTextColor(textColor);
+        btnConfirm.setTextColor(textColor);
+        tvTimeDisplay.setTextColor(textColor);
+        tvHourLabel.setTextColor(textColor);
+        tvMinuteLabel.setTextColor(textColor);
+
+        View timeContainer = findViewById(R.id.time_container);
+        if (timeContainer != null) {
+            timeContainer.setBackgroundColor(timeContainerBg);
+        }
+        // 数字键盘文字
+        int[] keyIdList = {
+            R.id.key_0,
+            R.id.key_1,
+            R.id.key_2,
+            R.id.key_3,
+            R.id.key_4,
+            R.id.key_5,
+            R.id.key_6,
+            R.id.key_7,
+            R.id.key_8,
+            R.id.key_9,
+            R.id.key_dot,
+            R.id.key_backspace,
+        };
+        for (int kid : keyIdList) {
+            View v = findViewById(kid);
+            if (v instanceof Button) {
+                ((Button) v).setTextColor(textColor);
+            }
+        }
+    }
+
+    private void refreshUi() {
+        // 后续如果有多语言，这里放updateAllTexts();
+        updateAllColor();
     }
 }

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:background="#f4f4f4"
+    android:padding="8dp"
 >
 
     <!-- 顶部标题栏，为Button，支持点击 -->
     <Button
         android:id="@+id/et_title"
         android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:background="#ff8822"
+        android:layout_height="50dp"
         android:text="增加：xx"
+        android:textSize="15sp"
         android:textColor="#ffffff"
-        android:textSize="16sp"
+        android:background="#ff8822"
         android:gravity="center_vertical"
         android:paddingStart="10dp"
         android:elevation="0dp"
@@ -33,31 +33,31 @@
         <Button
             android:id="@+id/btn_cancel"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:text="取消"
-            android:textSize="16sp"
+            android:textSize="15sp"
         />
 
         <Button
             android:id="@+id/btn_category"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:text="分类"
-            android:textSize="16sp"
+            android:textSize="15sp"
         />
 
         <Button
             android:id="@+id/btn_confirm"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_margin="4dp"
             android:text="确定"
-            android:textSize="16sp"
+            android:textSize="15sp"
         />
     </LinearLayout>
 
@@ -283,12 +283,12 @@
 
     <!-- 时间显示 + SeekBar滑块 -->
     <LinearLayout
+        android:id="@+id/time_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="12dp"
         android:padding="8dp"
-        android:background="#ececec"
     >
 
         <TextView
@@ -311,7 +311,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="时"
-                android:textSize="20sp"
+                android:textSize="16sp"
             />
             <SeekBar
                 android:id="@+id/seek_hour"
@@ -333,7 +333,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="分"
-                android:textSize="20sp"
+                android:textSize="16sp"
             />
             <SeekBar
                 android:id="@+id/seek_minute"

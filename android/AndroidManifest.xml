@@ -295,7 +295,6 @@
             android:name="com.x.AddEventRecord"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden"
         />
 
