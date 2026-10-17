@@ -298,11 +298,6 @@ public class MyService extends Service {
 
     @TargetApi(26)
     private void setForeground() {
-        /*Intent notificationIntent = new Intent(this, MainEntrance.class);
-        notificationIntent.setFlags(
-            Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP
-        );*/
-
         // ========== 核心：使用 Launcher Intent ==========
         Intent notificationIntent =
             getPackageManager().getLaunchIntentForPackage(getPackageName());
@@ -456,29 +451,10 @@ public class MyService extends Service {
                         channel
                     );
                 }
-                channel.enableLights(true);
-                channel.setLightColor(Color.RED);
-                m_notificationManagerAlarm.createNotificationChannel(channel);
             }
 
             ////////////////////////////////////////////////////////////////////////////////////
             // 保留原来的Intent/PendingIntent逻辑
-            /*Intent activityIntent = new Intent(context, MyActivity.class);
-            activityIntent.setFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
-            );
-            activityIntent.putExtra("ALARM_MESSAGE", message);
-
-            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                flags |= PendingIntent.FLAG_IMMUTABLE;
-            }
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                context,
-                (int) System.currentTimeMillis(),
-                activityIntent,
-                flags
-            );*/
 
             Intent activityIntent = new Intent(
                 context,
@@ -997,18 +973,6 @@ public class MyService extends Service {
                 Log.d("MyAlarmReceiver", "Alarm received: " + message);
 
                 notifyTodoAlarm(context, message);
-
-                // 切换到Android主线程调用C++方法（避免广播子线程）
-                /*new Handler(Looper.getMainLooper()).post(() -> {
-                    if (QtStateManager.getInstance().canInteractWithQt()) {
-                        CallJavaNotify_3();
-                    } else {
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            Log.w(TAG, "Qt未就绪，延迟3秒执行CallJavaNotify_3");
-                            CallJavaNotify_3();
-                        }, 3000);
-                    }
-                });*/
 
                 // 替换原有的 Handler.postDelayed 逻辑
                 new Handler(Looper.getMainLooper()).post(() -> {
@@ -1639,7 +1603,6 @@ public class MyService extends Service {
      */
     public void bringAppToForeground() {
         try {
-            //wakeUpScreen();
             bringToFront();
 
             // 强制激活窗口 + 清除输入法焦点

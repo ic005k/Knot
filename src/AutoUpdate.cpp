@@ -64,14 +64,16 @@ void AutoUpdate::doProcessFinished() {
   m_Method->closeGrayWindows();
   if (isCancel) return;
 
-  // install apk
 #ifdef Q_OS_ANDROID
   // "/storage/emulated/0/KnotBak/"
 
-  QJniObject jo = QJniObject::fromString(tarFile);
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("installApk", "(Ljava/lang/String;)V",
-                              jo.object<jstring>());
+  // install apk
+  if (tarFile.endsWith(".apk", Qt::CaseInsensitive)) {
+    QJniObject jo = QJniObject::fromString(tarFile);
+    QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
+    m_activity.callMethod<void>("installApk", "(Ljava/lang/String;)V",
+                                jo.object<jstring>());
+  }
 
 #endif
 }
@@ -93,7 +95,7 @@ void AutoUpdate::doProcessDownloadProgress(qint64 recv_total,
   }
 }
 
-void AutoUpdate::startDownload(QString strLink) {
+void AutoUpdate::startDownload(QString strLink, QString tarFile) {
   isCancel = false;
 
   QNetworkRequest request;
@@ -111,18 +113,8 @@ void AutoUpdate::startDownload(QString strLink) {
   connect(reply, &QNetworkReply::downloadProgress, this,
           &AutoUpdate::doProcessDownloadProgress);  // 大小
 
-  filename = "Knot.apk";
-
-#ifdef Q_OS_MAC
-  tarFile = privateDir + filename;
-#endif
-
-#ifdef Q_OS_ANDROID
-  // "/storage/emulated/0/KnotBak/"
-  tarFile = privateDir + filename;
-#endif
-  QFile apk(tarFile);
-  apk.remove();
+  QFile m_file(tarFile);
+  m_file.remove();
 
   myfile->setFileName(tarFile);
   bool ret =
@@ -133,6 +125,40 @@ void AutoUpdate::startDownload(QString strLink) {
   }
   ui->progressBar->setValue(0);
   ui->progressBar->setMinimum(0);
+}
+
+// 用于预解析302拿到最终真实下载地址
+void AutoUpdate::resolveHfRedirect(const QString& srcUrl) {
+  QNetworkRequest req(srcUrl);
+  req.setRawHeader("User-Agent", "Mozilla/5.0");
+  QNetworkReply* headReply = manager->head(req);
+
+  connect(headReply, &QNetworkReply::finished, this, [=]() {
+    QUrl finalUrl;
+    if (headReply->error() == QNetworkReply::NoError) {
+      int status =
+          headReply->attribute(QNetworkRequest::HttpStatusCodeAttribute)
+              .toInt();
+      // 302 / 301 重定向
+      if (status == 301 || status == 302) {
+        QVariant locVar = headReply->rawHeader("Location");
+        QString locUrl = locVar.toString();
+        finalUrl = QUrl(locUrl);
+      } else {
+        // 无重定向，源链接就是最终地址
+        finalUrl = QUrl(srcUrl);
+      }
+    }
+    headReply->deleteLater();
+
+    if (finalUrl.isValid()) {
+      // 拿到真实直链，调用下载函数，复用全部已有下载逻辑
+      startDownload(finalUrl.toString(), tarFile);
+    } else {
+      QMessageBox::warning(this, tr("warning"),
+                           tr("Failed to resolve download link."));
+    }
+  });
 }
 
 void AutoUpdate::startUpdate() {

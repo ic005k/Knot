@@ -33,7 +33,6 @@
 
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"
     />
@@ -188,7 +187,7 @@
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
         <service
             android:name="com.x.MyService"
-            android:foregroundServiceType="mediaPlayback|connectedDevice|dataSync"
+            android:foregroundServiceType="mediaPlayback|connectedDevice|dataSync|location"
             android:exported="false"
         >
             <meta-data

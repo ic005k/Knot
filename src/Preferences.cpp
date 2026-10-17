@@ -810,11 +810,45 @@ void Preferences::on_btnDownloadModel_clicked() {
   // embeddinggemma:
   // https://hf-mirror.com/ggml-org/embeddinggemma-300M-GGUF/tree/main
 
-  const QString targetUrl =
-      "https://hf-mirror.com/rodion-m/multilingual-e5-small-gguf/tree/main";
-  if (!QDesktopServices::openUrl(QUrl(targetUrl))) {
-    // 打开失败提示
-    qDebug() << "浏览器打开链接失败";
+  if (isAndroid) {
+    QString s_link =
+        "https://hf-mirror.com/rodion-m/multilingual-e5-small-gguf/resolve/"
+        "main/"
+        "multilingual-e5-small-fp32.gguf";
+    int aver = mw_one->m_AboutThis->getAndroidVer();
+    // Android7.0及以上
+    if (aver >= 24) {
+      mw_one->m_AboutThis->m_AutoUpdate = std::make_unique<AutoUpdate>(this);
+      int y =
+          (mw_one->height() - mw_one->m_AboutThis->m_AutoUpdate->height()) / 2;
+      mw_one->m_AboutThis->m_AutoUpdate->setGeometry(
+          mw_one->geometry().x(), y, mw_one->width(),
+          mw_one->m_AboutThis->m_AutoUpdate->height());
+
+      m_Method->showGrayWindows();
+      mw_one->m_AboutThis->m_AutoUpdate->show();
+
+#ifdef Q_OS_ANDROID
+      tarFile = privateDir + "model/multilingual-e5-small-fp32.gguf";
+#endif
+
+      // mw_one->m_AboutThis->m_AutoUpdate->startDownload(s_link, tarFile);
+      mw_one->m_AboutThis->m_AutoUpdate->resolveHfRedirect(s_link);
+      qDebug() << "start dl..... " << s_link << tarFile;
+      // this->close();
+    } else {
+      // Android6.0及以下通过浏览器下载
+      QUrl url(s_link);
+      QDesktopServices::openUrl(url);
+    }
+
+  } else {
+    const QString targetUrl =
+        "https://hf-mirror.com/rodion-m/multilingual-e5-small-gguf/tree/main";
+    if (!QDesktopServices::openUrl(QUrl(targetUrl))) {
+      // 打开失败提示
+      qDebug() << "浏览器打开链接失败";
+    }
   }
 }
 

@@ -222,8 +222,13 @@ void AboutThis::show_download() {
 
     m_Method->showGrayWindows();
     m_AutoUpdate->show();
-    m_AutoUpdate->startDownload(s_link);
-    qDebug() << "start dl..... " << s_link;
+
+#ifdef Q_OS_ANDROID
+    // "/storage/emulated/0/KnotBak/"
+    tarFile = privateDir + "Knot.apk";
+#endif
+    m_AutoUpdate->startDownload(s_link, tarFile);
+    qDebug() << "start dl..... " << s_link << tarFile;
     this->close();
   } else {
     // Android6.0及以下通过浏览器下载

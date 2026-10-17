@@ -43,9 +43,10 @@ class AutoUpdate : public QDialog {
 
   QString GetFileSize(const qint64& size, int precision);
 
-  void startDownload(QString strLink);
+  void startDownload(QString strLink, QString tarFile);
 
- protected:
+  void resolveHfRedirect(const QString &srcUrl);
+  protected:
   void closeEvent(QCloseEvent* event);
   void keyPressEvent(QKeyEvent* event);
   bool eventFilter(QObject* watch, QEvent* evn);
@@ -54,7 +55,6 @@ class AutoUpdate : public QDialog {
   void on_btnCancel_clicked();
 
  private:
-  QString tarFile;
   bool isCancel = false;
 };
 

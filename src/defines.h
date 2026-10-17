@@ -62,7 +62,7 @@ inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
     btnYearText, btnMonthText, strPage, ebookFile, strTitle, fileName,
     strOpfPath, catalogueFile, strShowMsg, strStartTotalTime, strOpfFile,
     oldOpfPath, strEpubTitle, strPercent, modelFileName, modelStatus,
-    modelFullPath, modelDataBasePath, modelFingerprint, reportTitle1,
+    modelFullPath, modelDataBasePath, modelFingerprint, reportTitle1, tarFile,
     reportTitle2;
 
 inline QString ver;
