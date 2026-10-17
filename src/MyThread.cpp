@@ -284,8 +284,6 @@ void MainWindow::bakDataDone() {
   if (!errorInfo.isEmpty()) {
     QMessageBox::critical(this, "Knot", errorInfo);
 
-    if (isAndroid) m_Method->openMainEntranceWindow();
-
     return;
   }
 

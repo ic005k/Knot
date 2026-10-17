@@ -409,10 +409,7 @@ void MainWindow::on_btnSync_clicked() {
 
 void MainWindow::on_btnBackDir_clicked() { m_Reader->backDir(); }
 
-void MainWindow::on_btnWebDAVBackup_clicked() {
-  if (!mw_one->ui->btnReader->isEnabled()) return;
-  m_CloudBackup->startBakData();
-}
+void MainWindow::on_btnWebDAVBackup_clicked() { m_CloudBackup->startBakData(); }
 
 void MainWindow::on_btnWebDAVRestore_clicked() {
   m_CloudBackup->webDAVRestoreData();
@@ -605,6 +602,10 @@ void MainWindow::on_btnShowCboxList_clicked() {
 }
 
 void MainWindow::onAndroidBackHandle() {
+  if (dlgProg != nullptr && dlgProg->isVisible()) {
+    return;
+  }
+
   if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
     closeTextToolBar();
     return;

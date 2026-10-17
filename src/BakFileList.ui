@@ -25,6 +25,17 @@
     <widget class="QListWidget" name="listBakFile"/>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QToolButton" name="btnFromFile">
+       <property name="text">
+        <string>Restore From File</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QToolButton" name="btnBackup">
@@ -37,17 +48,6 @@
       <widget class="QToolButton" name="btnRestore">
        <property name="text">
         <string>Restore</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QToolButton" name="btnFromFile">
-       <property name="text">
-        <string>Restore From File</string>
        </property>
       </widget>
      </item>

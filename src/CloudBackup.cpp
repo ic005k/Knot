@@ -135,6 +135,7 @@ void CloudBackup::uploadData() {
   mw_one->ui->btnWebDAVRestore->setEnabled(false);
 
   if (mw_one->ui->chkWebDAV->isChecked()) {
+    mw_one->showProgress();
     QString url = getWebDAVArgument();
     createDirectory(url, "Knot/");
     uploadFileToWebDAV(url, zipfile, "Knot/memo.zip");
@@ -206,6 +207,8 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
           &CloudBackup::updateUploadProgress);
 
   QObject::connect(reply, &QNetworkReply::finished, [=]() {
+    mw_one->safeCloseProgress();
+
     const int statusCode =
         reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     qDebug() << "HTTP状态码：" << statusCode;
