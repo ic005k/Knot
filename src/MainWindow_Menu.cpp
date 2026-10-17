@@ -289,9 +289,6 @@ void MainWindow::on_actionImport_Data_triggered() {
   connect(dialog, &QFileDialog::rejected, this, [this]() {
     qDebug() << "User cancelled file selection";
     zipfile = "";
-    if (isAndroid) {
-      m_Method->openMainEntranceWindow();
-    }
   });
 
   dialog->open();
@@ -353,9 +350,9 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
   QAction* actCopyLog = new QAction(tr("Copy Log to Clipboard"));
 
   QAction* actAbout = new QAction(tr("About") + " (" + ver + ")");
-  QAction* actOneDrive = new QAction(tr("Cloud Backup and Restore Data"));
+  QAction* actOneDrive = new QAction(tr("Cloud Backup"));
 
-  QAction* actBakFileList = new QAction(tr("Backup File List"));
+  QAction* actBakFileList = new QAction(tr("Local Backup"));
   QAction* actTabRecycle = new QAction(tr("Tab Recycle"));
   QAction* actShareFile = new QAction(tr("Share File"));
 
@@ -406,6 +403,8 @@ void MainWindow::init_Menu(QMenu* mainMenu) {
   actShareFile->setVisible(false);
 #else
   actShareFile->setVisible(false);
+  actExportData->setVisible(false);
+  actImportData->setVisible(false);
 
   if (!mw_one->m_Preferences->devMode) {
     actAddTab->setVisible(false);

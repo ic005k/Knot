@@ -68,7 +68,7 @@
     </message>
     <message>
         <location filename="AboutThis.cpp" line="63"/>
-        <location filename="AboutThis.cpp" line="274"/>
+        <location filename="AboutThis.cpp" line="279"/>
         <source>Download link copied.</source>
         <translation>下载链接已拷贝</translation>
     </message>
@@ -108,7 +108,7 @@
         <translation>目前使用的是最新版！</translation>
     </message>
     <message>
-        <location filename="AboutThis.cpp" line="285"/>
+        <location filename="AboutThis.cpp" line="290"/>
         <source>Log</source>
         <translation>日志</translation>
     </message>
@@ -121,10 +121,20 @@
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="15"/>
-        <location filename="AutoUpdate.cpp" line="83"/>
+        <location filename="AutoUpdate.cpp" line="16"/>
+        <location filename="AutoUpdate.cpp" line="86"/>
         <source>Download Progress</source>
         <translation>下载进度</translation>
+    </message>
+    <message>
+        <location filename="AutoUpdate.cpp" line="159"/>
+        <source>warning</source>
+        <translation type="unfinished">提醒</translation>
+    </message>
+    <message>
+        <location filename="AutoUpdate.cpp" line="160"/>
+        <source>Failed to resolve download link.</source>
+        <translation type="unfinished">重定向下载链接失败</translation>
     </message>
 </context>
 <context>
@@ -152,8 +162,18 @@
     </message>
     <message>
         <location filename="BakFileList.ui" line="32"/>
+        <source>Backup</source>
+        <translation type="unfinished">备份</translation>
+    </message>
+    <message>
+        <location filename="BakFileList.ui" line="39"/>
         <source>Restore</source>
         <translation>恢复</translation>
+    </message>
+    <message>
+        <location filename="BakFileList.ui" line="50"/>
+        <source>Restore From File</source>
+        <translation type="unfinished">从文件恢复</translation>
     </message>
 </context>
 <context>
@@ -259,7 +279,7 @@
         <translation type="vanished">下载文件成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1172"/>
+        <location filename="CloudBackup.cpp" line="1149"/>
         <source>Downloading data?</source>
         <translation>下载数据？</translation>
     </message>
@@ -279,7 +299,7 @@
     </message>
     <message>
         <location filename="CloudBackup.cpp" line="233"/>
-        <location filename="CloudBackup.cpp" line="403"/>
+        <location filename="CloudBackup.cpp" line="380"/>
         <source>Authentication failed.</source>
         <translation>认证失败，请检查网址、用户名、密码。如果使用坚果云，请使用“应用密码”而不是主密码，“应用密码”可通过坚果云网页端登录后进行设置。</translation>
     </message>
@@ -289,22 +309,22 @@
         <translation>上传错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="407"/>
+        <location filename="CloudBackup.cpp" line="384"/>
         <source>Download error</source>
         <translation>下载错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1246"/>
+        <location filename="CloudBackup.cpp" line="1223"/>
         <source>Invalid URL</source>
         <translation type="unfinished">无效的网址</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1284"/>
+        <location filename="CloudBackup.cpp" line="1260"/>
         <source>Connection succeeded</source>
         <translation type="unfinished">连接成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1285"/>
+        <location filename="CloudBackup.cpp" line="1261"/>
         <source>Connection failed, status code: %1</source>
         <translation type="unfinished">连接失败，状态码：%1</translation>
     </message>
@@ -325,7 +345,7 @@
         <translation type="vanished">最终大小：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1173"/>
+        <location filename="CloudBackup.cpp" line="1150"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation>此操作将会用云端的文件覆盖本地文件</translation>
     </message>
@@ -335,9 +355,8 @@
         <translation>文件下载成功，已保存到</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="374"/>
         <source>Import this data?</source>
-        <translation>是否导入这个数据？</translation>
+        <translation type="vanished">是否导入这个数据？</translation>
     </message>
     <message>
         <source>This action will update the data on OneDrive.</source>
@@ -1503,13 +1522,13 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="1297"/>
-        <location filename="MainWindow_Menu.cpp" line="301"/>
+        <location filename="MainWindow_Menu.cpp" line="307"/>
         <source>Rename Tab</source>
         <translation>重命名标签页</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="1347"/>
-        <location filename="MainWindow_Menu.cpp" line="342"/>
+        <location filename="MainWindow_Menu.cpp" line="348"/>
         <source>Preferences</source>
         <translation>偏好设置</translation>
     </message>
@@ -1579,7 +1598,7 @@
         <location filename="MainWindow.ui" line="1302"/>
         <location filename="MainWindow_Menu.cpp" line="103"/>
         <location filename="MainWindow_Menu.cpp" line="119"/>
-        <location filename="MainWindow_Menu.cpp" line="331"/>
+        <location filename="MainWindow_Menu.cpp" line="337"/>
         <source>Add Tab</source>
         <translation>增加标签页</translation>
     </message>
@@ -1587,25 +1606,25 @@
         <location filename="MainWindow.ui" line="1307"/>
         <location filename="MainWindow_Menu.cpp" line="133"/>
         <location filename="MainWindow_Menu.cpp" line="198"/>
-        <location filename="MainWindow_Menu.cpp" line="332"/>
+        <location filename="MainWindow_Menu.cpp" line="338"/>
         <source>Del Tab</source>
         <translation>删除标签页</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="1317"/>
-        <location filename="MainWindow_Menu.cpp" line="346"/>
+        <location filename="MainWindow_Menu.cpp" line="352"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="1322"/>
-        <location filename="MainWindow_Menu.cpp" line="339"/>
+        <location filename="MainWindow_Menu.cpp" line="345"/>
         <source>Export Data</source>
         <translation>导出数据</translation>
     </message>
     <message>
         <location filename="MainWindow.ui" line="1327"/>
-        <location filename="MainWindow_Menu.cpp" line="340"/>
+        <location filename="MainWindow_Menu.cpp" line="346"/>
         <source>Import Data</source>
         <translation>导入数据</translation>
     </message>
@@ -1621,7 +1640,7 @@
     </message>
     <message>
         <location filename="MainWindow.ui" line="1342"/>
-        <location filename="MainWindow_Menu.cpp" line="336"/>
+        <location filename="MainWindow_Menu.cpp" line="342"/>
         <source>Report</source>
         <translation>报表</translation>
     </message>
@@ -1790,9 +1809,8 @@
         <translation type="vanished">分类：</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="263"/>
-        <location filename="MainWindow_Menu.cpp" line="266"/>
-        <location filename="MainWindow_Menu.cpp" line="320"/>
+        <location filename="MainWindow_Menu.cpp" line="260"/>
+        <location filename="MainWindow_Menu.cpp" line="326"/>
         <source>KnotBak</source>
         <translation></translation>
     </message>
@@ -1805,7 +1823,7 @@
         <translation type="vanished">请开启APP的存储权限！</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="325"/>
+        <location filename="MyThread.cpp" line="306"/>
         <source>The data was exported successfully.</source>
         <translation>数据导出成功。</translation>
     </message>
@@ -1831,12 +1849,11 @@
         <translation>加密文件的密码错误！</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="264"/>
         <source>Or the operation is canceled by the user.</source>
-        <translation>或者此操作被用户取消</translation>
+        <translation type="vanished">或者此操作被用户取消</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="273"/>
+        <location filename="MyThread.cpp" line="260"/>
         <source>Data import was successful.</source>
         <translation>数据导入成功。</translation>
     </message>
@@ -1885,9 +1902,19 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="344"/>
+        <location filename="MainWindow_Menu.cpp" line="350"/>
         <source>Copy Log to Clipboard</source>
         <translation>复制日志到剪贴板</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_Menu.cpp" line="353"/>
+        <source>Cloud Backup</source>
+        <translation type="unfinished">云备份</translation>
+    </message>
+    <message>
+        <location filename="MainWindow_Menu.cpp" line="355"/>
+        <source>Local Backup</source>
+        <translation type="unfinished">本地备份</translation>
     </message>
     <message>
         <location filename="MainWindow_AI.cpp" line="57"/>
@@ -2002,24 +2029,23 @@
         <translation>压缩文件时发生错误。</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="320"/>
+        <location filename="MainWindow_Menu.cpp" line="326"/>
         <source>File (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="264"/>
+        <location filename="MainWindow_Menu.cpp" line="263"/>
         <source>Zip File (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="267"/>
+        <location filename="MainWindow_Menu.cpp" line="265"/>
         <source>Zip File (*.zip);;All(*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="274"/>
         <source>Import this data?</source>
-        <translation>是否导入这个数据？</translation>
+        <translation type="vanished">是否导入这个数据？</translation>
     </message>
     <message>
         <source>Tip</source>
@@ -2059,9 +2085,8 @@
         <translation type="vanished">滑动到右边启动或停止</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="347"/>
         <source>Cloud Backup and Restore Data</source>
-        <translation>云备份与恢复数据</translation>
+        <translation type="vanished">云备份与恢复数据</translation>
     </message>
     <message>
         <source>Downloading data?</source>
@@ -2076,7 +2101,7 @@
         <translation type="vanished">总距离</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="351"/>
+        <location filename="MainWindow_Menu.cpp" line="357"/>
         <source>Share File</source>
         <translation>分享文件</translation>
     </message>
@@ -2094,7 +2119,7 @@
     </message>
     <message>
         <location filename="MainWindow_Btn.cpp" line="62"/>
-        <location filename="MainWindow_Menu.cpp" line="326"/>
+        <location filename="MainWindow_Menu.cpp" line="332"/>
         <source>Share to</source>
         <translation>分享到</translation>
     </message>
@@ -2103,12 +2128,11 @@
         <translation type="vanished">隐藏查找</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="349"/>
         <source>Backup File List</source>
-        <translation>备份文件列表</translation>
+        <translation type="vanished">备份文件列表</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="350"/>
+        <location filename="MainWindow_Menu.cpp" line="356"/>
         <source>Tab Recycle</source>
         <translation>标签页回收箱</translation>
     </message>
@@ -2133,16 +2157,15 @@
         <translation type="vanished">路径</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="263"/>
         <source>Invalid data file.</source>
-        <translation>无效的数据文件</translation>
+        <translation type="vanished">无效的数据文件</translation>
     </message>
     <message>
         <source>Please enter your password</source>
         <translation type="vanished">请输入密码</translation>
     </message>
     <message>
-        <location filename="MainWindow_Menu.cpp" line="334"/>
+        <location filename="MainWindow_Menu.cpp" line="340"/>
         <source>Open KnotBak Dir</source>
         <translation>打开KnotBak目录</translation>
     </message>
@@ -3556,7 +3579,7 @@
         <location filename="Preferences.cpp" line="556"/>
         <location filename="Preferences.cpp" line="639"/>
         <location filename="Preferences.cpp" line="665"/>
-        <location filename="Preferences.cpp" line="942"/>
+        <location filename="Preferences.cpp" line="976"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
@@ -3566,17 +3589,17 @@
         <translation>暂无可用的AI配置</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="942"/>
+        <location filename="Preferences.cpp" line="976"/>
         <source>No configuration selected to delete.</source>
         <translation>未选择要删除的配置</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="954"/>
+        <location filename="Preferences.cpp" line="988"/>
         <source>Confirm Delete</source>
         <translation>确认删除</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="955"/>
+        <location filename="Preferences.cpp" line="989"/>
         <source>Are you sure to delete this configuration?
 
 %1</source>
@@ -3958,55 +3981,55 @@ Model ID: %1</source>
 <context>
     <name>QInstaller</name>
     <message>
-        <location filename="AutoUpdate.cpp" line="248"/>
+        <location filename="AutoUpdate.cpp" line="275"/>
         <location filename="Comm/Method.cpp" line="2319"/>
         <source>bytes</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="249"/>
+        <location filename="AutoUpdate.cpp" line="276"/>
         <location filename="Comm/Method.cpp" line="2320"/>
         <source>KiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="250"/>
+        <location filename="AutoUpdate.cpp" line="277"/>
         <location filename="Comm/Method.cpp" line="2321"/>
         <source>MiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="251"/>
+        <location filename="AutoUpdate.cpp" line="278"/>
         <location filename="Comm/Method.cpp" line="2322"/>
         <source>GiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="252"/>
+        <location filename="AutoUpdate.cpp" line="279"/>
         <location filename="Comm/Method.cpp" line="2323"/>
         <source>TiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="253"/>
+        <location filename="AutoUpdate.cpp" line="280"/>
         <location filename="Comm/Method.cpp" line="2324"/>
         <source>PiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="254"/>
+        <location filename="AutoUpdate.cpp" line="281"/>
         <location filename="Comm/Method.cpp" line="2325"/>
         <source>EiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="255"/>
+        <location filename="AutoUpdate.cpp" line="282"/>
         <location filename="Comm/Method.cpp" line="2326"/>
         <source>ZiB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="AutoUpdate.cpp" line="256"/>
+        <location filename="AutoUpdate.cpp" line="283"/>
         <location filename="Comm/Method.cpp" line="2327"/>
         <source>YiB</source>
         <translation></translation>

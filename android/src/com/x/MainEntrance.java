@@ -476,25 +476,26 @@ public class MainEntrance extends AppCompatActivity {
             new MenuItem(MENU_ID_RENAME_TAB, zh ? "重命名标签页" : "Rename Tab")
         );
 
-        items.add(
+        /*items.add(
             new MenuItem(MENU_ID_EXPORT_DATA, zh ? "导出数据" : "Export Data")
         );
         items.add(
             new MenuItem(MENU_ID_IMPORT_DATA, zh ? "导入数据" : "Import Data")
-        );
+        );*/
+
         items.add(
             new MenuItem(MENU_ID_PREFERENCE, zh ? "偏好设置" : "Preferences")
         );
         items.add(
             new MenuItem(
                 MENU_ID_CLOUD_BACKUP_RESTORE,
-                zh ? "云备份与恢复数据" : "Cloud Backup & Restore"
+                zh ? "云备份" : "Cloud Backup"
             )
         );
         items.add(
             new MenuItem(
                 MENU_ID_BACKUP_FILE_LIST,
-                zh ? "备份文件列表" : "Backup File List"
+                zh ? "本地备份" : "Local Backup"
             )
         );
         items.add(

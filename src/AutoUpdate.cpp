@@ -1,5 +1,6 @@
 #include "AutoUpdate.h"
 
+#include "MainWindow.h"
 #include "defines.h"
 #include "ui_AutoUpdate.h"
 
@@ -324,4 +325,9 @@ void AutoUpdate::keyPressEvent(QKeyEvent* event) {
 void AutoUpdate::on_btnCancel_clicked() {
   isCancel = true;
   close();
+  if (isAndroid) {
+    if (mw_one->m_Preferences->isHidden()) {
+      m_Method->openMainEntranceWindow();
+    }
+  }
 }

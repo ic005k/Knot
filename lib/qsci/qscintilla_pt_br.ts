@@ -56,7 +56,7 @@
     </message>
     <message>
         <location filename="../../src/AboutThis.cpp" line="63"/>
-        <location filename="../../src/AboutThis.cpp" line="274"/>
+        <location filename="../../src/AboutThis.cpp" line="279"/>
         <source>Download link copied.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -96,7 +96,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AboutThis.cpp" line="285"/>
+        <location filename="../../src/AboutThis.cpp" line="290"/>
         <source>Log</source>
         <translation type="unfinished"></translation>
     </message>
@@ -109,9 +109,19 @@
         <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="15"/>
-        <location filename="../../src/AutoUpdate.cpp" line="83"/>
+        <location filename="../../src/AutoUpdate.cpp" line="16"/>
+        <location filename="../../src/AutoUpdate.cpp" line="86"/>
         <source>Download Progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/AutoUpdate.cpp" line="159"/>
+        <source>warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/AutoUpdate.cpp" line="160"/>
+        <source>Failed to resolve download link.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -129,7 +139,17 @@
     </message>
     <message>
         <location filename="../../src/BakFileList.ui" line="32"/>
+        <source>Backup</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/BakFileList.ui" line="39"/>
         <source>Restore</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/BakFileList.ui" line="50"/>
+        <source>Restore From File</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -195,7 +215,7 @@
     </message>
     <message>
         <location filename="../../src/CloudBackup.cpp" line="233"/>
-        <location filename="../../src/CloudBackup.cpp" line="403"/>
+        <location filename="../../src/CloudBackup.cpp" line="380"/>
         <source>Authentication failed.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -210,37 +230,32 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="374"/>
-        <source>Import this data?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/CloudBackup.cpp" line="407"/>
+        <location filename="../../src/CloudBackup.cpp" line="384"/>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1172"/>
+        <location filename="../../src/CloudBackup.cpp" line="1149"/>
         <source>Downloading data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1173"/>
+        <location filename="../../src/CloudBackup.cpp" line="1150"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1246"/>
+        <location filename="../../src/CloudBackup.cpp" line="1223"/>
         <source>Invalid URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1284"/>
+        <location filename="../../src/CloudBackup.cpp" line="1260"/>
         <source>Connection succeeded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1285"/>
+        <location filename="../../src/CloudBackup.cpp" line="1261"/>
         <source>Connection failed, status code: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -459,7 +474,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="1342"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="336"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="342"/>
         <source>Report</source>
         <translation type="unfinished"></translation>
     </message>
@@ -665,12 +680,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="349"/>
-        <source>Backup File List</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="350"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="356"/>
         <source>Tab Recycle</source>
         <translation type="unfinished"></translation>
     </message>
@@ -685,7 +695,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="1297"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="301"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="307"/>
         <source>Rename Tab</source>
         <translation type="unfinished"></translation>
     </message>
@@ -693,7 +703,7 @@
         <location filename="../../src/MainWindow.ui" line="1302"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="103"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="119"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="331"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="337"/>
         <source>Add Tab</source>
         <translation type="unfinished"></translation>
     </message>
@@ -701,7 +711,7 @@
         <location filename="../../src/MainWindow.ui" line="1307"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="133"/>
         <location filename="../../src/MainWindow_Menu.cpp" line="198"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="332"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="338"/>
         <source>Del Tab</source>
         <translation type="unfinished"></translation>
     </message>
@@ -712,19 +722,19 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="1317"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="346"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="352"/>
         <source>About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="1322"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="339"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="345"/>
         <source>Export Data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="1327"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="340"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="346"/>
         <source>Import Data</source>
         <translation type="unfinished"></translation>
     </message>
@@ -735,7 +745,7 @@
     </message>
     <message>
         <location filename="../../src/MainWindow.ui" line="1347"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="342"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="348"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
@@ -745,7 +755,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MyThread.cpp" line="325"/>
+        <location filename="../../src/MyThread.cpp" line="306"/>
         <source>The data was exported successfully.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -755,17 +765,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MyThread.cpp" line="263"/>
-        <source>Invalid data file.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/MyThread.cpp" line="264"/>
-        <source>Or the operation is canceled by the user.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/MyThread.cpp" line="273"/>
+        <location filename="../../src/MyThread.cpp" line="260"/>
         <source>Data import was successful.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -843,22 +843,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="334"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="340"/>
         <source>Open KnotBak Dir</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="344"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="350"/>
         <source>Copy Log to Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="347"/>
-        <source>Cloud Backup and Restore Data</source>
+        <location filename="../../src/MainWindow_Menu.cpp" line="353"/>
+        <source>Cloud Backup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="351"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="355"/>
+        <source>Local Backup</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/MainWindow_Menu.cpp" line="357"/>
         <source>Share File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -973,36 +978,30 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="263"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="266"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="320"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="260"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="326"/>
         <source>KnotBak</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="320"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="326"/>
         <source>File (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/MainWindow_Btn.cpp" line="62"/>
-        <location filename="../../src/MainWindow_Menu.cpp" line="326"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="332"/>
         <source>Share to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="264"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="263"/>
         <source>Zip File (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="267"/>
+        <location filename="../../src/MainWindow_Menu.cpp" line="265"/>
         <source>Zip File (*.zip);;All(*.*)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/MainWindow_Menu.cpp" line="274"/>
-        <source>Import this data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1979,7 +1978,7 @@
         <location filename="../../src/Preferences.cpp" line="556"/>
         <location filename="../../src/Preferences.cpp" line="639"/>
         <location filename="../../src/Preferences.cpp" line="665"/>
-        <location filename="../../src/Preferences.cpp" line="942"/>
+        <location filename="../../src/Preferences.cpp" line="976"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2005,17 +2004,17 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="942"/>
+        <location filename="../../src/Preferences.cpp" line="976"/>
         <source>No configuration selected to delete.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="954"/>
+        <location filename="../../src/Preferences.cpp" line="988"/>
         <source>Confirm Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="955"/>
+        <location filename="../../src/Preferences.cpp" line="989"/>
         <source>Are you sure to delete this configuration?
 
 %1</source>
@@ -2048,55 +2047,55 @@
 <context>
     <name>QInstaller</name>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="248"/>
+        <location filename="../../src/AutoUpdate.cpp" line="275"/>
         <location filename="../../src/Comm/Method.cpp" line="2319"/>
         <source>bytes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="249"/>
+        <location filename="../../src/AutoUpdate.cpp" line="276"/>
         <location filename="../../src/Comm/Method.cpp" line="2320"/>
         <source>KiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="250"/>
+        <location filename="../../src/AutoUpdate.cpp" line="277"/>
         <location filename="../../src/Comm/Method.cpp" line="2321"/>
         <source>MiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="251"/>
+        <location filename="../../src/AutoUpdate.cpp" line="278"/>
         <location filename="../../src/Comm/Method.cpp" line="2322"/>
         <source>GiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="252"/>
+        <location filename="../../src/AutoUpdate.cpp" line="279"/>
         <location filename="../../src/Comm/Method.cpp" line="2323"/>
         <source>TiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="253"/>
+        <location filename="../../src/AutoUpdate.cpp" line="280"/>
         <location filename="../../src/Comm/Method.cpp" line="2324"/>
         <source>PiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="254"/>
+        <location filename="../../src/AutoUpdate.cpp" line="281"/>
         <location filename="../../src/Comm/Method.cpp" line="2325"/>
         <source>EiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="255"/>
+        <location filename="../../src/AutoUpdate.cpp" line="282"/>
         <location filename="../../src/Comm/Method.cpp" line="2326"/>
         <source>ZiB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/AutoUpdate.cpp" line="256"/>
+        <location filename="../../src/AutoUpdate.cpp" line="283"/>
         <location filename="../../src/Comm/Method.cpp" line="2327"/>
         <source>YiB</source>
         <translation type="unfinished"></translation>

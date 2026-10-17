@@ -15,12 +15,17 @@ class BakFileList : public QDialog {
   ~BakFileList();
 
   void loadBakFile();
+  void refreshBakFile();
 
  protected:
   void closeEvent(QCloseEvent* event) override;
 
  private slots:
   void on_btnRestore_clicked();
+
+  void on_btnBackup_clicked();
+
+  void on_btnFromFile_clicked();
 
  private:
   Ui::BakFileList* ui;

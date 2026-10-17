@@ -298,24 +298,12 @@ void MainHelper::importBakFileList(const QString& mzipfile) {
     auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
     if (!m_ShowMsg->showMsg(
             "Kont",
-            tr("Import this data?") + "\n" + m_Reader->getUriRealPath(zipfile),
+            tr("Import this data?") + "\n" + m_Reader->getUriRealPath(mzipfile),
             2)) {
       isZipOK = false;
-      if (isAndroid) {
-        QTimer::singleShot(300, this, [this]() {
-          if (mw_one->ui->frameOne->isHidden() &&
-              mw_one->m_BakFileList->isHidden()) {
-            m_Method->openMainEntranceWindow();
-          }
-        });
-      }
 
       return;
     }
-  }
-
-  if (isAndroid) {
-    m_Method->closeMainEntranceWindow();
   }
 
   isZipOK = true;

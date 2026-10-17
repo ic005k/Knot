@@ -20,7 +20,7 @@ BakFileList::~BakFileList() { delete ui; }
 
 void BakFileList ::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
 
-void BakFileList::loadBakFile() {
+void BakFileList::refreshBakFile() {
   // 1. 清空现有列表
   ui->listBakFile->clear();
 
@@ -61,6 +61,12 @@ void BakFileList::loadBakFile() {
     ui->listBakFile->addItem(item);
   }
 
+  if (ui->listBakFile->count() > 0) ui->listBakFile->setCurrentRow(0);
+}
+
+void BakFileList::loadBakFile() {
+  refreshBakFile();
+
   if (isAndroid) {
     int x, y, w, h;
     x = mw_one->geometry().x();
@@ -71,8 +77,6 @@ void BakFileList::loadBakFile() {
   } else
     m_Method->setWinPos(this, 350, 3);
 
-  if (ui->listBakFile->count() > 0) ui->listBakFile->setCurrentRow(0);
-
   show();
 }
 
@@ -81,4 +85,12 @@ void BakFileList::on_btnRestore_clicked() {
 
   QString zipfile = bakfileDir + ui->listBakFile->currentItem()->text();
   mw_one->m_MainHelper->importBakFileList(zipfile);
+}
+
+void BakFileList::on_btnBackup_clicked() {
+  mw_one->on_actionExport_Data_triggered();
+}
+
+void BakFileList::on_btnFromFile_clicked() {
+  mw_one->on_actionImport_Data_triggered();
 }
