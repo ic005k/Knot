@@ -175,7 +175,6 @@ public class MyActivity
 {
 
     private boolean isConfigChangeRecreate = false;
-    private static boolean isQtMainEnd = false;
 
     // 记录maintab卡片上次选中索引，-1 = 无选中
     public static int mainTabLastSelectedPos = -1;
@@ -487,12 +486,6 @@ public class MyActivity
                     addDeskShortcuts();
                 }
 
-                if (isConfigChangeRecreate && isQtMainEnd) {
-                    // 确保mw_one已创建完成后再调用
-
-                    Log.d(TAG, "配置变更初始化完成，Qt已就绪，可以调用C++");
-                }
-
                 ImmersiveUtil.applyRealImmersive(this, isDark);
             } catch (Exception e) {
                 Log.e(TAG, "初始化异常", e);
@@ -617,7 +610,7 @@ public class MyActivity
     @Override
     public void onPause() {
         System.out.println("onPause...");
-        if (MyService.isReady) CallJavaNotify_1();
+        //if (MyService.isReady) CallJavaNotify_1();
         super.onPause();
     }
 
@@ -738,12 +731,6 @@ public class MyActivity
         isConfigChangeRecreate = false;
 
         super.onDestroy();
-
-        // ========== 优化点5：仅在非配置变更时，执行重启逻辑 ==========
-        if (!isConfigChangeRecreate && checkNeedRestart()) {
-            restartApp();
-            Log.i(TAG, "触发应用重启...");
-        }
 
         // ========== 补充：Activity销毁时清理资源（避免隐性问题） ==========
         Window window = getWindow();
@@ -2194,10 +2181,6 @@ public class MyActivity
         }
     }
 
-    public static void setQtMainEnd(boolean isEnd) {
-        isQtMainEnd = isEnd;
-    }
-
     public static void launchWebView_Old() {
         if (m_instance != null) {
             // 检测系统是否支持 WebView
@@ -2434,120 +2417,6 @@ public class MyActivity
             return m_instance.getApplicationContext();
         }
         return null;
-    }
-
-    // 新增：标记需要重启（替代原setReOpen）
-    public void markNeedRestart() {
-        SharedPreferences sp = getSharedPreferences(
-            PREFS_RESTART,
-            Context.MODE_PRIVATE
-        );
-        sp.edit().putBoolean(KEY_NEED_RESTART, true).apply();
-    }
-
-    // 新增：检查并清除重启标记
-    private boolean checkNeedRestart() {
-        SharedPreferences sp = getSharedPreferences(
-            PREFS_RESTART,
-            Context.MODE_PRIVATE
-        );
-        boolean needRestart = sp.getBoolean(KEY_NEED_RESTART, false);
-        // 清除标记，避免重复重启
-        if (needRestart) {
-            sp.edit().putBoolean(KEY_NEED_RESTART, false).apply();
-        }
-        return needRestart;
-    }
-
-    // 重构：彻底重启应用的核心方法
-    private void restartApp() {
-        try {
-            // 1. 获取应用启动Intent（确保启动主Activity）
-            PackageManager pm = getPackageManager();
-            Intent launchIntent = pm.getLaunchIntentForPackage(
-                getPackageName()
-            );
-            if (launchIntent == null) {
-                Log.e(TAG, "获取启动Intent失败");
-                return;
-            }
-
-            // 2. 添加关键标记：清空任务栈+新建任务+清除顶部
-            launchIntent.addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK | // 新建任务栈
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK | // 清空原有任务栈
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP | // 清除顶部Activity
-                    Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED // 必要时重置任务
-            );
-
-            // 3. 主线程延迟启动（避开onDestroy的销毁状态）
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                startActivity(launchIntent);
-                Log.i(TAG, "启动新应用实例成功");
-
-                // 4. 强制终止旧进程（关键：确保旧进程退出）
-                Process.killProcess(Process.myPid());
-                System.exit(0);
-            }, 300); // 300ms延迟，给系统留足处理时间
-        } catch (Exception e) {
-            Log.e(TAG, "重启应用失败", e);
-        }
-    }
-
-    // 核心：主动触发重启（无广播接收器）
-    public void triggerRestart() {
-        new Handler(Looper.getMainLooper()).post(() -> {
-            try {
-                // 1. 获取应用启动Intent（确保启动主Activity）
-                PackageManager pm = getPackageManager();
-                Intent launchIntent = pm.getLaunchIntentForPackage(
-                    getPackageName()
-                );
-                if (launchIntent == null) {
-                    Log.e(TAG, "获取启动Intent失败，使用备用方式");
-                    // 备用方式：直接指定MyActivity
-                    launchIntent = new Intent(this, MyActivity.class);
-                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                }
-
-                // 2. 关键标记：确保全新启动（兼容所有Android版本）
-                launchIntent.addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK | // 新建任务栈
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK | // 清空旧任务栈
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP | // 清除顶部Activity
-                        Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED // 重置任务栈
-                );
-
-                // 3. Android 10+ 后台启动兼容（可选，增强稳定性）
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    ActivityManager am = (ActivityManager) getSystemService(
-                        Context.ACTIVITY_SERVICE
-                    );
-                    if (am != null) {
-                        am.moveTaskToFront(
-                            getTaskId(),
-                            ActivityManager.MOVE_TASK_NO_USER_ACTION
-                        );
-                    }
-                }
-
-                // 4. 启动新实例（先启动，再终止旧进程）
-                startActivity(launchIntent);
-                Log.i(TAG, "已触发应用重启，等待旧进程终止");
-
-                // 5. 延迟终止旧进程（给系统留足时间处理启动Intent）
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    finish(); // 关闭当前Activity
-                    Process.killProcess(Process.myPid()); // 终止旧进程
-                    System.exit(0);
-                }, 500); // 500ms延迟，确保启动Intent已生效
-            } catch (Exception e) {
-                Log.e(TAG, "重启失败，使用兜底方案", e);
-                // 兜底：仅终止进程，依赖onDestroy中的兜底逻辑
-                finish();
-                Process.killProcess(Process.myPid());
-            }
-        });
     }
 
     public void openClockActivityWithContent(String customContent) {

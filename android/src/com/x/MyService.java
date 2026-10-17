@@ -299,7 +299,7 @@ public class MyService extends Service {
     @TargetApi(26)
     private void setForeground() {
         // ========== 核心：使用 Launcher Intent ==========
-        Intent notificationIntent =
+        /*Intent notificationIntent =
             getPackageManager().getLaunchIntentForPackage(getPackageName());
 
         if (notificationIntent == null) {
@@ -310,7 +310,14 @@ public class MyService extends Service {
                 Intent.FLAG_ACTIVITY_NEW_TASK |
                     Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
             );
-        }
+        }*/
+
+        // ✅ 改为指向 Router，不再直接指向 MyActivity
+        Intent notificationIntent = new Intent(
+            this,
+            NotifyRouterActivity.class
+        );
+        notificationIntent.setAction(Intent.ACTION_MAIN);
         // ====================================================
 
         int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;

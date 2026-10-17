@@ -112,8 +112,6 @@ class Preferences : public QDialog {
 
   void on_sliderFontSize_valueChanged(int value);
 
-  void on_btnReStart_clicked();
-
   void on_chkDark_clicked(bool checked);
 
   void on_chkDark_clicked();

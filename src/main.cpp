@@ -346,12 +346,6 @@ int main(int argc, char* argv[]) {
 
   w.show();
 
-#ifdef Q_OS_ANDROID
-  // 通知 Java 层 Qt main() 已完成
-  QJniObject::callStaticMethod<void>(ANDROID_MAIN_ACTIVITY, "setQtMainEnd",
-                                     "(Z)V", true);
-#endif
-
   // ========== 停止闪屏的逻辑放到事件循环中，异步执行 ==========
   // QTimer::singleShot(0)：确保在事件循环启动后执行
   QTimer::singleShot(0, &app, [&]() {

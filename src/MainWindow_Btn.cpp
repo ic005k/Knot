@@ -602,7 +602,7 @@ void MainWindow::on_btnShowCboxList_clicked() {
 }
 
 void MainWindow::onAndroidBackHandle() {
-  if (dlgProg != nullptr && dlgProg->isVisible()) {
+  if (mw_one->dlgProg != nullptr || m_Method->infoWindow != nullptr) {
     return;
   }
 
@@ -647,68 +647,6 @@ void MainWindow::onAndroidBackHandle() {
     }
   }
 
-  if (mw_one->mainMenu != nullptr) {
-    if (mw_one->mainMenu->isVisible()) {
-      mw_one->mainMenu->close();
-      return;
-    }
-  }
-
-  if (mw_one->m_Report->m_Menu != nullptr) {
-    if (mw_one->m_Report->m_Menu->isVisible()) {
-      mw_one->m_Report->m_Menu->close();
-      return;
-    }
-  }
-
-  if (m_NotesList->menuNoteBook != nullptr) {
-    if (m_NotesList->menuNoteBook->isVisible()) {
-      m_NotesList->menuNoteBook->close();
-      return;
-    }
-  }
-
-  if (m_NotesList->menuNoteList != nullptr) {
-    if (m_NotesList->menuNoteList->isVisible()) {
-      m_NotesList->menuNoteList->close();
-      return;
-    }
-  }
-
-  if (m_NotesList->menuRecentOpen != nullptr) {
-    if (m_NotesList->menuRecentOpen->isVisible()) {
-      m_NotesList->menuRecentOpen->close();
-      return;
-    }
-  }
-
-  if (mw_one->m_RenameDlg != nullptr) {
-    if (mw_one->m_RenameDlg->isVisible()) {
-      mw_one->m_RenameDlg->close();
-      return;
-    }
-  }
-
-  if (mw_one->m_Todo->m_ReeditTodo != nullptr) {
-    if (mw_one->m_Todo->m_ReeditTodo->isVisible()) {
-      mw_one->m_Todo->m_ReeditTodo->close();
-      return;
-    }
-  }
-
-  if (m_NotesList->m_RenameNotes != nullptr) {
-    if (m_NotesList->m_RenameNotes->isVisible()) {
-      if (textToolbarDynamic != nullptr && textToolbarDynamic->isVisible()) {
-        closeTextToolBar();
-        return;
-      }
-
-      m_NotesList->m_RenameNotes->close();
-      m_Method->closeGrayWindows();
-      return;
-    }
-  }
-
   if (mw_one->m_Preferences->isVisible()) {
     mw_one->m_Preferences->ui->btnBack->click();
     return;
@@ -726,45 +664,12 @@ void MainWindow::onAndroidBackHandle() {
 
   if (!mw_one->ui->frameOne->isHidden()) {
     on_btnBack_One_clicked();
-    m_Method->openMainEntranceWindow();
-    return;
-  }
-
-  if (mw_one->m_TodoAlarm->isVisible()) {
-    mw_one->m_TodoAlarm->ui->btnBack->click();
-    return;
-  }
-
-  if (mw_one->m_Todo->isTodoAlarmShow) {
-    mw_one->m_Todo->closeTodoAlarm();
-    return;
-  }
-
-  if (m_Steps->isRouteShow()) {
-    m_Steps->closeRouteDialog();
-    return;
-  }
-
-  if (m_Steps->m_remarksDialog != nullptr) {
-    if (m_Steps->m_remarksDialog->isVisible()) {
-      m_Steps->m_remarksDialog->close();
-      return;
-    }
-  }
-
-  if (m_Steps->statsDialog != nullptr) {
-    m_Steps->statsDialog->close();
-
     return;
   }
 
   if (m_Steps->isVisible()) {
     m_Steps->close();
     m_Method->openMainEntranceWindow();
-    return;
-  }
-
-  if (mw_one->dlgProg != nullptr || m_Method->infoWindow != nullptr) {
     return;
   }
 

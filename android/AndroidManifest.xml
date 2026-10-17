@@ -262,6 +262,14 @@
         />
 
         <activity
+            android:name=".NotifyRouterActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:exported="false"
+        />
+
+        <activity
             android:name=".TabRecycleBinActivity"
             android:exported="false"
         />
