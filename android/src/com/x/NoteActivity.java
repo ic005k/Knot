@@ -628,8 +628,8 @@ public class NoteActivity extends AppCompatActivity {
         int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
         String title = isZh ? "删除笔记" : "Delete Note";
         String msg = isZh
-            ? "确定要删除笔记：\n" + noteTitle
-            : "Confirm to delete note:\n" + noteTitle;
+            ? "笔记将被移到回收站：\n" + noteTitle
+            : "The note will be moved to recycle bin:\n" + noteTitle;
         String okText = isZh ? "确定" : "OK";
         String cancelText = isZh ? "取消" : "Cancel";
 

@@ -63,7 +63,7 @@ Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
 
   if (isAndroid) {
     QFont font1 = this->font();
-    font1.setPointSize(15);
+    font1.setPointSize(18);
     font1.setBold(true);
     ui->lblGpsInfo->setFont(font1);
   }
@@ -403,7 +403,7 @@ void Steps::openStepsUI() {
     strGpsInfoShow = QString(" \n") + " \n" + " \n" + " \n" + " \n" + " \n" +
                      " \n" + " \n" + " \n" + tr("Total Distance") + " : " +
                      strTotalDistance;
-    strGpsInfoShow = tr("Total Distance") + " : " + strTotalDistance;
+    strGpsInfoShow = " \n" + tr("Total Distance") + " : " + strTotalDistance;
     ui->lblGpsInfo->setText(strGpsInfoShow);
   }
 
@@ -1088,7 +1088,8 @@ void Steps::updateGetGpsData() {
                    "\nLon.-Lat.: " + QString::number(longitude) + " - " +
                    QString::number(latitude) + "\n" + strGpsStatus + "\n" +
                    tr("Total Distance") + " : " + strTotalDistance;
-  strGpsInfoShow = tr("Total Distance") + " : " + strTotalDistance;
+  strGpsInfoShow =
+      strDurationTime + "\n" + tr("Total Distance") + " : " + strTotalDistance;
 
   if (m_distance > 0 || isGpsTest) {
     // 先校验经纬度是否在有效范围（-90~90纬度，-180~180经度）

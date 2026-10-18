@@ -156,5 +156,5 @@ void StepsOptions::on_btnCorrection_clicked() {
       QString(" \n") + " \n" + " \n" + " \n" + " \n" + " \n" + " \n" + " \n" +
       " \n" + tr("Total Distance") + " : " + m_Steps->strTotalDistance;
   m_Steps->strGpsInfoShow =
-      tr("Total Distance") + " : " + m_Steps->strTotalDistance;
+      " \n" + tr("Total Distance") + " : " + m_Steps->strTotalDistance;
 }
