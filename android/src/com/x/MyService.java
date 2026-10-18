@@ -312,12 +312,17 @@ public class MyService extends Service {
             );
         }*/
 
-        // ✅ 改为指向 Router，不再直接指向 MyActivity
+        // ✅ 统一指向 Router，由 Router 内部根据系统版本决定行为
         Intent notificationIntent = new Intent(
             this,
             NotifyRouterActivity.class
         );
         notificationIntent.setAction(Intent.ACTION_MAIN);
+        notificationIntent.addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+        );
+
         // ====================================================
 
         int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;

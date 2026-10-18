@@ -62,6 +62,23 @@ void NoteRecycleBin::on_btnRestore_clicked() {
 void NoteRecycleBin::on_btnDel_clicked() {
   QStringList checkedItems = getCheckedItems();
 
+  // ✅ 无选中项时直接返回，避免弹出无意义的确认框
+  if (checkedItems.isEmpty()) {
+    return;
+  }
+
+  // ✅ 删除确认对话框（tr + 英文原文，便于国际化）
+  QMessageBox::StandardButton reply = QMessageBox::question(
+      this, tr("Confirm Deletion"),
+      tr("Are you sure you want to permanently delete %n selected "
+         "note(s)?\n\nThis action cannot be undone.",
+         "", checkedItems.size()),
+      QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+  if (reply != QMessageBox::Yes) {
+    return;
+  }
+
   // 1. 执行底层数据删除
   m_NotesList->delRecycleBinNotes(checkedItems);
 

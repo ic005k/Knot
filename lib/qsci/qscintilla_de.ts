@@ -133,22 +133,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/BakFileList.ui" line="20"/>
+        <location filename="../../src/BakFileList.ui" line="22"/>
         <source>Backup File List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/BakFileList.ui" line="32"/>
+        <location filename="../../src/BakFileList.ui" line="29"/>
         <source>Backup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/BakFileList.ui" line="39"/>
+        <location filename="../../src/BakFileList.ui" line="50"/>
         <source>Restore</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/BakFileList.ui" line="50"/>
+        <location filename="../../src/BakFileList.ui" line="43"/>
         <source>Restore From File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -199,7 +199,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="218"/>
+        <location filename="../../src/CloudBackup.cpp" line="221"/>
         <source>Success Upload File:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -214,48 +214,48 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="233"/>
-        <location filename="../../src/CloudBackup.cpp" line="380"/>
+        <location filename="../../src/CloudBackup.cpp" line="236"/>
+        <location filename="../../src/CloudBackup.cpp" line="383"/>
         <source>Authentication failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="237"/>
+        <location filename="../../src/CloudBackup.cpp" line="240"/>
         <source>Upload error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="364"/>
+        <location filename="../../src/CloudBackup.cpp" line="367"/>
         <source>Successfully downloaded file,File saved to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="384"/>
+        <location filename="../../src/CloudBackup.cpp" line="387"/>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1149"/>
+        <location filename="../../src/CloudBackup.cpp" line="1152"/>
         <source>Downloading data?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1150"/>
+        <location filename="../../src/CloudBackup.cpp" line="1153"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1223"/>
+        <location filename="../../src/CloudBackup.cpp" line="1226"/>
         <source>Invalid URL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1260"/>
+        <location filename="../../src/CloudBackup.cpp" line="1263"/>
         <source>Connection succeeded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/CloudBackup.cpp" line="1261"/>
+        <location filename="../../src/CloudBackup.cpp" line="1264"/>
         <source>Connection failed, status code: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -759,7 +759,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/MyThread.cpp" line="306"/>
+        <location filename="../../src/MyThread.cpp" line="304"/>
         <source>The data was exported successfully.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1150,6 +1150,21 @@
         <location filename="../../src/Notes/NoteRecycleBin.ui" line="57"/>
         <source>Del</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Notes/NoteRecycleBin.cpp" line="72"/>
+        <source>Confirm Deletion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/Notes/NoteRecycleBin.cpp" line="73"/>
+        <source>Are you sure you want to permanently delete %n selected note(s)?
+
+This action cannot be undone.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -1930,7 +1945,7 @@
     </message>
     <message>
         <location filename="../../src/Preferences.ui" line="238"/>
-        <location filename="../../src/Preferences.cpp" line="506"/>
+        <location filename="../../src/Preferences.cpp" line="479"/>
         <source>Select Model</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1978,51 +1993,51 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="383"/>
+        <location filename="../../src/Preferences.cpp" line="356"/>
         <source>Password validation error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="556"/>
-        <location filename="../../src/Preferences.cpp" line="639"/>
-        <location filename="../../src/Preferences.cpp" line="665"/>
-        <location filename="../../src/Preferences.cpp" line="976"/>
+        <location filename="../../src/Preferences.cpp" line="529"/>
+        <location filename="../../src/Preferences.cpp" line="612"/>
+        <location filename="../../src/Preferences.cpp" line="638"/>
+        <location filename="../../src/Preferences.cpp" line="949"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="556"/>
+        <location filename="../../src/Preferences.cpp" line="529"/>
         <source>No AI configurations available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="640"/>
-        <location filename="../../src/Preferences.cpp" line="666"/>
+        <location filename="../../src/Preferences.cpp" line="613"/>
+        <location filename="../../src/Preferences.cpp" line="639"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="708"/>
+        <location filename="../../src/Preferences.cpp" line="681"/>
         <source>Save Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="709"/>
+        <location filename="../../src/Preferences.cpp" line="682"/>
         <source>Cannot open config file to write</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="976"/>
+        <location filename="../../src/Preferences.cpp" line="949"/>
         <source>No configuration selected to delete.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="988"/>
+        <location filename="../../src/Preferences.cpp" line="961"/>
         <source>Confirm Delete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Preferences.cpp" line="989"/>
+        <location filename="../../src/Preferences.cpp" line="962"/>
         <source>Are you sure to delete this configuration?
 
 %1</source>

@@ -156,22 +156,22 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="BakFileList.ui" line="20"/>
+        <location filename="BakFileList.ui" line="22"/>
         <source>Backup File List</source>
         <translation>备份文件列表</translation>
     </message>
     <message>
-        <location filename="BakFileList.ui" line="32"/>
+        <location filename="BakFileList.ui" line="29"/>
         <source>Backup</source>
         <translation type="unfinished">备份</translation>
     </message>
     <message>
-        <location filename="BakFileList.ui" line="39"/>
+        <location filename="BakFileList.ui" line="50"/>
         <source>Restore</source>
         <translation>恢复</translation>
     </message>
     <message>
-        <location filename="BakFileList.ui" line="50"/>
+        <location filename="BakFileList.ui" line="43"/>
         <source>Restore From File</source>
         <translation type="unfinished">从文件恢复</translation>
     </message>
@@ -270,7 +270,7 @@
         <translation type="vanished">获取用户信息成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="218"/>
+        <location filename="CloudBackup.cpp" line="221"/>
         <source>Success Upload File:</source>
         <translation>上传文件成功</translation>
     </message>
@@ -279,7 +279,7 @@
         <translation type="vanished">下载文件成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1149"/>
+        <location filename="CloudBackup.cpp" line="1152"/>
         <source>Downloading data?</source>
         <translation>下载数据？</translation>
     </message>
@@ -298,33 +298,33 @@
         <translation>此操作将更新云端的数据</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="233"/>
-        <location filename="CloudBackup.cpp" line="380"/>
+        <location filename="CloudBackup.cpp" line="236"/>
+        <location filename="CloudBackup.cpp" line="383"/>
         <source>Authentication failed.</source>
         <translation>认证失败，请检查网址、用户名、密码。如果使用坚果云，请使用“应用密码”而不是主密码，“应用密码”可通过坚果云网页端登录后进行设置。</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="237"/>
+        <location filename="CloudBackup.cpp" line="240"/>
         <source>Upload error</source>
         <translation>上传错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="384"/>
+        <location filename="CloudBackup.cpp" line="387"/>
         <source>Download error</source>
         <translation>下载错误</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1223"/>
+        <location filename="CloudBackup.cpp" line="1226"/>
         <source>Invalid URL</source>
         <translation type="unfinished">无效的网址</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1260"/>
+        <location filename="CloudBackup.cpp" line="1263"/>
         <source>Connection succeeded</source>
         <translation type="unfinished">连接成功</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1261"/>
+        <location filename="CloudBackup.cpp" line="1264"/>
         <source>Connection failed, status code: %1</source>
         <translation type="unfinished">连接失败，状态码：%1</translation>
     </message>
@@ -345,12 +345,12 @@
         <translation type="vanished">最终大小：</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="1150"/>
+        <location filename="CloudBackup.cpp" line="1153"/>
         <source>This action overwrites local files with files in the cloud.</source>
         <translation>此操作将会用云端的文件覆盖本地文件</translation>
     </message>
     <message>
-        <location filename="CloudBackup.cpp" line="364"/>
+        <location filename="CloudBackup.cpp" line="367"/>
         <source>Successfully downloaded file,File saved to</source>
         <translation>文件下载成功，已保存到</translation>
     </message>
@@ -1823,7 +1823,7 @@
         <translation type="vanished">请开启APP的存储权限！</translation>
     </message>
     <message>
-        <location filename="MyThread.cpp" line="306"/>
+        <location filename="MyThread.cpp" line="304"/>
         <source>The data was exported successfully.</source>
         <translation>数据导出成功。</translation>
     </message>
@@ -2467,6 +2467,22 @@
         <location filename="Notes/NoteRecycleBin.ui" line="57"/>
         <source>Del</source>
         <translation>删除</translation>
+    </message>
+    <message>
+        <location filename="Notes/NoteRecycleBin.cpp" line="72"/>
+        <source>Confirm Deletion</source>
+        <translation type="unfinished">确认删除</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="Notes/NoteRecycleBin.cpp" line="73"/>
+        <source>Are you sure you want to permanently delete %n selected note(s)?
+
+This action cannot be undone.</source>
+        <translation type="unfinished">
+            <numerusform>确定要永久删除选中的 %n 条笔记吗？
+
+此操作无法撤销。</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -3576,30 +3592,30 @@
         <translation type="vanished">字体</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="556"/>
-        <location filename="Preferences.cpp" line="639"/>
-        <location filename="Preferences.cpp" line="665"/>
-        <location filename="Preferences.cpp" line="976"/>
+        <location filename="Preferences.cpp" line="529"/>
+        <location filename="Preferences.cpp" line="612"/>
+        <location filename="Preferences.cpp" line="638"/>
+        <location filename="Preferences.cpp" line="949"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="556"/>
+        <location filename="Preferences.cpp" line="529"/>
         <source>No AI configurations available.</source>
         <translation>暂无可用的AI配置</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="976"/>
+        <location filename="Preferences.cpp" line="949"/>
         <source>No configuration selected to delete.</source>
         <translation>未选择要删除的配置</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="988"/>
+        <location filename="Preferences.cpp" line="961"/>
         <source>Confirm Delete</source>
         <translation>确认删除</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="989"/>
+        <location filename="Preferences.cpp" line="962"/>
         <source>Are you sure to delete this configuration?
 
 %1</source>
@@ -3708,18 +3724,18 @@ Model ID: %1</source>
         <translation type="vanished">连接测试通过！模型 ID：%1</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="640"/>
-        <location filename="Preferences.cpp" line="666"/>
+        <location filename="Preferences.cpp" line="613"/>
+        <location filename="Preferences.cpp" line="639"/>
         <source>Endpoint / API Key / Model ID cannot be empty</source>
         <translation>接入地址 / API 密钥 / 模型 ID 不能为空</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="708"/>
+        <location filename="Preferences.cpp" line="681"/>
         <source>Save Failed</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="709"/>
+        <location filename="Preferences.cpp" line="682"/>
         <source>Cannot open config file to write</source>
         <translation>无法打开配置文件写入数据</translation>
     </message>
@@ -3803,7 +3819,7 @@ Model ID: %1</source>
     </message>
     <message>
         <location filename="Preferences.ui" line="238"/>
-        <location filename="Preferences.cpp" line="506"/>
+        <location filename="Preferences.cpp" line="479"/>
         <source>Select Model</source>
         <translation>选择模型</translation>
     </message>
@@ -3943,7 +3959,7 @@ Model ID: %1</source>
         <translation type="vanished">自动备份</translation>
     </message>
     <message>
-        <location filename="Preferences.cpp" line="383"/>
+        <location filename="Preferences.cpp" line="356"/>
         <source>Password validation error.</source>
         <translation>密码验证错误</translation>
     </message>
