@@ -29,6 +29,7 @@ class BakFileList : public QDialog {
 
  private:
   Ui::BakFileList* ui;
+     QStringList getData();
 };
 
 #endif  // BAKFILELIST_H

@@ -67,7 +67,7 @@ void ShowMessage::init(int btnCount, int adaptiveH) {
   }
 
   // 宽度逻辑
-  int dlgW = 380;
+  int dlgW = 350;
 #ifdef Q_OS_ANDROID
   dlgW = mainW;
 #else
