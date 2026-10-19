@@ -174,6 +174,9 @@ public class MyActivity
     implements Application.ActivityLifecycleCallbacks
 {
 
+    // 记录上次字体缩放因子，用于检测变化
+    private float mLastFontScale = 1.0f;
+
     private boolean isConfigChangeRecreate = false;
 
     // 记录maintab卡片上次选中索引，-1 = 无选中
@@ -452,6 +455,9 @@ public class MyActivity
                 ")"
         );
 
+        // ⭐ 记录初始 fontScale
+        mLastFontScale = getResources().getConfiguration().fontScale;
+
         // 放弃HandlerThread异步，改用延迟post（避免JNI环境未就绪）
         // 核心：等待Qt层初始化完成（延迟500ms，适配的mw_one创建时机）
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -638,6 +644,21 @@ public class MyActivity
         if (isDark != newIsDark) {
             isDark = newIsDark;
             ImmersiveUtil.applyRealImmersive(this, isDark);
+        }
+
+        // ⭐ 检测字体缩放变化，通知 C++ 实时刷新
+        if (newConfig.fontScale != mLastFontScale) {
+            mLastFontScale = newConfig.fontScale;
+            Log.d(TAG, "系统字体缩放变更: " + mLastFontScale + " → 通知Qt刷新");
+
+            // 延迟 100ms 确保 Resources 已完全更新
+            mHandler.postDelayed(() -> {
+                try {
+                    CallJavaNotify_1();
+                } catch (Exception e) {
+                    Log.w(TAG, "通知字体变更异常", e);
+                }
+            }, 100);
         }
     }
 
@@ -2938,5 +2959,17 @@ public class MyActivity
     public float getSystemFontScale() {
         if (m_instance == null) return 1.0f;
         return m_instance.getResources().getConfiguration().fontScale;
+    }
+
+    public float getSystemDefaultTextSizePx() {
+        if (m_instance == null) return (
+            14.0f * getResources().getDisplayMetrics().scaledDensity
+        );
+        android.util.TypedValue tv = new android.util.TypedValue();
+        // 读取系统属性 ?attr/textAppearanceBodyMedium 或回退到 14sp
+        // 这里直接用 DisplayMetrics.scaledDensity × 14 作为安全兜底
+        return (
+            14.0f * m_instance.getResources().getDisplayMetrics().scaledDensity
+        );
     }
 }

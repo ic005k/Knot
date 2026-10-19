@@ -41,6 +41,8 @@ static void sendQuestionToCpp(JNIEnv* env, jclass clazz, jstring questionText);
 
 static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type);
 
+extern void applyAndroidFont();
+
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -64,9 +66,17 @@ static void JavaNotify_0() {
 }
 
 static void JavaNotify_1() {
-  // onPause
-
+  // 实时刷新字号
   if (mw_one->initMain) return;
+
+  QMetaObject::invokeMethod(
+      qApp,
+      []() {
+        applyAndroidFont();
+        qInfo()
+            << "[Font] Real-time refresh triggered by system fontScale change";
+      },
+      Qt::QueuedConnection);
 
   qDebug() << "C++ JavaNotify_1";
 }

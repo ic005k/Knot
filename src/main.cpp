@@ -57,27 +57,38 @@ float getJavaFuncFloat(QString mInstance, QString callJavaName,
 
 void applyAndroidFont() {
 #ifdef Q_OS_ANDROID
-  QJniObject ctx = QNativeInterface::QAndroidApplication::context();
-  if (!ctx.isValid()) return;
+  float nativePx = getJavaFuncFloat("m_instance", "getSystemDefaultTextSizePx",
+                                    "MyActivity");
+  if (nativePx <= 0.0f) nativePx = 14.0f;
 
-  QJniObject resources =
-      ctx.callObjectMethod("getResources", "()Landroid/content/res/Resources;");
-  if (!resources.isValid()) return;
+  // ⭐ 关键：抵消 Qt 对 setPixelSize 的隐式 DPI 二次补偿
+  // Qt 内部会执行: actualPx = pixelSize * devicePixelRatio
+  // 所以我们需要传入: pixelSize = nativePx / devicePixelRatio
+  qreal dpr = qApp->devicePixelRatio();
+  if (dpr <= 0.0) dpr = 1.0;  // 安全兜底
 
-  QJniObject config = resources.callObjectMethod(
-      "getConfiguration", "()Landroid/content/res/Configuration;");
-  if (!config.isValid()) return;
-
-  float fontScale = config.getField<jfloat>("fontScale");
+  int adjustedPixelSize = qRound(nativePx / dpr);
 
   QFont font = qApp->font();
-  // 仅对Qt自带pointSizeF乘以安卓fontScale，不再引入density，消除二次放大
-  qreal pt = font.pointSizeF();
-  font.setPointSizeF(pt * fontScale);
+  font.setPixelSize(adjustedPixelSize);
   qApp->setFont(font);
 
-  qInfo() << "fontScale:" << fontScale << "old pt:" << pt
-          << "new pt:" << font.pointSizeF();
+  // ⭐ 强制所有控件重新应用样式 + 重算布局 + 重绘
+  const QList<QWidget*> widgets = QApplication::allWidgets();
+  for (QWidget* widget : widgets) {
+    widget->style()->unpolish(widget);
+    widget->style()->polish(widget);
+
+    // 关键补充：让使用 sizeHint/fontMetrics 的控件重新计算尺寸
+    widget->updateGeometry();
+    widget->update();
+  }
+
+  // ⭐ 关键补充：确保 Qt 事件循环立即处理 FontChange/LayoutRequest
+  QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+  qInfo() << "[Font] Native px:" << nativePx << "DPR:" << dpr
+          << "Adjusted pixelSize:" << adjustedPixelSize;
 #endif
 }
 
@@ -91,7 +102,6 @@ int getAndroidSdkVersion();
 void migrateOldDataIfNeeded();
 #endif
 
-void initAndroidGPU();
 int clearLockFiles(const QString& iniDir);
 
 #define Cross_Origin
@@ -147,6 +157,7 @@ int main(int argc, char* argv[]) {
   isIOS = false;
   isLinux = false;
   isMacOS = false;
+
 #ifdef Q_OS_WIN
   isWindows = true;
 #elif defined(Q_OS_MACOS)
@@ -155,8 +166,6 @@ int main(int argc, char* argv[]) {
   isIOS = true;
 #elif defined(Q_OS_ANDROID)
   isAndroid = true;
-
-  initAndroidGPU();
 
 #elif defined(Q_OS_LINUX)
   isLinux = true;
@@ -630,8 +639,6 @@ void migrateOldDataIfNeeded() {
 }
 
 #endif
-
-void initAndroidGPU() {}
 
 int clearLockFiles(const QString& iniDir) {
   // 1. 初始化目录对象并校验有效性
