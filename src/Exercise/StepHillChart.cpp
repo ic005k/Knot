@@ -2,41 +2,38 @@
 
 #include <src/defines.h>
 
+#include <QFontMetrics>
 #include <QLinearGradient>
+#include <QPainterPath>
 #include <QResizeEvent>
 
 StepHillChart::StepHillChart(QWidget* parent) : QFrame(parent) {
-  // 安卓端核心设置：无边框、背景透明（适配手机界面）
   setFrameStyle(QFrame::NoFrame);
   setStyleSheet("background: transparent;");
-  // 尺寸策略：宽度/高度自适应父容器（安卓屏幕）
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  // 初始数据占位
   m_stepData.resize(90, 0);
+
+  // ⭐ 缓存翻译文本，避免 paintEvent 中重复查找
+  m_titleText = tr("Steps");
 }
 
 void StepHillChart::setStepData(const std::vector<int>& stepData) {
-  // 截断/补0到90个数据（适配X轴长度）
   m_stepData.clear();
   for (int i = 0; i < 90; ++i) {
     m_stepData.push_back(i < stepData.size() ? stepData[i] : 0);
   }
-  // 更新最大值（用于Y轴归一化）
-  m_maxValue = 1;  // 避免除0
+  m_maxValue = 1;
   for (int val : m_stepData) {
     if (val > m_maxValue) m_maxValue = val;
   }
-  // 触发重绘（安卓端异步更新，避免阻塞UI）
   update();
 }
 
 QPointF StepHillChart::mapToChartPos(size_t index, int value) {
-  // 逻辑完全不变，仅参数类型改size_t
   int drawWidth = width() - 2 * m_margin;
   int drawHeight = height() - 2 * m_topBottomMargin;
 
-  qreal x = m_margin + (index * drawWidth) /
-                           (m_stepData.size() - 1);  // index已为size_t，无转换
+  qreal x = m_margin + (index * drawWidth) / (m_stepData.size() - 1);
   qreal normalizedVal = (value * 1.0) / m_maxValue;
   qreal y = m_topBottomMargin + (drawHeight - normalizedVal * drawHeight);
 
@@ -46,14 +43,21 @@ QPointF StepHillChart::mapToChartPos(size_t index, int value) {
 void StepHillChart::paintEvent(QPaintEvent* event) {
   QFrame::paintEvent(event);
 
-  QPixmap buffer(size());
+  // ⭐ 核心：创建 HiDPI 感知的 buffer
+  qreal dpr = devicePixelRatioF();
+  if (dpr <= 0.0) dpr = 1.0;
+
+  QPixmap buffer(size() * dpr);     // 物理像素尺寸
+  buffer.setDevicePixelRatio(dpr);  // ⭐ 关键：告诉 QPainter 坐标系仍是逻辑像素
   buffer.fill(Qt::transparent);
+
   QPainter p(&buffer);
   p.setRenderHint(QPainter::Antialiasing, true);
+  p.setRenderHint(QPainter::SmoothPixmapTransform, true);  // 可选：提升渐变质量
 
   if (m_stepData.empty() || m_maxValue <= 1) return;
 
-  // 构建路径
+  // ========== 构建山丘路径 ==========
   QPainterPath path;
   path.moveTo(mapToChartPos(0, 0));
   for (size_t i = 0; i < m_stepData.size(); ++i) {
@@ -62,34 +66,66 @@ void StepHillChart::paintEvent(QPaintEvent* event) {
   path.lineTo(mapToChartPos(m_stepData.size() - 1, 0));
   path.closeSubpath();
 
-  // ========== 核心：根据isDark切换配色 ==========
+  // ========== 配色（保持原有逻辑）==========
   QColor topColor, bottomColor, borderColor;
-  if (isDark) {                                // 暗黑模式
-    topColor = QColor(76, 175, 80, 150);       // 暗绿（低亮度、半透明）
-    bottomColor = QColor(76, 175, 80, 40);     // 更淡的暗绿
-    borderColor = QColor(102, 187, 106, 180);  // 轮廓色（稍亮，保证辨识度）
-  } else {                                     // 浅色模式
-    topColor = QColor(66, 133, 244, 180);      // 谷歌蓝（原配色）
+  if (isDark) {
+    topColor = QColor(76, 175, 80, 150);
+    bottomColor = QColor(76, 175, 80, 40);
+    borderColor = QColor(102, 187, 106, 180);
+
+  } else {
+    topColor = QColor(66, 133, 244, 180);
     bottomColor = QColor(66, 133, 244, 60);
     borderColor = QColor(41, 98, 198, 200);
   }
 
-  // 适配后的渐变
+  // ========== 绘制山丘 ==========
   QLinearGradient grad(0, 0, 0, height());
   grad.setColorAt(0, topColor);
   grad.setColorAt(1, bottomColor);
   p.setBrush(grad);
   p.setPen(QPen(borderColor, 1));
-
-  // 绘制山丘（不变）
   p.drawPath(path);
 
+  // ========== ⭐ 左上角标题：同色系衬底，覆盖图形时更融合 ==========
+  QFont titleFont = font();
+  titleFont.setPixelSize(12);
+  titleFont.setBold(true);
+  p.setFont(titleFont);
+
+  QFontMetrics fm(titleFont);
+  int padX = 4, padY = 2;
+  int textW = fm.horizontalAdvance(m_titleText);
+  int textH = fm.height();
+  int x = m_margin + padX;
+  int y = m_topBottomMargin + padY + 8;
+
+  // ⭐ 关键改动：衬底使用山丘同色系，而非纯黑/纯白
+  // 高不透明度确保文字始终清晰，同色系确保与山丘融合自然
+  QColor bgColor, textColor;
+  if (isDark) {
+    bgColor = QColor(30, 70, 35, 160);  // 深绿底，与暗绿山丘同源
+    textColor = QColor(180, 230, 180);  // 柔光绿字
+  } else {
+    bgColor = QColor(220, 235, 255, 180);  // 淡蓝底，与谷歌蓝山丘同源
+    textColor = QColor(25, 55, 110);       // 深蓝灰字
+  }
+
+  p.setPen(Qt::NoPen);
+  p.setBrush(bgColor);
+  p.drawRoundedRect(QRectF(x - padX, y - fm.ascent() - padY, textW + padX * 2,
+                           textH + padY * 2),
+                    3, 3);
+
+  p.setPen(textColor);
+  p.drawText(x, y, m_titleText);
+
+  // ========== 输出到屏幕 ==========
   QPainter painter(this);
   painter.drawPixmap(0, 0, buffer);
 }
 
 void StepHillChart::resizeEvent(QResizeEvent* event) {
   QFrame::resizeEvent(event);
-  // 安卓屏幕旋转/尺寸变化时重绘
   update();
 }
