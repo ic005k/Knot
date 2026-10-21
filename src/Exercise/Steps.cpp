@@ -57,6 +57,7 @@ QJniObject gm_activity;
 Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
   ui->setupUi(this);
   this->installEventFilter(this);
+  ui->lblGpsInfo->installEventFilter(this);
   this->setModal(true);
 
   initUI();
@@ -273,6 +274,22 @@ void Steps::setAddressResolverConnect() {
 void Steps::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event) }
 
 bool Steps::eventFilter(QObject* obj, QEvent* event) {
+  if (obj == ui->lblGpsInfo && event->type() == QEvent::MouseButtonRelease) {
+    auto* mouseEvent = static_cast<QMouseEvent*>(event);
+    if (mouseEvent->button() == Qt::LeftButton) {
+      if (isGpsRun) {
+        if (isAndroid) {
+          QStringList list;
+          list.append(strGpsInfo);
+          m_Method->refreshJavaData("showCommonMsgDialog", "MyActivity", list);
+        } else {
+          QMessageBox::information(this, tr("GPS Info"), strGpsInfo);
+        }
+      }
+      return true;  // 消费事件，不再传递
+    }
+  }
+
   return QWidget::eventFilter(obj, event);
 }
 
@@ -738,6 +755,7 @@ void Steps::startRecordMotion() {
   ui->rbCycling->setEnabled(false);
   ui->rbHiking->setEnabled(false);
   ui->rbRunning->setEnabled(false);
+  ui->btnList->setEnabled(false);
 
   if (ui->rbCycling->isChecked()) saveInterval = 0.016f;
   if (ui->rbHiking->isChecked()) saveInterval = 0.008f;
@@ -1082,12 +1100,11 @@ void Steps::updateGetGpsData() {
                         .arg(seconds, 2, 10, QLatin1Char('0'));
   strDurationTime = tr("Duration") + " : " + timeStr;
 
-  strGpsInfoShow = tr("Current Distance") + " : " + str1 + "\n" +
-                   tr("Exercise Duration") + " : " + str2 + "\n" +
-                   strDurationTime +
-                   "\nLon.-Lat.: " + QString::number(longitude) + " - " +
-                   QString::number(latitude) + "\n" + strGpsStatus + "\n" +
-                   tr("Total Distance") + " : " + strTotalDistance;
+  strGpsInfo = tr("Current Distance") + " : " + str1 + "\n" +
+               tr("Exercise Duration") + " : " + str2 + "\n" + strDurationTime +
+               "\nLon.-Lat.: " + QString::number(longitude) + " - " +
+               QString::number(latitude) + "\n" + strGpsStatus + "\n" +
+               tr("Total Distance") + " : " + strTotalDistance;
   strGpsInfoShow =
       strDurationTime + "\n" + tr("Total Distance") + " : " + strTotalDistance;
 
@@ -1212,6 +1229,7 @@ void Steps::stopRecordMotion() {
   ui->rbCycling->setEnabled(true);
   ui->rbHiking->setEnabled(true);
   ui->rbRunning->setEnabled(true);
+  ui->btnList->setEnabled(true);
 }
 
 void Steps::refreshRoute() {

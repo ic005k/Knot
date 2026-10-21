@@ -187,7 +187,7 @@ class Steps : public QDialog {
   bool isChkPlayRunVoice = false;
 
   QString strTotalDistance;
-  QString strGpsInfoShow;
+  QString strGpsInfoShow, strGpsInfo;
 
   QString bearingToDirection(double bearing);
   double calculateBearing(double lat1, double lon1, double lat2, double lon2);
