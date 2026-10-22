@@ -57,34 +57,35 @@ set(GGML_SYCL OFF CACHE BOOL "" FORCE)
 set(GGML_BLAS OFF CACHE BOOL "" FORCE)
 set(LLAMA_EMBED ON CACHE BOOL "" FORCE)
 
-# ✅ 【注意】强制锁定 ggml 指令集，防止 CI 新机器自动启用 AVX-512/AMX
+# ✅ 【注意】强制锁定 ggml 指令集为安全基线 (AVX)
 # 必须在 add_subdirectory 之前设置！
 if(NOT APPLE AND NOT ANDROID)
     # 显式关闭所有高级指令集
     set(GGML_NATIVE        OFF CACHE BOOL "" FORCE)  # 禁止 native 优化
     set(GGML_AVX512        OFF CACHE BOOL "" FORCE)  # 禁止 AVX-512
     set(GGML_AMX           OFF CACHE BOOL "" FORCE)  # 禁止 AMX
-    set(GGML_BMI2          OFF CACHE BOOL "" FORCE)  # 可选：BMI2 也有兼容性问题
+    set(GGML_BMI2          OFF CACHE BOOL "" FORCE)  # 禁止 BMI2
+    set(GGML_AVX2          OFF CACHE BOOL "" FORCE)  # ✅ 关闭 AVX2
+    set(GGML_FMA           OFF CACHE BOOL "" FORCE)  # ✅ 关闭 FMA
+    set(GGML_F16C          OFF CACHE BOOL "" FORCE)  # ✅ 关闭 F16C
 
-    # 显式开启安全基线
-    set(GGML_AVX2          ON  CACHE BOOL "" FORCE)
-    set(GGML_FMA           ON  CACHE BOOL "" FORCE)
-    set(GGML_F16C          ON  CACHE BOOL "" FORCE)
+    # 显式开启安全基线 (AVX/SSE)
+    set(GGML_AVX           ON  CACHE BOOL "" FORCE)  # ✅ 开启 AVX (2011年后CPU均支持)
 
     # ✅ CI 日志可见性
-    message(STATUS "🔒 ggml ISA locked: AVX2+FMA+F16C (AVX-512/AMX/BMI2/NATIVE disabled)")
+    message(STATUS "🔒 ggml ISA locked: SAFE BASELINE AVX (AVX2/FMA/F16C/AVX-512 disabled)")
 endif()
 
 add_subdirectory(${LLAMA_ROOT} ${CMAKE_BINARY_DIR}/llama.cpp)
 
 # 确保 ggml/llama 目标也获得正确的编译选项
 if(NOT APPLE AND NOT ANDROID AND NOT WIN32)
-    # ✅ 确保 ggml 和 llama 库本身也用 AVX2 编译（而非默认的 baseline 或过高的 AVX-512）
+    # ✅ 使用安全基线 AVX 编译（兼容老旧 CPU）
     foreach(_ggml_target ggml llama)
         if(TARGET ${_ggml_target})
-            target_compile_options(${_ggml_target} PRIVATE -mavx2 -mf16c -mfma)
+            target_compile_options(${_ggml_target} PRIVATE -mavx)
             target_compile_definitions(${_ggml_target} PRIVATE
-                GGML_USE_AVX2 GGML_F16C
+                GGML_USE_AVX
             )
         endif()
     endforeach()
@@ -94,8 +95,8 @@ endif()
 if(WIN32 AND MSVC)
     foreach(_ggml_target ggml llama)
         if(TARGET ${_ggml_target})
-            # MSVC 下通过 /arch:AVX2 限定最高指令集（不会自动升到 AVX-512）
-            target_compile_options(${_ggml_target} PRIVATE /arch:AVX2)
+            # ✅ MSVC 下通过 /arch:AVX 限定最高指令集（兼容老旧 CPU）
+            target_compile_options(${_ggml_target} PRIVATE /arch:AVX)
         endif()
     endforeach()
 endif()
@@ -345,15 +346,21 @@ elseif(APPLE)
             target_compile_definitions(${PROJECT_NAME} PRIVATE
                 GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
         else()
-            message(STATUS "ℹ️ Targeting macOS x86_64 (AVX2)")
-            target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_AVX2 GGML_F16C)
-            target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mf16c -mfma)
+            # ✅ macOS x86_64 也降级为安全基线 AVX
+            message(STATUS "ℹ️ Targeting macOS x86_64 (SAFE BASELINE AVX)")
+            target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_AVX)
+            target_compile_options(${PROJECT_NAME} PRIVATE -mavx)
         endif()
 elseif(ANDROID)
     target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
 elseif(UNIX)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_AVX2 GGML_F16C GGML_NO_SCHED_BATCH _GNU_SOURCE)
-    target_compile_options(${PROJECT_NAME} PRIVATE -mavx2 -mf16c -mfma)
+    # ✅ Linux/Unix 降级为安全基线 AVX，移除 AVX2/FMA/F16C
+    target_compile_definitions(${PROJECT_NAME} PRIVATE 
+        GGML_USE_AVX 
+        GGML_NO_SCHED_BATCH 
+        _GNU_SOURCE
+    )
+    target_compile_options(${PROJECT_NAME} PRIVATE -mavx)
 endif()
 
 # ============================================================

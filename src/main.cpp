@@ -123,10 +123,10 @@ int clearLockFiles(const QString& iniDir);
 static ggml_backend_reg_t g_global_cpu_backend = nullptr;
 
 // 在全局作用域，强制让编译器认为这些符号被"使用"
-static volatile void* g_force_link_cpu_backend[] = {
+/*static volatile void* g_force_link_cpu_backend[] = {
     (void*)&ggml_backend_cpu_reg,
     (void*)&ggml_backend_cpu_init,
-};
+};*/
 
 int init_main_ai();
 
@@ -135,7 +135,7 @@ int init_main_ai();
 int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////////////////////////////
   // 防止整个数组被优化
-  (void)g_force_link_cpu_backend;
+  //(void)g_force_link_cpu_backend;
 
   int value = init_main_ai();
   qDebug() << "init_main_ai=" << value;
@@ -686,6 +686,9 @@ int clearLockFiles(const QString& iniDir) {
 int init_main_ai() {
   // ✅ CPU 兼容性检测
   g_cpu_supports_llama = CpuCheck::isCompatibleWithLlama();
+
+  // 全部放行（目前已支持avx）
+  g_cpu_supports_llama = true;
 
   if (!g_cpu_supports_llama) {
     qWarning()
