@@ -33,6 +33,8 @@ void MainWindow::gotoEnd() {
       m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
                              "StepListActivity");
     }
+  } else {
+    m_Notes->ui->progQA->setRange(0, 100);
   }
 }
 
@@ -329,16 +331,13 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   cfg.timeoutSec = 10;
   cfg.maxTokens = 1024;
 
-  if (!isAndroid) {
+  if (!isAndroid && !m_Notes->isAIQA) {
     showProgress();
   } else {
     if (m_Steps->isVisible() || m_Preferences->isVisible()) showProgress();
   }
 
-  // 复用统一连通检测函数，连通成功后执行提问
-  // checkAiConnectivity(cfg, [this, cfg, userQuestion]() {
   sendAiChatRequest(cfg, userQuestion);
-  //});
 }
 
 QUrl MainWindow::buildAiApiUrl(const QString& rawEndpoint) {

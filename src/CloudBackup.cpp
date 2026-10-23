@@ -379,9 +379,11 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
 
             file->remove();
             if (statusCode == 401) {
+              mw_one->safeCloseProgress();
               auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
               m_ShowMsg->showMsg("WebDAV", tr("Authentication failed."), 1);
             } else {
+              mw_one->safeCloseProgress();
               auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
               m_ShowMsg->showMsg(
                   "WebDAV", tr("Download error") + " : " + reply->errorString(),
