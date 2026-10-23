@@ -1526,10 +1526,10 @@ This action cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Notes/Notes.cpp" line="677"/>
-        <location filename="../../src/Notes/Notes.cpp" line="721"/>
-        <location filename="../../src/Notes/Notes.cpp" line="769"/>
-        <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
+        <location filename="../../src/Notes/Notes.cpp" line="676"/>
+        <location filename="../../src/Notes/Notes.cpp" line="720"/>
+        <location filename="../../src/Notes/Notes.cpp" line="768"/>
+        <source>Decompression failed. Please verify the data encryption password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5861,50 +5861,51 @@ This action cannot be undone.</source>
     <name>Steps</name>
     <message>
         <location filename="../../src/Exercise/Steps.ui" line="447"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="396"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="286"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="413"/>
         <source>GPS Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Exercise/Steps.ui" line="415"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="3110"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="3115"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="3128"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="3133"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="733"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="3113"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="750"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="3131"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1083"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1264"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1101"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1282"/>
         <source>Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1085"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1103"/>
         <source>Current Distance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="404"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="406"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1090"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1092"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="421"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="423"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1107"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1109"/>
         <source>Total Distance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Exercise/Steps.ui" line="42"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="111"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="112"/>
         <source>Direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1249"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1267"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5920,22 +5921,22 @@ This action cannot be undone.</source>
     </message>
     <message>
         <location filename="../../src/Exercise/Steps.ui" line="256"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1244"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1313"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1262"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1331"/>
         <source>Ride</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Exercise/Steps.ui" line="345"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1245"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1318"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1263"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1336"/>
         <source>Hike</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../src/Exercise/Steps.ui" line="361"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1246"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1323"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1264"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1341"/>
         <source>Run</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5966,197 +5967,197 @@ This action cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2725"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2743"/>
         <source>Uphill: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2725"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="2727"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="2729"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2743"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2745"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2747"/>
         <source> km</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2727"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2745"/>
         <source>Flat: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2728"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2746"/>
         <source>Downhill: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2814"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2832"/>
         <source>Invalid Direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2835"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2853"/>
         <source>Northeast</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2837"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2855"/>
         <source>Southeast</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2839"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2857"/>
         <source>Southwest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2841"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2859"/>
         <source>Northwest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2853"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2871"/>
         <source>East by North</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2905"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2923"/>
         <source>Edit Remarks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2913"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2931"/>
         <source>Please enter remarks here...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2940"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2958"/>
         <source>Parse remarks file failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2946"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2964"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2947"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2965"/>
         <source>Cancel</source>
         <translation type="unfinished">Abbrechen</translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="3054"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="3066"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="3072"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="3084"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="3055"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="3073"/>
         <source>Failed to save remarks: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="3067"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="3085"/>
         <source>Write remarks to file failed: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2850"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2868"/>
         <source>North by East</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2861"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2879"/>
         <source>South by East</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2858"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2876"/>
         <source>East by South</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2869"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2887"/>
         <source>West by South</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2866"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2884"/>
         <source>South by West</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2877"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2895"/>
         <source>North by West</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2874"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2892"/>
         <source>West by North</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="202"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="203"/>
         <source>Slide Right to Start or Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2825"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2843"/>
         <source>Due North</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2827"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2845"/>
         <source>Due East</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2829"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2847"/>
         <source>Due South</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2831"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2849"/>
         <source>Due West</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2890"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2908"/>
         <source>degrees</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="128"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="129"/>
         <source>Weather</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1251"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1269"/>
         <source>Distance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1086"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1264"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1104"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1282"/>
         <source>Exercise Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="961"/>
-        <location filename="../../src/Exercise/Steps.cpp" line="1267"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="979"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1285"/>
         <source>Average Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="1267"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="1285"/>
         <source>Max Speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2042"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2060"/>
         <source>Today</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Exercise/Steps.cpp" line="2043"/>
+        <location filename="../../src/Exercise/Steps.cpp" line="2061"/>
         <source>km</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6376,22 +6377,27 @@ This action cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1669"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1480"/>
+        <source>Decompression failed.Please verify the data encryption password.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/Todo/Todo.cpp" line="1670"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1669"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1670"/>
         <source>Enter new content:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1679"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1680"/>
         <source>Edit Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1680"/>
+        <location filename="../../src/Todo/Todo.cpp" line="1681"/>
         <source>Content cannot be empty!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6403,11 +6409,6 @@ This action cannot be undone.</source>
     <message>
         <location filename="../../src/Todo/Todo.cpp" line="1403"/>
         <source>WebDAV connection failed. Please check the network, website address or login information.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/Todo/Todo.cpp" line="1480"/>
-        <source>Decompression failed. Please check in Preferences that the passwords are consistent across all platforms.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

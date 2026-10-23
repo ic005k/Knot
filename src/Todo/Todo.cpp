@@ -1477,14 +1477,15 @@ void Todo::openTodo() {
                               zFile, privateDir + "KnotData/todo.json")) {
                         mw_one->safeCloseProgress();
                         errorInfo =
-                            tr("Decompression failed. Please check in "
-                               "Preferences that the passwords are consistent "
-                               "across all platforms.");
+                            tr("Decompression failed.Please verify the data "
+                               "encryption password.");
 
                         auto msg = std::make_unique<ShowMessage>(mw_one);
                         msg->showMsg("Knot", errorInfo, 1);
                         isPasswordError = true;
                         QFile::remove(zFile);
+
+                        if (isAndroid) m_Method->openMainEntranceWindow();
 
                         return;
                       }

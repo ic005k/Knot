@@ -673,9 +673,8 @@ void Notes::processSingleRemoteFile(const QString& file) {
 
     if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
       mw_one->safeCloseProgress();
-      errorInfo =
-          tr("Decompression failed. Please check in Preferences that the "
-             "passwords are consistent across all platforms.");
+      errorInfo = tr(
+          "Decompression failed. Please verify the data encryption password.");
 
       QMetaObject::invokeMethod(mw_one, []() {
         auto msg = std::make_unique<ShowMessage>(mw_one);
@@ -718,8 +717,8 @@ void Notes::processSingleRemoteFile(const QString& file) {
       if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
         mw_one->safeCloseProgress();
         errorInfo =
-            tr("Decompression failed. Please check in Preferences that the "
-               "passwords are consistent across all platforms.");
+            tr("Decompression failed. Please verify the data encryption "
+               "password.");
 
         QMetaObject::invokeMethod(mw_one, []() {
           auto msg = std::make_unique<ShowMessage>(mw_one);
@@ -766,8 +765,8 @@ void Notes::processSingleRemoteFile(const QString& file) {
       if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
         mw_one->safeCloseProgress();
         errorInfo =
-            tr("Decompression failed. Please check in Preferences that the "
-               "passwords are consistent across all platforms.");
+            tr("Decompression failed. Please verify the data encryption "
+               "password.");
 
         QMetaObject::invokeMethod(mw_one, []() {
           auto msg = std::make_unique<ShowMessage>(mw_one);
