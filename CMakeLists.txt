@@ -32,14 +32,6 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml Svg Concurrent LinguistTools Core5Compat Positioning
 )
 
-# ✅ 设置排除虚拟键盘插件
-if(ANDROID)
-    set(QT_ANDROID_EXCLUDE_PLUGINS
-        platforminputcontexts/qtvirtualkeyboardplugin
-        position/qtposition_nmea              # 可选：如果也不用 NMEA 串口定位
-    )
-endif()
-
 # ============================================================
 # 2. 第三方库: llama.cpp (通过 add_subdirectory 构建)
 # ============================================================
@@ -266,6 +258,11 @@ if(ANDROID)
         QT_ANDROID_VERSION_CODE "${ANDROID_VERSION_CODE}"
     )
     message(STATUS "📱 Android Version: name=${PROJECT_VERSION}, code=${ANDROID_VERSION_CODE}")
+
+    # ✅ 排除不需要的 Android 插件（减小 APK 体积）
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        QT_ANDROID_EXCLUDE_PLUGINS "platforminputcontexts/qtvirtualkeyboardplugin;position/qtposition_nmea"
+    )
 
 elseif(APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES
