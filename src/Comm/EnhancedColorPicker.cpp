@@ -1,6 +1,4 @@
 // enhancedcolorpicker.cpp
-#include "EnhancedColorPicker.h"
-
 #include <QDebug>
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -11,10 +9,10 @@
 #include <QValidator>
 #include <QtMath>
 
+#include "EnhancedColorPicker.h"
 #include "MainWindow.h"
 #include "defines.h"
 #include "src/Comm/Method.h"
-#include "ui_MainWindow.h"
 
 QString simpleLargeSliderStyle = R"(
         QSlider::groove:horizontal {

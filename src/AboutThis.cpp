@@ -1,5 +1,4 @@
 ﻿#include "AboutThis.h"
-
 #include "MainWindow.h"
 #include "defines.h"
 #include "ui_AboutThis.h"

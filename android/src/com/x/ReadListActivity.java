@@ -200,11 +200,6 @@ public class ReadListActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mBackCallback != null) {
