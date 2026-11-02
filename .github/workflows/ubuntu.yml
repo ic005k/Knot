@@ -171,6 +171,28 @@ jobs:
 
                    #-qmldir=/home/runner/work/Knot/Knot/src/qmlsrc
 
+      - name: Package tarball (portable)
+        run: |
+          if [ ! -d "AppDir" ]; then
+            echo "ERROR: 未找到 AppDir/，说明 linuxdeployqt 的 -appimage 未按预期生成目录"
+            exit 1
+          fi
+
+          # 重命名顶层目录，解压后即为 Knot/
+          rm -rf "${targetName}"
+          mv AppDir "${targetName}"
+          chmod +x "${targetName}/AppRun"
+
+          echo "=== 顶层内容 ==="
+          ls -la "${targetName}/"
+
+          tar -czf "${targetName}-${VERSION}-x86_64.tar.gz" "${targetName}"
+
+          echo "=== 产物 ==="
+          ls -lh "${targetName}-${VERSION}-x86_64.tar.gz"
+          echo "=== 归档预览 ==="
+          tar -tzf "${targetName}-${VERSION}-x86_64.tar.gz" | head -30
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
@@ -183,5 +205,20 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
           asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.tar.gz
+          path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz
+
+      - name: uploadRelease (tar.gz)
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
