@@ -36,14 +36,9 @@ jobs:
       QT_VERSION: ${{ matrix.qt_ver }}
       QT_ARCH: gcc_64
       QT_INSTALL_DIR: /opt/qt/QT_VERSION/gcc_64
-      # 包元信息，给deb/rpm共用
-      PKG_NAME: knot
-      PKG_DISPLAY_NAME: Knot
-      PKG_VERSION: 1.0.0
-      PKG_ARCH: amd64
-      PKG_MAINTAINER: Knot Developer
-      PKG_DESCRIPTION: Knot Qt Application
-      DESKTOP_FILE: bin/release/default.desktop
+
+      #QT_INSTALL_QML: /opt/qt/QT_VERSION/gcc_64/qml
+      #QML2_IMPORT_PATH: ${{ github.workspace }}/qml:/opt/qt/QT_VERSION/gcc_64/qml
 
     steps:
       - name: Install Qt
@@ -53,9 +48,8 @@ jobs:
           cached: 'false'
           modules: qtcharts qtsensors qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
 
-      - name: ubuntu install GL library & build deps + rpmbuild
+      - name: ubuntu install GL library
         run: |
-          sudo apt-get update
           sudo apt-get install -y libglew-dev libglfw3-dev libxcb*
           sudo apt-get install libxkbcommon-dev
           sudo add-apt-repository universe
@@ -63,8 +57,6 @@ jobs:
           sudo apt-get install libsecret-1-dev
           sudo apt-get install -y libqt6serialport6
           sudo apt-get install -y libibus-1.0-dev ibus libglib2.0-dev
-          # 新增：appdir2deb / appdir2rpm 依赖
-          sudo apt-get install -y fakeroot dpkg-dev wget curl
 
       - uses: actions/checkout@v4
         with:
@@ -75,35 +67,23 @@ jobs:
           cmake -B build \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
-
           cmake --build build --config Release --parallel 2
-
           echo "=== 对齐产物路径 ==="
           mkdir -p bin/release
-
           if [ ! -f "bin/release/${{ env.targetName }}" ]; then
-            echo "未在 bin/release 找到产物，尝试从 build 目录复制..."
             cp "build/${{ env.targetName }}" "bin/release/${{ env.targetName }}"
           else
             echo "产物已在 bin/release 目录中，跳过复制"
           fi
-
           chmod +x "bin/release/${{ env.targetName }}"
+          echo "=== 验证产物 ==="
           ls -la bin/release/${{ env.targetName }}
           file bin/release/${{ env.targetName }}
 
       - name: install linuxdeployqt
         run: |
-          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+          wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/内部工具/continuous/linuxdeployqt-continuous-x86_64.AppImage"
           chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-
-      - name: Install appdir2deb + appdir2rpm
-        run: |
-          # appdir2系列工具：一键把linuxdeploy AppDir转为deb/rpm
-          wget -c -nv https://github.com/TheAssassin/appdir2deb/releases/download/continuous/appdir2deb-x86_64.AppImage
-          wget -c -nv https://github.com/TheAssassin/appdir2rpm/releases/download/continuous/appdir2rpm-x86_64.AppImage
-          chmod +x appdir2deb-x86_64.AppImage
-          chmod +x appdir2rpm-x86_64.AppImage
 
       - name: Remove unused SQL drivers (SAFE MODE)
         run: |
@@ -122,9 +102,10 @@ jobs:
           echo "SQLite驱动状态:"
           ldd "$QT_PLUGINS_DIR/sqldrivers/libqsqlite.so" || true
 
-      - name: package AppDir (linuxdeployqt)
+      # ========== 打包 1/4: AppImage ==========
+      - name: package AppImage
         run: |
-          cp res/icon.png bin/release/icon.png
+          cp resicon.png binicon.png
           cp res/default.desktop bin/release/default.desktop
           cp ExtBin/linux/AppRun bin/release/AppRun
           chmod +x bin/release/AppRun
@@ -173,49 +154,162 @@ jobs:
           export QT_QPA_PLATFORM_PLUGIN_PATH="/home/runner/work/Knot/Qt/$QT_VERSION/gcc_64/plugins/platforms"
           export VERSION
 
-          # 重点：这里只生成AppDir，-appimage不再在这里执行，后面单独导出AppImage
-          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${targetName} \
+          ./linuxdeployqt-continuous-x86_64.AppImage bin/release/${{ env.targetName }} \
                    -unsupported-allow-new-glibc \
                    -qmake=/home/runner/work/Knot/Qt/${{ matrix.qt_ver }}/gcc_64/bin/qmake \
+                   -appimage \
                    -extra-plugins=platforminputcontexts \
                    -no-strip
 
-      - name: Generate AppImage from AppDir
+      # ========== 打包 2/4: tar.gz (便携压缩包) ==========
+      - name: package tar.gz (portable)
         run: |
-          wget -c -nv https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x appimagetool-x86_64.AppImage
-          ./appimagetool-x86_64.AppImage AppDir ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
+          # linuxdeployqt 的 -appimage 选项会同时生成 AppDir 目录
+          if [ ! -d "AppDir" ]; then
+            echo "ERROR: 未找到 AppDir/，请检查上面的 linuxdeployqt 步骤是否成功"
+            exit 1
+          fi
 
-      - name: Generate portable tar.gz (from AppDir,同源)
+          # 清理旧的打包目录
+          rm -rf "${{ env.targetName }}-Linux-x86_64"
+
+          # 将 AppDir 内容复制到命名目录
+          cp -r AppDir "${{ env.targetName }}-Linux-x86_64"
+
+          # 确保 AppRun 有执行权限
+          chmod +x "${{ env.targetName }}-Linux-x86_64/AppRun"
+
+          # 打包为 tar.gz
+          tar -czf "${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz" "${{ env.targetName }}-Linux-x86_64"
+
+          echo "=== 产物 ==="
+          ls -lh "${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz"
+          echo "=== 归档预览 ==="
+          tar -tzf "${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz" | head -30
+
+      # ========== 打包 3/4: .deb (Debian/Ubuntu) ==========
+      - name: package deb
         run: |
-          tar -czf ${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz AppDir
-          ls -lh ${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz
+          which dpkg-deb || sudo apt-get install -y dpkg
 
-      - name: Generate deb package
+          if [ ! -d "AppDir" ]; then
+            echo "ERROR: 未找到 AppDir/，请先执行 AppImage 打包步骤"
+            exit 1
+          fi
+
+          # 创建 deb 包目录结构
+          DEB_PACKAGE="deb-pkg/${{ env.targetName }}"
+          rm -rf "$DEB_PACKAGE"
+          mkdir -p "$DEB_PACKAGE/DEBIAN"
+          mkdir -p "$DEB_PACKAGE/opt/${{ env.targetName }}"
+          mkdir -p "$DEB_PACKAGE/usr/bin"
+          mkdir -p "$DEB_PACKAGE/usr/share/applications"
+          mkdir -p "$DEB_PACKAGE/usr/share/icons/hicolor/256x256/apps"
+
+          # 复制 AppDir 内容到 /opt/ 目录
+          cp -r AppDir/* "$DEB_PACKAGE/opt/${{ env.targetName }}/"
+
+          # 创建桌面启动器符号链接
+          ln -s "/opt/${{ env.targetName }}/AppRun" "$DEB_PACKAGE/usr/bin/${{ env.targetName }}"
+
+          # 复制桌面文件（如果 AppDir 中有）
+          if ls AppDir/usr/share/applications/*.desktop 1>/dev/null 2>&1; then
+            cp AppDir/usr/share/applications/*.desktop "$DEB_PACKAGE/usr/share/applications/"
+          fi
+
+          # 复制图标（如果 AppDir 中有）
+          if ls AppDir*.png 1>/dev/null 2>&1; then
+            cp AppDir*.png "$DEB_PACKAGE/usr/share/icons/hicolor/256x256/apps/"
+          fi
+
+          # 创建 control 文件
+          cat > "$DEB_PACKAGE/DEBIAN/control" << DEOF
+Package: ${{ env.targetName }}
+Version: 1.0-${{ env.VERSION }}
+Section: x11
+Priority: optional
+Architecture: amd64
+Maintainer: GitHub Actions <actions@github.com>
+Description: ${{ env.targetName }} - Qt Application
+ A cross-platform Qt application.
+Homepage: https://github.com/${{ github.repository }}
+Installed-Size: $(du -sk "$DEB_PACKAGE" | cut -f1)
+DEOF
+
+          # 构建 deb 包
+          dpkg-deb --build --root-owner-group "$DEB_PACKAGE" "${{ env.targetName }}_${{ env.VERSION }}_amd64.deb"
+
+          echo "=== 产物 ==="
+          ls -lh "${{ env.targetName }}_${{ env.VERSION }}_amd64.deb"
+
+      # ========== 打包 4/4: .rpm (Fedora/openSUSE/RHEL) ==========
+      - name: package rpm
         run: |
-          ./appdir2deb-x86_64.AppImage \
-            --name ${{ env.PKG_NAME }} \
-            --version ${{ env.PKG_VERSION }} \
-            --arch ${{ env.PKG_ARCH }} \
-            --maintainer "${{ env.PKG_MAINTAINER }}" \
-            --description "${{ env.PKG_DESCRIPTION }}" \
-            --output ${{ env.targetName }}-${{ env.VERSION }}-x86_64.deb \
-            AppDir
-          ls -lh ${{ env.targetName }}-${{ env.VERSION }}-x86_64.deb
+          sudo apt-get install -y rpm
 
-      - name: Generate rpm package
-        run: |
-          ./appdir2rpm-x86_64.AppImage \
-            --name ${{ env.PKG_NAME }} \
-            --version ${{ env.PKG_VERSION }} \
-            --release 1 \
-            --arch x86_64 \
-            --summary "${{ env.PKG_DESCRIPTION }}" \
-            --output ${{ env.targetName }}-${{ env.VERSION }}-x86_64.rpm \
-            AppDir
-          ls -lh ${{ env.targetName }}-${{ env.VERSION }}-x86_64.rpm
+          if [ ! -d "AppDir" ]; then
+            echo "ERROR: 未找到 AppDir/，请先执行 AppImage 打包步骤"
+            exit 1
+          fi
 
-      # ========== 4个产物全部上传artifact ==========
+          # 创建 rpmbuild 目录结构
+          RPM_WORK=rpmbuild-work
+          rm -rf "$RPM_WORK"
+          mkdir -p "$RPM_WORK/{BUILD,RPMS,SOURCES,SPECS,SRPMS}"
+
+          # 复制 AppDir 到 SOURCES 目录
+          cp -r AppDir "$RPM_WORK/SOURCES/${{ env.targetName }}-Linux-x86_64"
+
+          # 创建 spec 文件
+          cat > "$RPM_WORK/SPECS/${{ env.targetName }}.spec" << SPEOF
+Name:   ${{ env.targetName }}
+Version: 1.0
+Release: 1.${{ env.VERSION }}
+Summary: ${{ env.targetName }} - Qt Application
+License: MIT
+URL: https://github.com/${{ github.repository }}
+BuildArch: x86_64
+BuildRoot: %{_tmppath}/%{name}-build
+
+%description
+${{ env.targetName }} application for Linux.
+
+%install
+mkdir -p %{buildroot}/opt/${{ env.targetName }}
+cp -a $RPM_BUILD_DIR/${{ env.targetName }}-Linux-x86_64/* %{buildroot}/opt/${{ env.targetName }}/
+mkdir -p %{buildroot}/usr/bin
+ln -s /opt/${{ env.targetName }}/AppRun %{buildroot}/usr/bin/${{ env.targetName }}
+
+%files
+/opt/${{ env.targetName }}
+/usr/bin/${{ env.targetName }}
+
+%post
+echo "Installed ${{ env.targetName }} to /opt/${{ env.targetName }}"
+
+%preun
+echo "Removing ${{ env.targetName }} from /opt/${{ env.targetName }}"
+SPEOF
+
+          # 构建 rpm 包
+          rpmbuild -bb "$RPM_WORK/SPECS/${{ env.targetName }}.spec" \
+                   --define "_topdir $RPM_WORK" \
+                   --define "_buildrootdir $RPM_WORK/BUILD"
+
+          # 查找生成的 rpm 文件
+          RPM_FILE=$(find "$RPM_WORK/RPMS/x86_64/" -name "${{ env.targetName }}*.rpm" 2>/dev/null | head -1)
+          if [ -z "$RPM_FILE" ]; then
+            echo "ERROR: 未找到生成的 rpm 文件"
+            ls -la "$RPM_WORK/RPMS/x86_64/" || echo "RPMS目录为空"
+            exit 1
+          fi
+
+          cp "$RPM_FILE" "${{ env.targetName }}-1.0-${{ env.VERSION }}.x86_64.rpm"
+
+          echo "=== 产物 ==="
+          ls -lh "${{ env.targetName }}-1.0-${{ env.VERSION }}.x86_64.rpm"
+
+      # ========== 上传 Artifacts ==========
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
@@ -228,16 +322,16 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.deb
-          path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.deb
+          name: ${{ env.orgName }}-${{ env.VERSION }}-amd64.deb
+          path: ${{ env.targetName }}_${{ env.VERSION }}_amd64.deb
 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.rpm
-          path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.rpm
+          path: ${{ env.targetName }}-1.0-${{ env.VERSION }}.x86_64.rpm
 
-      # ========== Release上传4个包 ==========
-      - name: uploadRelease AppImage
+      # ========== 上传 Release (仅 tag 发布时) ==========
+      - name: uploadRelease
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
@@ -247,7 +341,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
-      - name: uploadRelease tar.gz
+      - name: uploadRelease (tar.gz)
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
@@ -257,22 +351,22 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
-      - name: uploadRelease deb
+      - name: uploadRelease (deb)
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.deb
-          asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.deb
+          file: ${{ env.targetName }}_${{ env.VERSION }}_amd64.deb
+          asset_name: ${{ env.orgName }}-${{ env.VERSION }}_amd64.deb
           tag: ${{ github.ref }}
           overwrite: true
 
-      - name: uploadRelease rpm
+      - name: uploadRelease (rpm)
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.rpm
+          file: ${{ env.targetName }}-1.0-${{ env.VERSION }}.x86_64.rpm
           asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.rpm
           tag: ${{ github.ref }}
           overwrite: true
