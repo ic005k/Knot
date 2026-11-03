@@ -965,9 +965,22 @@ static void PublicJavaCallCpp(JNIEnv* env, jclass clazz, jstring type) {
           }
 
           if (strType == "todo_recycle") {
-            QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->m_Todo->on_btnRecycle(); });
+            safeDelayedInvoke(100, []() { mw_one->m_Todo->on_btnRecycle(); });
           }
+
+          /*if (strType == "todo_recycle") {
+            // 使用 Qt::QueuedConnection 强制将调用 post 到 mw_one 所在的 Qt
+            // 主线程事件循环中
+            QMetaObject::invokeMethod(
+                mw_one,
+                []() {
+                  // 此时已经在 Qt 主线程，可以安全使用 QTimer
+                  // 全局变量 mw_one 可直接访问，无需捕获
+                  QTimer::singleShot(100, mw_one,
+                                     []() { mw_one->m_Todo->on_btnRecycle(); });
+                },
+                Qt::QueuedConnection);
+          }*/
 
           if (strType == "todo_recycle_clearall") {
             QTimer::singleShot(100, mw_one,

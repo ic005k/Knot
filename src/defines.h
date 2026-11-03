@@ -3,9 +3,11 @@
 
 #include <qglobal.h>
 
+#include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QFile>
+#include <QMetaObject>
 #include <QPointer>
 #include <QRegularExpression>
 #include <QSettings>
@@ -13,9 +15,11 @@
 #include <QTabWidget>
 #include <QTextBlock>
 #include <QTextEdit>
+#include <QTimer>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <atomic>
+#include <utility>
 
 #include "CloudBackup.h"
 #include "Comm/Method.h"
@@ -299,4 +303,32 @@ static inline bool isCjkChar(QChar ch) {
 // 判断是否为空白字符（空格、制表符、换行等）
 static inline bool isSpaceChar(QChar ch) {
   return ch.isSpace() || ch == '\n' || ch == '\r' || ch == '\t';
+}
+
+/**
+ * @brief [Qt6] 跨线程安全的延迟执行函数
+ * @param msec 延迟时间（毫秒）
+ * @param func 要执行的 Lambda 表达式或可调用对象
+ * @note 自动处理 JNI/Android UI 线程到 Qt 主线程的安全派发
+ */
+template <typename Func>
+inline void safeDelayedInvoke(int msec, Func&& func) {
+  // Qt6 中 qApp 是类型安全的，且生命周期与 App 完全一致
+  // Qt::AutoConnection:
+  //   - 在 JNI 等非主线程调用时 -> 自动转为 QueuedConnection (安全派发)
+  //   - 在 Qt 主线程调用时 -> 自动转为 DirectConnection (零开销直接执行)
+  QMetaObject::invokeMethod(
+      qApp,
+      [msec, f = std::forward<Func>(func)]() mutable {
+        QTimer::singleShot(msec, qApp, std::move(f));
+      },
+      Qt::AutoConnection);
+}
+
+/**
+ * @brief [Qt6] 跨线程安全立即执行（无延迟版本）
+ */
+template <typename Func>
+inline void safeInvoke(Func&& func) {
+  QMetaObject::invokeMethod(qApp, std::forward<Func>(func), Qt::AutoConnection);
 }
