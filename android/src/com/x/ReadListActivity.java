@@ -114,7 +114,7 @@ public class ReadListActivity extends AppCompatActivity {
 
         btnOpen.setOnClickListener(
                 v -> {
-                    MyActivity.m_instance.openFilePicker();
+                    MyActivity.mInstance.openFilePicker();
                     finish();
                 });
 
@@ -128,7 +128,7 @@ public class ReadListActivity extends AppCompatActivity {
                     String filePath = sel.getFilePath();
                     if (filePath == null || filePath.isEmpty()) return;
 
-                    MyActivity.m_instance.setTempSwapStr(filePath);
+                    MyActivity.mInstance.setTempSwapStr(filePath);
                     PublicJavaCallCpp("read_book_file");
                     finish();
                 });
@@ -140,8 +140,8 @@ public class ReadListActivity extends AppCompatActivity {
                         showSelectBookTip();
                         return;
                     }
-                    MyActivity.m_instance.shareImage(
-                            sel.getTitle(), sel.getFilePath(), "*/*", MyActivity.m_instance);
+                    MyActivity.mInstance.shareImage(
+                            sel.getTitle(), sel.getFilePath(), "*/*", MyActivity.mInstance);
                 });
 
         btnRemove.setOnClickListener(
@@ -185,7 +185,7 @@ public class ReadListActivity extends AppCompatActivity {
                             .setPositiveButton(
                                     MyActivity.zh_cn ? "确定" : "OK",
                                     (dialog, which) -> {
-                                        MyActivity.m_instance.setTempSwapStr(rawName);
+                                        MyActivity.mInstance.setTempSwapStr(rawName);
                                         PublicJavaCallCpp("clear_reader_records");
                                     })
                             .setNegativeButton(MyActivity.zh_cn ? "取消" : "Cancel", null)

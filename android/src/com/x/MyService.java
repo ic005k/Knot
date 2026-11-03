@@ -1591,11 +1591,11 @@ public class MyService extends Service {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 // 尝试获取Activity实例并激活窗口
                 if (
-                    MyActivity.m_instance != null &&
-                    !MyActivity.m_instance.isFinishing() &&
-                    !MyActivity.m_instance.isDestroyed()
+                    MyActivity.mInstance != null &&
+                    !MyActivity.mInstance.isFinishing() &&
+                    !MyActivity.mInstance.isDestroyed()
                 ) {
-                    Window window = MyActivity.m_instance.getWindow();
+                    Window window = MyActivity.mInstance.getWindow();
                     if (window != null) {
                         window.addFlags(
                             WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
@@ -1620,14 +1620,14 @@ public class MyService extends Service {
             // 强制激活窗口 + 清除输入法焦点
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (
-                    MyActivity.m_instance != null &&
-                    !MyActivity.m_instance.isFinishing() &&
-                    !MyActivity.m_instance.isDestroyed()
+                    MyActivity.mInstance != null &&
+                    !MyActivity.mInstance.isFinishing() &&
+                    !MyActivity.mInstance.isDestroyed()
                 ) {
                     hideSoftInput();
                     forceDisconnectInputMethod();
                     // 强制刷新UI
-                    MyActivity.m_instance
+                    MyActivity.mInstance
                         .getWindow()
                         .getDecorView()
                         .postInvalidate();
@@ -1642,7 +1642,7 @@ public class MyService extends Service {
      * 隐藏软键盘（适配Service）
      */
     private void hideSoftInput() {
-        if (MyActivity.m_instance == null) {
+        if (MyActivity.mInstance == null) {
             Log.e(TAG, "hideSoftInput失败：MyActivity实例为空");
             return;
         }
@@ -1652,7 +1652,7 @@ public class MyService extends Service {
         );
         if (imm == null) return;
 
-        View currentFocus = MyActivity.m_instance.getCurrentFocus();
+        View currentFocus = MyActivity.mInstance.getCurrentFocus();
         if (currentFocus != null) {
             imm.hideSoftInputFromWindow(
                 currentFocus.getWindowToken(),
@@ -1698,28 +1698,28 @@ public class MyService extends Service {
      */
     public static void forceDisconnectInputMethod() {
         if (
-            MyActivity.m_instance == null ||
-            MyActivity.m_instance.isFinishing() ||
-            MyActivity.m_instance.isDestroyed()
+            MyActivity.mInstance == null ||
+            MyActivity.mInstance.isFinishing() ||
+            MyActivity.mInstance.isDestroyed()
         ) {
             return;
         }
 
         try {
             InputMethodManager imm =
-                (InputMethodManager) MyActivity.m_instance.getSystemService(
+                (InputMethodManager) MyActivity.mInstance.getSystemService(
                     Context.INPUT_METHOD_SERVICE
                 );
             if (imm == null) return;
 
             // 1. 清除当前输入框焦点（最关键！）
-            View focusView = MyActivity.m_instance.getCurrentFocus();
+            View focusView = MyActivity.mInstance.getCurrentFocus();
             if (focusView != null) {
                 focusView.clearFocus();
             }
 
             // 2. 强制隐藏键盘
-            View decorView = MyActivity.m_instance.getWindow().getDecorView();
+            View decorView = MyActivity.mInstance.getWindow().getDecorView();
             imm.hideSoftInputFromWindow(
                 decorView.getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS

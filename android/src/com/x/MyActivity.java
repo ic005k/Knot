@@ -140,7 +140,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     public static boolean isBackMainUI = false;
 
     public static boolean isDark = false;
-    public static MyActivity m_instance = null;
+
     public static MyActivity mInstance = null;
     private static Application sAppContext;
 
@@ -214,7 +214,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     public static void setVibrate() {
-        VibrateUtils.vibrate(m_instance, 50);
+        VibrateUtils.vibrate(mInstance, 50);
     }
 
     // ------------------------------------------------------------------------
@@ -229,7 +229,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     // ------------------------------------------------------------------------
     public static void setMini() {
-        m_instance.moveTaskToBack(true);
+        mInstance.moveTaskToBack(true);
     }
 
     // ----------------------------------------------------------------------
@@ -347,7 +347,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
         // 轻量初始化（必须同步执行，确保JNI环境基础就绪）
         isZh(this);
-        m_instance = this;
+
         mInstance = this;
         sAppContext = getApplication();
         Log.d(TAG, "Android activity created (config change: " + isConfigChangeRecreate + ")");
@@ -624,7 +624,6 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         // ========== 优化点4：仅在非配置变更时，清空静态引用（避免重构后引用丢失） ==========
         if (!isConfigChangeRecreate) {
             mapActivityInstance = null;
-            m_instance = null;
             mInstance = null;
             sAppContext = null;
         }
@@ -1035,7 +1034,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     public static boolean checkCamera() {
         int permissionRecordCamera =
-                ActivityCompat.checkSelfPermission(m_instance, "android.permission.CAMERA");
+                ActivityCompat.checkSelfPermission(mInstance, "android.permission.CAMERA");
         if (permissionRecordCamera != PackageManager.PERMISSION_GRANTED) {
             return false;
         } else {
@@ -1045,7 +1044,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     public static int checkRecordAudio() {
         int permissionRecordCamera =
-                ActivityCompat.checkSelfPermission(m_instance, "android.permission.RECORD_AUDIO");
+                ActivityCompat.checkSelfPermission(mInstance, "android.permission.RECORD_AUDIO");
         if (permissionRecordCamera != PackageManager.PERMISSION_GRANTED) {
             return 0;
         } else {
@@ -1931,39 +1930,39 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     public static void launchWebView_Old() {
-        if (m_instance != null) {
+        if (mInstance != null) {
             // 检测系统是否支持 WebView
             if (isWebViewAvailable()) {
-                WebViewActivity.openLocalHtml(m_instance);
+                WebViewActivity.openLocalHtml(mInstance);
             } else {
                 // 根据 zh_cn 变量自动显示中文/英文提示
                 String tip = "Please install Android System WebView to view Markdown";
                 if (zh_cn) {
                     tip = "请安装 Android System WebView 以查看 Markdown 文件";
                 }
-                Toast.makeText(m_instance, tip, Toast.LENGTH_LONG).show();
+                Toast.makeText(mInstance, tip, Toast.LENGTH_LONG).show();
             }
         }
     }
 
     public static void launchWebView() {
-        if (m_instance == null) return;
+        if (mInstance == null) return;
 
-        m_instance.runOnUiThread(
+        mInstance.runOnUiThread(
                 () -> {
-                    Intent intent = new Intent(m_instance, WebViewActivity.class);
+                    Intent intent = new Intent(mInstance, WebViewActivity.class);
                     // 加这一行，让系统认为这是正常APP页面
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     // 再加这一行，让WebView获取合法令牌
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    m_instance.startActivity(intent);
+                    mInstance.startActivity(intent);
                 });
     }
 
     public static void launchWebView_InBrowser() {
-        if (m_instance == null) return;
+        if (mInstance == null) return;
 
-        m_instance.runOnUiThread(
+        mInstance.runOnUiThread(
                 () -> {
                     try {
                         // 你的文件
@@ -1980,7 +1979,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
                         Intent chooser =
                                 Intent.createChooser(
                                         intent, MyActivity.zh_cn ? "打开方式" : "Open with");
-                        m_instance.startActivity(chooser);
+                        mInstance.startActivity(chooser);
                     } catch (Exception e) {
                         // 不弹任何Toast，避免干扰
                     }
@@ -2135,8 +2134,8 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     public static Context getMyAppContext() {
         if (sAppContext != null) {
             return sAppContext;
-        } else if (m_instance != null) {
-            return m_instance.getApplicationContext();
+        } else if (mInstance != null) {
+            return mInstance.getApplicationContext();
         }
         return null;
     }
@@ -2209,7 +2208,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     public static int getHardStepCounter() {
-        Activity activity = m_instance;
+        Activity activity = mInstance;
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
             MyService.isStepCounter = 0;
             return MyService.isStepCounter;
@@ -2603,16 +2602,16 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     public float getSystemFontScale() {
-        if (m_instance == null) return 1.0f;
-        return m_instance.getResources().getConfiguration().fontScale;
+        if (mInstance == null) return 1.0f;
+        return mInstance.getResources().getConfiguration().fontScale;
     }
 
     public float getSystemDefaultTextSizePx() {
-        if (m_instance == null) return (14.0f * getResources().getDisplayMetrics().scaledDensity);
+        if (mInstance == null) return (14.0f * getResources().getDisplayMetrics().scaledDensity);
         android.util.TypedValue tv = new android.util.TypedValue();
         // 读取系统属性 ?attr/textAppearanceBodyMedium 或回退到 14sp
         // 这里直接用 DisplayMetrics.scaledDensity × 14 作为安全兜底
-        return (14.0f * m_instance.getResources().getDisplayMetrics().scaledDensity);
+        return (14.0f * mInstance.getResources().getDisplayMetrics().scaledDensity);
     }
 
     /** 供 ReadListActivity.onCreate 调用 */

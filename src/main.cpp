@@ -57,8 +57,8 @@ float getJavaFuncFloat(QString mInstance, QString callJavaName,
 
 void applyAndroidFont() {
 #ifdef Q_OS_ANDROID
-  float nativePx = getJavaFuncFloat("m_instance", "getSystemDefaultTextSizePx",
-                                    "MyActivity");
+  float nativePx =
+      getJavaFuncFloat("mInstance", "getSystemDefaultTextSizePx", "MyActivity");
   if (nativePx <= 0.0f) nativePx = 14.0f;
 
   // ⭐ 关键：抵消 Qt 对 setPixelSize 的隐式 DPI 二次补偿
@@ -178,10 +178,6 @@ int main(int argc, char* argv[]) {
   loadLocal();
 
 #ifdef Q_OS_ANDROID
-
-  // float fontScale = 1.0f;
-  // fontScale =
-  //     getJavaFuncFloat("m_instance", "getSystemFontScale", "MyActivity");
 
   applyAndroidFont();
 

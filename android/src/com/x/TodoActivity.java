@@ -144,13 +144,13 @@ public class TodoActivity extends AppCompatActivity {
         mInstance = null;
         //PublicJavaCallCpp("todo_activity_destroy");
         if (
-            MyActivity.m_instance != null &&
-            !MyActivity.m_instance.isFinishing() &&
-            !MyActivity.m_instance.isDestroyed()
+            MyActivity.mInstance != null &&
+            !MyActivity.mInstance.isFinishing() &&
+            !MyActivity.mInstance.isDestroyed()
         ) {
-            MyActivity.m_instance.runOnUiThread(() -> {
-                MyActivity.m_instance.getWindow().getDecorView().requestFocus();
-                MyActivity.m_instance
+            MyActivity.mInstance.runOnUiThread(() -> {
+                MyActivity.mInstance.getWindow().getDecorView().requestFocus();
+                MyActivity.mInstance
                     .getWindow()
                     .getDecorView()
                     .postInvalidate();

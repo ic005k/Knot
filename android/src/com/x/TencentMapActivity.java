@@ -488,13 +488,13 @@ public class TencentMapActivity extends MapActivity {
                 // 第一步：关闭当前TencentMapActivity
                 finish();
 
-                // 第二步：调用MyActivity的openMapWindow()（使用真实的m_instance变量）
-                if (MyActivity.m_instance != null) {
+                // 第二步：调用MyActivity的openMapWindow()（使用真实的mInstance变量）
+                if (MyActivity.mInstance != null) {
                     // 调用MyActivity中真实存在的openMapWindow()方法
-                    MyActivity.m_instance.openMapWindow();
+                    MyActivity.mInstance.openMapWindow();
                     Log.d(TAG, "已调用MyActivity.openMapWindow()重新打开地图");
                 } else {
-                    Log.w(TAG, "MyActivity.m_instance为空，无法重新打开地图");
+                    Log.w(TAG, "MyActivity.mInstance为空，无法重新打开地图");
                     // 兜底方案：直接启动TencentMapActivity（避免完全失效）
                     Intent intent = new Intent(
                         TencentMapActivity.this,

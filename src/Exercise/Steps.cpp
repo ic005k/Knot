@@ -1753,6 +1753,8 @@ void Steps::updateGpsTrack() {
 }
 
 void Steps::updateGpsMapUi() {
+  m_Method->execJavaFunc("mInstance", "dismissAiLoadingDialog",
+                         "SportChartActivity");
   if (isGpsMapTrackFile) {
     openMapWindow();
     appendTrackPointAndroid(lastLat, lastLon);

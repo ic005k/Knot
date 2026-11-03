@@ -201,7 +201,7 @@ public class ImageViewerActivity
 
         shareButton.setOnClickListener(v -> {
             String path = MyActivity.strImageFile;
-            MyActivity mAct = MyActivity.m_instance;
+            MyActivity mAct = MyActivity.mInstance;
             if (mAct != null) {
                 // 根据全局zh_cn切换标题文字
                 String shareTitle = MyActivity.zh_cn

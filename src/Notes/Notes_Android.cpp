@@ -176,7 +176,7 @@ void Notes::openNoteWindow() {
   }
 
   QJniObject instance = QJniObject::getStaticObjectField(
-      "com/x/MyActivity", "m_instance", "Lcom/x/MyActivity;");
+      "com/x/MyActivity", "mInstance", "Lcom/x/MyActivity;");
 
   if (instance.isValid()) {
     instance.callMethod<void>("openNoteWindow", "(Ljava/util/ArrayList;)V",

@@ -43,7 +43,7 @@ public class DataReportActivity extends AppCompatActivity {
         OnBackPressedCallback backCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                //MyActivity.m_instance.PublicJavaCallCpp("cancel_data_report");
+                //MyActivity.mInstance.PublicJavaCallCpp("cancel_data_report");
                 finish();
             }
         };
@@ -167,7 +167,7 @@ public class DataReportActivity extends AppCompatActivity {
         btnDetail.setLayoutParams(lpD);
         btnDetail.setOnClickListener(v -> {
             if (mSelectedPos >= 0) {
-                MyActivity.m_instance.PublicJavaCallCpp(
+                MyActivity.mInstance.PublicJavaCallCpp(
                     "data_report_detail|==|" + mSelectedPos
                 );
             }
@@ -185,7 +185,7 @@ public class DataReportActivity extends AppCompatActivity {
         lpC.setMargins(dp(12), 0, dp(6), 0);
         btnCategory.setLayoutParams(lpC);
         btnCategory.setOnClickListener(v -> {
-            MyActivity.m_instance.PublicJavaCallCpp("data_report_category");
+            MyActivity.mInstance.PublicJavaCallCpp("data_report_category");
         });
         bottomBar.addView(btnCategory);
 
@@ -253,7 +253,7 @@ public class DataReportActivity extends AppCompatActivity {
         b.setView(container);
         b.setPositiveButton(android.R.string.ok, (d, w) -> {
             int y = np.getValue();
-            MyActivity.m_instance.PublicJavaCallCpp("data_report_year|==|" + y);
+            MyActivity.mInstance.PublicJavaCallCpp("data_report_year|==|" + y);
         });
         b.setNegativeButton(android.R.string.cancel, null);
         b.show();
@@ -299,7 +299,7 @@ public class DataReportActivity extends AppCompatActivity {
             int y = npY.getValue();
             int m = npM.getValue();
             String val = String.format("%d-%02d", y, m);
-            MyActivity.m_instance.PublicJavaCallCpp("data_report_ym|==|" + val);
+            MyActivity.mInstance.PublicJavaCallCpp("data_report_ym|==|" + val);
         });
         b.setNegativeButton(android.R.string.cancel, null);
         b.show();
@@ -399,7 +399,7 @@ public class DataReportActivity extends AppCompatActivity {
                 npEDay.getValue()
             );
 
-            MyActivity.m_instance.PublicJavaCallCpp(
+            MyActivity.mInstance.PublicJavaCallCpp(
                 "data_report_range|==|" + s + "|==|" + e
             );
         });
@@ -655,7 +655,7 @@ public class DataReportActivity extends AppCompatActivity {
             btnAi.setLayoutParams(lpAi);
             btnAi.setOnClickListener(v -> {
                 showAiLoadingDialog();
-                MyActivity.m_instance.PublicJavaCallCpp(
+                MyActivity.mInstance.PublicJavaCallCpp(
                     "data_category_ai_analysis"
                 );
             });
@@ -695,7 +695,7 @@ public class DataReportActivity extends AppCompatActivity {
                         cateText = parts[0];
                     }
                     // 回调C++，带上分类文本
-                    MyActivity.m_instance.PublicJavaCallCpp(
+                    MyActivity.mInstance.PublicJavaCallCpp(
                         "data_category_detail|==|" + cateText
                     );
                 }

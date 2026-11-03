@@ -395,7 +395,7 @@ public class AddEventRecord extends AppCompatActivity {
         String finalAmount = etAmount.getText().toString();
 
         // TODO：把 finalTitle、finalCategory、finalNote、finalAmount、finalTimeTag 回传给C++
-        MyActivity.m_instance.setTempSwapStr(
+        MyActivity.mInstance.setTempSwapStr(
             finalCategory +
                 "|==|" +
                 finalNote +
@@ -418,7 +418,7 @@ public class AddEventRecord extends AppCompatActivity {
 
     private List<String> getHistoryCategoryFromCpp() {
         List<String> list = new ArrayList<>();
-        String raw = MyActivity.m_instance.getTempSwapStr();
+        String raw = MyActivity.mInstance.getTempSwapStr();
         if (raw == null || raw.isEmpty()) {
             return list;
         }

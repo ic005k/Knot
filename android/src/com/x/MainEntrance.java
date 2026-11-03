@@ -132,7 +132,7 @@ public class MainEntrance extends AppCompatActivity {
         mBackCallback = new OnBackPressedCallback(true /* enabled */) {
             @Override
             public void handleOnBackPressed() {
-                MyActivity.m_instance.moveTaskToBack(true);
+                MyActivity.mInstance.moveTaskToBack(true);
             }
         };
         getOnBackPressedDispatcher().addCallback(this, mBackCallback);
@@ -392,14 +392,14 @@ public class MainEntrance extends AppCompatActivity {
 
         // ✅ 新增：主动恢复 Qt Activity 焦点和渲染
         if (
-            MyActivity.m_instance != null &&
-            !MyActivity.m_instance.isFinishing() &&
-            !MyActivity.m_instance.isDestroyed()
+            MyActivity.mInstance != null &&
+            !MyActivity.mInstance.isFinishing() &&
+            !MyActivity.mInstance.isDestroyed()
         ) {
-            MyActivity.m_instance.runOnUiThread(() -> {
+            MyActivity.mInstance.runOnUiThread(() -> {
                 // 请求焦点 + 重绘，触发 Qt GL 恢复
-                MyActivity.m_instance.getWindow().getDecorView().requestFocus();
-                MyActivity.m_instance
+                MyActivity.mInstance.getWindow().getDecorView().requestFocus();
+                MyActivity.mInstance
                     .getWindow()
                     .getDecorView()
                     .postInvalidate();
