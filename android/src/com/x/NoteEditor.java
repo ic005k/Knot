@@ -505,37 +505,9 @@ public class NoteEditor
 
     //======================================
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
-
     public static native void CallJavaNotify_16();
+
+    public static native void PublicJavaCallCpp(String msg);
 
     // 传递全文文本与光标位置至C++，生成AI关联链接元数据
     public static native void generateAiLinkMetadata(
@@ -1110,14 +1082,6 @@ public class NoteEditor
 
     @Override
     public void onBackPressed() {
-        /*if (isTextChanged) showNormalDialog();
-        else {
-            if (isSaved) {
-                CallJavaNotify_6();
-            }
-            super.onBackPressed();
-        }*/
-
         super.onBackPressed();
     }
 
@@ -1154,7 +1118,7 @@ public class NoteEditor
 
         if (needRefreshNoteList) {
             try {
-                CallJavaNotify_6();
+                PublicJavaCallCpp("javaNoteToQMLNote");
             } catch (Exception e) {}
 
             needRefreshNoteList = false;
@@ -1656,7 +1620,7 @@ public class NoteEditor
         System.out.println("open image file=" + filePath);
         // "/storage/emulated/0/.Knot/receive_share_pic.png");
         if (fileIsExists(filePath)) {
-            CallJavaNotify_7();
+            PublicJavaCallCpp("insert_image_to_note");
         } else Toast.makeText(
             this,
             filePath + "  The file does not exist.",

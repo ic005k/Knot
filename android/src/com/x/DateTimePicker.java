@@ -80,36 +80,6 @@ public class DateTimePicker extends Activity {
 
     private static Context context;
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
-
     private static boolean zh_cn;
     private int y, m, d, h, mm;
     private static boolean isDark;
@@ -318,7 +288,7 @@ public class DateTimePicker extends Activity {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    CallJavaNotify_14();
+                    //CallJavaNotify_14();
                     DateTimePicker.this.finish();
                 }
 
@@ -362,7 +332,7 @@ public class DateTimePicker extends Activity {
                         e.printStackTrace();
                     }
 
-                    CallJavaNotify_14();
+                    //CallJavaNotify_14();
                     DateTimePicker.this.finish();
                 }
 
@@ -406,7 +376,7 @@ public class DateTimePicker extends Activity {
                         e.printStackTrace();
                     }
 
-                    CallJavaNotify_14();
+                    //CallJavaNotify_14();
                     DateTimePicker.this.finish();
                 }
 
@@ -451,7 +421,7 @@ public class DateTimePicker extends Activity {
                         e.printStackTrace();
                     }
 
-                    CallJavaNotify_14();
+                    //CallJavaNotify_14();
                     DateTimePicker.this.finish();
                 }
 

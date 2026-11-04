@@ -144,36 +144,6 @@ public class FilePicker
     public static FilePicker MyFilepicker;
     private boolean isDark = false;
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -630,7 +600,7 @@ public class FilePicker
                             filePath + "   Size:" + strFileSize,
                             Toast.LENGTH_LONG
                         ).show();
-                        //CallJavaNotify_9();
+
                         MyActivity.mInstance.PublicJavaCallCpp(
                             "open_local_book_file"
                         );

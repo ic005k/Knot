@@ -28,7 +28,7 @@ public class StepListActivity extends AppCompatActivity {
     private androidx.appcompat.app.AlertDialog mAiLoadingDialog;
 
     // JNI调用声明，确认项目已有该方法
-    private native void PublicJavaCallCpp(String msg);
+    private static native void PublicJavaCallCpp(String msg);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

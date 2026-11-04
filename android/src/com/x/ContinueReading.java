@@ -1,87 +1,74 @@
 package com.x;
 
-import org.ini4j.Wini;
-
-import com.x.MyActivity;
-import com.x.NoteEditor;
-
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.app.Application;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.TextView;
-import android.net.Uri;
-import android.os.FileObserver;
-
-import android.text.method.ScrollingMovementMethod;
-import java.util.List;
-import java.util.ArrayList;
-
-import android.content.IntentFilter;
-import android.content.Intent;
-import android.content.BroadcastReceiver;
-import android.app.PendingIntent;
-import android.text.TextUtils;
-import android.app.AlertDialog;
-import android.app.Service;
-import android.content.DialogInterface;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Activity;
-import android.appwidget.AppWidgetManager;
-import android.content.Context;
-import android.appwidget.AppWidgetProvider;
+import android.os.Bundle;
+import android.os.FileObserver;
+import android.os.Handler;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-import android.view.WindowManager;
-import android.view.Window;
-
+import android.widget.TextView;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.x.MyActivity;
+import com.x.NoteEditor;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.io.IOException;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import android.os.Handler;
-import android.media.AudioManager;
-import android.widget.TextView;
-
-import java.util.Locale;
-
-import android.app.Application;
-import android.app.ActivityManager;
-import android.content.pm.ApplicationInfo;
-
 import java.util.logging.Logger;
-
-import android.widget.Toast;
-
-import android.text.SpannableStringBuilder;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.Spannable;
-import android.text.Spanned;
+import org.ini4j.Wini;
 
 public class ContinueReading extends Activity {
 
@@ -89,44 +76,16 @@ public class ContinueReading extends Activity {
 
     private static Context context;
 
-    public native static void CallJavaNotify_0();
-
-    public native static void CallJavaNotify_1();
-
-    public native static void CallJavaNotify_2();
-
-    public native static void CallJavaNotify_3();
-
-    public native static void CallJavaNotify_4();
-
-    public native static void CallJavaNotify_5();
-
-    public native static void CallJavaNotify_6();
-
-    public native static void CallJavaNotify_7();
-
-    public native static void CallJavaNotify_8();
-
-    public native static void CallJavaNotify_9();
-
-    public native static void CallJavaNotify_10();
-
-    public native static void CallJavaNotify_11();
-
-    public native static void CallJavaNotify_12();
-
-    public native static void CallJavaNotify_13();
-
-    public native static void CallJavaNotify_14();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // HomeKey
-        registerReceiver(mHomeKeyEvent, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        registerReceiver(
+            mHomeKeyEvent,
+            new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        );
         ContinueReading.this.finish();
-
     }
 
     private BroadcastReceiver mHomeKeyEvent = new BroadcastReceiver() {
@@ -167,7 +126,6 @@ public class ContinueReading extends Activity {
         unregisterReceiver(mHomeKeyEvent);
         super.onDestroy();
         goContinueReading();
-
     }
 
     public void openAppFromPackageName(String pname) {
@@ -199,7 +157,9 @@ public class ContinueReading extends Activity {
     }
 
     public static boolean isAppRunning(Context context, String packageName) {
-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager am = (ActivityManager) context.getSystemService(
+            Context.ACTIVITY_SERVICE
+        );
         List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(100);
         if (list.size() <= 0) {
             return false;
@@ -215,7 +175,9 @@ public class ContinueReading extends Activity {
     // 获取已安装应用的 uid，-1 表示未安装此应用或程序异常
     public static int getPackageUid(Context context, String packageName) {
         try {
-            ApplicationInfo applicationInfo = context.getPackageManager().getApplicationInfo(packageName, 0);
+            ApplicationInfo applicationInfo = context
+                .getPackageManager()
+                .getApplicationInfo(packageName, 0);
             if (applicationInfo != null) {
                 Log.e("share", String.valueOf(applicationInfo.uid));
                 return applicationInfo.uid;
@@ -227,8 +189,11 @@ public class ContinueReading extends Activity {
     }
 
     public static boolean isProcessRunning(Context context, int uid) {
-        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> runningServiceInfos = am.getRunningServices(200);
+        ActivityManager am = (ActivityManager) context.getSystemService(
+            Context.ACTIVITY_SERVICE
+        );
+        List<ActivityManager.RunningServiceInfo> runningServiceInfos =
+            am.getRunningServices(200);
         if (runningServiceInfos.size() > 0) {
             for (ActivityManager.RunningServiceInfo appProcess : runningServiceInfos) {
                 if (uid == appProcess.uid) {
@@ -240,13 +205,12 @@ public class ContinueReading extends Activity {
     }
 
     private void goContinueReading() {
-        boolean isRun = MyService.isReady;// isAppRun("com.x");
+        boolean isRun = MyService.isReady; // isAppRun("com.x");
 
         if (!isRun) {
             try {
                 File file = new File(shortcut_ini);
-                if (!file.exists())
-                    file.createNewFile();
+                if (!file.exists()) file.createNewFile();
                 Wini ini = new Wini(file);
 
                 ini.put("desk", "keyType", "reader");
@@ -257,20 +221,23 @@ public class ContinueReading extends Activity {
                 e.printStackTrace();
             }
 
-            if (isZh())
-                Toast.makeText(this, getString(R.string.strTip_zh), Toast.LENGTH_LONG).show();
-            else
-                Toast.makeText(this, getString(R.string.strTip), Toast.LENGTH_LONG).show();
+            if (isZh()) Toast.makeText(
+                this,
+                getString(R.string.strTip_zh),
+                Toast.LENGTH_LONG
+            ).show();
+            else Toast.makeText(
+                this,
+                getString(R.string.strTip),
+                Toast.LENGTH_LONG
+            ).show();
 
             // reopen app
             openAppFromPackageName("com.x");
-
         } else {
-
             try {
                 File file = new File(shortcut_ini);
-                if (!file.exists())
-                    file.createNewFile();
+                if (!file.exists()) file.createNewFile();
                 Wini ini = new Wini(file);
 
                 ini.put("desk", "keyType", "reader");
@@ -281,17 +248,14 @@ public class ContinueReading extends Activity {
                 e.printStackTrace();
             }
 
-            CallJavaNotify_8();
+            //CallJavaNotify_8();
         }
     }
 
     public boolean isZh() {
         Locale locale = this.getResources().getConfiguration().locale;
         String language = locale.getLanguage();
-        if (language.endsWith("zh"))
-            return true;
-        else
-            return false;
+        if (language.endsWith("zh")) return true;
+        else return false;
     }
-
 }

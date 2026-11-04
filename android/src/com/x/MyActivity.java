@@ -43,18 +43,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 // 兼容库（必须）
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-// import com.xhh.pdfui.PDFActivity;
-
-import org.osmdroid.util.GeoPoint;
-// Qt
-import org.qtproject.qt.android.bindings.QtActivity;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -75,9 +68,19 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+// import com.xhh.pdfui.PDFActivity;
 
-public class MyActivity extends QtActivity implements Application.ActivityLifecycleCallbacks {
-    private static WeakReference<ReadListActivity> mReadListRef = new WeakReference<>(null);
+import org.osmdroid.util.GeoPoint;
+// Qt
+import org.qtproject.qt.android.bindings.QtActivity;
+
+public class MyActivity
+    extends QtActivity
+    implements Application.ActivityLifecycleCallbacks
+{
+
+    private static WeakReference<ReadListActivity> mReadListRef =
+        new WeakReference<>(null);
 
     // 记录上次字体缩放因子，用于检测变化
     private float mLastFontScale = 1.0f;
@@ -120,7 +123,8 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     public static int MapType = 1;
 
     public static MapActivity mapActivityInstance = null;
-    public static List<GeoPoint> osmTrackPoints = new java.util.concurrent.CopyOnWriteArrayList<>();
+    public static List<GeoPoint> osmTrackPoints =
+        new java.util.concurrent.CopyOnWriteArrayList<>();
     public static String lblDate = "Date";
     public static String lblInfo = "Speed";
 
@@ -158,43 +162,13 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     private MediaRecorder recorder;
     private MediaPlayer player;
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
-
     public static native void CallJavaNotify_15();
 
     public static native void CallJavaNotify_18();
 
     public static native void CallJavaNotify_19();
 
-    public native void PublicJavaCallCpp(String msg);
+    public static native void PublicJavaCallCpp(String msg);
 
     public static boolean isReadShareData = false;
     public static boolean zh_cn;
@@ -204,7 +178,9 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         // 产生震动
         public static void vibrate(Context context, long milliseconds) {
             // 获取Vibrator实例
-            Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            Vibrator vibrator = (Vibrator) context.getSystemService(
+                Context.VIBRATOR_SERVICE
+            );
             // 检查设备是否支持震动
             if (vibrator != null && vibrator.hasVibrator()) {
                 // 震动
@@ -257,16 +233,15 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
                 isScreenOff = false;
 
                 // 延迟调用确保服务已初始化
-                mHandler.postDelayed(
-                        () -> {
-                            if (MyService.isReady) {
-                                CallJavaNotify_2();
-                                Log.w("Knot", "成功获取步数");
-                            } else {
-                                Log.e("Knot", "服务未准备好，无法获取步数");
-                            }
-                        },
-                        500); // 延迟 500 毫秒
+                mHandler.postDelayed(() -> {
+                    if (MyService.isReady) {
+                        PublicJavaCallCpp("update_steps");
+
+                        Log.w("Knot", "成功获取步数");
+                    } else {
+                        Log.e("Knot", "服务未准备好，无法获取步数");
+                    }
+                }, 500); // 延迟 500 毫秒
 
                 Log.w("Knot", "屏幕亮了");
             } else if (SCREEN_OFF.equals(intent.getAction())) {
@@ -293,7 +268,9 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         try {
             BufferedOutputStream dest = null; // 缓冲输出流
             InputStream fis = new FileInputStream(zipFile);
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
+            ZipInputStream zis = new ZipInputStream(
+                new BufferedInputStream(fis)
+            );
             ZipEntry entry; // 每个zip条目的实例
             while ((entry = zis.getNextEntry()) != null) {
                 try {
@@ -350,71 +327,82 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
         mInstance = this;
         sAppContext = getApplication();
-        Log.d(TAG, "Android activity created (config change: " + isConfigChangeRecreate + ")");
+        Log.d(
+            TAG,
+            "Android activity created (config change: " +
+                isConfigChangeRecreate +
+                ")"
+        );
 
         // ⭐ 记录初始 fontScale
         mLastFontScale = getResources().getConfiguration().fontScale;
 
         // 放弃HandlerThread异步，改用延迟post（避免JNI环境未就绪）
         // 核心：等待Qt层初始化完成（延迟500ms，适配的mw_one创建时机）
-        new Handler(Looper.getMainLooper())
-                .postDelayed(
-                        () -> {
-                            // 仅在主线程执行初始化（避免JNI跨线程问题）
-                            try {
-                                // 注册广播接收器（配置变更重构时重新注册）
-                                if (mScreenStatusReceiver != null) {
-                                    try {
-                                        unregisterReceiver(mScreenStatusReceiver);
-                                    } catch (IllegalArgumentException e) {
-                                        // 未注册时的异常直接忽略，避免日志告警
-                                        Log.d(TAG, "ScreenStatusReceiver未注册，无需注销");
-                                    } catch (Exception e) {
-                                        Log.w(TAG, "注销ScreenStatusReceiver异常", e);
-                                    }
-                                    mScreenStatusReceiver = null;
-                                }
-                                registSreenStatusReceiver();
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // 仅在主线程执行初始化（避免JNI跨线程问题）
+            try {
+                // 注册广播接收器（配置变更重构时重新注册）
+                if (mScreenStatusReceiver != null) {
+                    try {
+                        unregisterReceiver(mScreenStatusReceiver);
+                    } catch (IllegalArgumentException e) {
+                        // 未注册时的异常直接忽略，避免日志告警
+                        Log.d(TAG, "ScreenStatusReceiver未注册，无需注销");
+                    } catch (Exception e) {
+                        Log.w(TAG, "注销ScreenStatusReceiver异常", e);
+                    }
+                    mScreenStatusReceiver = null;
+                }
+                registSreenStatusReceiver();
 
-                                // 注册Activity生命周期回调
-                                getApplication()
-                                        .registerActivityLifecycleCallbacks(MyActivity.this);
+                // 注册Activity生命周期回调
+                getApplication().registerActivityLifecycleCallbacks(
+                    MyActivity.this
+                );
 
-                                // 启动服务（仅首次创建执行）
-                                if (!isConfigChangeRecreate && !isServiceStarted) {
-                                    startMyService();
-                                }
+                // 启动服务（仅首次创建执行）
+                if (!isConfigChangeRecreate && !isServiceStarted) {
+                    startMyService();
+                }
 
-                                // 创建快捷方式（仅首次创建执行）
-                                if (!isConfigChangeRecreate) {
-                                    addDeskShortcuts();
-                                }
+                // 创建快捷方式（仅首次创建执行）
+                if (!isConfigChangeRecreate) {
+                    addDeskShortcuts();
+                }
 
-                                ImmersiveUtil.applyRealImmersive(this, isDark);
-                            } catch (Exception e) {
-                                Log.e(TAG, "初始化异常", e);
-                            }
-                        },
-                        500); // 延迟500ms：适配你的Qt层mw_one实例创建时间（可根据实际调整）
+                ImmersiveUtil.applyRealImmersive(this, isDark);
+            } catch (Exception e) {
+                Log.e(TAG, "初始化异常", e);
+            }
+        }, 500); // 延迟500ms：适配你的Qt层mw_one实例创建时间（可根据实际调整）
 
         // 拦截手势返回回调
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        if (
+            android.os.Build.VERSION.SDK_INT >=
+            android.os.Build.VERSION_CODES.TIRAMISU
+        ) {
             OnBackInvokedDispatcher dispatcher = getOnBackInvokedDispatcher();
-            mBackCallback =
-                    new OnBackInvokedCallback() {
-                        @Override
-                        public void onBackInvoked() {
-                            // 关键：不写空！让系统先处理（关闭输入法/弹窗）
-                            // 自己不消费，让给下层处理
-                            dispatchKeyEvent(
-                                    new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
-                            dispatchKeyEvent(
-                                    new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK));
-                        }
-                    };
+            mBackCallback = new OnBackInvokedCallback() {
+                @Override
+                public void onBackInvoked() {
+                    // 关键：不写空！让系统先处理（关闭输入法/弹窗）
+                    // 自己不消费，让给下层处理
+                    dispatchKeyEvent(
+                        new KeyEvent(
+                            KeyEvent.ACTION_DOWN,
+                            KeyEvent.KEYCODE_BACK
+                        )
+                    );
+                    dispatchKeyEvent(
+                        new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
+                    );
+                }
+            };
             dispatcher.registerOnBackInvokedCallback(
-                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, // 必须是 DEFAULT，不是 OVERLAY！
-                    mBackCallback);
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, // 必须是 DEFAULT，不是 OVERLAY！
+                mBackCallback
+            );
         }
     }
 
@@ -424,7 +412,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
             String sharedData = processViewIntent(intent);
             if (sharedData != null) {
                 Log.d(TAG, "It's a view intent: " + sharedData);
-                Intent viewIntent = new Intent(getApplicationContext(), MyActivity.class);
+                Intent viewIntent = new Intent(
+                    getApplicationContext(),
+                    MyActivity.class
+                );
                 viewIntent.setAction(Intent.ACTION_VIEW);
                 viewIntent.putExtra("sharedData", sharedData);
                 viewIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -451,25 +442,26 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         }
     }
 
-    private static ServiceConnection mCon =
-            new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName arg0, IBinder arg1) {
-                    // Auto-generated method stub
-                }
+    private static ServiceConnection mCon = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName arg0, IBinder arg1) {
+            // Auto-generated method stub
+        }
 
-                @Override
-                public void onServiceDisconnected(ComponentName arg0) {
-                    // Auto-generated method stub
-                }
-            };
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            // Auto-generated method stub
+        }
+    };
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             // 正确判断：是否有对话框/弹窗正在显示
-            if (getWindow().peekDecorView().getWindowToken()
-                    != getWindow().peekDecorView().getApplicationWindowToken()) {
+            if (
+                getWindow().peekDecorView().getWindowToken() !=
+                getWindow().peekDecorView().getApplicationWindowToken()
+            ) {
                 return super.onKeyDown(keyCode, event);
             } else {
                 CallJavaNotify_15();
@@ -486,8 +478,13 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         if (activity == null) return false;
 
         // 检查是否有模态对话框正在显示
-        WindowManager.LayoutParams params = activity.getWindow().getAttributes();
-        return (params.type == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG);
+        WindowManager.LayoutParams params = activity
+            .getWindow()
+            .getAttributes();
+        return (
+            params.type ==
+            WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+        );
     }
 
     @Override
@@ -498,7 +495,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     @Override
     public void onPause() {
         System.out.println("onPause...");
-        // if (MyService.isReady) CallJavaNotify_1();
+
         super.onPause();
     }
 
@@ -534,15 +531,13 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
             Log.d(TAG, "系统字体缩放变更: " + mLastFontScale + " → 通知Qt刷新");
 
             // 延迟 100ms 确保 Resources 已完全更新
-            mHandler.postDelayed(
-                    () -> {
-                        try {
-                            CallJavaNotify_1();
-                        } catch (Exception e) {
-                            Log.w(TAG, "通知字体变更异常", e);
-                        }
-                    },
-                    100);
+            mHandler.postDelayed(() -> {
+                try {
+                    PublicJavaCallCpp("refresh_font_size");
+                } catch (Exception e) {
+                    Log.w(TAG, "通知字体变更异常", e);
+                }
+            }, 100);
         }
     }
 
@@ -564,7 +559,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     @Override
     protected void onDestroy() {
-        Log.i(TAG, "Main onDestroy (config change: " + isConfigChangeRecreate + ")");
+        Log.i(
+            TAG,
+            "Main onDestroy (config change: " + isConfigChangeRecreate + ")"
+        );
 
         // ========== 无论是否配置变更，都移除Handler回调 ==========
         // 1. 处理屏幕状态的mHandler
@@ -653,7 +651,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     @Override
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
+    public void onActivityCreated(
+        Activity activity,
+        Bundle savedInstanceState
+    ) {}
 
     @Override
     public void onActivityStarted(Activity activity) {}
@@ -671,30 +672,41 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     @Override
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
+    public void onActivitySaveInstanceState(
+        Activity activity,
+        Bundle outState
+    ) {}
 
     @Override
     public void onActivityDestroyed(Activity activity) {}
 
     @Override
     public void onRequestPermissionsResult(
-            int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        int requestCode,
+        @NonNull String[] permissions,
+        @NonNull int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(
+            requestCode,
+            permissions,
+            grantResults
+        );
         // 校验：权限结果数组为空直接返回（避免崩溃）
         if (grantResults == null || grantResults.length == 0) return;
 
         switch (requestCode) {
-                // 1. 定位权限（原有逻辑保留，无需改）
+            // 1. 定位权限（原有逻辑保留，无需改）
             case REQ_LOCATION:
-                boolean isGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                boolean isGranted =
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 if (isGranted) {
                     Toast.makeText(
-                                    this,
-                                    MyActivity.zh_cn
-                                            ? "定位权限已授予，正在启动GPS"
-                                            : "Location permission granted, starting GPS",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        MyActivity.zh_cn
+                            ? "定位权限已授予，正在启动GPS"
+                            : "Location permission granted, starting GPS",
+                        Toast.LENGTH_SHORT
+                    ).show();
 
                     // Android 10+ 直接申请后台定位权限
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -702,123 +714,129 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
                     }
 
                     // 直接启动GPS（服务已提前启动，无需兜底）
-                    if (getIntent().getBooleanExtra("START_GPS_AFTER_PERMISSION", false)) {
+                    if (
+                        getIntent().getBooleanExtra(
+                            "START_GPS_AFTER_PERMISSION",
+                            false
+                        )
+                    ) {
                         MyService.getInstance().startGPS();
                     }
                 } else {
                     // 仅基础提示，依赖系统原生引导
                     Toast.makeText(
-                                    this,
-                                    MyActivity.zh_cn
-                                            ? "定位权限被拒绝，GPS功能无法使用"
-                                            : "Location permission denied, GPS function"
-                                                    + " unavailable",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        MyActivity.zh_cn
+                            ? "定位权限被拒绝，GPS功能无法使用"
+                            : "Location permission denied, GPS function" +
+                                  " unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
                 }
                 break;
-                // 后台定位权限回调
+            // 后台定位权限回调
             case REQ_BACKGROUND_LOCATION:
-                boolean isBgGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                boolean isBgGranted =
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 if (isBgGranted) {
                     Toast.makeText(
-                                    this,
-                                    MyActivity.zh_cn
-                                            ? "后台定位权限已授予"
-                                            : "Background location permission granted",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        MyActivity.zh_cn
+                            ? "后台定位权限已授予"
+                            : "Background location permission granted",
+                        Toast.LENGTH_SHORT
+                    ).show();
                 } else {
                     Toast.makeText(
-                                    this,
-                                    MyActivity.zh_cn
-                                            ? "后台定位权限被拒绝，仅前台可使用GPS"
-                                            : "Background location permission denied, GPS only"
-                                                    + " available in foreground",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        MyActivity.zh_cn
+                            ? "后台定位权限被拒绝，仅前台可使用GPS"
+                            : "Background location permission denied, GPS only" +
+                                  " available in foreground",
+                        Toast.LENGTH_SHORT
+                    ).show();
                 }
                 break;
-                // ========== 后台定位权限回调分支结束 ==========
-                // 2. 录音权限（新增处理）
+            // ========== 后台定位权限回调分支结束 ==========
+            // 2. 录音权限（新增处理）
             case REQ_RECORD_AUDIO:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(
-                                    this,
-                                    zh_cn
-                                            ? "录音权限已授予，可正常录音"
-                                            : "Microphone permission granted, recording available",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        zh_cn
+                            ? "录音权限已授予，可正常录音"
+                            : "Microphone permission granted, recording available",
+                        Toast.LENGTH_SHORT
+                    ).show();
                     // 可选：如果用户是在点击录音按钮时申请的，这里可以自动启动录音
                     // 比如：if (isWaitingForRecord) startRecord(xxx);
                 } else {
                     Toast.makeText(
-                                    this,
-                                    zh_cn
-                                            ? "录音权限被拒绝，无法使用录音功能"
-                                            : "Microphone permission denied, recording unavailable",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        zh_cn
+                            ? "录音权限被拒绝，无法使用录音功能"
+                            : "Microphone permission denied, recording unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
                 }
                 break;
-                // 3. 相机权限（新增处理）
+            // 3. 相机权限（新增处理）
             case REQ_CAMERA:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(
-                                    this,
-                                    zh_cn ? "相机权限已授予" : "Camera permission granted",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        zh_cn ? "相机权限已授予" : "Camera permission granted",
+                        Toast.LENGTH_SHORT
+                    ).show();
                     // 若后续添加相机功能，这里可触发相机初始化
                 } else {
                     Toast.makeText(
-                                    this,
-                                    zh_cn
-                                            ? "相机权限被拒绝，无法使用相机功能"
-                                            : "Camera permission denied, camera function"
-                                                    + " unavailable",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        zh_cn
+                            ? "相机权限被拒绝，无法使用相机功能"
+                            : "Camera permission denied, camera function" +
+                                  " unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
                 }
                 break;
-                // 4. 通知权限（新增处理）
+            // 4. 通知权限（新增处理）
             case REQ_NOTIFICATION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(
-                                    this,
-                                    zh_cn
-                                            ? "通知权限已授予，可接收提醒"
-                                            : "Notification permission granted, alerts available",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        zh_cn
+                            ? "通知权限已授予，可接收提醒"
+                            : "Notification permission granted, alerts available",
+                        Toast.LENGTH_SHORT
+                    ).show();
                 } else {
                     Toast.makeText(
-                                    this,
-                                    zh_cn
-                                            ? "通知权限被拒绝，将无法接收闹钟、提醒等通知"
-                                            : "Notification permission denied, unable to receive"
-                                                    + " alarms, alerts, etc.",
-                                    Toast.LENGTH_LONG)
-                            .show();
+                        this,
+                        zh_cn
+                            ? "通知权限被拒绝，将无法接收闹钟、提醒等通知"
+                            : "Notification permission denied, unable to receive" +
+                                  " alarms, alerts, etc.",
+                        Toast.LENGTH_LONG
+                    ).show();
                 }
                 break;
-                // 5. 运动传感器权限（新增处理）
+            // 5. 运动传感器权限（新增处理）
             case REQ_ACTIVITY_RECOGNITION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(
-                                    this,
-                                    zh_cn
-                                            ? "运动权限已授予，可统计步数"
-                                            : "Activity recognition permission granted",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        zh_cn
+                            ? "运动权限已授予，可统计步数"
+                            : "Activity recognition permission granted",
+                        Toast.LENGTH_SHORT
+                    ).show();
 
                     // ★ 新增：权限授予后，确保标记已请求
                     getSharedPreferences("step_perm_pref", Context.MODE_PRIVATE)
-                            .edit()
-                            .putBoolean("has_requested_step_perm", true)
-                            .apply();
+                        .edit()
+                        .putBoolean("has_requested_step_perm", true)
+                        .apply();
 
                     MyService service = MyService.getInstance();
                     if (service != null) {
@@ -827,39 +845,39 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
                 } else {
                     // 用户拒绝了，标记已请求过（下次进入时 shouldShow 可能为 true 或 false）
                     getSharedPreferences("step_perm_pref", Context.MODE_PRIVATE)
-                            .edit()
-                            .putBoolean("has_requested_step_perm", true)
-                            .apply();
+                        .edit()
+                        .putBoolean("has_requested_step_perm", true)
+                        .apply();
 
                     Toast.makeText(
-                                    this,
-                                    zh_cn
-                                            ? "运动权限被拒绝，无法统计步数"
-                                            : "Activity recognition permission denied",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        zh_cn
+                            ? "运动权限被拒绝，无法统计步数"
+                            : "Activity recognition permission denied",
+                        Toast.LENGTH_SHORT
+                    ).show();
                 }
                 break;
-                // 6. 存储权限
+            // 6. 存储权限
             case REQ_STORAGE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(
-                                    this,
-                                    zh_cn
-                                            ? "存储权限已授予，可读写文件"
-                                            : "Storage permission granted, file read/write"
-                                                    + " available",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        zh_cn
+                            ? "存储权限已授予，可读写文件"
+                            : "Storage permission granted, file read/write" +
+                                  " available",
+                        Toast.LENGTH_SHORT
+                    ).show();
                 } else {
                     Toast.makeText(
-                                    this,
-                                    zh_cn
-                                            ? "存储权限被拒绝，无法读写文件"
-                                            : "Storage permission denied, file read/write"
-                                                    + " unavailable",
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                        this,
+                        zh_cn
+                            ? "存储权限被拒绝，无法读写文件"
+                            : "Storage permission denied, file read/write" +
+                                  " unavailable",
+                        Toast.LENGTH_SHORT
+                    ).show();
                 }
                 break;
         }
@@ -965,9 +983,11 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         String type = "application/vnd.android.package-archive";
         Uri uri;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            uri =
-                    FileProvider.getUriForFile(
-                            getMyAppContext(), getMyAppContext().getPackageName(), newApkFile);
+            uri = FileProvider.getUriForFile(
+                getMyAppContext(),
+                getMyAppContext().getPackageName(),
+                newApkFile
+            );
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } else {
             uri = Uri.fromFile(newApkFile);
@@ -978,7 +998,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     // ==============================================================================================
     private void checkStoragePermission() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(
+            PREFS_NAME,
+            MODE_PRIVATE
+        );
         boolean shouldRequest = prefs.getBoolean(KEY_SHOULD_REQUEST, true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -986,7 +1009,9 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
                 // 更新标记，避免重复跳转
                 prefs.edit().putBoolean(KEY_SHOULD_REQUEST, false).apply();
 
-                Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                Intent intent = new Intent(
+                    Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                );
                 startActivity(intent);
             }
         }
@@ -994,37 +1019,51 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     // 动态获取权限需要添加的常量
     private static String[] PERMISSIONS_STORAGE = {
-        "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
     };
 
     // 被调用的方法
     public static void verifyStoragePermissions(Activity activity) {
         try {
             // 检测是否有写的权限
-            int permission =
-                    ActivityCompat.checkSelfPermission(
-                            activity, "android.permission.WRITE_EXTERNAL_STORAGE");
+            int permission = ActivityCompat.checkSelfPermission(
+                activity,
+                "android.permission.WRITE_EXTERNAL_STORAGE"
+            );
             if (permission != PackageManager.PERMISSION_GRANTED) {
                 // 没有写的权限，去申请写的权限，会弹出对话框
-                ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, REQ_STORAGE);
+                ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQ_STORAGE
+                );
             }
 
             // 申请记录音频的权限，会弹出对话框
-            int permissionRecordAudio =
-                    ActivityCompat.checkSelfPermission(activity, "android.permission.RECORD_AUDIO");
+            int permissionRecordAudio = ActivityCompat.checkSelfPermission(
+                activity,
+                "android.permission.RECORD_AUDIO"
+            );
             if (permissionRecordAudio != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(
-                        activity,
-                        new String[] {"android.permission.RECORD_AUDIO"},
-                        REQ_RECORD_AUDIO);
+                    activity,
+                    new String[] { "android.permission.RECORD_AUDIO" },
+                    REQ_RECORD_AUDIO
+                );
             }
 
             // 检查摄像头权限
-            int permissionRecordCamera =
-                    ActivityCompat.checkSelfPermission(activity, "android.permission.CAMERA");
+            int permissionRecordCamera = ActivityCompat.checkSelfPermission(
+                activity,
+                "android.permission.CAMERA"
+            );
             if (permissionRecordCamera != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(
-                        activity, new String[] {"android.permission.CAMERA"}, REQ_CAMERA);
+                    activity,
+                    new String[] { "android.permission.CAMERA" },
+                    REQ_CAMERA
+                );
             } else {
             }
         } catch (Exception e) {
@@ -1033,8 +1072,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     public static boolean checkCamera() {
-        int permissionRecordCamera =
-                ActivityCompat.checkSelfPermission(mInstance, "android.permission.CAMERA");
+        int permissionRecordCamera = ActivityCompat.checkSelfPermission(
+            mInstance,
+            "android.permission.CAMERA"
+        );
         if (permissionRecordCamera != PackageManager.PERMISSION_GRANTED) {
             return false;
         } else {
@@ -1043,8 +1084,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     public static int checkRecordAudio() {
-        int permissionRecordCamera =
-                ActivityCompat.checkSelfPermission(mInstance, "android.permission.RECORD_AUDIO");
+        int permissionRecordCamera = ActivityCompat.checkSelfPermission(
+            mInstance,
+            "android.permission.RECORD_AUDIO"
+        );
         if (permissionRecordCamera != PackageManager.PERMISSION_GRANTED) {
             return 0;
         } else {
@@ -1064,10 +1107,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         }
 
         /** 保存文件filename为文件名，filecontent为存入的文件内容 例:configureActivity.saveFiletoSD("text.ini",""); */
-        public void saveFile(String filename, Properties properties) throws Exception {
+        public void saveFile(String filename, Properties properties)
+            throws Exception {
             // 设置Context.MODE_PRIVATE表示每次调用该方法会覆盖原来的文件数据
-            FileOutputStream
-                    fileOutputStream; // = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            FileOutputStream fileOutputStream; // = context.openFileOutput(filename, Context.MODE_PRIVATE);
             File file = new File(filename);
             fileOutputStream = new FileOutputStream(file);
             // 通过properties.stringPropertyNames()获得所有key的集合Set，里面是String对象
@@ -1088,7 +1131,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
             File file = new File(filename);
             fileInputStream = new FileInputStream(file);
 
-            InputStreamReader reader = new InputStreamReader(fileInputStream, "UTF-8");
+            InputStreamReader reader = new InputStreamReader(
+                fileInputStream,
+                "UTF-8"
+            );
             BufferedReader br = new BufferedReader(reader);
 
             properties.load(br);
@@ -1109,15 +1155,23 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     // 分享功能-------------------------------------------------------------------
     // ========== 辅助方法：获取排除自己应用的组件列表 ==========
-    private ComponentName[] getExcludeSelfComponents(Intent targetIntent, Context context) {
+    private ComponentName[] getExcludeSelfComponents(
+        Intent targetIntent,
+        Context context
+    ) {
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> infos = pm.queryIntentActivities(targetIntent, 0);
         List<ComponentName> excludeList = new ArrayList<>();
         String myPackage = context.getPackageName();
         for (ResolveInfo info : infos) {
-            if (info.activityInfo != null && myPackage.equals(info.activityInfo.packageName)) {
-                ComponentName comp =
-                        new ComponentName(info.activityInfo.packageName, info.activityInfo.name);
+            if (
+                info.activityInfo != null &&
+                myPackage.equals(info.activityInfo.packageName)
+            ) {
+                ComponentName comp = new ComponentName(
+                    info.activityInfo.packageName,
+                    info.activityInfo.name
+                );
                 excludeList.add(comp);
             }
         }
@@ -1141,15 +1195,22 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     // ========== 2. 分享单张图片 ==========
-    public void shareImage(String title, String path, String fileType, QtActivity activity) {
+    public void shareImage(
+        String title,
+        String path,
+        String fileType,
+        QtActivity activity
+    ) {
         Intent share = new Intent(Intent.ACTION_SEND);
         share.setType(fileType); // 例如 "image/png"
 
         Uri photoUri;
         if (Build.VERSION.SDK_INT >= 24) {
-            photoUri =
-                    FileProvider.getUriForFile(
-                            getMyAppContext(), getMyAppContext().getPackageName(), new File(path));
+            photoUri = FileProvider.getUriForFile(
+                getMyAppContext(),
+                getMyAppContext().getPackageName(),
+                new File(path)
+            );
         } else {
             photoUri = Uri.fromFile(new File(path));
         }
@@ -1164,7 +1225,11 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     // ========== 3. 分享多张图片（静态方法） ==========
-    public static void shareImages(String title, String imagesPath, QtActivity activity) {
+    public static void shareImages(
+        String title,
+        String imagesPath,
+        QtActivity activity
+    ) {
         String[] pathList = imagesPath.split("\\|");
         ArrayList<Uri> imagesUriList = new ArrayList<>();
         for (String path : pathList) {
@@ -1182,7 +1247,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         // 创建选择器
         Intent chooser = Intent.createChooser(share, title);
         // 静态方法中，通过 activity 获取 Context 和 PackageManager
-        ComponentName[] exclude = getExcludeSelfComponentsStatic(share, activity);
+        ComponentName[] exclude = getExcludeSelfComponentsStatic(
+            share,
+            activity
+        );
         if (exclude.length > 0) {
             chooser.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, exclude);
         }
@@ -1191,15 +1259,22 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     // 静态方法使用的辅助（与实例方法逻辑相同，只是 Context 来源不同）
     private static ComponentName[] getExcludeSelfComponentsStatic(
-            Intent targetIntent, Context context) {
+        Intent targetIntent,
+        Context context
+    ) {
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> infos = pm.queryIntentActivities(targetIntent, 0);
         List<ComponentName> excludeList = new ArrayList<>();
         String myPackage = context.getPackageName();
         for (ResolveInfo info : infos) {
-            if (info.activityInfo != null && myPackage.equals(info.activityInfo.packageName)) {
-                ComponentName comp =
-                        new ComponentName(info.activityInfo.packageName, info.activityInfo.name);
+            if (
+                info.activityInfo != null &&
+                myPackage.equals(info.activityInfo.packageName)
+            ) {
+                ComponentName comp = new ComponentName(
+                    info.activityInfo.packageName,
+                    info.activityInfo.name
+                );
                 excludeList.add(comp);
             }
         }
@@ -1219,7 +1294,11 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     public void openReadListWindow(ArrayList<String> readItemList) {
         // ✅ 已存在且未销毁 → 直接返回，不重复打开
         ReadListActivity existing = mReadListRef.get();
-        if (existing != null && !existing.isFinishing() && !existing.isDestroyed()) {
+        if (
+            existing != null &&
+            !existing.isFinishing() &&
+            !existing.isDestroyed()
+        ) {
             return;
         }
 
@@ -1247,12 +1326,11 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
      */
     public void cppRefreshTodoCardList(ArrayList<String> newList) {
         // JNI线程，必须切UI线程
-        runOnUiThread(
-                () -> {
-                    if (TodoActivity.mInstance != null) {
-                        TodoActivity.mInstance.mTodoAdapter.setStringListData(newList);
-                    }
-                });
+        runOnUiThread(() -> {
+            if (TodoActivity.mInstance != null) {
+                TodoActivity.mInstance.mTodoAdapter.setStringListData(newList);
+            }
+        });
     }
 
     /** 打开Todo回收站 */
@@ -1289,11 +1367,12 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     /** 打开新增事件记录窗口 AddEventRecord */
     public void openAddEventRecord(
-            String titleText,
-            String categoryText,
-            String noteText,
-            String amountText,
-            String timeTagText) {
+        String titleText,
+        String categoryText,
+        String noteText,
+        String amountText,
+        String timeTagText
+    ) {
         Intent intent = new Intent(this, AddEventRecord.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -1376,7 +1455,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     public void closeMainEntranceWindow() {
-        if (MainEntrance.mInstance != null && !MainEntrance.mInstance.isFinishing()) {
+        if (
+            MainEntrance.mInstance != null &&
+            !MainEntrance.mInstance.isFinishing()
+        ) {
             MainEntrance.mInstance.finish();
         }
     }
@@ -1389,15 +1471,15 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     public void openMapWindow() {
         // 1. 根据MapType选择目标地图Activity
-        Class<?> targetActivity = MapType == 1 ? MapActivity.class : TencentMapActivity.class;
+        Class<?> targetActivity =
+            MapType == 1 ? MapActivity.class : TencentMapActivity.class;
 
         // 2. 创建Intent，核心添加"移到前台"标志
         Intent intent = new Intent(getMyAppContext(), targetActivity);
         intent.setFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK
-                        | // 非Activity上下文启动必须
-                        Intent.FLAG_ACTIVITY_REORDER_TO_FRONT // 关键：若Activity已存在，直接移到前台
-                );
+            Intent.FLAG_ACTIVITY_NEW_TASK | // 非Activity上下文启动必须
+                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT // 关键：若Activity已存在，直接移到前台
+        );
 
         // 3. 启动（若已存在则唤醒，不存在则新建）
         getMyAppContext().startActivity(intent);
@@ -1416,7 +1498,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     public void forwardAppendTrackPoint(double latitude, double longitude) {
         if (mapActivityInstance != null) {
             // 额外判断：Activity是否未销毁且未处于 finishing 状态
-            if (!mapActivityInstance.isDestroyed() && !mapActivityInstance.isFinishing()) {
+            if (
+                !mapActivityInstance.isDestroyed() &&
+                !mapActivityInstance.isFinishing()
+            ) {
                 mapActivityInstance.appendTrackPoint(latitude, longitude);
             } else {
                 Log.w("MyActivity", "MapActivity已销毁，跳过追加轨迹点");
@@ -1486,7 +1571,11 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     public void openMuPDF(String path) {
         File file = new File(path);
         if (!file.exists()) {
-            Toast.makeText(getMyAppContext(), "文件不存在", Toast.LENGTH_SHORT).show();
+            Toast.makeText(
+                getMyAppContext(),
+                "文件不存在",
+                Toast.LENGTH_SHORT
+            ).show();
             return;
         }
 
@@ -1494,21 +1583,27 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         String mimeType = "application/octet-stream"; // ← 改为更安全的默认值
         String name = file.getName().toLowerCase();
         if (name.endsWith(".pdf")) mimeType = "application/pdf";
-        else if (name.endsWith(".xps")) mimeType = "application/vnd.ms-xpsdocument";
+        else if (name.endsWith(".xps")) mimeType =
+            "application/vnd.ms-xpsdocument";
         else if (name.endsWith(".cbz")) mimeType = "application/x-cbz";
         else if (name.endsWith(".epub")) mimeType = "application/epub+zip";
-        else if (name.endsWith(".fb2")) mimeType = "application/x-fictionbook+xml";
+        else if (name.endsWith(".fb2")) mimeType =
+            "application/x-fictionbook+xml";
         else if (name.endsWith(".txt")) mimeType = "text/plain";
         // ← 新增
-        else if (name.endsWith(".html") || name.endsWith(".htm") // ← 建议一并添加
+        else if (
+            name.endsWith(".html") ||
+            name.endsWith(".htm") // ← 建议一并添加
         ) mimeType = "text/html";
         else if (name.endsWith(".xml")) mimeType = "text/xml"; // ← 可选
 
         if (Build.VERSION.SDK_INT >= 24) {
             // ✅ 只传 3 个参数，authority 必须与 AndroidManifest.xml 中一致
-            fileUri =
-                    FileProvider.getUriForFile(
-                            getMyAppContext(), getMyAppContext().getPackageName(), file);
+            fileUri = FileProvider.getUriForFile(
+                getMyAppContext(),
+                getMyAppContext().getPackageName(),
+                file
+            );
         } else {
             fileUri = Uri.fromFile(file);
         }
@@ -1541,7 +1636,10 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     private void addDeskShortcuts() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+            SharedPreferences prefs = getSharedPreferences(
+                "app_prefs",
+                MODE_PRIVATE
+            );
             if (prefs.getBoolean("shortcuts_initialized", false)) {
                 return; // 已初始化则跳过
             }
@@ -1555,80 +1653,124 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
             String lblContinueReading = null;
             String lblExercise = null;
             if (zh_cn) {
-                lblAddRecord = getString(R.string.addRecord_shortcut_short_label_zh);
-                lblNewTodo = getString(R.string.newTodo_shortcut_short_label_zh);
-                lblNewNote = getString(R.string.newNote_shortcut_short_label_zh);
-                lblContinueReading = getString(R.string.continueReading_shortcut_short_label_zh);
-                lblExercise = getString(R.string.exercise_shortcut_short_label_zh);
+                lblAddRecord = getString(
+                    R.string.addRecord_shortcut_short_label_zh
+                );
+                lblNewTodo = getString(
+                    R.string.newTodo_shortcut_short_label_zh
+                );
+                lblNewNote = getString(
+                    R.string.newNote_shortcut_short_label_zh
+                );
+                lblContinueReading = getString(
+                    R.string.continueReading_shortcut_short_label_zh
+                );
+                lblExercise = getString(
+                    R.string.exercise_shortcut_short_label_zh
+                );
             } else {
-                lblAddRecord = getString(R.string.addRecord_shortcut_short_label);
+                lblAddRecord = getString(
+                    R.string.addRecord_shortcut_short_label
+                );
                 lblNewTodo = getString(R.string.newTodo_shortcut_short_label);
                 lblNewNote = getString(R.string.newNote_shortcut_short_label);
-                lblContinueReading = getString(R.string.continueReading_shortcut_short_label);
+                lblContinueReading = getString(
+                    R.string.continueReading_shortcut_short_label
+                );
                 lblExercise = getString(R.string.exercise_shortcut_short_label);
             }
 
-            ShortcutInfo shortcut0 =
-                    new ShortcutInfo.Builder(this, "Add_Record")
-                            .setShortLabel(lblAddRecord)
-                            .setIcon(Icon.createWithResource(this, R.drawable.addrecord))
-                            .setIntent(new Intent(Intent.ACTION_MAIN, null, this, AddRecord.class))
-                            .build();
+            ShortcutInfo shortcut0 = new ShortcutInfo.Builder(
+                this,
+                "Add_Record"
+            )
+                .setShortLabel(lblAddRecord)
+                .setIcon(Icon.createWithResource(this, R.drawable.addrecord))
+                .setIntent(
+                    new Intent(Intent.ACTION_MAIN, null, this, AddRecord.class)
+                )
+                .build();
 
-            ShortcutInfo shortcut1 =
-                    new ShortcutInfo.Builder(this, "New_Todo")
-                            .setShortLabel(lblNewTodo)
-                            .setIcon(Icon.createWithResource(this, R.drawable.newtodo))
-                            .setIntent(
-                                    new Intent("com.x.action.NEW_TODO", null, this, NewTodo.class))
-                            .build();
+            ShortcutInfo shortcut1 = new ShortcutInfo.Builder(this, "New_Todo")
+                .setShortLabel(lblNewTodo)
+                .setIcon(Icon.createWithResource(this, R.drawable.newtodo))
+                .setIntent(
+                    new Intent(
+                        "com.x.action.NEW_TODO",
+                        null,
+                        this,
+                        NewTodo.class
+                    )
+                )
+                .build();
 
-            ShortcutInfo shortcut2 =
-                    new ShortcutInfo.Builder(this, "New_Note")
-                            .setShortLabel(lblNewNote)
-                            .setIcon(Icon.createWithResource(this, R.drawable.newnote))
-                            .setIntent(new Intent(Intent.ACTION_MAIN, null, this, NewNote.class))
-                            .build();
+            ShortcutInfo shortcut2 = new ShortcutInfo.Builder(this, "New_Note")
+                .setShortLabel(lblNewNote)
+                .setIcon(Icon.createWithResource(this, R.drawable.newnote))
+                .setIntent(
+                    new Intent(Intent.ACTION_MAIN, null, this, NewNote.class)
+                )
+                .build();
 
-            ShortcutInfo shortcut3 =
-                    new ShortcutInfo.Builder(this, "New_Exercise")
-                            .setShortLabel(lblExercise)
-                            .setIcon(Icon.createWithResource(this, R.drawable.exercise))
-                            .setIntent(
-                                    new Intent(Intent.ACTION_MAIN, null, this, Desk_Exercise.class))
-                            .build();
+            ShortcutInfo shortcut3 = new ShortcutInfo.Builder(
+                this,
+                "New_Exercise"
+            )
+                .setShortLabel(lblExercise)
+                .setIcon(Icon.createWithResource(this, R.drawable.exercise))
+                .setIntent(
+                    new Intent(
+                        Intent.ACTION_MAIN,
+                        null,
+                        this,
+                        Desk_Exercise.class
+                    )
+                )
+                .build();
 
-            ShortcutInfo shortcut4 =
-                    new ShortcutInfo.Builder(this, "Continue_Reading")
-                            .setShortLabel(lblContinueReading)
-                            .setIcon(Icon.createWithResource(this, R.drawable.continuereading))
-                            .setIntent(
-                                    new Intent(
-                                            Intent.ACTION_MAIN, null, this, ContinueReading.class))
-                            .build();
+            ShortcutInfo shortcut4 = new ShortcutInfo.Builder(
+                this,
+                "Continue_Reading"
+            )
+                .setShortLabel(lblContinueReading)
+                .setIcon(
+                    Icon.createWithResource(this, R.drawable.continuereading)
+                )
+                .setIntent(
+                    new Intent(
+                        Intent.ACTION_MAIN,
+                        null,
+                        this,
+                        ContinueReading.class
+                    )
+                )
+                .build();
 
             // 设置动态快捷方式（仅首次）
             shortcutManager.setDynamicShortcuts(
-                    Arrays.asList(shortcut0, shortcut1, shortcut2, shortcut3));
+                Arrays.asList(shortcut0, shortcut1, shortcut2, shortcut3)
+            );
             prefs.edit().putBoolean("shortcuts_initialized", true).apply();
         }
     }
 
-    private static Handler m_handler =
-            new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    switch (msg.what) {
-                        case 1:
-                            // 使用应用上下文，彻底避免Activity引用泄漏
-                            Context appContext = getMyAppContext();
-                            Toast toast =
-                                    Toast.makeText(appContext, (String) msg.obj, Toast.LENGTH_LONG);
-                            toast.show();
-                            break;
-                    }
-                }
-            };
+    private static Handler m_handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 1:
+                    // 使用应用上下文，彻底避免Activity引用泄漏
+                    Context appContext = getMyAppContext();
+                    Toast toast = Toast.makeText(
+                        appContext,
+                        (String) msg.obj,
+                        Toast.LENGTH_LONG
+                    );
+                    toast.show();
+                    break;
+            }
+        }
+    };
 
     public void showToastMessage(String msg) {
         m_handler.sendMessage(m_handler.obtainMessage(1, msg));
@@ -1651,17 +1793,19 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     private void createAudioRecord() {
-        recordBufsize =
-                AudioRecord.getMinBufferSize(
-                        44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        recordBufsize = AudioRecord.getMinBufferSize(
+            44100,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT
+        );
         Log.i("audioRecordTest", "size->" + recordBufsize);
-        audioRecord =
-                new AudioRecord(
-                        MediaRecorder.AudioSource.MIC,
-                        44100,
-                        AudioFormat.CHANNEL_IN_MONO,
-                        AudioFormat.ENCODING_PCM_16BIT,
-                        recordBufsize);
+        audioRecord = new AudioRecord(
+            MediaRecorder.AudioSource.MIC,
+            44100,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+            recordBufsize
+        );
     }
 
     public void startRecord_pcm(String FILE_NAME) {
@@ -1672,41 +1816,39 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         isRecording = true;
         audioRecord.startRecording();
         Log.i("audioRecordTest", "开始录音");
-        recordingThread =
-                new Thread(
-                        () -> {
-                            byte data[] = new byte[recordBufsize];
-                            File file = new File(FILE_NAME);
-                            FileOutputStream os = null;
-                            try {
-                                if (!file.exists()) {
-                                    file.createNewFile();
-                                    Log.i("audioRecordTest", "创建录音文件->" + FILE_NAME);
-                                }
-                                os = new FileOutputStream(file);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            int read;
-                            if (os != null) {
-                                while (isRecording) {
-                                    read = audioRecord.read(data, 0, recordBufsize);
-                                    if (AudioRecord.ERROR_INVALID_OPERATION != read) {
-                                        try {
-                                            os.write(data);
-                                            Log.i("audioRecordTest", "写录音数据->" + read);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                            }
-                            try {
-                                os.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        });
+        recordingThread = new Thread(() -> {
+            byte data[] = new byte[recordBufsize];
+            File file = new File(FILE_NAME);
+            FileOutputStream os = null;
+            try {
+                if (!file.exists()) {
+                    file.createNewFile();
+                    Log.i("audioRecordTest", "创建录音文件->" + FILE_NAME);
+                }
+                os = new FileOutputStream(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            int read;
+            if (os != null) {
+                while (isRecording) {
+                    read = audioRecord.read(data, 0, recordBufsize);
+                    if (AudioRecord.ERROR_INVALID_OPERATION != read) {
+                        try {
+                            os.write(data);
+                            Log.i("audioRecordTest", "写录音数据->" + read);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            try {
+                os.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         recordingThread.start();
     }
 
@@ -1723,19 +1865,24 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     public void startRecord(String outputFile) {
         // 第一步：再次检查录音权限
-        int recordPermission =
-                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
+        int recordPermission = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.RECORD_AUDIO
+        );
         if (recordPermission != PackageManager.PERMISSION_GRANTED) {
             // 权限缺失，主动请求录音权限
             ActivityCompat.requestPermissions(
-                    this, new String[] {Manifest.permission.RECORD_AUDIO}, REQ_RECORD_AUDIO);
+                this,
+                new String[] { Manifest.permission.RECORD_AUDIO },
+                REQ_RECORD_AUDIO
+            );
             Toast.makeText(
-                            this,
-                            zh_cn
-                                    ? "需要录音权限才能开始录制"
-                                    : "Recording permission is required to start recording",
-                            Toast.LENGTH_SHORT)
-                    .show();
+                this,
+                zh_cn
+                    ? "需要录音权限才能开始录制"
+                    : "Recording permission is required to start recording",
+                Toast.LENGTH_SHORT
+            ).show();
             return;
         }
 
@@ -1754,21 +1901,21 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         } catch (IOException e) {
             Log.e(TAG, "录制初始化失败（IO异常）", e);
             Toast.makeText(
-                            this,
-                            zh_cn ? "录制文件创建失败" : "Failed to create recording file",
-                            Toast.LENGTH_SHORT)
-                    .show();
+                this,
+                zh_cn ? "录制文件创建失败" : "Failed to create recording file",
+                Toast.LENGTH_SHORT
+            ).show();
             tempRecorder.release();
             recorder = null;
         } catch (RuntimeException e) {
             Log.e(TAG, "录制启动失败（运行时异常）", e);
             Toast.makeText(
-                            this,
-                            zh_cn
-                                    ? "录音功能启动失败，请检查权限或设备"
-                                    : "Failed to start recording, check permission or device",
-                            Toast.LENGTH_SHORT)
-                    .show();
+                this,
+                zh_cn
+                    ? "录音功能启动失败，请检查权限或设备"
+                    : "Failed to start recording, check permission or device",
+                Toast.LENGTH_SHORT
+            ).show();
             tempRecorder.release();
             recorder = null;
         }
@@ -1871,7 +2018,11 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         Locale locale;
         // 适配 API 24+ 多语言获取方式
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            locale = context.getResources().getConfiguration().getLocales().get(0);
+            locale = context
+                .getResources()
+                .getConfiguration()
+                .getLocales()
+                .get(0);
         } else {
             locale = context.getResources().getConfiguration().locale;
         }
@@ -1919,12 +2070,17 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     private void requestSensorPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 ActivityCompat.requestPermissions(
-                        this,
-                        new String[] {Manifest.permission.ACTIVITY_RECOGNITION},
-                        REQ_ACTIVITY_RECOGNITION);
+                    this,
+                    new String[] { Manifest.permission.ACTIVITY_RECOGNITION },
+                    REQ_ACTIVITY_RECOGNITION
+                );
             }
         }
     }
@@ -1936,7 +2092,8 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
                 WebViewActivity.openLocalHtml(mInstance);
             } else {
                 // 根据 zh_cn 变量自动显示中文/英文提示
-                String tip = "Please install Android System WebView to view Markdown";
+                String tip =
+                    "Please install Android System WebView to view Markdown";
                 if (zh_cn) {
                     tip = "请安装 Android System WebView 以查看 Markdown 文件";
                 }
@@ -1948,42 +2105,45 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     public static void launchWebView() {
         if (mInstance == null) return;
 
-        mInstance.runOnUiThread(
-                () -> {
-                    Intent intent = new Intent(mInstance, WebViewActivity.class);
-                    // 加这一行，让系统认为这是正常APP页面
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    // 再加这一行，让WebView获取合法令牌
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    mInstance.startActivity(intent);
-                });
+        mInstance.runOnUiThread(() -> {
+            Intent intent = new Intent(mInstance, WebViewActivity.class);
+            // 加这一行，让系统认为这是正常APP页面
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // 再加这一行，让WebView获取合法令牌
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mInstance.startActivity(intent);
+        });
     }
 
     public static void launchWebView_InBrowser() {
         if (mInstance == null) return;
 
-        mInstance.runOnUiThread(
-                () -> {
-                    try {
-                        // 你的文件
-                        File htmlFile = new File("/storage/emulated/0/KnotData/memo.html");
-                        Uri uri = Uri.fromFile(htmlFile);
+        mInstance.runOnUiThread(() -> {
+            try {
+                // 你的文件
+                File htmlFile = new File(
+                    "/storage/emulated/0/KnotData/memo.html"
+                );
+                Uri uri = Uri.fromFile(htmlFile);
 
-                        // 强制打开浏览器（真正能看见的那种）
-                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                        intent.setDataAndType(uri, "text/html");
-                        intent.addFlags(
-                                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                // 强制打开浏览器（真正能看见的那种）
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                intent.setDataAndType(uri, "text/html");
+                intent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP
+                );
 
-                        // 关键：让系统一定显示选择浏览器
-                        Intent chooser =
-                                Intent.createChooser(
-                                        intent, MyActivity.zh_cn ? "打开方式" : "Open with");
-                        mInstance.startActivity(chooser);
-                    } catch (Exception e) {
-                        // 不弹任何Toast，避免干扰
-                    }
-                });
+                // 关键：让系统一定显示选择浏览器
+                Intent chooser = Intent.createChooser(
+                    intent,
+                    MyActivity.zh_cn ? "打开方式" : "Open with"
+                );
+                mInstance.startActivity(chooser);
+            } catch (Exception e) {
+                // 不弹任何Toast，避免干扰
+            }
+        });
     }
 
     // 轻量检测 WebView 是否可用（不会崩溃）
@@ -2000,31 +2160,50 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     public static void keepScreenOn(Activity activity) {
         // 关键：通过 runOnUiThread 切换到 UI 线程
         activity.runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        activity.getWindow()
-                                .addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                    }
-                });
+            new Runnable() {
+                @Override
+                public void run() {
+                    activity
+                        .getWindow()
+                        .addFlags(
+                            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                        );
+                }
+            }
+        );
     }
 
     /** 取消屏幕常亮（强制在 UI 线程执行） */
     public static void cancelKeepScreenOn(Activity activity) {
         activity.runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        activity.getWindow()
-                                .clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                    }
-                });
+            new Runnable() {
+                @Override
+                public void run() {
+                    activity
+                        .getWindow()
+                        .clearFlags(
+                            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                        );
+                }
+            }
+        );
     }
 
     public void addTrackPoint(double latitude, double longitude) {
         // 经纬度合法性校验
-        if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 || longitude > 180.0) {
-            Log.w(TAG, "非法经纬度，跳过添加 | 纬度：" + latitude + "，经度：" + longitude);
+        if (
+            latitude < -90.0 ||
+            latitude > 90.0 ||
+            longitude < -180.0 ||
+            longitude > 180.0
+        ) {
+            Log.w(
+                TAG,
+                "非法经纬度，跳过添加 | 纬度：" +
+                    latitude +
+                    "，经度：" +
+                    longitude
+            );
             return;
         }
 
@@ -2163,23 +2342,32 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         if (intent != null && intent.hasExtra("ALARM_MESSAGE")) {
             String message = intent.getStringExtra("ALARM_MESSAGE");
             // 这里可以通知 Qt 层显示提醒内容，或执行相关操作
-            // CallJavaNotify_3();
         }
     }
 
     // 处理定位权限请求
     private void handleLocationPermissionRequest(Intent intent) {
-        if (intent != null && intent.getBooleanExtra("REQUEST_LOCATION_PERMISSION", false)) {
+        if (
+            intent != null &&
+            intent.getBooleanExtra("REQUEST_LOCATION_PERMISSION", false)
+        ) {
             requestLocationPermission();
         }
     }
 
     public void requestLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             // 先申请精确定位
             ActivityCompat.requestPermissions(
-                    this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, REQ_LOCATION);
+                this,
+                new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
+                REQ_LOCATION
+            );
         } else {
             // 已有前台定位 → 申请后台定位
             requestBackgroundLocationPermission();
@@ -2189,15 +2377,19 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     // 单独申请后台定位（Android 10+ 才需要）
     private void requestBackgroundLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(
-                            this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 ActivityCompat.requestPermissions(
-                        this,
-                        new String[] {
-                            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-                        },
-                        REQ_BACKGROUND_LOCATION);
+                    this,
+                    new String[] {
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                    },
+                    REQ_BACKGROUND_LOCATION
+                );
             }
         }
     }
@@ -2209,7 +2401,9 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     public static int getHardStepCounter() {
         Activity activity = mInstance;
-        if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
+        if (
+            activity == null || activity.isFinishing() || activity.isDestroyed()
+        ) {
             MyService.isStepCounter = 0;
             return MyService.isStepCounter;
         }
@@ -2232,69 +2426,80 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         // 以下为无权限时的处理逻辑（仅 Android 10+ 会走到这里）
         MyService.isStepCounter = 0;
 
-        boolean needRationale = ActivityCompat.shouldShowRequestPermissionRationale(activity, perm);
+        boolean needRationale =
+            ActivityCompat.shouldShowRequestPermissionRationale(activity, perm);
 
-        activity.runOnUiThread(
-                () -> {
-                    try {
-                        SharedPreferences sp =
-                                activity.getSharedPreferences(
-                                        "step_perm_pref", Context.MODE_PRIVATE);
-                        boolean hasRequestedBefore =
-                                sp.getBoolean("has_requested_step_perm", false);
+        activity.runOnUiThread(() -> {
+            try {
+                SharedPreferences sp = activity.getSharedPreferences(
+                    "step_perm_pref",
+                    Context.MODE_PRIVATE
+                );
+                boolean hasRequestedBefore = sp.getBoolean(
+                    "has_requested_step_perm",
+                    false
+                );
 
-                        if (needRationale) {
-                            // 用户之前拒绝过，但未勾选"不再询问" → 解释后重新申请
-                            new android.app.AlertDialog.Builder(activity)
-                                    .setMessage(
-                                            zh_cn
-                                                    ? "需要运动权限才能统计每日步数，请授予权限"
-                                                    : "Activity recognition permission is required"
-                                                            + " to record daily steps")
-                                    .setPositiveButton(
-                                            zh_cn ? "去授权" : "Allow",
-                                            (dialog, which) -> {
-                                                activity.requestPermissions(
-                                                        new String[] {perm},
-                                                        REQ_ACTIVITY_RECOGNITION);
-                                            })
-                                    .setNegativeButton(zh_cn ? "稍后再说" : "Later", null)
-                                    .show();
-                        } else if (!hasRequestedBefore) {
-                            // ★ 关键修复3：首次请求，直接弹系统授权框，先标记再请求
-                            sp.edit().putBoolean("has_requested_step_perm", true).apply();
-                            activity.requestPermissions(
-                                    new String[] {perm}, REQ_ACTIVITY_RECOGNITION);
-                        } else {
-                            // ★ 关键修复4：只有「之前请求过」+「现在不需要Rationale」= 真正的永久拒绝
-                            // 避免在系统弹窗显示期间误判
-                            new android.app.AlertDialog.Builder(activity)
-                                    .setMessage(
-                                            zh_cn
-                                                    ? "运动权限已被永久禁用，请前往系统设置手动开启"
-                                                    : "Activity permission is permanently denied,"
-                                                          + " please enable it in system settings")
-                                    .setPositiveButton(
-                                            zh_cn ? "去设置" : "Settings",
-                                            (dialog, which) -> {
-                                                Intent intent =
-                                                        new Intent(
-                                                                Settings
-                                                                        .ACTION_APPLICATION_DETAILS_SETTINGS);
-                                                intent.setData(
-                                                        Uri.parse(
-                                                                "package:"
-                                                                        + activity
-                                                                                .getPackageName()));
-                                                activity.startActivity(intent);
-                                            })
-                                    .setNegativeButton(zh_cn ? "取消" : "Cancel", null)
-                                    .show();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "步数权限弹窗异常，跳过弹窗", e);
-                    }
-                });
+                if (needRationale) {
+                    // 用户之前拒绝过，但未勾选"不再询问" → 解释后重新申请
+                    new android.app.AlertDialog.Builder(activity)
+                        .setMessage(
+                            zh_cn
+                                ? "需要运动权限才能统计每日步数，请授予权限"
+                                : "Activity recognition permission is required" +
+                                      " to record daily steps"
+                        )
+                        .setPositiveButton(
+                            zh_cn ? "去授权" : "Allow",
+                            (dialog, which) -> {
+                                activity.requestPermissions(
+                                    new String[] { perm },
+                                    REQ_ACTIVITY_RECOGNITION
+                                );
+                            }
+                        )
+                        .setNegativeButton(zh_cn ? "稍后再说" : "Later", null)
+                        .show();
+                } else if (!hasRequestedBefore) {
+                    // ★ 关键修复3：首次请求，直接弹系统授权框，先标记再请求
+                    sp.edit()
+                        .putBoolean("has_requested_step_perm", true)
+                        .apply();
+                    activity.requestPermissions(
+                        new String[] { perm },
+                        REQ_ACTIVITY_RECOGNITION
+                    );
+                } else {
+                    // ★ 关键修复4：只有「之前请求过」+「现在不需要Rationale」= 真正的永久拒绝
+                    // 避免在系统弹窗显示期间误判
+                    new android.app.AlertDialog.Builder(activity)
+                        .setMessage(
+                            zh_cn
+                                ? "运动权限已被永久禁用，请前往系统设置手动开启"
+                                : "Activity permission is permanently denied," +
+                                      " please enable it in system settings"
+                        )
+                        .setPositiveButton(
+                            zh_cn ? "去设置" : "Settings",
+                            (dialog, which) -> {
+                                Intent intent = new Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                );
+                                intent.setData(
+                                    Uri.parse(
+                                        "package:" + activity.getPackageName()
+                                    )
+                                );
+                                activity.startActivity(intent);
+                            }
+                        )
+                        .setNegativeButton(zh_cn ? "取消" : "Cancel", null)
+                        .show();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "步数权限弹窗异常，跳过弹窗", e);
+            }
+        });
 
         return MyService.isStepCounter;
     }
@@ -2320,46 +2525,47 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
 
     /** 兜底恢复状态栏、导航栏，解决PDF子Activity异常退出导致系统栏永久隐藏（定制ROM兜底） 只修改MyActivity自己的Window，不操作PDF的Window */
     private void forceRestoreSystemBars() {
-        runOnUiThread(
-                () -> {
-                    Window window = getWindow();
-                    if (window == null) return;
+        runOnUiThread(() -> {
+            Window window = getWindow();
+            if (window == null) return;
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        WindowInsetsController controller = window.getInsetsController();
-                        if (controller != null) {
-                            controller.show(
-                                    WindowInsets.Type.statusBars()
-                                            | WindowInsets.Type.navigationBars());
-                        }
-                    } else {
-                        int vis = window.getDecorView().getSystemUiVisibility();
-                        vis &=
-                                ~(View.SYSTEM_UI_FLAG_FULLSCREEN
-                                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                        | View.SYSTEM_UI_FLAG_IMMERSIVE
-                                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-                        // 保留原有布局标记 LAYOUT_STABLE | LAYOUT_FULLSCREEN
-                        vis |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-                        vis |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-                        window.getDecorView().setSystemUiVisibility(vis);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                WindowInsetsController controller =
+                    window.getInsetsController();
+                if (controller != null) {
+                    controller.show(
+                        WindowInsets.Type.statusBars() |
+                            WindowInsets.Type.navigationBars()
+                    );
+                }
+            } else {
+                int vis = window.getDecorView().getSystemUiVisibility();
+                vis &= ~(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN |
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_IMMERSIVE |
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                );
+                // 保留原有布局标记 LAYOUT_STABLE | LAYOUT_FULLSCREEN
+                vis |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+                vis |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+                window.getDecorView().setSystemUiVisibility(vis);
+            }
+
+            // 再调用原有沉浸式工具，恢复主Activity暗黑模式下状态栏图标颜色
+            ImmersiveUtil.applyRealImmersive(this, isDark);
+
+            // 强制 Qt 感知窗口变化并重绘（仅使用标准 Android API）
+            getWindow()
+                .getDecorView()
+                .post(() -> {
+                    View content = findViewById(android.R.id.content);
+                    if (content != null) {
+                        content.requestLayout();
+                        content.invalidate();
                     }
-
-                    // 再调用原有沉浸式工具，恢复主Activity暗黑模式下状态栏图标颜色
-                    ImmersiveUtil.applyRealImmersive(this, isDark);
-
-                    // 强制 Qt 感知窗口变化并重绘（仅使用标准 Android API）
-                    getWindow()
-                            .getDecorView()
-                            .post(
-                                    () -> {
-                                        View content = findViewById(android.R.id.content);
-                                        if (content != null) {
-                                            content.requestLayout();
-                                            content.invalidate();
-                                        }
-                                    });
                 });
+        });
     }
 
     public void exitSystemFullscreen() {
@@ -2368,15 +2574,18 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
             WindowInsetsController controller = window.getInsetsController();
             if (controller != null) {
                 controller.show(
-                        WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+                    WindowInsets.Type.statusBars() |
+                        WindowInsets.Type.navigationBars()
+                );
             }
         } else {
             int vis = window.getDecorView().getSystemUiVisibility();
             // 清除全屏、隐藏导航栏标记，保留 LAYOUT_STABLE | LAYOUT_FULLSCREEN 布局延伸
-            vis &=
-                    ~(View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE);
+            vis &= ~(
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_IMMERSIVE
+            );
             window.getDecorView().setSystemUiVisibility(vis);
         }
     }
@@ -2407,81 +2616,91 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
      * @param ctx 传入当前发起弹窗的Activity上下文（XXXActivity.this）
      * @param mdList 数组，第0项为markdown文本
      */
-    public static void showAiMarkdownDialog(Context ctx, ArrayList<String> mdList) {
+    public static void showAiMarkdownDialog(
+        Context ctx,
+        ArrayList<String> mdList
+    ) {
         if (ctx == null || ((Activity) ctx).isFinishing()) {
             return;
         }
         Activity act = (Activity) ctx;
-        act.runOnUiThread(
-                () -> {
-                    String mdContent = "";
-                    if (mdList != null && mdList.size() > 0) {
-                        mdContent = mdList.get(0);
-                    }
+        act.runOnUiThread(() -> {
+            String mdContent = "";
+            if (mdList != null && mdList.size() > 0) {
+                mdContent = mdList.get(0);
+            }
 
-                    int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
-                    int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+            int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
 
-                    android.widget.ScrollView scrollView = new android.widget.ScrollView(act);
-                    scrollView.setPadding(dp(act, 16), dp(act, 12), dp(act, 16), dp(act, 12));
-                    LinearLayout container = new LinearLayout(act);
-                    container.setOrientation(LinearLayout.VERTICAL);
-                    container.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            android.widget.ScrollView scrollView =
+                new android.widget.ScrollView(act);
+            scrollView.setPadding(
+                dp(act, 16),
+                dp(act, 12),
+                dp(act, 16),
+                dp(act, 12)
+            );
+            LinearLayout container = new LinearLayout(act);
+            container.setOrientation(LinearLayout.VERTICAL);
+            container.setGravity(android.view.Gravity.CENTER_VERTICAL);
 
-                    String[] lines = mdContent.split("\\n");
-                    for (String line : lines) {
-                        TextView tv = new TextView(act);
-                        tv.setTextColor(textColor);
-                        tv.setPadding(0, dp(act, 3), 0, dp(act, 3));
-                        tv.setTextSize(14);
-                        String showText = line;
-                        boolean bold = false;
-                        float textSize = 14;
+            String[] lines = mdContent.split("\\n");
+            for (String line : lines) {
+                TextView tv = new TextView(act);
+                tv.setTextColor(textColor);
+                tv.setPadding(0, dp(act, 3), 0, dp(act, 3));
+                tv.setTextSize(14);
+                String showText = line;
+                boolean bold = false;
+                float textSize = 14;
 
-                        if (line.startsWith("# ")) {
-                            showText = line.substring(2);
-                            bold = true;
-                            textSize = 18;
-                        } else if (line.startsWith("## ")) {
-                            showText = line.substring(3);
-                            bold = true;
-                            textSize = 16;
-                        } else if (line.startsWith("### ")) {
-                            showText = line.substring(4);
-                            bold = true;
-                            textSize = 15;
-                        } else if (line.startsWith("#### ")) {
-                            showText = line.substring(5);
-                            bold = true;
-                            textSize = 14;
-                        } else if (line.startsWith("##### ")) {
-                            showText = line.substring(6);
-                            bold = true;
-                            textSize = 13;
-                        } else if (line.startsWith("- ") || line.startsWith("* ")) {
-                            showText = "• " + line.substring(2);
-                        }
-                        showText = showText.replace("**", "");
-                        if (bold) {
-                            tv.getPaint().setFakeBoldText(true);
-                        }
-                        tv.setTextSize(textSize);
-                        tv.setText(showText);
-                        container.addView(tv);
-                    }
-                    scrollView.addView(container);
+                if (line.startsWith("# ")) {
+                    showText = line.substring(2);
+                    bold = true;
+                    textSize = 18;
+                } else if (line.startsWith("## ")) {
+                    showText = line.substring(3);
+                    bold = true;
+                    textSize = 16;
+                } else if (line.startsWith("### ")) {
+                    showText = line.substring(4);
+                    bold = true;
+                    textSize = 15;
+                } else if (line.startsWith("#### ")) {
+                    showText = line.substring(5);
+                    bold = true;
+                    textSize = 14;
+                } else if (line.startsWith("##### ")) {
+                    showText = line.substring(6);
+                    bold = true;
+                    textSize = 13;
+                } else if (line.startsWith("- ") || line.startsWith("* ")) {
+                    showText = "• " + line.substring(2);
+                }
+                showText = showText.replace("**", "");
+                if (bold) {
+                    tv.getPaint().setFakeBoldText(true);
+                }
+                tv.setTextSize(textSize);
+                tv.setText(showText);
+                container.addView(tv);
+            }
+            scrollView.addView(container);
 
-                    // androidx.appcompat.app.AlertDialog.Builder builder =
-                    //    new androidx.appcompat.app.AlertDialog.Builder(act);
-                    android.app.AlertDialog.Builder builder =
-                            new android.app.AlertDialog.Builder(act);
+            // androidx.appcompat.app.AlertDialog.Builder builder =
+            //    new androidx.appcompat.app.AlertDialog.Builder(act);
+            android.app.AlertDialog.Builder builder =
+                new android.app.AlertDialog.Builder(act);
 
-                    String title = MyActivity.zh_cn ? "AI分析结果" : "AI Analysis Result";
-                    builder.setTitle(title);
-                    builder.setView(scrollView);
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.show();
-                });
+            String title = MyActivity.zh_cn
+                ? "AI分析结果"
+                : "AI Analysis Result";
+            builder.setTitle(title);
+            builder.setView(scrollView);
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
+        });
     }
 
     /**
@@ -2490,24 +2709,30 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
      * @param act 当前发起页面Activity
      * @return 创建好的AlertDialog实例，页面自行保存引用
      */
-    public static androidx.appcompat.app.AlertDialog showAiLoadingDialog(Activity act) {
+    public static androidx.appcompat.app.AlertDialog showAiLoadingDialog(
+        Activity act
+    ) {
         if (act == null || act.isFinishing()) {
             return null;
         }
 
-        String msg = MyActivity.zh_cn ? "处理中，请稍后..." : "Processing, please wait...";
+        String msg = MyActivity.zh_cn
+            ? "处理中，请稍后..."
+            : "Processing, please wait...";
 
         LinearLayout layout = new LinearLayout(act);
         layout.setOrientation(LinearLayout.HORIZONTAL);
         layout.setPadding(dp(act, 24), dp(act, 16), dp(act, 24), dp(act, 16));
         layout.setGravity(android.view.Gravity.CENTER_VERTICAL);
 
-        android.widget.ProgressBar progressBar = new android.widget.ProgressBar(act);
+        android.widget.ProgressBar progressBar = new android.widget.ProgressBar(
+            act
+        );
         progressBar.setIndeterminate(true);
-        LinearLayout.LayoutParams progressLp =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams progressLp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
         progressLp.rightMargin = dp(act, 16);
         progressBar.setLayoutParams(progressLp);
 
@@ -2520,7 +2745,7 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         layout.addView(tvMsg);
 
         androidx.appcompat.app.AlertDialog.Builder builder =
-                new androidx.appcompat.app.AlertDialog.Builder(act);
+            new androidx.appcompat.app.AlertDialog.Builder(act);
         builder.setView(layout);
         builder.setCancelable(false);
         androidx.appcompat.app.AlertDialog dialog = builder.create();
@@ -2533,7 +2758,9 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
      *
      * @param dialogRef 页面持有的弹窗引用
      */
-    public static void dismissAiLoadingDialog(androidx.appcompat.app.AlertDialog dialogRef) {
+    public static void dismissAiLoadingDialog(
+        androidx.appcompat.app.AlertDialog dialogRef
+    ) {
         if (dialogRef != null && dialogRef.isShowing()) {
             dialogRef.dismiss();
         }
@@ -2550,29 +2777,39 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
         if (act == null || act.isFinishing() || act.isDestroyed()) {
             return;
         }
-        act.runOnUiThread(
-                () -> {
-                    int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
-                    int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
-                    // 外层滚动容器
-                    android.widget.ScrollView scrollView = new android.widget.ScrollView(act);
-                    scrollView.setPadding(dp(act, 4), dp(act, 4), dp(act, 4), dp(act, 4));
-                    TextView tvContent = new TextView(act);
-                    tvContent.setText(contentText);
-                    tvContent.setTextSize(15);
-                    tvContent.setTextColor(textColor);
-                    tvContent.setPadding(dp(act, 20), dp(act, 16), dp(act, 20), dp(act, 16));
-                    tvContent.setBackgroundColor(bgColor);
-                    scrollView.addView(tvContent);
+        act.runOnUiThread(() -> {
+            int textColor = isDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = isDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+            // 外层滚动容器
+            android.widget.ScrollView scrollView =
+                new android.widget.ScrollView(act);
+            scrollView.setPadding(
+                dp(act, 4),
+                dp(act, 4),
+                dp(act, 4),
+                dp(act, 4)
+            );
+            TextView tvContent = new TextView(act);
+            tvContent.setText(contentText);
+            tvContent.setTextSize(15);
+            tvContent.setTextColor(textColor);
+            tvContent.setPadding(
+                dp(act, 20),
+                dp(act, 16),
+                dp(act, 20),
+                dp(act, 16)
+            );
+            tvContent.setBackgroundColor(bgColor);
+            scrollView.addView(tvContent);
 
-                    android.app.AlertDialog.Builder builder =
-                            new android.app.AlertDialog.Builder(act);
-                    builder.setView(scrollView);
-                    // 根据全局zh_cn切换按钮文字
-                    String okText = MyActivity.zh_cn ? "确定" : "OK";
-                    builder.setPositiveButton(okText, null);
-                    builder.show();
-                });
+            android.app.AlertDialog.Builder builder =
+                new android.app.AlertDialog.Builder(act);
+            builder.setView(scrollView);
+            // 根据全局zh_cn切换按钮文字
+            String okText = MyActivity.zh_cn ? "确定" : "OK";
+            builder.setPositiveButton(okText, null);
+            builder.show();
+        });
     }
 
     // ========== 原JNI对外入口，C++调用，保持签名不变 ==========
@@ -2607,11 +2844,15 @@ public class MyActivity extends QtActivity implements Application.ActivityLifecy
     }
 
     public float getSystemDefaultTextSizePx() {
-        if (mInstance == null) return (14.0f * getResources().getDisplayMetrics().scaledDensity);
+        if (mInstance == null) return (
+            14.0f * getResources().getDisplayMetrics().scaledDensity
+        );
         android.util.TypedValue tv = new android.util.TypedValue();
         // 读取系统属性 ?attr/textAppearanceBodyMedium 或回退到 14sp
         // 这里直接用 DisplayMetrics.scaledDensity × 14 作为安全兜底
-        return (14.0f * mInstance.getResources().getDisplayMetrics().scaledDensity);
+        return (
+            14.0f * mInstance.getResources().getDisplayMetrics().scaledDensity
+        );
     }
 
     /** 供 ReadListActivity.onCreate 调用 */

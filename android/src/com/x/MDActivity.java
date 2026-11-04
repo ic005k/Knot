@@ -223,36 +223,6 @@ public class MDActivity
     private static final int REQUEST_EDIT = 1; // 可以是任意整数（建议从 1 开始）
     public static final int RESULT_SAVE = 1001;
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -457,7 +427,7 @@ public class MDActivity
             (LinearLayoutManager) recyclerView.getLayoutManager()
         ).findFirstVisibleItemPosition();
         View view = recyclerView.getChildAt(0);
-        int offset = (view != null) ? view.getTop() : 0;
+        int offset = view != null ? view.getTop() : 0;
 
         getSharedPreferences(strmdFileName + "scroll_position", MODE_PRIVATE)
             .edit()

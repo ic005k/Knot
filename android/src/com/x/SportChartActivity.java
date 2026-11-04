@@ -21,10 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -39,7 +37,7 @@ public class SportChartActivity extends AppCompatActivity {
     private OnBackPressedCallback mBackCallback;
     private int mScreenWidth;
 
-    private native void PublicJavaCallCpp(String msg);
+    private static native void PublicJavaCallCpp(String msg);
 
     private androidx.appcompat.app.AlertDialog mAiLoadingDialog;
 
@@ -47,14 +45,13 @@ public class SportChartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mInstance = this;
-        mBackCallback =
-                new OnBackPressedCallback(true) {
-                    @Override
-                    public void handleOnBackPressed() {
-                        PublicJavaCallCpp("cancel_sport_chart");
-                        finish();
-                    }
-                };
+        mBackCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                PublicJavaCallCpp("cancel_sport_chart");
+                finish();
+            }
+        };
         getOnBackPressedDispatcher().addCallback(this, mBackCallback);
 
         mIsDark = ImmersiveUtil.applyRealImmersive(this);
@@ -63,8 +60,11 @@ public class SportChartActivity extends AppCompatActivity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setLayoutParams(
-                new ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        );
         int bgColor = mIsDark ? 0xFF121212 : 0xFFF5F5F5;
         int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
         int btnBgNormal = mIsDark ? 0xFF303030 : 0xFFE8E8E8;
@@ -79,15 +79,15 @@ public class SportChartActivity extends AppCompatActivity {
         mBtnYear.setText(MyActivity.zh_cn ? "汇总" : "Summary");
         mBtnYear.setBackgroundColor(btnBgNormal);
         mBtnYear.setTextColor(textColor);
-        LinearLayout.LayoutParams lpBtnY =
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams lpBtnY = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        );
         lpBtnY.setMargins(0, 0, dp(12), 0);
         topBtnBar.addView(mBtnYear, lpBtnY);
-        mBtnYear.setOnClickListener(
-                v -> {
-                    PublicJavaCallCpp("sport_select_year|==|");
-                });
+        mBtnYear.setOnClickListener(v -> {
+            PublicJavaCallCpp("sport_select_year|==|");
+        });
 
         mBtnYearMonth = new Button(this);
         mBtnYearMonth.setText(MyActivity.zh_cn ? "年月" : "Year‑Month");
@@ -100,7 +100,12 @@ public class SportChartActivity extends AppCompatActivity {
         // ========== 自定义分页吸附横向滚动容器 ==========
         mHScrollView = new SnapHorizontalScrollView(this);
         mHScrollView.setLayoutParams(
-                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f));
+            new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
+                1.0f
+            )
+        );
         mHScrollView.setFillViewport(true);
 
         mScrollContentContainer = new LinearLayout(this);
@@ -111,146 +116,157 @@ public class SportChartActivity extends AppCompatActivity {
         setContentView(root);
 
         Intent intent = getIntent();
-        ArrayList<String> initRecordList = intent.getStringArrayListExtra("sport_record_list");
+        ArrayList<String> initRecordList = intent.getStringArrayListExtra(
+            "sport_record_list"
+        );
         if (initRecordList != null) {
             refreshAllRecords(initRecordList);
         }
     }
 
     public void refreshAllRecords(ArrayList<String> recordRawList) {
-        runOnUiThread(
-                () -> {
-                    mScrollContentContainer.removeAllViews();
-                    int screenW = mScreenWidth;
-                    int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
-                    int btnBgNormal = mIsDark ? 0xFF303030 : 0xFFE8E8E8;
-                    for (int idx = 0; idx < recordRawList.size(); idx++) {
-                        String rawItem = recordRawList.get(idx);
-                        String[] sevenTexts = rawItem.split("===");
-                        LinearLayout itemRoot = new LinearLayout(this);
-                        itemRoot.setOrientation(LinearLayout.VERTICAL);
-                        LinearLayout.LayoutParams itemLp =
-                                new LinearLayout.LayoutParams(
-                                        screenW, ViewGroup.LayoutParams.MATCH_PARENT);
-                        itemRoot.setLayoutParams(itemLp);
-                        itemRoot.setPadding(dp(12), dp(8), dp(12), dp(8));
+        runOnUiThread(() -> {
+            mScrollContentContainer.removeAllViews();
+            int screenW = mScreenWidth;
+            int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
+            int btnBgNormal = mIsDark ? 0xFF303030 : 0xFFE8E8E8;
+            for (int idx = 0; idx < recordRawList.size(); idx++) {
+                String rawItem = recordRawList.get(idx);
+                String[] sevenTexts = rawItem.split("===");
+                LinearLayout itemRoot = new LinearLayout(this);
+                itemRoot.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams itemLp =
+                    new LinearLayout.LayoutParams(
+                        screenW,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    );
+                itemRoot.setLayoutParams(itemLp);
+                itemRoot.setPadding(dp(12), dp(8), dp(12), dp(8));
 
-                        LinearLayout statContainer = new LinearLayout(this);
-                        statContainer.setOrientation(LinearLayout.VERTICAL);
-                        for (int t = 0; t < sevenTexts.length; t++) {
-                            if (t == 6) continue;
-                            TextView tv = new TextView(this);
-                            tv.setTextSize(15);
-                            tv.setTextColor(textColor);
-                            tv.setPadding(0, dp(3), 0, dp(3));
-                            tv.setText(sevenTexts[t]);
-                            // 第一行加粗
-                            if (t == 0) {
-                                tv.getPaint().setFakeBoldText(true);
-                            }
-                            statContainer.addView(tv);
-                        }
-                        itemRoot.addView(statContainer);
-
-                        SportChartView chartView = new SportChartView(this, mIsDark, idx);
-                        LinearLayout.LayoutParams chartLp =
-                                new LinearLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f);
-                        chartView.setLayoutParams(chartLp);
-                        itemRoot.addView(chartView);
-
-                        LinearLayout itemBottomBar = new LinearLayout(this);
-                        itemBottomBar.setOrientation(LinearLayout.HORIZONTAL);
-                        itemBottomBar.setGravity(Gravity.CENTER);
-                        itemBottomBar.setPadding(0, dp(6), 0, 0);
-
-                        Button btnTrack = new Button(this);
-                        btnTrack.setText(MyActivity.zh_cn ? "轨迹" : "Track");
-                        btnTrack.setBackgroundColor(btnBgNormal);
-                        btnTrack.setTextColor(textColor);
-                        LinearLayout.LayoutParams lpTrack =
-                                new LinearLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                                        ViewGroup.LayoutParams.WRAP_CONTENT);
-                        lpTrack.setMargins(0, 0, dp(12), 0);
-                        btnTrack.setLayoutParams(lpTrack);
-                        final int curIdx = idx;
-                        btnTrack.setOnClickListener(
-                                v -> {
-                                    showAiLoadingDialog();
-                                    PublicJavaCallCpp("sport_chart_track|==|" + curIdx);
-                                });
-
-                        Button btnPath = new Button(this);
-                        btnPath.setText(MyActivity.zh_cn ? "途径" : "Path");
-                        btnPath.setBackgroundColor(btnBgNormal);
-                        btnPath.setTextColor(textColor);
-                        btnPath.setOnClickListener(
-                                v -> PublicJavaCallCpp("sport_chart_path|==|" + curIdx));
-
-                        itemBottomBar.addView(btnTrack);
-                        itemBottomBar.addView(btnPath);
-                        itemRoot.addView(itemBottomBar);
-
-                        mScrollContentContainer.addView(itemRoot);
+                LinearLayout statContainer = new LinearLayout(this);
+                statContainer.setOrientation(LinearLayout.VERTICAL);
+                for (int t = 0; t < sevenTexts.length; t++) {
+                    if (t == 6) continue;
+                    TextView tv = new TextView(this);
+                    tv.setTextSize(15);
+                    tv.setTextColor(textColor);
+                    tv.setPadding(0, dp(3), 0, dp(3));
+                    tv.setText(sevenTexts[t]);
+                    // 第一行加粗
+                    if (t == 0) {
+                        tv.getPaint().setFakeBoldText(true);
                     }
+                    statContainer.addView(tv);
+                }
+                itemRoot.addView(statContainer);
 
-                    int itemCount = mScrollContentContainer.getChildCount();
-                    if (itemCount > 0) {
-                        int targetScrollX = (itemCount - 1) * mScreenWidth;
-                        mHScrollView.post(() -> mHScrollView.scrollTo(targetScrollX, 0));
-                    }
+                SportChartView chartView = new SportChartView(
+                    this,
+                    mIsDark,
+                    idx
+                );
+                LinearLayout.LayoutParams chartLp =
+                    new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        0,
+                        1.0f
+                    );
+                chartView.setLayoutParams(chartLp);
+                itemRoot.addView(chartView);
+
+                LinearLayout itemBottomBar = new LinearLayout(this);
+                itemBottomBar.setOrientation(LinearLayout.HORIZONTAL);
+                itemBottomBar.setGravity(Gravity.CENTER);
+                itemBottomBar.setPadding(0, dp(6), 0, 0);
+
+                Button btnTrack = new Button(this);
+                btnTrack.setText(MyActivity.zh_cn ? "轨迹" : "Track");
+                btnTrack.setBackgroundColor(btnBgNormal);
+                btnTrack.setTextColor(textColor);
+                LinearLayout.LayoutParams lpTrack =
+                    new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    );
+                lpTrack.setMargins(0, 0, dp(12), 0);
+                btnTrack.setLayoutParams(lpTrack);
+                final int curIdx = idx;
+                btnTrack.setOnClickListener(v -> {
+                    showAiLoadingDialog();
+                    PublicJavaCallCpp("sport_chart_track|==|" + curIdx);
                 });
+
+                Button btnPath = new Button(this);
+                btnPath.setText(MyActivity.zh_cn ? "途径" : "Path");
+                btnPath.setBackgroundColor(btnBgNormal);
+                btnPath.setTextColor(textColor);
+                btnPath.setOnClickListener(v ->
+                    PublicJavaCallCpp("sport_chart_path|==|" + curIdx)
+                );
+
+                itemBottomBar.addView(btnTrack);
+                itemBottomBar.addView(btnPath);
+                itemRoot.addView(itemBottomBar);
+
+                mScrollContentContainer.addView(itemRoot);
+            }
+
+            int itemCount = mScrollContentContainer.getChildCount();
+            if (itemCount > 0) {
+                int targetScrollX = (itemCount - 1) * mScreenWidth;
+                mHScrollView.post(() ->
+                    mHScrollView.scrollTo(targetScrollX, 0)
+                );
+            }
+        });
     }
 
     public void setRecordSpeedData(int recordIndex, double[] speedArr) {
-        runOnUiThread(
-                () -> {
-                    View itemView = mScrollContentContainer.getChildAt(recordIndex);
-                    if (!(itemView instanceof LinearLayout)) return;
-                    LinearLayout itemLl = (LinearLayout) itemView;
-                    SportChartView chart = (SportChartView) itemLl.getChildAt(1);
-                    if (chart != null) chart.setSpeedData(speedArr);
-                });
+        runOnUiThread(() -> {
+            View itemView = mScrollContentContainer.getChildAt(recordIndex);
+            if (!(itemView instanceof LinearLayout)) return;
+            LinearLayout itemLl = (LinearLayout) itemView;
+            SportChartView chart = (SportChartView) itemLl.getChildAt(1);
+            if (chart != null) chart.setSpeedData(speedArr);
+        });
     }
 
     public void setRecordAltData(int recordIndex, double[] altArr) {
-        runOnUiThread(
-                () -> {
-                    View itemView = mScrollContentContainer.getChildAt(recordIndex);
-                    if (!(itemView instanceof LinearLayout)) return;
-                    LinearLayout itemLl = (LinearLayout) itemView;
-                    SportChartView chart = (SportChartView) itemLl.getChildAt(1);
-                    if (chart != null) chart.setAltitudeData(altArr);
-                });
+        runOnUiThread(() -> {
+            View itemView = mScrollContentContainer.getChildAt(recordIndex);
+            if (!(itemView instanceof LinearLayout)) return;
+            LinearLayout itemLl = (LinearLayout) itemView;
+            SportChartView chart = (SportChartView) itemLl.getChildAt(1);
+            if (chart != null) chart.setAltitudeData(altArr);
+        });
     }
 
     public void refreshAllSpeedData(ArrayList<double[]> speedList) {
-        runOnUiThread(
-                () -> {
-                    for (int i = 0; i < speedList.size(); i++) {
-                        if (i >= mScrollContentContainer.getChildCount()) break;
-                        View itemView = mScrollContentContainer.getChildAt(i);
-                        if (!(itemView instanceof LinearLayout)) continue;
-                        SportChartView chart =
-                                (SportChartView) ((LinearLayout) itemView).getChildAt(1);
-                        if (chart != null) chart.setSpeedData(speedList.get(i));
-                    }
-                });
+        runOnUiThread(() -> {
+            for (int i = 0; i < speedList.size(); i++) {
+                if (i >= mScrollContentContainer.getChildCount()) break;
+                View itemView = mScrollContentContainer.getChildAt(i);
+                if (!(itemView instanceof LinearLayout)) continue;
+                SportChartView chart = (SportChartView) (
+                    (LinearLayout) itemView
+                ).getChildAt(1);
+                if (chart != null) chart.setSpeedData(speedList.get(i));
+            }
+        });
     }
 
     public void refreshAllAltData(ArrayList<double[]> altList) {
-        runOnUiThread(
-                () -> {
-                    for (int i = 0; i < altList.size(); i++) {
-                        if (i >= mScrollContentContainer.getChildCount()) break;
-                        View itemView = mScrollContentContainer.getChildAt(i);
-                        if (!(itemView instanceof LinearLayout)) continue;
-                        SportChartView chart =
-                                (SportChartView) ((LinearLayout) itemView).getChildAt(1);
-                        if (chart != null) chart.setAltitudeData(altList.get(i));
-                    }
-                });
+        runOnUiThread(() -> {
+            for (int i = 0; i < altList.size(); i++) {
+                if (i >= mScrollContentContainer.getChildCount()) break;
+                View itemView = mScrollContentContainer.getChildAt(i);
+                if (!(itemView instanceof LinearLayout)) continue;
+                SportChartView chart = (SportChartView) (
+                    (LinearLayout) itemView
+                ).getChildAt(1);
+                if (chart != null) chart.setAltitudeData(altList.get(i));
+            }
+        });
     }
 
     private void showYearMonthSelectDialog() {
@@ -268,9 +284,10 @@ public class SportChartActivity extends AppCompatActivity {
         npYear.setMaxValue(currentYear);
         npYear.setValue(currentYear);
         npYear.setWrapSelectorWheel(false);
-        LinearLayout.LayoutParams lpYear =
-                new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams lpYear = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        );
         lpYear.setMargins(0, 0, dp(16), 0);
         npYear.setLayoutParams(lpYear);
 
@@ -286,13 +303,11 @@ public class SportChartActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(MyActivity.zh_cn ? "选择年月" : "Select Year‑Month");
         builder.setView(container);
-        builder.setPositiveButton(
-                android.R.string.ok,
-                (dialog, which) -> {
-                    String selYm = npYear.getValue() + "-" + npMonth.getValue();
-                    mBtnYearMonth.setText(selYm);
-                    PublicJavaCallCpp("sport_select_ym|==|" + selYm);
-                });
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            String selYm = npYear.getValue() + "-" + npMonth.getValue();
+            mBtnYearMonth.setText(selYm);
+            PublicJavaCallCpp("sport_select_ym|==|" + selYm);
+        });
         builder.setNegativeButton(android.R.string.cancel, null);
         builder.show();
     }
@@ -305,121 +320,128 @@ public class SportChartActivity extends AppCompatActivity {
     }
 
     private int dp(int dpVal) {
-        return (int) (dpVal * getResources().getDisplayMetrics().density + 0.5f);
+        return (int) (dpVal * getResources().getDisplayMetrics().density +
+            0.5f);
     }
 
     public void showSummaryDialog(ArrayList<String> summaryList) {
-        runOnUiThread(
-                () -> {
-                    int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
-                    int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+        runOnUiThread(() -> {
+            int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
 
-                    LinearLayout rootContainer = new LinearLayout(this);
-                    rootContainer.setOrientation(LinearLayout.VERTICAL);
-                    rootContainer.setBackgroundColor(bgColor);
+            LinearLayout rootContainer = new LinearLayout(this);
+            rootContainer.setOrientation(LinearLayout.VERTICAL);
+            rootContainer.setBackgroundColor(bgColor);
 
-                    TextView tvTitle = new TextView(this);
-                    tvTitle.setText(MyActivity.zh_cn ? "汇总" : "Summary");
-                    tvTitle.setTextSize(18);
-                    tvTitle.setTextColor(textColor);
-                    tvTitle.setPadding(dp(12), dp(16), dp(12), dp(12));
-                    rootContainer.addView(tvTitle);
+            TextView tvTitle = new TextView(this);
+            tvTitle.setText(MyActivity.zh_cn ? "汇总" : "Summary");
+            tvTitle.setTextSize(18);
+            tvTitle.setTextColor(textColor);
+            tvTitle.setPadding(dp(12), dp(16), dp(12), dp(12));
+            rootContainer.addView(tvTitle);
 
-                    ListView listView = new ListView(this);
-                    listView.setBackgroundColor(bgColor);
-                    listView.setAdapter(
-                            new ArrayAdapter<String>(this, 0, summaryList) {
-                                @Override
-                                public View getView(
-                                        int position, View convertView, ViewGroup parent) {
-                                    LinearLayout itemLl =
-                                            convertView instanceof LinearLayout
-                                                    ? (LinearLayout) convertView
-                                                    : new LinearLayout(getContext());
-                                    itemLl.setOrientation(LinearLayout.VERTICAL);
-                                    itemLl.setPadding(dp(12), dp(14), dp(12), dp(14));
-                                    itemLl.removeAllViews();
+            ListView listView = new ListView(this);
+            listView.setBackgroundColor(bgColor);
+            listView.setAdapter(
+                new ArrayAdapter<String>(this, 0, summaryList) {
+                    @Override
+                    public View getView(
+                        int position,
+                        View convertView,
+                        ViewGroup parent
+                    ) {
+                        LinearLayout itemLl =
+                            convertView instanceof LinearLayout
+                                ? (LinearLayout) convertView
+                                : new LinearLayout(getContext());
+                        itemLl.setOrientation(LinearLayout.VERTICAL);
+                        itemLl.setPadding(dp(12), dp(14), dp(12), dp(14));
+                        itemLl.removeAllViews();
 
-                                    TextView tvLine = new TextView(getContext());
-                                    tvLine.setTextSize(15);
-                                    tvLine.setTextColor(textColor);
-                                    tvLine.setText(getItem(position));
-                                    itemLl.addView(tvLine);
-                                    return itemLl;
-                                }
-                            });
-                    rootContainer.addView(listView);
+                        TextView tvLine = new TextView(getContext());
+                        tvLine.setTextSize(15);
+                        tvLine.setTextColor(textColor);
+                        tvLine.setText(getItem(position));
+                        itemLl.addView(tvLine);
+                        return itemLl;
+                    }
+                }
+            );
+            rootContainer.addView(listView);
 
-                    new AlertDialog.Builder(this)
-                            .setView(rootContainer)
-                            .setPositiveButton(android.R.string.ok, null)
-                            .show();
-                });
+            new AlertDialog.Builder(this)
+                .setView(rootContainer)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+        });
     }
 
     public void showPathDialog(ArrayList<String> pathItemList) {
-        runOnUiThread(
-                () -> {
-                    int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
-                    int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
+        runOnUiThread(() -> {
+            int textColor = mIsDark ? 0xFFFFFFFF : 0xFF000000;
+            int bgColor = mIsDark ? 0xFF1E1E1E : 0xFFFFFFFF;
 
-                    LinearLayout rootContainer = new LinearLayout(this);
-                    rootContainer.setOrientation(LinearLayout.VERTICAL);
-                    rootContainer.setBackgroundColor(bgColor);
+            LinearLayout rootContainer = new LinearLayout(this);
+            rootContainer.setOrientation(LinearLayout.VERTICAL);
+            rootContainer.setBackgroundColor(bgColor);
 
-                    TextView tvTitle = new TextView(this);
-                    tvTitle.setText(MyActivity.zh_cn ? "途径点" : "Path Points");
-                    tvTitle.setTextSize(18);
-                    tvTitle.setTextColor(textColor);
-                    tvTitle.setPadding(dp(12), dp(16), dp(12), dp(12));
-                    rootContainer.addView(tvTitle);
+            TextView tvTitle = new TextView(this);
+            tvTitle.setText(MyActivity.zh_cn ? "途径点" : "Path Points");
+            tvTitle.setTextSize(18);
+            tvTitle.setTextColor(textColor);
+            tvTitle.setPadding(dp(12), dp(16), dp(12), dp(12));
+            rootContainer.addView(tvTitle);
 
-                    ListView listView = new ListView(this);
-                    listView.setBackgroundColor(bgColor);
-                    listView.setAdapter(
-                            new ArrayAdapter<String>(this, 0, pathItemList) {
-                                @Override
-                                public View getView(
-                                        int position, View convertView, ViewGroup parent) {
-                                    LinearLayout itemLl =
-                                            convertView instanceof LinearLayout
-                                                    ? (LinearLayout) convertView
-                                                    : new LinearLayout(getContext());
-                                    itemLl.setOrientation(LinearLayout.VERTICAL);
-                                    itemLl.setPadding(dp(12), dp(8), dp(12), dp(8));
-                                    itemLl.removeAllViews();
+            ListView listView = new ListView(this);
+            listView.setBackgroundColor(bgColor);
+            listView.setAdapter(
+                new ArrayAdapter<String>(this, 0, pathItemList) {
+                    @Override
+                    public View getView(
+                        int position,
+                        View convertView,
+                        ViewGroup parent
+                    ) {
+                        LinearLayout itemLl =
+                            convertView instanceof LinearLayout
+                                ? (LinearLayout) convertView
+                                : new LinearLayout(getContext());
+                        itemLl.setOrientation(LinearLayout.VERTICAL);
+                        itemLl.setPadding(dp(12), dp(8), dp(12), dp(8));
+                        itemLl.removeAllViews();
 
-                                    String[] parts = getItem(position).split("===");
+                        String[] parts = getItem(position).split("===");
 
-                                    TextView tvTime = new TextView(getContext());
-                                    tvTime.setTextSize(15);
-                                    tvTime.setTextColor(textColor);
-                                    tvTime.getPaint().setFakeBoldText(true);
-                                    tvTime.setText(parts.length >= 1 ? parts[0] : "");
-                                    itemLl.addView(tvTime);
+                        TextView tvTime = new TextView(getContext());
+                        tvTime.setTextSize(15);
+                        tvTime.setTextColor(textColor);
+                        tvTime.getPaint().setFakeBoldText(true);
+                        tvTime.setText(parts.length >= 1 ? parts[0] : "");
+                        itemLl.addView(tvTime);
 
-                                    TextView tvLatLon = new TextView(getContext());
-                                    tvLatLon.setTextSize(14);
-                                    tvLatLon.setTextColor(textColor);
-                                    tvLatLon.setText(parts.length >= 2 ? parts[1] : "");
-                                    itemLl.addView(tvLatLon);
+                        TextView tvLatLon = new TextView(getContext());
+                        tvLatLon.setTextSize(14);
+                        tvLatLon.setTextColor(textColor);
+                        tvLatLon.setText(parts.length >= 2 ? parts[1] : "");
+                        itemLl.addView(tvLatLon);
 
-                                    TextView tvAddr = new TextView(getContext());
-                                    tvAddr.setTextSize(14);
-                                    tvAddr.setTextColor(textColor);
-                                    tvAddr.setText(parts.length >= 3 ? parts[2] : "");
-                                    itemLl.addView(tvAddr);
+                        TextView tvAddr = new TextView(getContext());
+                        tvAddr.setTextSize(14);
+                        tvAddr.setTextColor(textColor);
+                        tvAddr.setText(parts.length >= 3 ? parts[2] : "");
+                        itemLl.addView(tvAddr);
 
-                                    return itemLl;
-                                }
-                            });
-                    rootContainer.addView(listView);
+                        return itemLl;
+                    }
+                }
+            );
+            rootContainer.addView(listView);
 
-                    new AlertDialog.Builder(this)
-                            .setView(rootContainer)
-                            .setPositiveButton(android.R.string.ok, null)
-                            .show();
-                });
+            new AlertDialog.Builder(this)
+                .setView(rootContainer)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+        });
     }
 
     private class SnapHorizontalScrollView extends HorizontalScrollView {
@@ -444,7 +466,10 @@ public class SportChartActivity extends AppCompatActivity {
             if (action == MotionEvent.ACTION_DOWN) {
                 mIsUserScrolling = true;
                 mVelocityTracker.clear();
-            } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            } else if (
+                action == MotionEvent.ACTION_UP ||
+                action == MotionEvent.ACTION_CANCEL
+            ) {
                 mIsUserScrolling = false;
                 mVelocityTracker.computeCurrentVelocity(1000);
                 float velocityX = mVelocityTracker.getXVelocity();
@@ -478,8 +503,10 @@ public class SportChartActivity extends AppCompatActivity {
             if (Math.abs(velocityX) > VELOCITY_FLING_THRESHOLD) {
                 targetPage = velocityX < 0 ? currentPage + 1 : currentPage;
             } else {
-                if (fraction >= 1.0f - SNAP_THRESHOLD_RATIO) targetPage = currentPage + 1;
-                else if (fraction <= SNAP_THRESHOLD_RATIO) targetPage = currentPage;
+                if (fraction >= 1.0f - SNAP_THRESHOLD_RATIO) targetPage =
+                    currentPage + 1;
+                else if (fraction <= SNAP_THRESHOLD_RATIO) targetPage =
+                    currentPage;
                 else targetPage = Math.round((float) scrollX / pageWidth);
             }
 
@@ -520,7 +547,11 @@ public class SportChartActivity extends AppCompatActivity {
         private final Paint mPaintLabel = new Paint();
         private final Paint mPaintLabelBg = new Paint();
 
-        public SportChartView(Context context, boolean isDark, int recordIndex) {
+        public SportChartView(
+            Context context,
+            boolean isDark,
+            int recordIndex
+        ) {
             super(context);
             mDarkMode = isDark;
             mRecordIndex = recordIndex;
@@ -577,21 +608,34 @@ public class SportChartActivity extends AppCompatActivity {
             int red = Color.argb(180, 244, 67, 54);
 
             if (ratio < 0.33f) return evaluateColor(ratio / 0.33f, blue, green);
-            else if (ratio < 0.66f) return evaluateColor((ratio - 0.33f) / 0.33f, green, orange);
+            else if (ratio < 0.66f) return evaluateColor(
+                (ratio - 0.33f) / 0.33f,
+                green,
+                orange
+            );
             else return evaluateColor((ratio - 0.66f) / 0.34f, orange, red);
         }
 
-        private static int evaluateColor(float fraction, int startColor, int endColor) {
-            int startA = (startColor >> 24) & 0xff, startR = (startColor >> 16) & 0xff;
-            int startG = (startColor >> 8) & 0xff, startB = startColor & 0xff;
-            int endA = (endColor >> 24) & 0xff, endR = (endColor >> 16) & 0xff;
-            int endG = (endColor >> 8) & 0xff, endB = endColor & 0xff;
+        private static int evaluateColor(
+            float fraction,
+            int startColor,
+            int endColor
+        ) {
+            int startA = (startColor >> 24) & 0xff,
+                startR = (startColor >> 16) & 0xff;
+            int startG = (startColor >> 8) & 0xff,
+                startB = startColor & 0xff;
+            int endA = (endColor >> 24) & 0xff,
+                endR = (endColor >> 16) & 0xff;
+            int endG = (endColor >> 8) & 0xff,
+                endB = endColor & 0xff;
 
             return Color.argb(
-                    startA + (int) (fraction * (endA - startA)),
-                    startR + (int) (fraction * (endR - startR)),
-                    startG + (int) (fraction * (endG - startG)),
-                    startB + (int) (fraction * (endB - startB)));
+                startA + (int) (fraction * (endA - startA)),
+                startR + (int) (fraction * (endR - startR)),
+                startG + (int) (fraction * (endG - startG)),
+                startB + (int) (fraction * (endB - startB))
+            );
         }
 
         /** 绘制带半透明背景的标签 */
@@ -601,12 +645,12 @@ public class SportChartActivity extends AppCompatActivity {
             float padding = dpInner(4);
 
             // 绘制背景圆角矩形
-            RectF bgRect =
-                    new RectF(
-                            x - padding,
-                            y - textSize - padding,
-                            x + textWidth + padding,
-                            y + padding);
+            RectF bgRect = new RectF(
+                x - padding,
+                y - textSize - padding,
+                x + textWidth + padding,
+                y + padding
+            );
             canvas.drawRoundRect(bgRect, dpInner(4), dpInner(4), mPaintLabelBg);
 
             // 绘制文字
@@ -642,7 +686,8 @@ public class SportChartActivity extends AppCompatActivity {
                 Path altPath = new Path();
                 for (int i = 0; i < sampleCount; i++) {
                     float x = (float) (((double) i / (sampleCount - 1)) * w);
-                    float y = (float) (midY - ((mAltData[i] - minAlt) / rangeAlt) * (midY * 0.9));
+                    float y = (float) (midY -
+                        ((mAltData[i] - minAlt) / rangeAlt) * (midY * 0.9));
                     if (i == 0) altPath.moveTo(x, y);
                     else altPath.lineTo(x, y);
                 }
@@ -664,11 +709,18 @@ public class SportChartActivity extends AppCompatActivity {
                     double sp2 = mSpeedData[i + 1];
 
                     float x1 = (float) (((double) i / (sampleCount - 1)) * w);
-                    float x2 = (float) (((double) (i + 1) / (sampleCount - 1)) * w);
+                    float x2 = (float) (((double) (i + 1) / (sampleCount - 1)) *
+                        w);
 
                     // 下半区高度为 midY，底部为 h，顶部为 midY
-                    float y1 = maxSp > 0 ? h - (float) ((sp1 / maxSp) * (midY * 0.9)) : h;
-                    float y2 = maxSp > 0 ? h - (float) ((sp2 / maxSp) * (midY * 0.9)) : h;
+                    float y1 =
+                        maxSp > 0
+                            ? h - (float) ((sp1 / maxSp) * (midY * 0.9))
+                            : h;
+                    float y2 =
+                        maxSp > 0
+                            ? h - (float) ((sp2 / maxSp) * (midY * 0.9))
+                            : h;
 
                     Path segmentPath = new Path();
                     segmentPath.moveTo(x1, h);
@@ -691,22 +743,20 @@ public class SportChartActivity extends AppCompatActivity {
 
     /** 显示AI分析等待弹窗，带转圈ProgressBar */
     public void showAiLoadingDialog() {
-        runOnUiThread(
-                () -> {
-                    if (isFinishing()) return;
-                    if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
-                        return;
-                    }
-                    // 调用MyActivity公共方法，拿到dialog实例保存到本页面成员
-                    mAiLoadingDialog = MyActivity.showAiLoadingDialog(this);
-                });
+        runOnUiThread(() -> {
+            if (isFinishing()) return;
+            if (mAiLoadingDialog != null && mAiLoadingDialog.isShowing()) {
+                return;
+            }
+            // 调用MyActivity公共方法，拿到dialog实例保存到本页面成员
+            mAiLoadingDialog = MyActivity.showAiLoadingDialog(this);
+        });
     }
 
     /** 关闭AI等待弹窗 */
     public void dismissAiLoadingDialog() {
-        runOnUiThread(
-                () -> {
-                    MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
-                });
+        runOnUiThread(() -> {
+            MyActivity.dismissAiLoadingDialog(mAiLoadingDialog);
+        });
     }
 }

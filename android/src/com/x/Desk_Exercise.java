@@ -77,36 +77,6 @@ public class Desk_Exercise extends Activity {
 
     private static Context context;
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
-
     private static boolean zh_cn;
 
     @Override
@@ -279,8 +249,7 @@ public class Desk_Exercise extends Activity {
                     executeServiceAction();
                 }
             });
-        })
-            .start();
+        }).start();
     }
 
     private boolean checkServiceRunning() {
@@ -322,16 +291,13 @@ public class Desk_Exercise extends Activity {
         ).show();
 
         // 延迟启动应用（确保Toast显示）
-        new Handler().postDelayed(
-            () -> {
-                startActivity(
-                    new Intent(this, MyActivity.class).addFlags(
-                        Intent.FLAG_ACTIVITY_NEW_TASK
-                    )
-                );
-            },
-            500
-        );
+        new Handler().postDelayed(() -> {
+            startActivity(
+                new Intent(this, MyActivity.class).addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+                )
+            );
+        }, 500);
     }
 
     private void executeServiceAction() {

@@ -75,35 +75,7 @@ public class ClockActivity
 
     private boolean isReady = false; // 非静态成员变量
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
+    public static native void PublicJavaCallCpp(String msg);
 
     private void bindViews(String strTitle, String str) {
         text_title = (TextView) findViewById(R.id.text_title);
@@ -217,8 +189,6 @@ public class ClockActivity
         else strTodo = "Todo: \n";
 
         bindViews(str1, str2 + "\n" + strCurDT + "\n");
-
-        //CallJavaNotify_3();
 
         String mystr = str2;
         boolean isVoice = false;
@@ -336,7 +306,7 @@ public class ClockActivity
 
         MyService.clearNotify(getApplicationContext());
 
-        CallJavaNotify_4();
+        PublicJavaCallCpp("JavaNotify_4");
 
         // 释放MediaPlayer
         if (player != null) {

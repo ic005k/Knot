@@ -86,41 +86,13 @@ public class ShareReceiveActivity
     private InternalConfigure internalConfigure;
     private static Context context;
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
-
     private String type;
     private String action;
 
     private String cursorText;
     private String strUri = "";
+
+    public static native void PublicJavaCallCpp(String msg);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -403,7 +375,7 @@ public class ShareReceiveActivity
             openAppFromPackageName("com.x");
         } else {
             saveReceiveShare("text/plain", strData, "true");
-            CallJavaNotify_5();
+            PublicJavaCallCpp("goto_receive_share");
         }
     }
 
@@ -428,7 +400,7 @@ public class ShareReceiveActivity
             openAppFromPackageName("com.x");
         } else {
             saveReceiveShare("image/*", "", "true");
-            CallJavaNotify_5();
+            PublicJavaCallCpp("goto_receive_share");
         }
     }
 

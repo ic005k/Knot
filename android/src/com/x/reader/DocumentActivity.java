@@ -205,35 +205,7 @@ public class DocumentActivity extends Activity {
     protected PageView pageView;
     protected String key;
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
+    public static native void PublicJavaCallCpp(String type);
 
     private String toHex(byte[] digest) {
         StringBuilder builder = new StringBuilder(2 * digest.length);
@@ -1386,7 +1358,7 @@ public class DocumentActivity extends Activity {
         core = null;
 
         // 退出全屏模式
-        CallJavaNotify_0();
+        PublicJavaCallCpp("exit_full_screen");
 
         super.onDestroy();
         mPdfActivity = null;

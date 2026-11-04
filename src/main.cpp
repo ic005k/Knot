@@ -34,17 +34,16 @@
 #include "src/AI/GlobalAI.h"
 #include "src/Comm/AppLogger.h"
 
-extern void RegJni(const char* myClassName);
-extern void RegJni15(const char* myClassName);
-extern void RegJni16(const char* myClassName);
-extern void RegJni17(const char* myClassName);
-extern void RegJni18(const char* myClassName);
-extern void RegJni19(const char* myClassName);
-extern void RegJni20(const char* myClassName);
-extern void RegJniAiLink(const char* myClassName);
-extern void RegJniParsePreview(const char* myClassName);
-extern void RegJniSendQuestion(const char* myClassName);
-extern void RegJniPublicJavaCallCpp(const char* myClassName);
+extern void RegJni15(const char *myClassName);
+extern void RegJni16(const char *myClassName);
+extern void RegJni17(const char *myClassName);
+extern void RegJni18(const char *myClassName);
+extern void RegJni19(const char *myClassName);
+extern void RegJni20(const char *myClassName);
+extern void RegJniAiLink(const char *myClassName);
+extern void RegJniParsePreview(const char *myClassName);
+extern void RegJniSendQuestion(const char *myClassName);
+extern void RegJniPublicJavaCallCpp(const char *myClassName);
 
 extern void releaseGlobalAiEngine();
 
@@ -59,13 +58,15 @@ void applyAndroidFont() {
 #ifdef Q_OS_ANDROID
   float nativePx =
       getJavaFuncFloat("mInstance", "getSystemDefaultTextSizePx", "MyActivity");
-  if (nativePx <= 0.0f) nativePx = 14.0f;
+  if (nativePx <= 0.0f)
+    nativePx = 14.0f;
 
   // ⭐ 关键：抵消 Qt 对 setPixelSize 的隐式 DPI 二次补偿
   // Qt 内部会执行: actualPx = pixelSize * devicePixelRatio
   // 所以我们需要传入: pixelSize = nativePx / devicePixelRatio
   qreal dpr = qApp->devicePixelRatio();
-  if (dpr <= 0.0) dpr = 1.0;  // 安全兜底
+  if (dpr <= 0.0)
+    dpr = 1.0; // 安全兜底
 
   int adjustedPixelSize = qRound(nativePx / dpr);
 
@@ -74,8 +75,8 @@ void applyAndroidFont() {
   qApp->setFont(font);
 
   // ⭐ 强制所有控件重新应用样式 + 重算布局 + 重绘
-  const QList<QWidget*> widgets = QApplication::allWidgets();
-  for (QWidget* widget : widgets) {
+  const QList<QWidget *> widgets = QApplication::allWidgets();
+  for (QWidget *widget : widgets) {
     widget->style()->unpolish(widget);
     widget->style()->polish(widget);
 
@@ -102,7 +103,7 @@ int getAndroidSdkVersion();
 void migrateOldDataIfNeeded();
 #endif
 
-int clearLockFiles(const QString& iniDir);
+int clearLockFiles(const QString &iniDir);
 
 #define Cross_Origin
 
@@ -132,14 +133,15 @@ int init_main_ai();
 
 ///////////////////////////////////////////////////////////////
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   ///////////////////////////////////////////////////////////////////////
   // 防止整个数组被优化
   //(void)g_force_link_cpu_backend;
 
   int value = init_main_ai();
   qDebug() << "init_main_ai=" << value;
-  if (value == 1) return 1;
+  if (value == 1)
+    return 1;
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -203,7 +205,7 @@ int main(int argc, char* argv[]) {
   g_currentIsDark =
       (QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark);
   isDark = g_currentIsDark;
-  SplashTimer* splash = new SplashTimer(isAndroid, isDark, 200, 90);
+  SplashTimer *splash = new SplashTimer(isAndroid, isDark, 200, 90);
   splash->show();
 
   // 设置应用程序标识（为QML里面使用Settings做准备）
@@ -220,30 +222,19 @@ int main(int argc, char* argv[]) {
 #ifdef Q_OS_ANDROID
   defaultFontSize = 12;
 
-  RegJni("com/x/MyService");
+  RegJniPublicJavaCallCpp("com/x/MyService");
   RegJni20("com/x/MyService");
-  RegJni(ANDROID_MAIN_ACTIVITY);
   RegJni15(ANDROID_MAIN_ACTIVITY);
   RegJni18(ANDROID_MAIN_ACTIVITY);
   RegJni19(ANDROID_MAIN_ACTIVITY);
-  RegJni("com/x/ClockActivity");
-  RegJni("com/x/ShareReceiveActivity");
-  RegJni("com/x/NoteEditor");
+  RegJniPublicJavaCallCpp("com/x/MyService");
+  RegJniPublicJavaCallCpp("com/x/ClockActivity");
+  RegJniPublicJavaCallCpp("com/x/ShareReceiveActivity");
+  RegJniPublicJavaCallCpp("com/x/NoteEditor");
   RegJni16("com/x/NoteEditor");
   RegJniAiLink("com/x/NoteEditor");
   RegJniParsePreview("com/x/NoteEditor");
   RegJniSendQuestion("com/x/NoteEditor");
-  RegJni("com/x/MDActivity");
-  RegJni("com/x/NewTodo");
-  RegJni("com/x/NewNote");
-  RegJni("com/x/AddRecord");
-  RegJni("com/x/ContinueReading");
-  RegJni("com/x/Desk_Exercise");
-  RegJni("com/x/FilePicker");
-  RegJni("com/xhh/pdfui/PDFActivity");
-  RegJni("com/x/reader/DocumentActivity");
-  RegJni("com/x/DefaultOpen");
-  RegJni("com/x/DateTimePicker");
   RegJni17("com/x/WebViewActivity");
   RegJniPublicJavaCallCpp("com/x/ReadListActivity");
   RegJniPublicJavaCallCpp("com/x/AddEventRecord");
@@ -263,6 +254,7 @@ int main(int argc, char* argv[]) {
   RegJniPublicJavaCallCpp("com/x/StepListActivity");
   RegJniPublicJavaCallCpp("com/x/SportChartActivity");
   RegJniPublicJavaCallCpp("com/x/MyActivity");
+  RegJniPublicJavaCallCpp("com/x/reader/DocumentActivity");
 
   iniDir = "/storage/emulated/0/KnotData/";
   privateDir = "/storage/emulated/0/.Knot/";
@@ -340,9 +332,9 @@ int main(int argc, char* argv[]) {
                      bool newIsDark = (scheme == Qt::ColorScheme::Dark);
                      // 核心优化：只有主题真的变化时，才执行加载逻辑
                      if (newIsDark != g_currentIsDark) {
-                       isDark = newIsDark;           // 同步原有全局isDark
-                       g_currentIsDark = newIsDark;  // 更新当前状态
-                       loadTheme(isDark);            // 仅在主题变化时执行
+                       isDark = newIsDark;          // 同步原有全局isDark
+                       g_currentIsDark = newIsDark; // 更新当前状态
+                       loadTheme(isDark);           // 仅在主题变化时执行
                      }
                    });
 
@@ -361,16 +353,16 @@ int main(int argc, char* argv[]) {
 
     // ========== 堆对象的安全停止+释放 ==========
     if (splash) {
-      splash->stopAnimation();  // 停止动画
-      splash->close();          // 关闭窗口
-      splash->deleteLater();    // 异步释放堆对象（正确用法）
-      splash = nullptr;         // 置空，避免野指针
+      splash->stopAnimation(); // 停止动画
+      splash->close();         // 关闭窗口
+      splash->deleteLater();   // 异步释放堆对象（正确用法）
+      splash = nullptr;        // 置空，避免野指针
     }
   });
 
   int ret = app.exec();
 
-  QThread* workerThread = WeatherFetcher::instance()->workerThread();
+  QThread *workerThread = WeatherFetcher::instance()->workerThread();
 
   // ✅ 1. 阻塞等待子线程执行完 shutdown
   QMetaObject::invokeMethod(WeatherFetcher::instance(), "shutdown",
@@ -415,7 +407,7 @@ void loadTheme(bool isDark) {
   }*/
 
   // 必须遍历所有顶层窗口及其子控件，执行 unpolish -> polish
-  for (QWidget* widget : QApplication::allWidgets()) {
+  for (QWidget *widget : QApplication::allWidgets()) {
     widget->style()->unpolish(widget);
     widget->style()->polish(widget);
 
@@ -431,7 +423,8 @@ void loadTheme(bool isDark) {
 
   // 空指针校验：避免崩溃
   if (mw_one) {
-    if (m_Reader) m_Reader->initInfoShowFont();
+    if (m_Reader)
+      m_Reader->initInfoShowFont();
     if (mw_one->m_Todo) {
       mw_one->m_Todo->refreshTableListsFromFile();
       mw_one->m_Todo->refreshAlarm();
@@ -446,7 +439,8 @@ void loadTheme(bool isDark) {
     m_Method->closeMainEntranceWindow();
 
     QTimer::singleShot(1000, nullptr, []() {
-      if (mw_one) mw_one->execDeskShortcut();  // 空指针校验
+      if (mw_one)
+        mw_one->execDeskShortcut(); // 空指针校验
     });
   }
 }
@@ -455,12 +449,12 @@ QPalette createDarkPalette() {
   QPalette darkPalette;
 
   // 基础颜色设置
-  darkPalette.setColor(QPalette::Window, QColor(25, 35, 45));  // "#19232D"
+  darkPalette.setColor(QPalette::Window, QColor(25, 35, 45)); // "#19232D"
   darkPalette.setColor(QPalette::WindowText, Qt::white);
   darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
 
   // 统一选中项颜色 (关键)
-  darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));  // 统一蓝色
+  darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218)); // 统一蓝色
   darkPalette.setColor(QPalette::HighlightedText, Qt::white);
 
   // 其他必要颜色配置
@@ -483,7 +477,7 @@ QPalette createLightPalette() {
 
   // 自定义亮色主题颜色（可选）
   lightPalette.setColor(QPalette::Highlight,
-                        QColor(42, 130, 218));  // 保持与暗模式相同的高亮色
+                        QColor(42, 130, 218)); // 保持与暗模式相同的高亮色
   lightPalette.setColor(QPalette::HighlightedText, Qt::white);
 
   // 确保禁用状态颜色合适
@@ -536,7 +530,7 @@ void loadLocal() {
   }
 }
 
-bool unzipToDir(const QString& zipPath, const QString& destDir) {
+bool unzipToDir(const QString &zipPath, const QString &destDir) {
   QuaZip zip(zipPath);
   if (!zip.open(QuaZip::mdUnzip)) {
     qDebug() << "无法打开 ZIP 文件：" << zipPath;
@@ -613,8 +607,8 @@ QString getPublicKnotDataPath() {
 
 int getAndroidSdkVersion() {
   // 正确方式：直接获取静态 int 字段
-  return QJniObject::getStaticField<jint>("android/os/Build$VERSION",  // 类名
-                                          "SDK_INT"                    // 字段名
+  return QJniObject::getStaticField<jint>("android/os/Build$VERSION", // 类名
+                                          "SDK_INT"                   // 字段名
   );
 }
 
@@ -636,21 +630,21 @@ void migrateOldDataIfNeeded() {
 
 #endif
 
-int clearLockFiles(const QString& iniDir) {
+int clearLockFiles(const QString &iniDir) {
   // 1. 初始化目录对象并校验有效性
   QDir dir(iniDir);
   if (!dir.exists()) {
     qWarning() << "清除.lock文件失败：目录不存在 ->" << iniDir;
-    return 0;  // 目录不存在，无需清理
+    return 0; // 目录不存在，无需清理
   }
 
   // 2. 筛选目录中所有 .lock 后缀的文件（仅文件，不包含子目录）
   // 过滤规则：后缀为 .lock（不区分大小写，如 .LOCK 也会被匹配）
   QStringList nameFilters;
-  nameFilters << "*.lock" << "*.LOCK";  // 覆盖大小写情况
+  nameFilters << "*.lock" << "*.LOCK"; // 覆盖大小写情况
   QFileInfoList fileInfos = dir.entryInfoList(nameFilters,
-                                              QDir::Files,  // 只处理文件
-                                              QDir::NoSort  // 无需排序
+                                              QDir::Files, // 只处理文件
+                                              QDir::NoSort // 无需排序
   );
 
   if (fileInfos.isEmpty()) {
@@ -663,7 +657,7 @@ int clearLockFiles(const QString& iniDir) {
   // 使用const迭代器遍历，避免detach
   for (QFileInfoList::const_iterator it = fileInfos.constBegin();
        it != fileInfos.constEnd(); ++it) {
-    const QFileInfo& fileInfo = *it;
+    const QFileInfo &fileInfo = *it;
 
     QFile file(fileInfo.absoluteFilePath());
     if (file.remove()) {
@@ -690,7 +684,7 @@ int init_main_ai() {
     qWarning()
         << "⚠ [CpuCheck] 当前 CPU 缺少 AVX2/FMA/F16C 指令集，AI 功能已禁用。";
     qWarning() << "   (需要 Intel Core 4代 Haswell 或 AMD 同等及以上架构)";
-    return 0;  // 返回 0 表示非致命错误，程序继续运行，只是不加载 AI
+    return 0; // 返回 0 表示非致命错误，程序继续运行，只是不加载 AI
   }
 
   // ✅ 静态链接模式下，必须显式调用此函数注册 CPU 后端
@@ -715,7 +709,7 @@ int init_main_ai() {
   // ✅ 【第二步】确认有后端加载后，再获取 CPU 后端
 
   g_global_cpu_backend =
-      ggml_backend_cpu_reg();  // 再次调用，拿到初始化后的有效指针
+      ggml_backend_cpu_reg(); // 再次调用，拿到初始化后的有效指针
 
   if (!g_global_cpu_backend) {
     fprintf(stderr, "❌ CPU backend not loaded!\n");

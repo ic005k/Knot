@@ -101,38 +101,10 @@ public class MyService extends Service {
 
     private static PersistService mySensorSerivece;
 
-    public static native void CallJavaNotify_0();
-
-    public static native void CallJavaNotify_1();
-
-    public static native void CallJavaNotify_2();
-
-    public static native void CallJavaNotify_3();
-
-    public static native void CallJavaNotify_4();
-
-    public static native void CallJavaNotify_5();
-
-    public static native void CallJavaNotify_6();
-
-    public static native void CallJavaNotify_7();
-
-    public static native void CallJavaNotify_8();
-
-    public static native void CallJavaNotify_9();
-
-    public static native void CallJavaNotify_10();
-
-    public static native void CallJavaNotify_11();
-
-    public static native void CallJavaNotify_12();
-
-    public static native void CallJavaNotify_13();
-
-    public static native void CallJavaNotify_14();
-
     // 注意：这个方法带 String 参数！用来把当前朗读的句子传给 Qt
     public static native void CallJavaNotify_20(String sentence);
+
+    public static native void PublicJavaCallCpp(String msg);
 
     private static SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
 
@@ -990,7 +962,7 @@ public class MyService extends Service {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     // 使用更可靠的 Qt 状态检查
                     if (QtStateManager.getInstance().canInteractWithQt()) {
-                        CallJavaNotify_3();
+                        PublicJavaCallCpp("exec_alarm_notification");
                     } else {
                         // 改用轮询+超时机制，而非盲等3秒
                         final int[] retryCount = { 0 };
@@ -1001,7 +973,9 @@ public class MyService extends Service {
                                     QtStateManager.getInstance().canInteractWithQt()
                                 ) {
                                     Log.d(TAG, "Qt已就绪，执行闹钟通知");
-                                    CallJavaNotify_3();
+                                    PublicJavaCallCpp(
+                                        "exec_alarm_notification"
+                                    );
                                 } else if (retryCount[0] < 20) {
                                     // 最多等5秒 (20*250ms)
                                     retryCount[0]++;
@@ -1011,9 +985,11 @@ public class MyService extends Service {
                                 } else {
                                     Log.w(
                                         TAG,
-                                        "Qt就绪超时，仍尝试执行CallJavaNotify_3"
+                                        "Qt就绪超时，仍尝试执行exec_alarm_notification"
                                     );
-                                    CallJavaNotify_3();
+                                    PublicJavaCallCpp(
+                                        "exec_alarm_notification"
+                                    );
                                 }
                             }
                         };
@@ -1863,5 +1839,9 @@ public class MyService extends Service {
 
     public static String getCurrentTtsTitle() {
         return sCurrentTtsTitle;
+    }
+
+    public static void CallJavaNotify_8() {
+        PublicJavaCallCpp("exec_desktop_shortcut");
     }
 }
