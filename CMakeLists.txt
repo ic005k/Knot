@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(Knot VERSION 26.11.05 LANGUAGES C CXX)
+project(Knot VERSION 26.11.08 LANGUAGES C CXX)
 
 # ============================================================
 # ✅ 全局 MSVC 编译选项（必须在 add_library / add_executable 之前）
@@ -352,9 +352,9 @@ elseif(ANDROID)
     target_compile_definitions(${PROJECT_NAME} PRIVATE GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC)
 elseif(UNIX)
     # ✅ Linux/Unix 降级为安全基线 AVX，移除 AVX2/FMA/F16C
-    target_compile_definitions(${PROJECT_NAME} PRIVATE 
-        GGML_USE_AVX 
-        GGML_NO_SCHED_BATCH 
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        GGML_USE_AVX
+        GGML_NO_SCHED_BATCH
         _GNU_SOURCE
     )
     target_compile_options(${PROJECT_NAME} PRIVATE -mavx)

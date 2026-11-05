@@ -1384,13 +1384,17 @@ public class NoteEditor
     }
 
     public static void insertNote(String str) {
-        int index = editNote.getSelectionStart(); // 获取光标所在位置
-        Editable edit = editNote.getEditableText(); // 获取EditText的文字
-        if (index < 0 || index >= edit.length()) {
-            edit.append(str);
-        } else {
-            edit.insert(index, str); // 光标所在位置插入文字
-        }
+        if (editNote == null) return;
+        editNote.post(() -> {
+            int index = editNote.getSelectionStart();
+            Editable edit = editNote.getEditableText();
+            if (index < 0 || index >= edit.length()) {
+                edit.append(str);
+            } else {
+                edit.insert(index, str);
+            }
+            isTextChanged = true;
+        });
     }
 
     private void saveNote() {

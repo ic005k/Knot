@@ -169,7 +169,7 @@ android {
     println ">>> [DEBUG] Actual compileSdkVersion = ${sdkInt} (raw: ${androidCompileSdkVersion})"
 
     sourceSets {
-        main {
+        /*main {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = [qtAndroidDir + '/src', 'src', 'java']
             aidl.srcDirs = [qtAndroidDir + '/src', 'src', 'aidl']
@@ -179,7 +179,23 @@ android {
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
             jniLibs.includes = ['​**​/*.so', '​**​/*.txt']
-       }
+       }*/
+
+       main {
+           manifest.srcFile 'AndroidManifest.xml'
+
+           // ✅ 新增：使用 findProperty 兼容 JDTLS 解析，找不到变量时返回空字符串
+           def qtDir = project.hasProperty('qtAndroidDir') ? project.property('qtAndroidDir') : ''
+
+           java.srcDirs = [qtDir + '/src', 'src', 'java']
+           aidl.srcDirs = [qtDir + '/src', 'src', 'aidl']
+           res.srcDirs = [qtDir + '/res' , 'res', 'reader_res/res', 'src/main/res']
+           resources.srcDirs = ['resources']
+           renderscript.srcDirs = ['src']
+           assets.srcDirs = ['assets']
+           jniLibs.srcDirs = ['libs']
+           jniLibs.includes = ['**/*.so', '**/*.txt']
+      }
     }
 
     tasks.withType(JavaCompile) {
@@ -251,4 +267,3 @@ android {
     }
     }*/
 }
-
