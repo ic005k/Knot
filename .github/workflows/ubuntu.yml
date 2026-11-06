@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - '**'
-      - '!stats.txt'
-      - '!README.md'
+      - "**"
+      - "!stats.txt"
+      - "!README.md"
 
   pull_request:
     paths:
-      - '**'
+      - "**"
 
   release:
     types: [published]
@@ -42,19 +42,50 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.qt_ver }}
-          cached: 'false'
+          cached: "false"
           modules: qtcharts qtsensors qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
 
       - name: Install Qt6 GTK platform theme
         run: |
-          # 检查 qt.io 的 Qt 是否已包含 platformthemes 插件
-          find "$QT_ROOT_DIR/plugins/platformthemes" -name "*.so" 2>/dev/null || echo "NOT FOUND"
-          # 如果上面没找到，从系统 Qt 复制（需要安装系统 Qt6 GTK 主题包）
+          # 安装系统 Qt6 GTK 主题包（提供 libqgtk3.so）
           sudo apt-get install -y qt6-gtk-platformtheme
-          # 复制到 qt.io 的 Qt 目录
-          mkdir -p "$QT_ROOT_DIR/plugins/platformthemes"
-          find /usr/lib/x86_64-linux-gnu/qt6/plugins/platformthemes/ -name "*.so" -exec cp {} "$QT_ROOT_DIR/plugins/platformthemes/" \;
-          ls -la "$QT_ROOT_DIR/plugins/platformthemes/"
+
+          # 查找 Qt 安装目录（不依赖 QT_ROOT_DIR，使用与其他步骤一致的路径）
+          QT_DIR="/home/runner/work/Knot/Qt/${{ matrix.qt_ver }}/gcc_64"
+
+          # 如果标准路径不存在，尝试自动查找
+          if [ ! -d "$QT_DIR" ]; then
+            QT_DIR=$(find $HOME -name "qml" -type d -path "*Qt/${{ matrix.qt_ver }}/gcc_64" 2>/dev/null | head -1)
+          fi
+          if [ -z "$QT_DIR" ] || [ ! -d "$QT_DIR" ]; then
+            QT_DIR=$(find /opt -name "qml" -type d -path "*Qt/${{ matrix.qt_ver }}/gcc_64" 2>/dev/null | head -1)
+          fi
+
+          if [ ! -d "$QT_DIR" ]; then
+            echo "ERROR: 无法找到 Qt 安装目录"
+            exit 1
+          fi
+
+          echo "Found Qt at: $QT_DIR"
+
+          # 先检查 qt.io 的 Qt 是否已自带 platformthemes 插件
+          echo "=== qt.io Qt 中的 platformthemes ==="
+          ls -la "$QT_DIR/plugins/platformthemes/" 2>/dev/null || echo "目录不存在或为空"
+
+          # 复制系统 GTK 平台主题插件到 Qt 目录
+          mkdir -p "$QT_DIR/plugins/platformthemes"
+          find /usr/lib/x86_64-linux-gnu/qt6/plugins/platformthemes/ -name "*.so" -exec cp {} "$QT_DIR/plugins/platformthemes/" \;
+          echo "=== 复制后的 qt.io Qt platformthemes ==="
+          ls -la "$QT_DIR/plugins/platformthemes/"
+
+          # 同时复制到 bin/release 目录（作为 linuxdeployqt 的备用来源）
+          mkdir -p bin/release/plugins/platformthemes
+          cp "$QT_DIR/plugins/platformthemes/"*.so bin/release/plugins/platformthemes/ 2>/dev/null || true
+          echo "=== bin/release/plugins/platformthemes ==="
+          ls -la bin/release/plugins/platformthemes/
+
+          # 设置 QT_ROOT_DIR 供后续步骤使用
+          echo "QT_ROOT_DIR=$QT_DIR" >> $GITHUB_ENV
 
       - name: ubuntu install GL library
         run: |
