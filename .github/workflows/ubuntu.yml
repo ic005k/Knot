@@ -45,6 +45,17 @@ jobs:
           cached: 'false'
           modules: qtcharts qtsensors qtlocation qtwebchannel qt5compat qtpositioning qtmultimedia
 
+      - name: Install Qt6 GTK platform theme
+        run: |
+          # 检查 qt.io 的 Qt 是否已包含 platformthemes 插件
+          find "$QT_ROOT_DIR/plugins/platformthemes" -name "*.so" 2>/dev/null || echo "NOT FOUND"
+          # 如果上面没找到，从系统 Qt 复制（需要安装系统 Qt6 GTK 主题包）
+          sudo apt-get install -y qt6-gtk-platformtheme
+          # 复制到 qt.io 的 Qt 目录
+          mkdir -p "$QT_ROOT_DIR/plugins/platformthemes"
+          find /usr/lib/x86_64-linux-gnu/qt6/plugins/platformthemes/ -name "*.so" -exec cp {} "$QT_ROOT_DIR/plugins/platformthemes/" \;
+          ls -la "$QT_ROOT_DIR/plugins/platformthemes/"
+
       - name: ubuntu install GL library
         run: |
           sudo apt-get install -y libglew-dev libglfw3-dev libxcb*
@@ -140,7 +151,7 @@ jobs:
                    -unsupported-allow-new-glibc \
                    -qmake=/home/runner/work/Knot/Qt/${{ matrix.qt_ver }}/gcc_64/bin/qmake \
                    -appimage \
-                   -extra-plugins=platforminputcontexts \
+                   -extra-plugins=platformthemes,platforminputcontexts \
                    -no-strip
 
       # ========== 打包 2/4: tar.gz (便携压缩包) ==========

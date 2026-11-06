@@ -7,6 +7,13 @@ export QT_PLUGIN_PATH="$HERE/plugins:$QT_PLUGIN_PATH"
 # 动态库同时检索外层lib + 输入法插件目录，解决ibus依赖找不到问题
 export LD_LIBRARY_PATH="$HERE/lib:$HERE/plugins/platforminputcontexts:$LD_LIBRARY_PATH"
 
+# 【新增】强制使用 GTK3 平台主题，使 Qt 正确读取系统字体配置
+# libqgtk3.so 通过 XSettings (Xfce) / GSettings (GNOME) / fontconfig 获取字体
+# 注意：前提是 linuxdeployqt 已将 plugins/platformthemes/libqgtk3.so 打包进 AppImage
+if [ -z "$QT_QPA_PLATFORMTHEME" ]; then
+    export QT_QPA_PLATFORMTHEME=gtk3
+fi
+
 # 不覆盖用户系统输入法环境，仅无配置时默认fcitx5
 if [ -z "$QT_IM_MODULE" ]; then
     export QT_IM_MODULE=fcitx5
