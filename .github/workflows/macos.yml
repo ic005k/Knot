@@ -3,16 +3,16 @@ name: MacOS-x86_64 CI
 on:
   push:
     branches: [main]
-    paths: ['**', '!stats.txt', '!README.md']
+    paths: ["**", "!stats.txt", "!README.md"]
   pull_request:
-    paths: ['**']
+    paths: ["**"]
   release:
     types: [published]
 
 jobs:
   build:
     name: Build-x86_64
-    runs-on: macos-14
+    runs-on: macos-15
     permissions:
       contents: write
 
