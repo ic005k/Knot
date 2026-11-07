@@ -220,7 +220,6 @@ int main(int argc, char *argv[]) {
   qDebug() << "Path:" << path;
 
 #ifdef Q_OS_ANDROID
-  defaultFontSize = 12;
 
   RegJniPublicJavaCallCpp("com/x/MyService");
   RegJni20("com/x/MyService");
@@ -405,6 +404,15 @@ void loadTheme(bool isDark) {
 
     }
   }*/
+
+  if (!isAndroid) {
+    QFont f = qApp->font();
+    int org_font_size = f.pointSize();
+    defaultFontSize =
+        iniPreferences->value("/Options/fontsize", org_font_size).toInt();
+    f.setPointSize(defaultFontSize); // 必须用 pointSize
+    qApp->setFont(f);
+  }
 
   // 必须遍历所有顶层窗口及其子控件，执行 unpolish -> polish
   for (QWidget *widget : QApplication::allWidgets()) {

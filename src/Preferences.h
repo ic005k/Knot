@@ -97,6 +97,8 @@ class Preferences : public QDialog {
 
   void initLocalModelList();
 
+  void updateFontSize();
+
  protected:
   void keyReleaseEvent(QKeyEvent* event) override;
 
@@ -135,6 +137,10 @@ class Preferences : public QDialog {
   void on_btnSelectModel_clicked();
 
   void on_btnDel_clicked();
+
+  void on_btnDecrease_clicked();
+
+  void on_btnIncrease_clicked();
 
  private:
   bool isChanged;

@@ -32,6 +32,8 @@ Preferences::Preferences(QWidget* parent)
   ui->f_aiapi->setFrameShape(QFrame::NoFrame);
   ui->f_localai->setFrameShape(QFrame::NoFrame);
   ui->f_General->setFrameShape(QFrame::NoFrame);
+  ui->f_Font->setFrameShape(QFrame::NoFrame);
+  if (isAndroid) ui->f_Font->hide();
 
   ui->tabOptions->setCurrentIndex(1);
 
@@ -133,6 +135,8 @@ void Preferences::saveOptions() {
 
     iniPreferences->setValue("/Options/aiindex",
                              ui->cboxEndpoint->currentIndex());
+
+    iniPreferences->setValue("/Options/fontsize", ui->editFontSize->text());
   }
 
   iniPreferences->setValue("/Options/Zip", mw_one->ui->chkZip->isChecked());
@@ -481,6 +485,8 @@ void Preferences::openPreferences() {
     ui->btnSelectModel->setText(text);
 
   initLocalModelList();
+
+  ui->editFontSize->setText(QString::number(defaultFontSize));
 
   show();
   initCheckStatus();
@@ -1012,4 +1018,21 @@ void Preferences::on_btnDel_clicked() {
   // 7. 同步更新 ini 中保存的 aiindex
   iniPreferences->setValue("/Options/aiindex",
                            ui->cboxEndpoint->currentIndex());
+}
+
+void Preferences::on_btnDecrease_clicked() {
+  defaultFontSize--;
+  updateFontSize();
+}
+
+void Preferences::on_btnIncrease_clicked() {
+  defaultFontSize++;
+  updateFontSize();
+}
+
+void Preferences::updateFontSize() {
+  ui->editFontSize->setText(QString::number(defaultFontSize));
+  QFont f = qApp->font();
+  f.setPointSize(defaultFontSize);
+  qApp->setFont(f);
 }
