@@ -130,6 +130,27 @@ static ggml_backend_reg_t g_global_cpu_backend = nullptr;
 };*/
 
 int init_main_ai();
+void setAppFont();
+void updateAllWidgets();
+
+void setAppFont() {
+  QFont f = qApp->font();
+  int org_font_size = f.pointSize();
+  defaultFontSize =
+      iniPreferences->value("/Options/fontsize", org_font_size).toInt();
+  f.setPointSize(defaultFontSize);
+  qApp->setFont(f);
+}
+
+void updateAllWidgets() {
+  // 遍历所有顶层窗口及其子控件，执行 unpolish -> polish
+  for (QWidget *widget : QApplication::allWidgets()) {
+    widget->style()->unpolish(widget);
+    widget->style()->polish(widget);
+
+    widget->update();
+  }
+}
 
 ///////////////////////////////////////////////////////////////
 
@@ -406,21 +427,10 @@ void loadTheme(bool isDark) {
   }*/
 
   if (!isAndroid) {
-    QFont f = qApp->font();
-    int org_font_size = f.pointSize();
-    defaultFontSize =
-        iniPreferences->value("/Options/fontsize", org_font_size).toInt();
-    f.setPointSize(defaultFontSize); // 必须用 pointSize
-    qApp->setFont(f);
+    setAppFont();
   }
 
-  // 必须遍历所有顶层窗口及其子控件，执行 unpolish -> polish
-  for (QWidget *widget : QApplication::allWidgets()) {
-    widget->style()->unpolish(widget);
-    widget->style()->polish(widget);
-
-    widget->update();
-  }
+  updateAllWidgets();
 
   // 强制窗口重绘
   if (mw_one) {

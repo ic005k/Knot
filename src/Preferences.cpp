@@ -12,7 +12,10 @@ extern void releaseGlobalAiEngine();
 extern int init_main_ai();
 extern QString vecDbPath;
 
-Preferences::Preferences(QWidget* parent)
+extern void setAppFont();
+extern void updateAllWidgets();
+
+Preferences::Preferences(QWidget *parent)
     : QDialog(parent), ui(new Ui::Preferences) {
   ui->setupUi(this);
 
@@ -33,7 +36,8 @@ Preferences::Preferences(QWidget* parent)
   ui->f_localai->setFrameShape(QFrame::NoFrame);
   ui->f_General->setFrameShape(QFrame::NoFrame);
   ui->f_Font->setFrameShape(QFrame::NoFrame);
-  if (isAndroid) ui->f_Font->hide();
+  if (isAndroid)
+    ui->f_Font->hide();
 
   ui->tabOptions->setCurrentIndex(1);
 
@@ -41,15 +45,14 @@ Preferences::Preferences(QWidget* parent)
   ui->cboxModel->setVisible(false);
 
   ui->lblModelTip->setText("");
-  ui->lblModel->setText(tr("Local Model List:") +
-                        "\n"
-                        R"((~\.Knot\model))");
+  ui->lblModel->setText(tr("Local Model List:") + "\n"
+                                                  R"((~\.Knot\model))");
 
   isFontChange = false;
 
   // 只能输入 1~50 的整数，彻底禁止输入超过 50 的数字
   QRegularExpression rx("^(?:[1-9]|[1-4][0-9]|50)$");
-  QRegularExpressionValidator* validator =
+  QRegularExpressionValidator *validator =
       new QRegularExpressionValidator(rx, this);
   ui->editConcurrency->setValidator(validator);
 
@@ -78,7 +81,7 @@ Preferences::Preferences(QWidget* parent)
 
     ui->cboxEndpoint->clear();
     for (int i = 0; i < m_aiAllRecords.size(); ++i) {
-      const auto& rec = m_aiAllRecords[i];
+      const auto &rec = m_aiAllRecords[i];
       ui->cboxEndpoint->addItem(rec.displayText());
       ui->cboxEndpoint->setItemData(i, i);
     }
@@ -96,12 +99,12 @@ Preferences::Preferences(QWidget* parent)
 
 Preferences::~Preferences() { delete ui; }
 
-void Preferences::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
+void Preferences::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
 
-bool Preferences::eventFilter(QObject* watch, QEvent* evn) {
-  QMouseEvent* event = static_cast<QMouseEvent*>(evn);
+bool Preferences::eventFilter(QObject *watch, QEvent *evn) {
+  QMouseEvent *event = static_cast<QMouseEvent *>(evn);
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       on_btnBack_clicked();
       return true;
@@ -126,7 +129,8 @@ void Preferences::on_btnBack_clicked() {
   mw_one->clearWidgetFocus();
   QTimer::singleShot(10, this, [this]() { close(); });
 
-  if (isAndroid) m_Method->openMainEntranceWindow();
+  if (isAndroid)
+    m_Method->openMainEntranceWindow();
 }
 
 void Preferences::saveOptions() {
@@ -151,10 +155,11 @@ void Preferences::saveOptions() {
     encPassword = "";
 }
 
-QString Preferences::setFontDemoUI(QString customFontPath, QToolButton* btn,
+QString Preferences::setFontDemoUI(QString customFontPath, QToolButton *btn,
                                    int fontSize) {
   // 0. 安全校验
-  if (customFontPath.isEmpty() || !btn) return "";
+  if (customFontPath.isEmpty() || !btn)
+    return "";
 
   QString fontName;
   int loadedFontID = -1;
@@ -167,7 +172,8 @@ QString Preferences::setFontDemoUI(QString customFontPath, QToolButton* btn,
 
   // 2. 加载新字体 (同步操作，无需Sleep)
   loadedFontID = QFontDatabase::addApplicationFont(customFontPath);
-  if (loadedFontID == -1) return "";
+  if (loadedFontID == -1)
+    return "";
 
   // 3. 获取字体族
   QStringList loadedFontFamilies =
@@ -323,7 +329,7 @@ QStringList Preferences::getBakFilesList() {
   QStringList uniqueList;
   QSet<QString> seen;
 
-  for (const QString& str : fileList) {
+  for (const QString &str : fileList) {
     if (!seen.contains(str)) {
       seen.insert(str);
       uniqueList.append(str);
@@ -365,15 +371,16 @@ void Preferences::on_chkZip_clicked() {
   saveOptions();
 }
 
-void Preferences::on_editPassword_textChanged(const QString& arg1) {
-  if (arg1.length() > 0) mw_one->ui->chkZip->setChecked(false);
+void Preferences::on_editPassword_textChanged(const QString &arg1) {
+  if (arg1.length() > 0)
+    mw_one->ui->chkZip->setChecked(false);
 }
 
-void Preferences::on_editValidate_textChanged(const QString& arg1) {
+void Preferences::on_editValidate_textChanged(const QString &arg1) {
   on_editPassword_textChanged(arg1);
 }
 
-void Preferences::closeEvent(QCloseEvent* event) {
+void Preferences::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
   closeTextToolBar();
   saveOptions();
@@ -472,7 +479,8 @@ void Preferences::openPreferences() {
     setFixedHeight(mw_one->height());
   }
 
-  if (y < 0) y = 50;
+  if (y < 0)
+    y = 50;
 
   setGeometry(x, y, width(), height());
   setModal(true);
@@ -537,7 +545,7 @@ void Preferences::on_btnAISelect_clicked() {
   }
 
   {
-    QMenu* menu = new QMenu(this);
+    QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
     menu->setFocusPolicy(Qt::StrongFocus);
     menu->setFocus();
@@ -550,7 +558,7 @@ void Preferences::on_btnAISelect_clicked() {
       QString displayText = parts.size() > 1 ? parts.mid(1).join("||").trimmed()
                                              : rawText.trimmed();
 
-      QAction* action = menu->addAction(displayText);
+      QAction *action = menu->addAction(displayText);
 
       if (i == ui->cboxEndpoint->currentIndex()) {
         action->setCheckable(true);
@@ -657,18 +665,19 @@ void Preferences::saveAIConfig() {
 
   // 判断整套三元组是否已存在，存在则覆盖参数，不存在追加
   bool found = false;
-  for (auto& item : m_aiAllRecords) {
+  for (auto &item : m_aiAllRecords) {
     if (item.uniqueKey() == newRec.uniqueKey()) {
       item = newRec;
       found = true;
       break;
     }
   }
-  if (!found) m_aiAllRecords.append(newRec);
+  if (!found)
+    m_aiAllRecords.append(newRec);
 
   // 组装JSON写入文件
   QJsonArray arr;
-  for (const auto& rec : m_aiAllRecords) {
+  for (const auto &rec : m_aiAllRecords) {
     QJsonObject obj;
     obj["endpoint"] = rec.endpoint;
     obj["apiKey"] = rec.apiKey;
@@ -701,7 +710,7 @@ void Preferences::saveAIConfig() {
 
   ui->cboxEndpoint->clear();
   for (int i = 0; i < m_aiAllRecords.size(); ++i) {
-    const auto& rec = m_aiAllRecords[i];
+    const auto &rec = m_aiAllRecords[i];
     ui->cboxEndpoint->addItem(rec.displayText());
     ui->cboxEndpoint->setItemData(i, i);
   }
@@ -719,18 +728,21 @@ void Preferences::initAIConfig() {
   m_aiAllRecords.clear();
   ui->cboxEndpoint->clear();
 
-  if (!file.exists()) return;
-  if (!file.open(QIODevice::ReadOnly)) return;
+  if (!file.exists())
+    return;
+  if (!file.open(QIODevice::ReadOnly))
+    return;
 
   QByteArray raw = file.readAll();
   file.close();
   QJsonParseError err;
   QJsonDocument doc = QJsonDocument::fromJson(raw, &err);
-  if (err.error != QJsonParseError::NoError) return;
+  if (err.error != QJsonParseError::NoError)
+    return;
 
   QJsonObject root = doc.object();
   QJsonArray arr = root["all_records"].toArray();
-  for (const auto& val : arr) {
+  for (const auto &val : arr) {
     QJsonObject obj = val.toObject();
     AiSingleRecord rec;
     rec.endpoint = obj["endpoint"].toString();
@@ -744,7 +756,7 @@ void Preferences::initAIConfig() {
 
   // 复用结构体 displayText，绑定数组下标 itemData
   for (int i = 0; i < m_aiAllRecords.size(); ++i) {
-    const auto& rec = m_aiAllRecords[i];
+    const auto &rec = m_aiAllRecords[i];
     ui->cboxEndpoint->addItem(rec.displayText());
     ui->cboxEndpoint->setItemData(i, i);
   }
@@ -760,14 +772,16 @@ void Preferences::on_cboxEndpoint_currentIndexChanged(int index) {
   ui->editAIKey->clear();
   ui->editAIModelID->clear();
 
-  if (index < 0 || index >= m_aiAllRecords.size()) return;
+  if (index < 0 || index >= m_aiAllRecords.size())
+    return;
 
   // 从隐藏数据获取真实记录下标，不依赖combo原生index
   int recordIdx = ui->cboxEndpoint->itemData(index).toInt();
-  if (recordIdx < 0 || recordIdx >= m_aiAllRecords.size()) return;
+  if (recordIdx < 0 || recordIdx >= m_aiAllRecords.size())
+    return;
 
   // 直接通过下标取完整原始记录，完全不依赖cbox的currentText
-  const AiSingleRecord& rec = m_aiAllRecords[recordIdx];
+  const AiSingleRecord &rec = m_aiAllRecords[recordIdx];
 
   // 强制回填纯净原始endpoint，不受下拉展示文本干扰
   ui->editEndpoint->setText(rec.endpoint);
@@ -870,8 +884,9 @@ void Preferences::initLocalModelList() {
   QStringList result;
 
   for (int i = 0; i < fileInfos.size(); ++i) {
-    const QFileInfo& info = fileInfos[i];
-    if (info.fileName().contains("note_vector")) continue;
+    const QFileInfo &info = fileInfos[i];
+    if (info.fileName().contains("note_vector"))
+      continue;
 
     // 仅文件名
     result << info.fileName();
@@ -887,7 +902,7 @@ void Preferences::initLocalModelList() {
   }
 }
 
-void Preferences::on_cboxModel_currentTextChanged(const QString& arg1) {
+void Preferences::on_cboxModel_currentTextChanged(const QString &arg1) {
   Q_UNUSED(arg1);
   if (this->isVisible()) {
     ui->btnSelectModel->setEnabled(false);
@@ -919,7 +934,7 @@ void Preferences::on_cboxModel_currentTextChanged(const QString& arg1) {
 
 void Preferences::on_btnSelectModel_clicked() {
   // 构建自定义弹窗，数据完全从原 ComboBox 同步
-  QMenu* menu = new QMenu(this);
+  QMenu *menu = new QMenu(this);
   menu->setAttribute(Qt::WA_DeleteOnClose);
 
   // ✅ 关键:确保菜单获取焦点，从而接收 Android 返回键事件
@@ -927,7 +942,7 @@ void Preferences::on_btnSelectModel_clicked() {
   menu->setFocus();
 
   for (int i = 0; i < ui->cboxModel->count(); ++i) {
-    QAction* action = menu->addAction(ui->cboxModel->itemText(i));
+    QAction *action = menu->addAction(ui->cboxModel->itemText(i));
 
     // 标记当前选中项
     if (i == ui->cboxModel->currentIndex()) {
@@ -977,7 +992,7 @@ void Preferences::on_btnDel_clicked() {
 
   // 4. 写回 JSON 文件（复用 saveAIConfig 的序列化逻辑）
   QJsonArray arr;
-  for (const auto& rec : m_aiAllRecords) {
+  for (const auto &rec : m_aiAllRecords) {
     QJsonObject obj;
     obj["endpoint"] = rec.endpoint;
     obj["apiKey"] = rec.apiKey;
@@ -1000,7 +1015,7 @@ void Preferences::on_btnDel_clicked() {
   // 5. 刷新下拉框并自动加载第一个配置
   ui->cboxEndpoint->clear();
   for (int i = 0; i < m_aiAllRecords.size(); ++i) {
-    const auto& rec = m_aiAllRecords[i];
+    const auto &rec = m_aiAllRecords[i];
     ui->cboxEndpoint->addItem(rec.displayText());
     ui->cboxEndpoint->setItemData(i, i);
   }
@@ -1032,7 +1047,7 @@ void Preferences::on_btnIncrease_clicked() {
 
 void Preferences::updateFontSize() {
   ui->editFontSize->setText(QString::number(defaultFontSize));
-  QFont f = qApp->font();
-  f.setPointSize(defaultFontSize);
-  qApp->setFont(f);
+  iniPreferences->setValue("/Options/fontsize", ui->editFontSize->text());
+  setAppFont();
+  updateAllWidgets();
 }
