@@ -46,10 +46,10 @@ class Preferences;
 class Preferences : public QDialog {
   Q_OBJECT
 
- public:
-  explicit Preferences(QWidget* parent = nullptr);
+public:
+  explicit Preferences(QWidget *parent = nullptr);
   ~Preferences();
-  Ui::Preferences* ui;
+  Ui::Preferences *ui;
 
   bool isTestBtnClicked = false;
   void saveAIConfig();
@@ -75,7 +75,7 @@ class Preferences : public QDialog {
   void setDefaultFont(QString fontFamily);
   QString getDefaultFont();
 
-  QString setFontDemoUI(QString customFontPath, QToolButton* btn, int fontSize);
+  QString setFontDemoUI(QString customFontPath, QToolButton *btn, int fontSize);
 
   void setEncSyncStatusTip();
 
@@ -89,9 +89,9 @@ class Preferences : public QDialog {
 
   void on_btnShowValidate_released();
 
-  void on_editPassword_textChanged(const QString& arg1);
+  void on_editPassword_textChanged(const QString &arg1);
 
-  void on_editValidate_textChanged(const QString& arg1);
+  void on_editValidate_textChanged(const QString &arg1);
 
   void on_chkZip_clicked();
 
@@ -99,15 +99,16 @@ class Preferences : public QDialog {
 
   void updateFontSize();
 
- protected:
-  void keyReleaseEvent(QKeyEvent* event) override;
+protected:
+  void keyReleaseEvent(QKeyEvent *event) override;
 
-  bool eventFilter(QObject* watch, QEvent* evn) override;
-  void closeEvent(QCloseEvent* event) override;
+  bool eventFilter(QObject *watch, QEvent *evn) override;
+  void closeEvent(QCloseEvent *event) override;
 
- public slots:
+public slots:
+  void on_cboxModel_currentTextChanged(const QString &arg1);
 
- private slots:
+private slots:
   void on_btnBack_clicked();
 
   void on_chkUIFont_clicked();
@@ -132,8 +133,6 @@ class Preferences : public QDialog {
 
   void on_cboxModel_currentIndexChanged(int index);
 
-  void on_cboxModel_currentTextChanged(const QString& arg1);
-
   void on_btnSelectModel_clicked();
 
   void on_btnDel_clicked();
@@ -142,10 +141,10 @@ class Preferences : public QDialog {
 
   void on_btnIncrease_clicked();
 
- private:
+private:
   bool isChanged;
 
-  EditEventFilter* editFilter = nullptr;
+  EditEventFilter *editFilter = nullptr;
 
   QString iniBakFiles = "BakFiles.ini";
   void getCheckStatusChange();
@@ -156,7 +155,7 @@ class Preferences : public QDialog {
 
   QFont::Weight uiFontWeight;
 
-  QByteArray aes_key0 = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
+  QByteArray aes_key0 = "MySuperSecretKey1234567890"; // 长度不足32会自动处理
   QByteArray aes_iv0 = "InitializationVe";
 
   void initAIConfig();
@@ -165,4 +164,4 @@ class Preferences : public QDialog {
   QList<AiSingleRecord> m_aiAllRecords;
 };
 
-#endif  // PREFERENCES_H
+#endif // PREFERENCES_H

@@ -4,7 +4,7 @@
 #include "defines.h"
 #include "ui_AutoUpdate.h"
 
-AutoUpdate::AutoUpdate(QWidget* parent)
+AutoUpdate::AutoUpdate(QWidget *parent)
     : QDialog(parent), ui(new Ui::AutoUpdate) {
   ui->setupUi(this);
 
@@ -19,9 +19,9 @@ AutoUpdate::AutoUpdate(QWidget* parent)
   manager = new QNetworkAccessManager(nullptr);
 }
 
-bool AutoUpdate::eventFilter(QObject* watch, QEvent* evn) {
+bool AutoUpdate::eventFilter(QObject *watch, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       return false;
     }
@@ -38,20 +38,21 @@ AutoUpdate::~AutoUpdate() {
     reply = nullptr;
   }
   // 2. 销毁所有子请求
-  for (QNetworkReply* rep : manager->findChildren<QNetworkReply*>()) {
+  for (QNetworkReply *rep : manager->findChildren<QNetworkReply *>()) {
     rep->abort();
     rep->deleteLater();
   }
   // 3. 延后释放NAM，给内置网络线程退出时间
   manager->deleteLater();
   // 4. 关闭文件
-  if (myfile->isOpen()) myfile->close();
+  if (myfile->isOpen())
+    myfile->close();
   delete myfile;
 
   delete ui;
 }
 
-void AutoUpdate::doProcessReadyRead()  // 读取并写入
+void AutoUpdate::doProcessReadyRead() // 读取并写入
 {
   while (!reply->atEnd()) {
     QByteArray ba = reply->readAll();
@@ -63,7 +64,8 @@ void AutoUpdate::doProcessFinished() {
   myfile->close();
   this->close();
   m_Method->closeGrayWindows();
-  if (isCancel) return;
+  if (isCancel)
+    return;
 
 #ifdef Q_OS_ANDROID
   // "/storage/emulated/0/KnotBak/"
@@ -77,6 +79,13 @@ void AutoUpdate::doProcessFinished() {
   }
 
 #endif
+
+  if (tarFile.endsWith(".gguf", Qt::CaseInsensitive)) {
+    QFileInfo fi(tarFile);
+    QString filename = fi.fileName();
+    mw_one->m_Preferences->ui->btnSelectModel->setText(filename);
+    mw_one->m_Preferences->on_cboxModel_currentTextChanged(filename);
+  }
 }
 
 void AutoUpdate::doProcessDownloadProgress(qint64 recv_total,
@@ -106,20 +115,20 @@ void AutoUpdate::startDownload(QString strLink, QString tarFile) {
   // otherwise returns nothing from qt5.6
   // request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
 
-  reply = manager->get(request);  // 发送请求
+  reply = manager->get(request); // 发送请求
   connect(reply, &QNetworkReply::readyRead, this,
-          &AutoUpdate::doProcessReadyRead);  // 可读
+          &AutoUpdate::doProcessReadyRead); // 可读
   connect(reply, &QNetworkReply::finished, this,
           &AutoUpdate::doProcessFinished);
   connect(reply, &QNetworkReply::downloadProgress, this,
-          &AutoUpdate::doProcessDownloadProgress);  // 大小
+          &AutoUpdate::doProcessDownloadProgress); // 大小
 
   QFile m_file(tarFile);
   m_file.remove();
 
   myfile->setFileName(tarFile);
   bool ret =
-      myfile->open(QIODevice::WriteOnly | QIODevice::Truncate);  // 创建文件
+      myfile->open(QIODevice::WriteOnly | QIODevice::Truncate); // 创建文件
   if (!ret) {
     QMessageBox::warning(this, "warning", "Failed to open.");
     return;
@@ -129,10 +138,10 @@ void AutoUpdate::startDownload(QString strLink, QString tarFile) {
 }
 
 // 用于预解析302拿到最终真实下载地址
-void AutoUpdate::resolveHfRedirect(const QString& srcUrl) {
+void AutoUpdate::resolveHfRedirect(const QString &srcUrl) {
   QNetworkRequest req(srcUrl);
   req.setRawHeader("User-Agent", "Mozilla/5.0");
-  QNetworkReply* headReply = manager->head(req);
+  QNetworkReply *headReply = manager->head(req);
 
   connect(headReply, &QNetworkReply::finished, this, [=]() {
     QUrl finalUrl;
@@ -175,16 +184,15 @@ void AutoUpdate::startUpdate() {
 #ifdef Q_OS_MAC
 
   QString fileName = tempDir + "up.sh";
-  QTextEdit* txtEdit = new QTextEdit();
+  QTextEdit *txtEdit = new QTextEdit();
   QString strTarget = appInfo.path().replace("Contents", "");
   strTarget = strTarget + ".";
   strTarget = "\"" + strTarget + "\"";
 
   txtEdit->append("hdiutil mount -mountpoint /Volumes/Knot " + strZip);
-  txtEdit->append(
-      "cp -R -p -f "
-      "/Volumes/Knot/Knot.app/. " +
-      strTarget);
+  txtEdit->append("cp -R -p -f "
+                  "/Volumes/Knot/Knot.app/. " +
+                  strTarget);
 
   txtEdit->append("hdiutil eject /Volumes/Knot");
 
@@ -204,7 +212,7 @@ void AutoUpdate::startUpdate() {
   QString fileName = privateDir + "up.bat";
   strPath = appInfo.filePath();
 
-  QTextEdit* txtEdit = new QTextEdit();
+  QTextEdit *txtEdit = new QTextEdit();
   strUnzip = strPath + "/unzip.exe";
   strUnzip = "\"" + strUnzip + "\"";
   strZip = "\"" + strZip + "\"";
@@ -226,7 +234,7 @@ void AutoUpdate::startUpdate() {
 
 #ifdef Q_OS_LINUX
   QString fileName = privateDir + "up.sh";
-  QTextEdit* txtEdit = new QTextEdit();
+  QTextEdit *txtEdit = new QTextEdit();
   strZip = "\"" + strZip + "\"";
   strLinuxTargetFile = "\"" + strLinuxTargetFile + "\"";
   txtEdit->append("cp -f " + strZip + " " + strLinuxTargetFile);
@@ -239,14 +247,15 @@ void AutoUpdate::startUpdate() {
 #endif
 }
 
-void AutoUpdate::closeEvent(QCloseEvent* event) {
+void AutoUpdate::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
   reply->close();
   myfile->close();
 }
 
 QString AutoUpdate::GetFileSize(qint64 size) {
-  if (size < 0) return "0";
+  if (size < 0)
+    return "0";
   if (!size) {
     return "0 Bytes";
   }
@@ -268,7 +277,7 @@ QString AutoUpdate::GetFileSize(qint64 size) {
          SizeNames.at(i);
 }
 
-QString AutoUpdate::GetFileSize(const qint64& size, int precision) {
+QString AutoUpdate::GetFileSize(const qint64 &size, int precision) {
   double sizeAsDouble = size;
   static QStringList measures;
   if (measures.isEmpty())
@@ -292,27 +301,27 @@ QString AutoUpdate::GetFileSize(const qint64& size, int precision) {
       .arg(measure);
 }
 
-void AutoUpdate::keyPressEvent(QKeyEvent* event) {
+void AutoUpdate::keyPressEvent(QKeyEvent *event) {
   switch (event->key()) {
-    case Qt::Key_Escape:
+  case Qt::Key_Escape:
 
-      break;
+    break;
 
-    case Qt::Key_Return:
+  case Qt::Key_Return:
 
-      break;
+    break;
 
-    case Qt::Key_Backspace:
+  case Qt::Key_Backspace:
 
-      break;
+    break;
 
-    case Qt::Key_Space:
+  case Qt::Key_Space:
 
-      break;
+    break;
 
-    case Qt::Key_F1:
+  case Qt::Key_F1:
 
-      break;
+    break;
   }
 
   if (event->modifiers() == Qt::ControlModifier) {
