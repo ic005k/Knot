@@ -56,6 +56,7 @@ class AutoUpdate : public QDialog {
 
  private:
   bool isCancel = false;
+     void cancelDownload();
 };
 
 #endif  // AUTOUPDATE_H

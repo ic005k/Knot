@@ -22,9 +22,9 @@ AutoUpdate::AutoUpdate(QWidget *parent)
 bool AutoUpdate::eventFilter(QObject *watch, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
-    if (keyEvent->key() == Qt::Key_Back) {
-      return false;
-    }
+    // if (keyEvent->key() == Qt::Key_Back) {
+    //   return false;
+    // }
   }
 
   return QWidget::eventFilter(watch, evn);
@@ -33,6 +33,8 @@ bool AutoUpdate::eventFilter(QObject *watch, QEvent *evn) {
 AutoUpdate::~AutoUpdate() {
   // 1. 中止正在进行的下载reply
   if (reply) {
+    QObject::disconnect(reply, nullptr, this,
+                        nullptr); // 先断开，abort 不再回调槽
     reply->abort();
     reply->deleteLater();
     reply = nullptr;
@@ -52,20 +54,30 @@ AutoUpdate::~AutoUpdate() {
   delete ui;
 }
 
-void AutoUpdate::doProcessReadyRead() // 读取并写入
-{
-  while (!reply->atEnd()) {
-    QByteArray ba = reply->readAll();
-    myfile->write(ba);
-  }
+void AutoUpdate::doProcessReadyRead() {
+  if (isCancel || !reply)
+    return;
+  myfile->write(reply->readAll()); // 不要 while(!atEnd())
 }
 
 void AutoUpdate::doProcessFinished() {
-  myfile->close();
+  const bool canceled =
+      isCancel ||
+      (reply && reply->error() == QNetworkReply::OperationCanceledError);
+
+  if (myfile->isOpen())
+    myfile->close();
+  if (reply) {
+    reply->deleteLater();
+    reply = nullptr;
+  } // 必须释放，否则连接残留
+
+  if (canceled) {
+    QFile::remove(tarFile);
+    return; // 不要 this->close()，取消路径由按钮自己关
+  }
+
   this->close();
-  m_Method->closeGrayWindows();
-  if (isCancel)
-    return;
 
 #ifdef Q_OS_ANDROID
   // "/storage/emulated/0/KnotBak/"
@@ -81,8 +93,13 @@ void AutoUpdate::doProcessFinished() {
 #endif
 
   if (tarFile.endsWith(".gguf", Qt::CaseInsensitive)) {
-    QFileInfo fi(tarFile);
+    QString m_file = privateDir + "model/multilingual-e5-small-fp32.gguf";
+    QFileInfo fi(m_file);
     QString filename = fi.fileName();
+    if (QFile::exists(m_file)) {
+      QFile::remove(m_file);
+    }
+    QFile::rename(tarFile, m_file);
     mw_one->m_Preferences->ui->btnSelectModel->setText(filename);
     mw_one->m_Preferences->on_cboxModel_currentTextChanged(filename);
   }
@@ -90,6 +107,9 @@ void AutoUpdate::doProcessFinished() {
 
 void AutoUpdate::doProcessDownloadProgress(qint64 recv_total,
                                            qint64 all_total) {
+  if (isCancel || !reply)
+    return;
+
   ui->progressBar->setMaximum(all_total);
   ui->progressBar->setValue(recv_total);
   ui->lblTxt->setText(tr("Download Progress") + " : \n" +
@@ -161,7 +181,11 @@ void AutoUpdate::resolveHfRedirect(const QString &srcUrl) {
     }
     headReply->deleteLater();
 
+    mw_one->safeCloseProgress();
+
     if (finalUrl.isValid()) {
+      m_Method->showGrayWindows();
+      show();
       // 拿到真实直链，调用下载函数，复用全部已有下载逻辑
       startDownload(finalUrl.toString(), tarFile);
     } else {
@@ -248,9 +272,13 @@ void AutoUpdate::startUpdate() {
 }
 
 void AutoUpdate::closeEvent(QCloseEvent *event) {
-  Q_UNUSED(event);
-  reply->close();
-  myfile->close();
+  m_Method->closeGrayWindows();
+  isCancel = true;
+  if (reply)
+    reply->abort();
+  if (myfile && myfile->isOpen())
+    myfile->close();
+  QDialog::closeEvent(event); // 交给基类正常收尾
 }
 
 QString AutoUpdate::GetFileSize(qint64 size) {
@@ -332,11 +360,21 @@ void AutoUpdate::keyPressEvent(QKeyEvent *event) {
 }
 
 void AutoUpdate::on_btnCancel_clicked() {
-  isCancel = true;
+  cancelDownload();
   close();
   if (isAndroid) {
     if (mw_one->m_Preferences->isHidden()) {
       m_Method->openMainEntranceWindow();
     }
+  }
+}
+
+void AutoUpdate::cancelDownload() {
+  isCancel = true;
+  if (reply) {
+    QNetworkReply *r = reply;
+    reply = nullptr; // 先摘走，doProcessFinished 里就不会重复处理
+    r->abort();      // 同步触发 finished，槽内看到 reply==nullptr，跳过删除分支
+    r->deleteLater();
   }
 }

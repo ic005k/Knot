@@ -2,12 +2,13 @@
 #include "SearchWorker.h"
 #include "defines.h"
 
-SearchWorker* m_searchWorker;
+SearchWorker *m_searchWorker;
 
 void MainWindow::on_btnModify_clicked() { m_Todo->reeditText(); }
 
 void MainWindow::on_btnTabMoveUp_clicked() {
-  if (tabData->count() == 0) return;
+  if (tabData->count() == 0)
+    return;
   int curIndex = tabData->currentIndex();
   if (curIndex > 0) {
     tabData->tabBar()->moveTab(curIndex, curIndex - 1);
@@ -18,7 +19,8 @@ void MainWindow::on_btnTabMoveUp_clicked() {
 }
 
 void MainWindow::on_btnTabMoveDown_clicked() {
-  if (tabData->count() == 0) return;
+  if (tabData->count() == 0)
+    return;
   int curIndex = tabData->currentIndex();
   if (curIndex <= tabData->count() - 2) {
     tabData->tabBar()->moveTab(curIndex, curIndex + 1);
@@ -140,10 +142,11 @@ void MainWindow::on_btnDelNoteRecycle_clicked() {
   m_NotesList->on_btnBatchDel_Recycle_clicked();
 }
 
-void MainWindow::on_btnFindNotes_clicked(const QString& kw) {
+void MainWindow::on_btnFindNotes_clicked(const QString &kw) {
   // 笔记精准匹配搜索
   QString str = kw;
-  if (str.length() == 0) return;
+  if (str.length() == 0)
+    return;
   mySearchText = str;
   m_NotesList->startFind(str);
 }
@@ -165,12 +168,14 @@ void MainWindow::on_btnBackSearch_clicked() {
     m_Method->openMainEntranceWindow();
 }
 
-void MainWindow::on_btnStartSearch_clicked(const QString& searchStr) {
+void MainWindow::on_btnStartSearch_clicked(const QString &searchStr) {
   // 主事件搜索
 
-  if (searchStr.length() == 0) return;
+  if (searchStr.length() == 0)
+    return;
 
-  if (!isAndroid) showProgress();
+  if (!isAndroid)
+    showProgress();
 
   m_Method->data_for_search = m_Method->exportAllDataForSearch();
 
@@ -214,7 +219,8 @@ void MainWindow::on_btnViewCategory_clicked() {
 }
 
 void MainWindow::on_btnAIExerciseSuggestions_clicked() {
-  if (!isEnabledAiApi) return;
+  if (!isEnabledAiApi)
+    return;
 
   // 获取当前程序生效的语言标识
   QLocale loc = QLocale::system();
@@ -266,13 +272,14 @@ Rules:
   aiChatQuery(fullPrompt);
 }
 
-void MainWindow::on_btnAIBookExplanation_clicked(const QString& selectedText) {
+void MainWindow::on_btnAIBookExplanation_clicked(const QString &selectedText) {
   QString trimText = selectedText.trimmed();
   if (trimText.isEmpty()) {
     return;
   }
 
-  if (!isEnabledAiApi) return;
+  if (!isEnabledAiApi)
+    return;
 
   // qDebug() << trimText;
 
@@ -280,7 +287,7 @@ void MainWindow::on_btnAIBookExplanation_clicked(const QString& selectedText) {
   QLocale loc = QLocale::system();
   // 如果切换过软件语言，改用之前存储的语言代码变量：
   // QString langCode = m_appLanguageCode;
-  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+  QString langCode = loc.name(); // 格式 zh_CN / en_US / ja_JP
 
   // 标准化英文指令，明确指定输出语言，精准可控
   QString promptTemplate = R"(
@@ -325,7 +332,8 @@ void MainWindow::on_btnAISteps_clicked() {
     return;
   }
 
-  if (!isEnabledAiApi) return;
+  if (!isEnabledAiApi)
+    return;
 
   m_Steps->isAiSteps = true;
 
@@ -335,7 +343,7 @@ void MainWindow::on_btnAISteps_clicked() {
   QLocale loc = QLocale::system();
   // 如果切换过软件语言，改用之前存储的语言代码变量：
   // QString langCode = m_appLanguageCode;
-  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+  QString langCode = loc.name(); // 格式 zh_CN / en_US / ja_JP
 
   // 标准化英文指令，明确指定输出语言，精准可控
   QString promptTemplate = R"(
@@ -364,7 +372,8 @@ void MainWindow::on_btnAIReportAnalysis_clicked() {
     return;
   }
 
-  if (!isEnabledAiApi) return;
+  if (!isEnabledAiApi)
+    return;
 
   mw_one->m_Report->isAiCategory = true;
 
@@ -372,7 +381,7 @@ void MainWindow::on_btnAIReportAnalysis_clicked() {
   QLocale loc = QLocale::system();
   // 如果切换过软件语言，改用之前存储的语言代码变量：
   // QString langCode = m_appLanguageCode;
-  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+  QString langCode = loc.name(); // 格式 zh_CN / en_US / ja_JP
 
   // 标准化英文指令，明确指定输出语言，精准可控
   QString promptTemplate = R"(
@@ -417,7 +426,8 @@ void MainWindow::on_btnWebDAVRestore_clicked() {
 
 void MainWindow::on_btnOpenSearchEdit_clicked() {
   QString mdFile = m_NotesList->getSearchResultQmlFile();
-  if (!QFile::exists(mdFile)) return;
+  if (!QFile::exists(mdFile))
+    return;
   isOpenSearchResult = true;
   currentMDFile = mdFile;
 
@@ -427,7 +437,8 @@ void MainWindow::on_btnOpenSearchEdit_clicked() {
 
 void MainWindow::on_btnOpenSearchView_clicked() {
   QString mdFile = m_NotesList->getSearchResultQmlFile();
-  if (!QFile::exists(mdFile)) return;
+  if (!QFile::exists(mdFile))
+    return;
 
   currentMDFile = mdFile;
 
@@ -437,12 +448,13 @@ void MainWindow::on_btnOpenSearchView_clicked() {
 
 void MainWindow::on_btnCopyNoteLink_clicked() {
   QString mdFile = m_NotesList->getSearchResultQmlFile();
-  if (!QFile::exists(mdFile)) return;
+  if (!QFile::exists(mdFile))
+    return;
   QString file = mdFile;
   file = file.replace(iniDir, "");
   QString name = m_Notes->m_NoteManager->getNoteTitle(mdFile);
   QString strlink = "[" + name + "](" + file + ")";
-  QClipboard* clipboard = QApplication::clipboard();
+  QClipboard *clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
 
   QString res = m_Method->escapeAllHtml(strlink);
@@ -469,10 +481,10 @@ void MainWindow::on_btnAdd_clicked() {
 
 void MainWindow::on_btnDel_clicked() {
   isMoveEntry = false;
-  del_Data((QTreeWidget*)mw_one->ui->tabWidget->currentWidget());
+  del_Data((QTreeWidget *)mw_one->ui->tabWidget->currentWidget());
 }
 
-void MainWindow::resizeEvent(QResizeEvent* event) {
+void MainWindow::resizeEvent(QResizeEvent *event) {
   const QSize sz = event->size();
   if (sz.width() <= 0 || sz.height() <= 0) {
     event->ignore();
@@ -508,7 +520,8 @@ void MainWindow::on_btnDownload_clicked() {
 
 void MainWindow::on_btnBack_One_clicked() {
   m_CloudBackup->backExit();
-  if (isAndroid) m_Method->openMainEntranceWindow();
+  if (isAndroid)
+    m_Method->openMainEntranceWindow();
 }
 
 void MainWindow::on_btnReport() { on_actionReport_triggered(); }
@@ -562,11 +575,13 @@ void MainWindow::on_btnReadList_clicked() {
   m_Reader->saveReader("", false);
   m_Reader->savePageVPos();
 
-  if (isAndroid) m_Reader->closeMyPDF();
+  if (isAndroid)
+    m_Reader->closeMyPDF();
 
   m_Reader->closeSelText();
 
-  if (mw_one->ui->frameMain->isVisible()) mw_one->ui->frameMain->hide();
+  if (mw_one->ui->frameMain->isVisible())
+    mw_one->ui->frameMain->hide();
 
   m_Reader->showBookListWin();
 
@@ -647,6 +662,12 @@ void MainWindow::onAndroidBackHandle() {
     }
   }
 
+  if (mw_one->m_AboutThis->m_AutoUpdate != nullptr) {
+    if (mw_one->m_AboutThis->m_AutoUpdate->isVisible()) {
+      return;
+    }
+  }
+
   if (mw_one->m_Preferences->isVisible()) {
     mw_one->m_Preferences->ui->btnBack->click();
     return;
@@ -692,7 +713,7 @@ void MainWindow::onAndroidBackHandle() {
   }
 }
 
-void MainWindow::setToolButtonAnimation(QToolButton* btn, bool setMyStyle) {
+void MainWindow::setToolButtonAnimation(QToolButton *btn, bool setMyStyle) {
   if (setMyStyle) {
     // 根据明暗主题区分tooltip样式
     QString tipStyle;

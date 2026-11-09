@@ -794,6 +794,8 @@ void Preferences::on_cboxEndpoint_activated(int index) {
 }
 
 void Preferences::on_btnDownloadModel_clicked() {
+  mw_one->showProgress();
+
   // FP32:
   // https://hf-mirror.com/rodion-m/multilingual-e5-small-gguf/tree/main
 
@@ -814,10 +816,7 @@ void Preferences::on_btnDownloadModel_clicked() {
       mw_one->geometry().x(), y, mw_one->width(),
       mw_one->m_AboutThis->m_AutoUpdate->height());
 
-  m_Method->showGrayWindows();
-  mw_one->m_AboutThis->m_AutoUpdate->show();
-
-  tarFile = privateDir + "model/multilingual-e5-small-fp32.gguf";
+  tarFile = privateDir + "model/temp.gguf";
 
   // mw_one->m_AboutThis->m_AutoUpdate->startDownload(s_link, tarFile);
   mw_one->m_AboutThis->m_AutoUpdate->resolveHfRedirect(s_link);

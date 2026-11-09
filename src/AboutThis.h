@@ -20,13 +20,13 @@ class AboutThis;
 class AboutThis : public QDialog {
   Q_OBJECT
 
- public:
-  explicit AboutThis(QWidget* parent = nullptr);
+public:
+  explicit AboutThis(QWidget *parent = nullptr);
   ~AboutThis();
-  Ui::AboutThis* ui;
+  Ui::AboutThis *ui;
 
-  std::unique_ptr<AutoUpdate> m_AutoUpdate;
-  QNetworkAccessManager* manager;
+  std::unique_ptr<AutoUpdate> m_AutoUpdate = nullptr;
+  QNetworkAccessManager *manager;
   int parse_UpdateJSON(QString str);
   bool blAutoCheckUpdate = false;
 
@@ -35,20 +35,20 @@ class AboutThis : public QDialog {
   void CheckUpdate();
   void show_download();
   int getAndroidVer();
- public slots:
+public slots:
 
   void on_btnBack_About_clicked();
 
- protected:
-  void keyReleaseEvent(QKeyEvent* event) override;
-  void resizeEvent(QResizeEvent* event) override;
-  bool eventFilter(QObject* obj, QEvent* evn) override;
+protected:
+  void keyReleaseEvent(QKeyEvent *event) override;
+  void resizeEvent(QResizeEvent *event) override;
+  bool eventFilter(QObject *obj, QEvent *evn) override;
 
- private slots:
+private slots:
 
   void on_btnHomePage_clicked();
 
-  void replyFinished(QNetworkReply* reply);
+  void replyFinished(QNetworkReply *reply);
 
   void on_btnCheckUpdate_clicked();
 
@@ -58,9 +58,9 @@ class AboutThis : public QDialog {
 
   void on_btnViewLog_clicked();
 
- private:
+private:
   QString getUrl(QVariantList list);
   QString s_link;
 };
 
-#endif  // ABOUTTHIS_H
+#endif // ABOUTTHIS_H
