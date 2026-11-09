@@ -4,7 +4,7 @@
 #include "defines.h"
 #include "ui_StepsOptions.h"
 
-StepsOptions::StepsOptions(QWidget* parent)
+StepsOptions::StepsOptions(QWidget *parent)
     : QDialog(parent), ui(new Ui::StepsOptions) {
   ui->setupUi(this);
   this->installEventFilter(this);
@@ -13,22 +13,22 @@ StepsOptions::StepsOptions(QWidget* parent)
 
   ui->editMapKey->setFixedHeight(100);
 
-  QValidator* validator1 =
+  QValidator *validator1 =
       new QRegularExpressionValidator(regxNumber, ui->editStepLength);
   ui->editStepLength->setValidator(validator1);
 
-  QValidator* validator2 =
+  QValidator *validator2 =
       new QRegularExpressionValidator(regxNumber, ui->editStepsThreshold);
   ui->editStepsThreshold->setValidator(validator2);
 
-  QValidator* validator3 =
+  QValidator *validator3 =
       new QRegularExpressionValidator(regxNumber, ui->editTotalDistance);
   ui->editTotalDistance->setValidator(validator3);
 }
 
 StepsOptions::~StepsOptions() { delete ui; }
 
-void StepsOptions::closeEvent(QCloseEvent* event) {
+void StepsOptions::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
 
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
@@ -40,9 +40,9 @@ void StepsOptions::closeEvent(QCloseEvent* event) {
   m_Method->closeGrayWindows();
 }
 
-bool StepsOptions::eventFilter(QObject* obj, QEvent* evn) {
+bool StepsOptions::eventFilter(QObject *obj, QEvent *evn) {
   if (evn->type() == QEvent::KeyPress) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       on_btnBack_clicked();
       return true;
@@ -53,7 +53,8 @@ bool StepsOptions::eventFilter(QObject* obj, QEvent* evn) {
 }
 
 void StepsOptions::init() {
-  if (isGpsRun) return;
+  if (isGpsRun)
+    return;
 
   m_Steps->tmeRefreshSteps->stop();
 
@@ -61,7 +62,7 @@ void StepsOptions::init() {
   x = mw_one->geometry().x();
   y = 0;
   w = mw_one->width();
-  h = 600;
+  h = 520;
   setGeometry(x, y, w, h);
   m_Method->showGrayWindows();
   show();
@@ -96,12 +97,12 @@ void StepsOptions::on_btnBack_clicked() {
   close();
 }
 
-void StepsOptions::on_editStepsThreshold_textChanged(const QString& arg1) {
+void StepsOptions::on_editStepsThreshold_textChanged(const QString &arg1) {
   Q_UNUSED(arg1);
   isTextChange = true;
 }
 
-void StepsOptions::on_editStepLength_textChanged(const QString& arg1) {
+void StepsOptions::on_editStepLength_textChanged(const QString &arg1) {
   Q_UNUSED(arg1);
   isTextChange = true;
 }
