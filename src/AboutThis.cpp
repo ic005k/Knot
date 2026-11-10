@@ -279,11 +279,22 @@ void AboutThis::on_btnViewLog_clicked() {
   AppLogger::instance().copyTodayLogToClipboard();
   QString log = AppLogger::instance().getTodayLogText();
   log = log.replace("\n", "\n\n");
-  QString res = m_Method->escapeAllHtml(log);
-  QTimer::singleShot(100, this, [this, res, log]() {
+  QTimer::singleShot(100, this, [this, log]() {
     if (!isAndroid) {
-      auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-      m_ShowMsg->showMsg(tr("Log"), res, 1);
+      // this 指向当前的模态对话框
+      QTextEdit *logEdit = new QTextEdit(this);
+      logEdit->setReadOnly(true);
+      logEdit->setWindowTitle(tr("Log"));
+      logEdit->setAttribute(Qt::WA_DeleteOnClose);
+
+      // 关键：作为模态对话框的子窗口，但自身保持非模态
+      logEdit->setWindowModality(Qt::NonModal);
+      logEdit->setWindowFlags(logEdit->windowFlags() | Qt::Window);
+
+      m_Method->setWinPos(logEdit, 350, 3);
+      logEdit->append(log);
+      logEdit->show();
+      logEdit->activateWindow();
     } else {
       QStringList list;
       list.append(log);
