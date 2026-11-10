@@ -362,8 +362,7 @@ void Preferences::on_chkZip_clicked() {
   if (mw_one->ui->editPassword->text().trimmed() !=
       mw_one->ui->editValidate->text().trimmed()) {
     mw_one->ui->chkZip->setChecked(false);
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg("Knot", tr("Password validation error."), 1);
+    showInfo("Knot", tr("Password validation error."));
 
     return;
   }
@@ -539,8 +538,7 @@ void Preferences::on_chkUIFont_clicked(bool checked) {
 void Preferences::on_btnAISelect_clicked() {
   // 如果列表为空，直接提示并返回
   if (ui->cboxEndpoint->count() == 0) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Warning"), tr("No AI configurations available."), 1);
+    showInfo(tr("Warning"), tr("No AI configurations available."));
     return;
   }
 
@@ -622,9 +620,8 @@ void Preferences::on_btnAITest_clicked() {
   QString mid = ui->editAIModelID->text().trimmed();
 
   if (ep.isEmpty() || key.isEmpty() || mid.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Warning"),
-                 tr("Endpoint / API Key / Model ID cannot be empty"), 1);
+    showInfo(tr("Warning"),
+             tr("Endpoint / API Key / Model ID cannot be empty"));
     return;
   }
 
@@ -648,9 +645,8 @@ void Preferences::saveAIConfig() {
 
   // 空值校验
   if (endpoint.isEmpty() || apiKey.isEmpty() || modelId.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Warning"),
-                 tr("Endpoint / API Key / Model ID cannot be empty"), 1);
+    showInfo(tr("Warning"),
+             tr("Endpoint / API Key / Model ID cannot be empty"));
     return;
   }
 
@@ -944,8 +940,7 @@ void Preferences::on_btnDel_clicked() {
   // 1. 获取当前选中的真实记录下标
   int curComboIdx = ui->cboxEndpoint->currentIndex();
   if (curComboIdx < 0) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Warning"), tr("No configuration selected to delete."), 1);
+    showInfo(tr("Warning"), tr("No configuration selected to delete."));
     return;
   }
 

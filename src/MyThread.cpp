@@ -5,7 +5,7 @@
 
 MyThread::MyThread() {}
 
-ReadTWThread::ReadTWThread(QObject* parent) : QThread{parent} {
+ReadTWThread::ReadTWThread(QObject *parent) : QThread{parent} {
   setObjectName("ReadTWThread");
 }
 void ReadTWThread::run() {
@@ -16,7 +16,7 @@ void ReadTWThread::run() {
 
 void MainWindow::readTWDone() {
   for (int i = 0; i < tabData->tabBar()->count(); i++) {
-    QTreeWidget* tw = (QTreeWidget*)tabData->widget(i);
+    QTreeWidget *tw = (QTreeWidget *)tabData->widget(i);
     tw->setCurrentItem(tw->topLevelItem(tw->topLevelItemCount() - 1));
   }
 
@@ -30,7 +30,7 @@ void MainWindow::readTWDone() {
   mw_one->ui->progBar->setMaximum(100);
 }
 
-ReadChartThread::ReadChartThread(QObject* parent) : QThread{parent} {
+ReadChartThread::ReadChartThread(QObject *parent) : QThread{parent} {
   setObjectName("ReadChartThread");
 }
 void ReadChartThread::run() {
@@ -55,13 +55,13 @@ void MainWindow::readChartDone() {
   max_day = getMaxDay(QString::number(QDate::currentDate().year()),
                       QString::number(QDate::currentDate().month()));
   // 1. 初始化完整数组（补0）
-  QList<double> freqValues(max_day, 0.0);  // 长度max_day，全0
+  QList<double> freqValues(max_day, 0.0); // 长度max_day，全0
   QList<double> amountValues(max_day, 0.0);
 
   // 2. 填充频次数据（有数据的日期替换0）
   // 频次循环
   for (int i = 0; i < freqPointList.count(); ++i) {
-    const QPointF& p = freqPointList[i];
+    const QPointF &p = freqPointList[i];
     int day = qRound(p.x());
     if (day >= 1 && day <= max_day) {
       freqValues[day - 1] = p.y();
@@ -70,7 +70,7 @@ void MainWindow::readChartDone() {
 
   // 3. 金额循环
   for (int i = 0; i < amountList.count(); ++i) {
-    const QPointF& p = amountList[i];
+    const QPointF &p = amountList[i];
     int day = qRound(p.x());
     if (day >= 1 && day <= max_day) {
       amountValues[day - 1] = p.y();
@@ -90,7 +90,7 @@ void MainWindow::readChartDone() {
   qmlAmountValues = QVariant::fromValue(amountValues).toList();
 }
 
-SaveThread::SaveThread(QObject* parent) : QThread{parent} {
+SaveThread::SaveThread(QObject *parent) : QThread{parent} {
   setObjectName("SaveThread");
 }
 void SaveThread::run() {
@@ -109,10 +109,11 @@ void MainWindow::saveDone() {
 
   mw_one->ui->progBar->setMaximum(100);
 
-  if (SaveType == "tab" || SaveType == "alltab") startRead(strDate);
+  if (SaveType == "tab" || SaveType == "alltab")
+    startRead(strDate);
 }
 
-UpdateGpsMapThread::UpdateGpsMapThread(QObject* parent) : QThread{parent} {
+UpdateGpsMapThread::UpdateGpsMapThread(QObject *parent) : QThread{parent} {
   setObjectName("UpdateGpsMapThread");
 }
 void UpdateGpsMapThread::run() {
@@ -125,11 +126,11 @@ void MainWindow::updateGpsMapDone() { m_Steps->updateGpsMapUi(); }
 
 void GetGpsDataThread::stop() { m_running = false; }
 
-GetGpsDataThread::GetGpsDataThread(QObject* parent) : QThread{parent} {
+GetGpsDataThread::GetGpsDataThread(QObject *parent) : QThread{parent} {
   setObjectName("GetGpsDataThread");
 }
 void GetGpsDataThread::run() {
-  m_running = true;  // 启动循环标记
+  m_running = true; // 启动循环标记
 
   // 核心循环：每隔1秒执行一次，直到调用stop()
   while (m_running) {
@@ -148,7 +149,7 @@ void GetGpsDataThread::run() {
 
 void MainWindow::GetGpsDataThreadDone() { m_Steps->updateGpsUI(); }
 
-ReadEBookThread::ReadEBookThread(QObject* parent) : QThread{parent} {
+ReadEBookThread::ReadEBookThread(QObject *parent) : QThread{parent} {
   setObjectName("ReadEBookThread");
 }
 void ReadEBookThread::run() {
@@ -195,7 +196,7 @@ void MainWindow::readEBookDone() {
   isReadEBookEnd = true;
 }
 
-SearchThread::SearchThread(QObject* parent) : QThread{parent} {
+SearchThread::SearchThread(QObject *parent) : QThread{parent} {
   setObjectName("SearchThread");
 }
 void SearchThread::run() {
@@ -211,7 +212,7 @@ void MainWindow::searchDone() {
   mw_one->safeCloseProgress();
 }
 
-ImportDataThread::ImportDataThread(QObject* parent) : QThread{parent} {
+ImportDataThread::ImportDataThread(QObject *parent) : QThread{parent} {
   setObjectName("ImportDataThread");
 }
 void ImportDataThread::run() {
@@ -225,8 +226,7 @@ void MainWindow::importDataDone() {
 
   if (isPasswordError) {
     safeCloseProgress();
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg("Knot", tr("The password of the encrypted file is wrong!"), 1);
+    showInfo(appName, tr("The password of the encrypted file is wrong!"));
 
     return;
   }
@@ -256,11 +256,10 @@ void MainWindow::importDataDone() {
 
   safeCloseProgress();
 
-  auto msg = std::make_unique<ShowMessage>(mw_one);
-  msg->showMsg("Knot", tr("Data import was successful."), 1);
+  showInfo(appName, tr("Data import was successful."));
 }
 
-BakDataThread::BakDataThread(QObject* parent) : QThread{parent} {
+BakDataThread::BakDataThread(QObject *parent) : QThread{parent} {
   setObjectName("BakDataThread");
 }
 void BakDataThread::run() {
@@ -270,7 +269,7 @@ void BakDataThread::run() {
 }
 
 void MainWindow::bakDataDone() {
-  QThread* mainThread = QCoreApplication::instance()->thread();
+  QThread *mainThread = QCoreApplication::instance()->thread();
   if (QThread::currentThread() != mainThread) {
     QMetaObject::invokeMethod(this, &MainWindow::bakDataDone,
                               Qt::QueuedConnection);

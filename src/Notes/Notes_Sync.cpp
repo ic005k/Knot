@@ -22,7 +22,7 @@ void Notes::syncToWebDAV() {
   }
 }
 
-void Notes::delRemoteFile(const QStringList& Files) {
+void Notes::delRemoteFile(const QStringList &Files) {
   QStringList delFiles;
   for (int j = 0; j < Files.count(); j++) {
     QString syncFile = Files.at(j);
@@ -63,30 +63,30 @@ void Notes::zipNoteToSyncList() {
   if (!m_Method->compressFileWithZlib(currentMDFile, zipMD,
                                       Z_DEFAULT_COMPRESSION)) {
     errorInfo = tr("An error occurred while compressing the file.");
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg("Knot", errorInfo, 1);
+    showInfo("Knot", errorInfo);
     return;
   }
 
   QString enc_file = m_Method->useEnc(zipMD);
-  if (enc_file != "") zipMD = enc_file;
+  if (enc_file != "")
+    zipMD = enc_file;
   appendToSyncList(zipMD);
 
   QString json = getCurrentJSON(currentMDFile);
   if (QFile::exists(json)) {
     if (!m_Method->compressFileWithZlib(json, zipJSON, Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg("Knot", errorInfo, 1);
+      showInfo("Knot", errorInfo);
       return;
     }
     QString enc_json = m_Method->useEnc(zipJSON);
-    if (enc_json != "") zipJSON = enc_json;
+    if (enc_json != "")
+      zipJSON = enc_json;
     appendToSyncList(zipJSON);
   }
 }
 
-QString Notes::getCurrentJSON(const QString& md) {
+QString Notes::getCurrentJSON(const QString &md) {
   QFileInfo fi(md);
   return iniDir + "memo/" + fi.baseName() + ".json";
 }
@@ -104,13 +104,13 @@ void Notes::updateMainnotesIniToSyncLists() {
     if (!m_Method->compressFileWithZlib(iniDir + "mainnotes.json", zipMainnotes,
                                         Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg("Knot", errorInfo, 1);
+      showInfo("Knot", errorInfo);
       return;
     }
 
     QString enc_file = m_Method->useEnc(zipMainnotes);
-    if (enc_file != "") zipMainnotes = enc_file;
+    if (enc_file != "")
+      zipMainnotes = enc_file;
 
     appendToSyncList(zipMainnotes);
 
@@ -120,7 +120,7 @@ void Notes::updateMainnotesIniToSyncLists() {
 
 void Notes::appendToSyncList(QString file) {
   QString baseFlag = m_Method->getBaseFlag(file);
-  notes_sync_files.removeIf([&baseFlag](const QString& f) {
+  notes_sync_files.removeIf([&baseFlag](const QString &f) {
     return m_Method->getBaseFlag(f) == baseFlag;
   });
   notes_sync_files.append(file);
@@ -134,7 +134,7 @@ void Notes::startBackgroundTaskDelAndClear() {
     QFuture<void> future =
         QtConcurrent::run([=]() { m_NotesList->needDelNotes(); });
 
-    QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+    QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
     connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
       m_NotesList->delRemoteWebDAVFiles();
 

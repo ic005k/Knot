@@ -19,9 +19,9 @@
 #include "defines.h"
 #include "ui_CloudBackup.h"
 
-QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray& data);
+QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data);
 
-CloudBackup::CloudBackup(QWidget* parent)
+CloudBackup::CloudBackup(QWidget *parent)
     : QDialog(parent), ui(new Ui::CloudBackup) {
   ui->setupUi(this);
 
@@ -42,7 +42,7 @@ CloudBackup::CloudBackup(QWidget* parent)
 }
 
 QString CloudBackup::initUserInfo(QString info) {
-  QTextEdit* edit = new QTextEdit;
+  QTextEdit *edit = new QTextEdit;
   edit->setPlainText(info);
   int lineCount = edit->document()->lineCount();
 
@@ -84,8 +84,8 @@ CloudBackup::~CloudBackup() {
   // 处理全局网络管理器 m_networkManager
   if (m_networkManager) {
     // 中止全部未完成请求
-    for (QNetworkReply* rep :
-         m_networkManager->findChildren<QNetworkReply*>()) {
+    for (QNetworkReply *rep :
+         m_networkManager->findChildren<QNetworkReply *>()) {
       rep->abort();
       rep->deleteLater();
     }
@@ -94,7 +94,7 @@ CloudBackup::~CloudBackup() {
   }
 
   if (m_manager) {
-    for (QNetworkReply* rep : m_manager->findChildren<QNetworkReply*>()) {
+    for (QNetworkReply *rep : m_manager->findChildren<QNetworkReply *>()) {
       rep->abort();
       rep->deleteLater();
     }
@@ -104,9 +104,9 @@ CloudBackup::~CloudBackup() {
   delete ui;
 }
 
-bool CloudBackup::eventFilter(QObject* obj, QEvent* evn) {
+bool CloudBackup::eventFilter(QObject *obj, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       on_btnBack_clicked();
       return true;
@@ -121,14 +121,12 @@ void CloudBackup::on_pushButton_downloadFile_clicked() {}
 void CloudBackup::uploadData() {
   QString strFlag;
   strFlag = "WebDAV";
-  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-  if (!m_ShowMsg->showMsg(
+  if (!showConfirm(
           strFlag,
           tr("Uploading data?") + "\n\n" +
               tr("This action updates the data in the cloud.") + "\n\n" +
               m_Reader->getUriRealPath(zipfile) +
-              "\n\nSIZE: " + m_Method->getFileSize(QFile(zipfile).size(), 2),
-          2))
+              "\n\nSIZE: " + m_Method->getFileSize(QFile(zipfile).size(), 2)))
     return;
 
   mw_one->ui->btnWebDAVBackup->setEnabled(false);
@@ -174,7 +172,7 @@ void CloudBackup::startBakData() {
 // 上传文件到WebDAV
 void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
                                      QString remoteFileName) {
-  QNetworkAccessManager* manager = new QNetworkAccessManager();
+  QNetworkAccessManager *manager = new QNetworkAccessManager();
   QUrl url(webdavUrl + remoteFileName);
   QNetworkRequest request(url);
 
@@ -189,7 +187,7 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
   qDebug() << "上传URL：" << url.toString();
   qDebug() << "认证头：" << request.rawHeader("Authorization");
 
-  QFile* file = new QFile(localFilePath);
+  QFile *file = new QFile(localFilePath);
   if (!file->open(QIODevice::ReadOnly)) {
     qDebug() << "无法打开本地文件：" << localFilePath;
     delete manager;
@@ -201,7 +199,7 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
   mw_one->ui->progBar->setValue(0);
   mw_one->ui->progressBar->setValue(0);
 
-  QNetworkReply* reply = manager->put(request, file);
+  QNetworkReply *reply = manager->put(request, file);
 
   connect(reply, &QNetworkReply::uploadProgress, this,
           &CloudBackup::updateUploadProgress);
@@ -214,14 +212,10 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
     qDebug() << "HTTP状态码：" << statusCode;
     if (reply->error() == QNetworkReply::NoError) {
       qDebug() << "上传成功！";
-
-      auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-      m_ShowMsg->showMsg(
-          "WebDAV",
-          QString(tr("Success Upload File:") + "\n\nPath: %1\n\nID: %2" +
-                  "\n\n" + QDateTime::currentDateTime().toString())
-              .arg(localFilePath, webdavUrl + remoteFileName),
-          1);
+      showInfo("WebDAV",
+               QString(tr("Success Upload File:") + "\n\nPath: %1\n\nID: %2" +
+                       "\n\n" + QDateTime::currentDateTime().toString())
+                   .arg(localFilePath, webdavUrl + remoteFileName));
 
       mw_one->ui->progBar->hide();
 
@@ -232,12 +226,9 @@ void CloudBackup::uploadFileToWebDAV(QString webdavUrl, QString localFilePath,
       mw_one->ui->progBar->hide();
 
       if (statusCode == 401) {
-        auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-        m_ShowMsg->showMsg("WebDAV", tr("Authentication failed."), 1);
+        showInfo("WebDAV", tr("Authentication failed."));
       } else {
-        auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-        m_ShowMsg->showMsg(
-            "WebDAV", tr("Upload error") + " : " + reply->errorString(), 1);
+        showInfo("WebDAV", tr("Upload error") + " : " + reply->errorString());
       }
     }
     file->close();
@@ -258,7 +249,7 @@ void CloudBackup::updateUploadProgress(qint64 bytesSent, qint64 bytesTotal) {
 }
 
 void CloudBackup::createDirectory(QString webdavUrl, QString remoteDirPath) {
-  QNetworkAccessManager* m_manager = new QNetworkAccessManager();
+  QNetworkAccessManager *m_manager = new QNetworkAccessManager();
   QEventLoop loop;
   QUrl url(webdavUrl + remoteDirPath);
   QNetworkRequest request(url);
@@ -270,14 +261,14 @@ void CloudBackup::createDirectory(QString webdavUrl, QString remoteDirPath) {
   // 🔥 必须加这一行：伪装成 Zotero
   request.setRawHeader("User-Agent", "Zotero/5.0");
 
-  QNetworkReply* reply = m_manager->sendCustomRequest(request, "MKCOL");
+  QNetworkReply *reply = m_manager->sendCustomRequest(request, "MKCOL");
 
   QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-  loop.exec();  // 阻塞直到请求完成
+  loop.exec(); // 阻塞直到请求完成
 
   int statusCode =
       reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-  if (statusCode == 201 || statusCode == 405) {  // 405表示目录已存在
+  if (statusCode == 201 || statusCode == 405) { // 405表示目录已存在
     qDebug() << "目录已就绪:" << remoteDirPath;
     m_Method->setInfoText(">> " + remoteDirPath);
   } else {
@@ -301,7 +292,7 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
 
   request.setRawHeader("User-Agent", "Zotero/5.0");
 
-  QFile* localFile = new QFile(localSavePath);
+  QFile *localFile = new QFile(localSavePath);
   if (!localFile->open(QIODevice::WriteOnly)) {
     qDebug() << "无法创建本地文件：" << localSavePath;
     delete localFile;
@@ -309,13 +300,13 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
     return;
   }
 
-  QNetworkReply* reply = m_manager->get(request);
+  QNetworkReply *reply = m_manager->get(request);
   m_activeDownloads.insert(reply, localFile);
 
   // 进度更新
   QObject::connect(
       reply, &QNetworkReply::downloadProgress,
-      [this](qint64 bytesReceived, qint64 bytesTotal) {  // 显式捕获this
+      [this](qint64 bytesReceived, qint64 bytesTotal) { // 显式捕获this
         QMetaObject::invokeMethod(this, [bytesReceived, bytesTotal]() {
           int percent =
               (bytesTotal > 0)
@@ -336,8 +327,8 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
 
   // 数据写入
   QObject::connect(reply, &QNetworkReply::readyRead,
-                   [this, reply]() {  // 显式捕获this
-                     if (QFile* file = m_activeDownloads.value(reply)) {
+                   [this, reply]() { // 显式捕获this
+                     if (QFile *file = m_activeDownloads.value(reply)) {
                        file->write(reply->readAll());
                      }
                    });
@@ -345,8 +336,8 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
   // 完成处理
   QObject::connect(
       reply, &QNetworkReply::finished,
-      [this, reply, localSavePath]() {  // 显式捕获this
-        QFile* file = m_activeDownloads.take(reply);
+      [this, reply, localSavePath]() { // 显式捕获this
+        QFile *file = m_activeDownloads.take(reply);
         const int statusCode =
             reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
@@ -361,13 +352,10 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
             mw_one->safeCloseProgress();
 
             zipfile = localSavePath;
-            auto showbox = std::make_unique<ShowMessage>(mw_one);
-            showbox->showMsg(
-                "WebDAV",
-                tr("Successfully downloaded file,File saved to") + " : " +
-                    localSavePath + "\n\nSize: " +
-                    m_Method->getFileSize(QFile(localSavePath).size(), 2),
-                1);
+            showInfo("WebDAV",
+                     tr("Successfully downloaded file,File saved to") + " : " +
+                         localSavePath + "\n\nSize: " +
+                         m_Method->getFileSize(QFile(localSavePath).size(), 2));
 
             if (QFile(localSavePath).exists()) {
               mw_one->m_MainHelper->importBakFileList(localSavePath);
@@ -380,14 +368,11 @@ void CloudBackup::downloadFile(QString remoteFileName, QString localSavePath) {
             file->remove();
             if (statusCode == 401) {
               mw_one->safeCloseProgress();
-              auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-              m_ShowMsg->showMsg("WebDAV", tr("Authentication failed."), 1);
+              showInfo("WebDAV", tr("Authentication failed."));
             } else {
               mw_one->safeCloseProgress();
-              auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-              m_ShowMsg->showMsg(
-                  "WebDAV", tr("Download error") + " : " + reply->errorString(),
-                  1);
+              showInfo("WebDAV",
+                       tr("Download error") + " : " + reply->errorString());
             }
           }
           delete file;
@@ -412,8 +397,8 @@ QString CloudBackup::aesEncrypt(QString plainText, QByteArray key,
 
   // 处理密钥和IV长度（AES-256需要32字节，CBC模式需要16字节IV）
   QByteArray adjustedKey =
-      key.leftJustified(32, '\0', true);  // 截断或填充到32字节
-  QByteArray adjustedIv = iv.leftJustified(16, '\0', true);  // 调整IV到16字节
+      key.leftJustified(32, '\0', true); // 截断或填充到32字节
+  QByteArray adjustedIv = iv.leftJustified(16, '\0', true); // 调整IV到16字节
 
   // 加密
   QByteArray encrypted =
@@ -443,9 +428,9 @@ QString CloudBackup::aesDecrypt(QString cipherText, QByteArray key,
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-void CloudBackup::uploadFilesToWebDAV(const QStringList& files) {
+void CloudBackup::uploadFilesToWebDAV(const QStringList &files) {
   // 将新文件添加到队列
-  for (const QString& file : files) {
+  for (const QString &file : files) {
     uploadQueue.enqueue(file);
   }
 
@@ -497,7 +482,7 @@ void CloudBackup::startNextUpload() {
 
     QUrl fullUrl = QUrl(getWebDAVArgument() + remoteFile);
 
-    QFile* file = new QFile(filePath);
+    QFile *file = new QFile(filePath);
     if (!file->open(QIODevice::ReadOnly)) {
       qWarning() << "Failed to open file:" << filePath;
       delete file;
@@ -513,8 +498,8 @@ void CloudBackup::startNextUpload() {
     // ==============================
     // ✅ 【终极稳定】局部独立 QNAM
     // ==============================
-    QNetworkAccessManager* nam = new QNetworkAccessManager();
-    QNetworkReply* reply = nam->put(request, file);
+    QNetworkAccessManager *nam = new QNetworkAccessManager();
+    QNetworkReply *reply = nam->put(request, file);
 
     // 绑定上传进度
     connect(reply, &QNetworkReply::uploadProgress, this,
@@ -534,7 +519,7 @@ void CloudBackup::startNextUpload() {
     connect(reply, &QNetworkReply::finished, this, [=]() {
       handleUploadFinished(reply, filePath);
       reply->deleteLater();
-      nam->deleteLater();  // 用完释放
+      nam->deleteLater(); // 用完释放
       file->close();
       file->deleteLater();
 
@@ -545,8 +530,8 @@ void CloudBackup::startNextUpload() {
   }
 }
 
-void CloudBackup::handleUploadFinished(QNetworkReply* reply,
-                                       const QString& filePath) {
+void CloudBackup::handleUploadFinished(QNetworkReply *reply,
+                                       const QString &filePath) {
   activeReplies.remove(reply);
 
   if (reply->error() == QNetworkReply::NoError) {
@@ -581,10 +566,10 @@ void CloudBackup::handleUploadFinished(QNetworkReply* reply,
 /// /////////////////////////////////////////////////////////////////////////////////
 
 // 核心函数：列出目录文件（100% 兼容 坚果云 + 中科院 + 所有标准WebDAV）
-WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
-                              const QString& password) {
-  WebDavHelper* helper = new WebDavHelper();
-  QNetworkAccessManager* manager = new QNetworkAccessManager(helper);
+WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
+                              const QString &password) {
+  WebDavHelper *helper = new WebDavHelper();
+  QNetworkAccessManager *manager = new QNetworkAccessManager(helper);
 
   // ==============================================
   // 精准判断：是否为 中科院数据胶囊
@@ -655,7 +640,7 @@ WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
       </d:propfind>)";
   }
 
-  QNetworkReply* reply = manager->sendCustomRequest(request, "PROPFIND", body);
+  QNetworkReply *reply = manager->sendCustomRequest(request, "PROPFIND", body);
 
   QObject::connect(reply, &QNetworkReply::finished, [manager, helper, reply]() {
     if (reply->error() != QNetworkReply::NoError) {
@@ -681,7 +666,7 @@ WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
 }
 
 // 解析函数
-QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray& data) {
+QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray &data) {
   QList<QPair<QString, QDateTime>> files;
   QXmlStreamReader xml(data);
   QString currentHref;
@@ -715,11 +700,11 @@ QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray& data) {
 
         // Qt6
         QString timeWithoutTZ =
-            rawTime.left(rawTime.lastIndexOf(' '));  // 移除 "GMT"
+            rawTime.left(rawTime.lastIndexOf(' ')); // 移除 "GMT"
         QLocale locale(QLocale::C);
         currentModified =
             locale.toDateTime(timeWithoutTZ, "ddd, dd MMM yyyy hh:mm:ss");
-        currentModified.setTimeZone(QTimeZone::utc());  // 手动设置为 UTC
+        currentModified.setTimeZone(QTimeZone::utc()); // 手动设置为 UTC
 
         if (!currentModified.isValid()) {
           qWarning() << "时间解析失败:" << rawTime;
@@ -730,7 +715,7 @@ QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray& data) {
           if (xml.name() == QLatin1String("collection")) {
             isDirectory = true;
           }
-          xml.skipCurrentElement();  // 直接跳过剩余内容
+          xml.skipCurrentElement(); // 直接跳过剩余内容
         }
       }
     }
@@ -749,24 +734,24 @@ QList<QPair<QString, QDateTime>> parseWebDavResponse(const QByteArray& data) {
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-WebDavDownloader::WebDavDownloader(const QString& username,
-                                   const QString& password, QObject* parent)
+WebDavDownloader::WebDavDownloader(const QString &username,
+                                   const QString &password, QObject *parent)
     : QObject(parent), m_username(username), m_password(password) {
   // 连接认证信号
   connect(&manager, &QNetworkAccessManager::authenticationRequired, this,
           &WebDavDownloader::handleAuthentication);
 }
 
-void WebDavDownloader::downloadFiles(const QList<QString>& remotePaths,
-                                     const QString& localBaseDir,
+void WebDavDownloader::downloadFiles(const QList<QString> &remotePaths,
+                                     const QString &localBaseDir,
                                      int maxConcurrent) {
   // 清空队列
   downloadQueue.clear();
   activeDownloads.clear();
 
   // 初始化队列
-  for (const QString& remotePath : remotePaths) {
-    QString localPath;  // = QDir(localBaseDir).absoluteFilePath(remotePath);
+  for (const QString &remotePath : remotePaths) {
+    QString localPath; // = QDir(localBaseDir).absoluteFilePath(remotePath);
     localPath = localBaseDir + remotePath;
 
     qDebug() << "需要下载的远程文件：" << remotePath << "下载到本地："
@@ -780,7 +765,7 @@ void WebDavDownloader::downloadFiles(const QList<QString>& remotePaths,
   this->maxConcurrent = qMax(1, maxConcurrent);
 
   // 启动初始下载，每个任务之间加入延迟（毫秒）
-  const int INITIAL_DELAY = 50;  // 时间间隔
+  const int INITIAL_DELAY = 50; // 时间间隔
   for (int i = 0; i < qMin(this->maxConcurrent, downloadQueue.size()); ++i) {
     // 第i个任务延迟i*INITIAL_DELAY毫秒启动，避免同时发起
     QTimer::singleShot(i * INITIAL_DELAY, this,
@@ -788,15 +773,16 @@ void WebDavDownloader::downloadFiles(const QList<QString>& remotePaths,
   }
 }
 
-void WebDavDownloader::handleAuthentication(QNetworkReply* reply,
-                                            QAuthenticator* auth) {
+void WebDavDownloader::handleAuthentication(QNetworkReply *reply,
+                                            QAuthenticator *auth) {
   Q_UNUSED(reply);
   auth->setUser(m_username);
   auth->setPassword(m_password);
 }
 
 void WebDavDownloader::startNextDownload() {
-  if (downloadQueue.isEmpty()) return;
+  if (downloadQueue.isEmpty())
+    return;
 
   auto [remotePath, localPath] = downloadQueue.dequeue();
 
@@ -820,7 +806,7 @@ void WebDavDownloader::startNextDownload() {
 
   request.setRawHeader("User-Agent", "Zotero/5.0");
 
-  QNetworkReply* reply = manager.get(request);
+  QNetworkReply *reply = manager.get(request);
 
   // 记录活动下载
   activeDownloads[reply] = localPath;
@@ -851,7 +837,7 @@ void WebDavDownloader::startNextDownload() {
   qDebug() << "开始下载:" << url.toString() << "->" << localPath;
 }
 
-void WebDavDownloader::onDownloadFinished(QNetworkReply* reply) {
+void WebDavDownloader::onDownloadFinished(QNetworkReply *reply) {
   QString localPath = activeDownloads.value(reply);
   bool success = false;
   QString error;
@@ -882,7 +868,7 @@ void WebDavDownloader::onDownloadFinished(QNetworkReply* reply) {
   // 启动下一个下载（加入延迟）
   if (!downloadQueue.isEmpty()) {
     // 设置延迟时间（毫秒），可根据需要调整
-    const int DOWNLOAD_DELAY = 50;  // 延迟
+    const int DOWNLOAD_DELAY = 50; // 延迟
     QTimer::singleShot(DOWNLOAD_DELAY, this,
                        &WebDavDownloader::startNextDownload);
   }
@@ -919,12 +905,12 @@ void CloudBackup::fetchNextPage() {
     return;
   }
 
-  WebDavHelper* helper = listWebDavFiles(nextPageUrl, USERNAME, APP_PASSWORD);
+  WebDavHelper *helper = listWebDavFiles(nextPageUrl, USERNAME, APP_PASSWORD);
   helper->setParent(this);
 
   QObject::connect(
       helper, &WebDavHelper::listCompleted, this,
-      [this, helper](const QList<QPair<QString, QDateTime>>& files) {
+      [this, helper](const QList<QPair<QString, QDateTime>> &files) {
         allFiles.append(files);
 
         // 解析下一页URL
@@ -944,17 +930,17 @@ void CloudBackup::fetchNextPage() {
       });
 
   QObject::connect(helper, &WebDavHelper::errorOccurred, this,
-                   [this, helper](const QString& error) {
+                   [this, helper](const QString &error) {
                      qDebug() << "获取文件列表出错:" << error;
                      helper->deleteLater();
-                     processFileList();  // 即使出错也处理已获取的文件
+                     processFileList(); // 即使出错也处理已获取的文件
                    });
 }
 
 QString CloudBackup::parseNextPageUrl(
-    const QList<QNetworkReply::RawHeaderPair>& headers) {
+    const QList<QNetworkReply::RawHeaderPair> &headers) {
   // 查找 Link 头
-  for (const auto& header : headers) {
+  for (const auto &header : headers) {
     if (header.first.compare("Link", Qt::CaseInsensitive) == 0) {
       QByteArray linkValue = header.second;
 
@@ -967,7 +953,7 @@ QString CloudBackup::parseNextPageUrl(
       }
     }
   }
-  return QString();  // 没有找到下一页
+  return QString(); // 没有找到下一页
 }
 
 void CloudBackup::processFileList() {
@@ -979,9 +965,9 @@ void CloudBackup::processFileList() {
   }
 
   for (int i = 0; i < allFiles.size(); ++i) {
-    const auto& filePair = allFiles.at(i);  // .at() 绝对安全，不触发 detach
-    const QString& path = filePair.first;
-    const QDateTime& mtime = filePair.second;
+    const auto &filePair = allFiles.at(i); // .at() 绝对安全，不触发 detach
+    const QString &path = filePair.first;
+    const QDateTime &mtime = filePair.second;
 
     QString remoteFile = path;
 
@@ -996,7 +982,7 @@ void CloudBackup::processFileList() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-QString CloudBackup::getRemoteKnotDataFullPath(const QString& remoteFile) {
+QString CloudBackup::getRemoteKnotDataFullPath(const QString &remoteFile) {
   QString path;
   // 获取KnotData开头的路径
   int idx = remoteFile.indexOf("KnotData/");
@@ -1031,7 +1017,8 @@ void CloudBackup::backExit() {
   mw_one->m_Preferences->saveOptions();
   mw_one->m_Preferences->setEncSyncStatusTip();
 
-  if (!isAndroid) mw_one->ui->frameMain->show();
+  if (!isAndroid)
+    mw_one->ui->frameMain->show();
 
   mw_one->ui->frameOne->hide();
 }
@@ -1073,7 +1060,7 @@ void CloudBackup::save_WebDav() {
       items.append(text);
     }
   }
-  items.removeDuplicates();  // 强制去重
+  items.removeDuplicates(); // 强制去重
 
   // 清空旧配置，重新保存
   iniPreferences->remove("/webdav/count");
@@ -1131,7 +1118,7 @@ void CloudBackup::init_CloudBacup() {
       iniPreferences->value("/cloudbak/autosync", 0).toBool());
 }
 
-void CloudBackup::changeComBoxWebDAV(const QString& arg1) {
+void CloudBackup::changeComBoxWebDAV(const QString &arg1) {
   QString username, password;
   username = iniPreferences->value("/webdav/username_" + arg1).toString();
   QString aesStr = iniPreferences->value("/webdav/password_" + arg1).toString();
@@ -1145,15 +1132,14 @@ void CloudBackup::webDAVRestoreData() {
   QString filePath;
   filePath = bakfileDir + "memo.zip";
 
-  if (QFile(filePath).exists()) QFile(filePath).remove();
-  if (filePath.isEmpty()) return;
+  if (QFile(filePath).exists())
+    QFile(filePath).remove();
+  if (filePath.isEmpty())
+    return;
 
-  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-  if (!m_ShowMsg->showMsg(
-          "WebDAV",
-          tr("Downloading data?") + "\n\n" +
-              tr("This action overwrites local files with files in the cloud."),
-          2))
+  if (!showConfirm("WebDAV", tr("Downloading data?") + "\n\n" +
+                                 tr("This action overwrites local files with "
+                                    "files in the cloud.")))
     return;
 
   mw_one->showProgress();
@@ -1191,13 +1177,12 @@ bool CloudBackup::checkWebDAVConnection() {
   request.setRawHeader("Depth", "0");
 
   // 🔥 关键：极简 PROPFIND，中科院只认这个
-  QString xml =
-      "<?xml version=\"1.0\"?>"
-      "<d:propfind xmlns:d=\"DAV:\">"
-      "<d:allprop/>"
-      "</d:propfind>";
+  QString xml = "<?xml version=\"1.0\"?>"
+                "<d:propfind xmlns:d=\"DAV:\">"
+                "<d:allprop/>"
+                "</d:propfind>";
 
-  QNetworkReply* reply =
+  QNetworkReply *reply =
       manager.sendCustomRequest(request, "PROPFIND", xml.toUtf8());
 
   QEventLoop loop;
@@ -1214,7 +1199,8 @@ bool CloudBackup::checkWebDAVConnection() {
   qDebug() << strError;
   reply->deleteLater();
 
-  if (ok) save_WebDav();
+  if (ok)
+    save_WebDav();
 
   return ok;
 }
@@ -1238,11 +1224,10 @@ void CloudBackup::checkWebDAVConnectionAsync() {
   request.setRawHeader("User-Agent", "Zotero/5.0");
   request.setRawHeader("Depth", "0");
 
-  QString xml =
-      "<?xml version=\"1.0\"?><d:propfind "
-      "xmlns:d=\"DAV:\"><d:allprop/></d:propfind>";
+  QString xml = "<?xml version=\"1.0\"?><d:propfind "
+                "xmlns:d=\"DAV:\"><d:allprop/></d:propfind>";
 
-  QNetworkReply* reply =
+  QNetworkReply *reply =
       m_chk_manager->sendCustomRequest(request, "PROPFIND", xml.toUtf8());
 
   // 异步连接：当请求完成时，调用处理函数
@@ -1253,8 +1238,9 @@ void CloudBackup::checkWebDAVConnectionAsync() {
 }
 
 void CloudBackup::onWebDAVCheckFinished() {
-  QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
-  if (!reply) return;
+  QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+  if (!reply)
+    return;
 
   int status =
       reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -1274,7 +1260,7 @@ void CloudBackup::onWebDAVCheckFinished() {
   // 通知 UI 更新状态（例如关闭 loading 动画，显示成功/失败提示）
   emit connectionCheckFinished(ok, strError);
 
-  reply->deleteLater();  // 安全删除 reply
+  reply->deleteLater(); // 安全删除 reply
 }
 
 QString CloudBackup::unifyWebDAVBaseUrlToDavEnd(QString url) {

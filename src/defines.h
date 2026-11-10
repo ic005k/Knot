@@ -3,10 +3,12 @@
 
 #include <qglobal.h>
 
+#include <QApplication>
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QFile>
+#include <QMessageBox>
 #include <QMetaObject>
 #include <QPointer>
 #include <QRegularExpression>
@@ -52,7 +54,7 @@ inline const QString uniqueKey = "KnotMyUniqueApplicationKey_12345";
 inline QSharedMemory sharedMemory;
 #endif
 
-extern Method* m_Method;
+extern Method *m_Method;
 
 inline QPointer<TextEditToolbar> textToolbar;
 inline QPointer<TextEditToolbar> textToolbarDynamic;
@@ -132,18 +134,18 @@ inline bool isNeedExecDeskShortcut = false;
 inline bool isAndroidAIQA = false;
 
 inline QString loadText(QString textFile);
-inline void TextEditToFile(QTextEdit* txtEdit, QString fileName);
+inline void TextEditToFile(QTextEdit *txtEdit, QString fileName);
 inline int deleteDirfile(QString dirName);
-inline QString getTextEditLineText(QTextEdit* txtEdit, int i);
+inline QString getTextEditLineText(QTextEdit *txtEdit, int i);
 inline bool StringToFile(QString buffers, QString fileName);
 inline void closeTextToolBar();
-inline void initTextToolbarDynamic(QWidget* parent);
-inline QString computeModelFingerprint(const QString& modelPath);
+inline void initTextToolbarDynamic(QWidget *parent);
+inline QString computeModelFingerprint(const QString &modelPath);
 
-bool unzipToDir(const QString& zipPath, const QString& destDir);
-QString markdownToHtmlWithMath(const QString& md);
-WebDavHelper* listWebDavFiles(const QString& url, const QString& username,
-                              const QString& password);
+bool unzipToDir(const QString &zipPath, const QString &destDir);
+QString markdownToHtmlWithMath(const QString &md);
+WebDavHelper *listWebDavFiles(const QString &url, const QString &username,
+                              const QString &password);
 
 inline void closeTextToolBar() {
   if (textToolbar != nullptr && textToolbar->isVisible()) {
@@ -155,7 +157,7 @@ inline void closeTextToolBar() {
   }
 }
 
-inline void initTextToolbarDynamic(QWidget* parent) {
+inline void initTextToolbarDynamic(QWidget *parent) {
   if (textToolbarDynamic != nullptr) {
     textToolbarDynamic->deleteLater();
     textToolbarDynamic = nullptr;
@@ -183,7 +185,7 @@ inline QString loadText(QString textFile) {
 
 inline bool StringToFile(QString buffers, QString fileName) {
   bool isValue;
-  QFile* file;
+  QFile *file;
   file = new QFile;
   file->setFileName(fileName);
   bool ok = file->open(QIODevice::WriteOnly | QIODevice::Text);
@@ -201,8 +203,8 @@ inline bool StringToFile(QString buffers, QString fileName) {
   return isValue;
 }
 
-inline void TextEditToFile(QTextEdit* txtEdit, QString fileName) {
-  QFile* file;
+inline void TextEditToFile(QTextEdit *txtEdit, QString fileName) {
+  QFile *file;
   file = new QFile;
   file->setFileName(fileName);
   bool ok = file->open(QIODevice::WriteOnly | QIODevice::Text);
@@ -217,7 +219,7 @@ inline void TextEditToFile(QTextEdit* txtEdit, QString fileName) {
   delete file;
 }
 
-inline QString getTextEditLineText(QTextEdit* txtEdit, int i) {
+inline QString getTextEditLineText(QTextEdit *txtEdit, int i) {
   QTextBlock block = txtEdit->document()->findBlockByNumber(i);
   txtEdit->setTextCursor(QTextCursor(block));
   QString lineText = txtEdit->document()->findBlockByNumber(i).text();
@@ -231,7 +233,8 @@ inline int deleteDirfile(QString dirName) {
   }
 
   QString srcPath = QDir::toNativeSeparators(dirName);
-  if (!srcPath.endsWith(QDir::separator())) srcPath += QDir::separator();
+  if (!srcPath.endsWith(QDir::separator()))
+    srcPath += QDir::separator();
 
   QStringList fileNames = directory.entryList(
       QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
@@ -257,7 +260,7 @@ inline int deleteDirfile(QString dirName) {
   return !error;
 }
 
-inline QString computeModelFingerprint(const QString& modelPath) {
+inline QString computeModelFingerprint(const QString &modelPath) {
   QFile file(modelPath);
   if (!file.open(QIODevice::ReadOnly)) {
     qWarning() << "计算模型指纹，打开模型文件失败:" << modelPath
@@ -266,8 +269,8 @@ inline QString computeModelFingerprint(const QString& modelPath) {
   }
 
   QCryptographicHash hash(QCryptographicHash::Sha256);
-  const qint64 maxReadSize = 2 * 1024 * 1024;  // 2MB
-  const qint64 chunkSize = 1 * 1024 * 1024;    // 1MB 缓冲区，移动端更友好
+  const qint64 maxReadSize = 2 * 1024 * 1024; // 2MB
+  const qint64 chunkSize = 1 * 1024 * 1024;   // 1MB 缓冲区，移动端更友好
   qint64 totalRead = 0;
   QByteArray buffer;
   buffer.reserve(chunkSize);
@@ -291,13 +294,13 @@ inline QString computeModelFingerprint(const QString& modelPath) {
 // 判断是否为 CJK 统一汉字/日文假名/韩文音节等
 static inline bool isCjkChar(QChar ch) {
   uint u = ch.unicode();
-  return (u >= 0x4E00 && u <= 0x9FFF) ||    // CJK Unified Ideographs
-         (u >= 0x3400 && u <= 0x4DBF) ||    // CJK Extension A
-         (u >= 0x20000 && u <= 0x2A6DF) ||  // CJK Extension B
-         (u >= 0xF900 && u <= 0xFAFF) ||    // CJK Compatibility Ideographs
-         (u >= 0x3040 && u <= 0x309F) ||    // Hiragana
-         (u >= 0x30A0 && u <= 0x30FF) ||    // Katakana
-         (u >= 0xAC00 && u <= 0xD7AF);      // Hangul Syllables
+  return (u >= 0x4E00 && u <= 0x9FFF) ||   // CJK Unified Ideographs
+         (u >= 0x3400 && u <= 0x4DBF) ||   // CJK Extension A
+         (u >= 0x20000 && u <= 0x2A6DF) || // CJK Extension B
+         (u >= 0xF900 && u <= 0xFAFF) ||   // CJK Compatibility Ideographs
+         (u >= 0x3040 && u <= 0x309F) ||   // Hiragana
+         (u >= 0x30A0 && u <= 0x30FF) ||   // Katakana
+         (u >= 0xAC00 && u <= 0xD7AF);     // Hangul Syllables
 }
 
 // 判断是否为空白字符（空格、制表符、换行等）
@@ -311,8 +314,7 @@ static inline bool isSpaceChar(QChar ch) {
  * @param func 要执行的 Lambda 表达式或可调用对象
  * @note 自动处理 JNI/Android UI 线程到 Qt 主线程的安全派发
  */
-template <typename Func>
-inline void safeDelayedInvoke(int msec, Func&& func) {
+template <typename Func> inline void safeDelayedInvoke(int msec, Func &&func) {
   // Qt6 中 qApp 是类型安全的，且生命周期与 App 完全一致
   // Qt::AutoConnection:
   //   - 在 JNI 等非主线程调用时 -> 自动转为 QueuedConnection (安全派发)
@@ -328,7 +330,36 @@ inline void safeDelayedInvoke(int msec, Func&& func) {
 /**
  * @brief [Qt6] 跨线程安全立即执行（无延迟版本）
  */
-template <typename Func>
-inline void safeInvoke(Func&& func) {
+template <typename Func> inline void safeInvoke(Func &&func) {
   QMetaObject::invokeMethod(qApp, std::forward<Func>(func), Qt::AutoConnection);
+}
+
+/**
+ * @brief 通用信息提示框 (仅确定按钮)
+ */
+inline void showInfo(const QString &title, const QString &text,
+                     QWidget *parent = nullptr) {
+  // 如果 parent 为空，默认使用主窗口作为父级，防止弹窗位置乱跑
+  if (!parent && qApp->activeWindow()) {
+    parent = qApp->activeWindow();
+  }
+  QMessageBox::information(parent, title, text);
+}
+
+/**
+ * @brief 通用确认提示框 (确定/取消 或 Yes/No)
+ * @return true: 用户点击了确定/Yes; false: 用户点击了取消/No/关闭
+ */
+inline bool showConfirm(const QString &title, const QString &text,
+                        QWidget *parent = nullptr) {
+  if (!parent && qApp->activeWindow()) {
+    parent = qApp->activeWindow();
+  }
+
+  // 使用 Question 图标，更符合"询问"的语义
+  // 这里使用了 Yes/No，Ok/Cancel，可替换为 QMessageBox::Ok |
+  // QMessageBox::Cancel
+  return QMessageBox::question(parent, title, text,
+                               QMessageBox::Yes | QMessageBox::No) ==
+         QMessageBox::Yes;
 }

@@ -13,7 +13,7 @@ int highCount;
 
 bool isNeedSync = false;
 
-Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
+Todo::Todo(QWidget *parent) : QDialog(parent), ui(new Ui::Todo) {
   ui->setupUi(this);
 
   this->installEventFilter(this);
@@ -35,25 +35,25 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
 
   /////////////////////////////////////////////////////////////////////
   // 1. 设置自定义委托
-  TodoItemDelegate* delegate = new TodoItemDelegate(this);
+  TodoItemDelegate *delegate = new TodoItemDelegate(this);
   ui->listTodo->setItemDelegate(delegate);
 
   // 2. 优化 QListWidget 的显示效果
   ui->listTodo->setSelectionMode(
-      QAbstractItemView::SingleSelection);  // 单选模式
-  ui->listTodo->setSelectionBehavior(
-      QAbstractItemView::SelectRows);  // 整行选中
+      QAbstractItemView::SingleSelection);                           // 单选模式
+  ui->listTodo->setSelectionBehavior(QAbstractItemView::SelectRows); // 整行选中
   ui->listTodo->setVerticalScrollMode(
-      QAbstractItemView::ScrollPerPixel);  // 平滑滚动
+      QAbstractItemView::ScrollPerPixel); // 平滑滚动
   ui->listTodo->setHorizontalScrollBarPolicy(
-      Qt::ScrollBarAlwaysOff);  // 隐藏水平滚动条
+      Qt::ScrollBarAlwaysOff); // 隐藏水平滚动条
 
   connect(delegate, &TodoItemDelegate::toolButtonClicked, this,
-          [this](const QModelIndex& index, const QString& actionId) {
+          [this](const QModelIndex &index, const QString &actionId) {
             // 从 model 获取该行数据
             QString rawData = index.data(Qt::DisplayRole).toString();
             QStringList parts = rawData.split("|==|");
-            if (parts.size() < 3) return;
+            if (parts.size() < 3)
+              return;
 
             if (actionId == QLatin1String("high")) {
               on_btnHigh_clicked();
@@ -73,8 +73,9 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
           });
 
   connect(delegate, &TodoItemDelegate::expandedIndexChanged, this,
-          [this](const QModelIndex& index) {
-            if (!index.isValid()) return;
+          [this](const QModelIndex &index) {
+            if (!index.isValid())
+              return;
 
             // ✅ 在展开的同时，手动设置选中（与 dataChanged 同帧生效）
             ui->listTodo->setCurrentIndex(index);
@@ -89,7 +90,7 @@ Todo::Todo(QWidget* parent) : QDialog(parent), ui(new Ui::Todo) {
 
 Todo::~Todo() { delete ui; }
 
-void Todo::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
+void Todo::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
 
 void Todo::saveTodo() {
   mw_one->strLatestModify = tr("Modi Todo");
@@ -126,12 +127,12 @@ void Todo::saveTodo() {
 
   // 写入文件
   QString tempFile = iniDir + "todo.tmp";
-  QString endFile = iniDir + "todo.json";  // 改成 json 后缀
+  QString endFile = iniDir + "todo.json"; // 改成 json 后缀
 
   QFile file(tempFile);
   if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     QJsonDocument doc(rootObj);
-    file.write(doc.toJson(QJsonDocument::Indented));  // 缩进格式化
+    file.write(doc.toJson(QJsonDocument::Indented)); // 缩进格式化
     file.close();
   }
 
@@ -143,7 +144,8 @@ void Todo::saveTodo() {
 QString Todo::getItemTodoText(int index) {
   QString str = listTodo.at(index);
   QStringList list = str.split("|==|");
-  if (list.count() == 3) return list.at(2);
+  if (list.count() == 3)
+    return list.at(2);
 
   return "";
 }
@@ -183,7 +185,7 @@ void Todo::init_Todo() {
     }
 
     // 读取回收站
-    clearAllRecycle();  // 清空现有回收站数据
+    clearAllRecycle(); // 清空现有回收站数据
     QJsonArray recycleArray = root["recycle"].toArray();
     for (int i = 0; i < recycleArray.size(); i++) {
       QJsonObject item = recycleArray[i].toObject();
@@ -199,7 +201,8 @@ void Todo::init_Todo() {
 }
 
 void Todo::addToList(QString str, bool isInsert) {
-  if (str == "") return;
+  if (str == "")
+    return;
 
   int count = getCount();
   for (int i = 0; i < count; i++) {
@@ -231,19 +234,20 @@ void Todo::addToList(QString str, bool isInsert) {
 
 void Todo::AddTodoText() {
   QString str = "todo txt";
-  if (str == "") return;
+  if (str == "")
+    return;
   addToList(str, true);
 }
 
-int Todo::getEditTextHeight(QTextEdit* edit) {
-  QTextDocument* doc = edit->document();
+int Todo::getEditTextHeight(QTextEdit *edit) {
+  QTextDocument *doc = edit->document();
   int height = doc->size().height() * 1.10;
   int width = doc->size().width();
   doc->setTextWidth(width);
   return height;
 }
 
-void Todo::closeEvent(QCloseEvent* event) {
+void Todo::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
   closeTodo();
 }
@@ -268,13 +272,13 @@ void Todo::closeTodo() {
     if (!m_Method->compressFileWithZlib(todoFile, todoZipFile,
                                         Z_DEFAULT_COMPRESSION)) {
       errorInfo = tr("An error occurred while compressing the file.");
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg("Knot", errorInfo, 1);
+      showInfo("Knot", errorInfo);
       return;
     }
 
     QString enc_file = m_Method->useEnc(todoZipFile);
-    if (enc_file != "") todoZipFile = enc_file;
+    if (enc_file != "")
+      todoZipFile = enc_file;
 
     m_Notes->appendToSyncList(todoZipFile);
     mw_one->showProgress();
@@ -284,9 +288,9 @@ void Todo::closeTodo() {
   }
 }
 
-bool Todo::eventFilter(QObject* watch, QEvent* evn) {
+bool Todo::eventFilter(QObject *watch, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
     }
   }
@@ -296,13 +300,15 @@ bool Todo::eventFilter(QObject* watch, QEvent* evn) {
 
 void Todo::on_btnHigh(int index) {
   int count = getCount();
-  if (count == 0) return;
+  if (count == 0)
+    return;
 
   int row = index;
 
   QString strTime = getItemTime(row);
 
-  if (getTimeStr(strTime) != "") return;
+  if (getTimeStr(strTime) != "")
+    return;
 
   QString strText = getItemTodoText(row);
 
@@ -344,20 +350,23 @@ void Todo::delItemRecycle(int index) {
 QString Todo::getItemTodoTextRecycle(int index) {
   QString str = listRecycle.at(index);
   QStringList list = str.split("|==|");
-  if (list.count() == 2) return list.at(1);
+  if (list.count() == 2)
+    return list.at(1);
 
   return "";
 }
 
 void Todo::on_btnLow(int index) {
   int count = getCount();
-  if (count == 0) return;
+  if (count == 0)
+    return;
 
   int row = index;
 
   QString strTime = getItemTime(row);
 
-  if (getTimeStr(strTime) != "") return;
+  if (getTimeStr(strTime) != "")
+    return;
 
   QString strTodoText = getItemTodoText(row);
   delItem(row);
@@ -378,7 +387,8 @@ void Todo::on_btnLow(int index) {
 void Todo::on_SetAlarm(bool w1, bool w2, bool w3, bool w4, bool w5, bool w6,
                        bool w7, int y, int mon, int d, int h, int m) {
   int row = curTodoListIndex;
-  if (row < 0) return;
+  if (row < 0)
+    return;
 
   QString strTodoText = getItemTodoText(row);
   QString strTime;
@@ -386,13 +396,20 @@ void Todo::on_SetAlarm(bool w1, bool w2, bool w3, bool w4, bool w5, bool w6,
   alarmDate.setDate(y, mon, d);
 
   QString str;
-  if (w1) str = str + "1";
-  if (w2) str = str + "2";
-  if (w3) str = str + "3";
-  if (w4) str = str + "4";
-  if (w5) str = str + "5";
-  if (w6) str = str + "6";
-  if (w7) str = str + "7";
+  if (w1)
+    str = str + "1";
+  if (w2)
+    str = str + "2";
+  if (w3)
+    str = str + "3";
+  if (w4)
+    str = str + "4";
+  if (w5)
+    str = str + "5";
+  if (w6)
+    str = str + "6";
+  if (w7)
+    str = str + "7";
   if (str.length() > 0) {
     strTime = tr("Alarm") + "  " + str + "  " + alarmTime.toString("HH:mm");
 
@@ -488,7 +505,8 @@ qlonglong Todo::getSecond(QString strDateTime) {
 
 void Todo::on_btnSetTime(int index) {
   int count = getCount();
-  if (count == 0) return;
+  if (count == 0)
+    return;
 
   curTodoListIndex = index;
 
@@ -519,13 +537,20 @@ void Todo::on_btnSetTime(int index) {
       QString s1 = list.at(0);
       for (int i = 0; i < s1.length(); i++) {
         QString s2 = s1.mid(i, 1);
-        if (s2 == "1") str1 = "1";
-        if (s2 == "2") str2 = "1";
-        if (s2 == "3") str3 = "1";
-        if (s2 == "4") str4 = "1";
-        if (s2 == "5") str5 = "1";
-        if (s2 == "6") str6 = "1";
-        if (s2 == "7") str7 = "1";
+        if (s2 == "1")
+          str1 = "1";
+        if (s2 == "2")
+          str2 = "1";
+        if (s2 == "3")
+          str3 = "1";
+        if (s2 == "4")
+          str4 = "1";
+        if (s2 == "5")
+          str5 = "1";
+        if (s2 == "6")
+          str6 = "1";
+        if (s2 == "7")
+          str7 = "1";
       }
       date = QDate::currentDate();
 
@@ -557,13 +582,20 @@ void Todo::on_btnSetTime(int index) {
       QString s1 = list.at(0);
       for (int i = 0; i < s1.length(); i++) {
         QString s2 = s1.mid(i, 1);
-        if (s2 == "1") str1 = "1";
-        if (s2 == "2") str2 = "1";
-        if (s2 == "3") str3 = "1";
-        if (s2 == "4") str4 = "1";
-        if (s2 == "5") str5 = "1";
-        if (s2 == "6") str6 = "1";
-        if (s2 == "7") str7 = "1";
+        if (s2 == "1")
+          str1 = "1";
+        if (s2 == "2")
+          str2 = "1";
+        if (s2 == "3")
+          str3 = "1";
+        if (s2 == "4")
+          str4 = "1";
+        if (s2 == "5")
+          str5 = "1";
+        if (s2 == "6")
+          str6 = "1";
+        if (s2 == "7")
+          str7 = "1";
       }
       date = QDate::currentDate();
       for (int i = 0; i < list.count(); i++) {
@@ -592,12 +624,14 @@ void Todo::on_btnSetTime(int index) {
 
 void Todo::on_DelAlarm() {
   int row = curTodoListIndex;
-  if (row < 0) return;
+  if (row < 0)
+    return;
 
   QString str = getItemTime(row);
   QString str1 = str;
   str = getTimeStr(str);
-  if (str != "") str1 = str;
+  if (str != "")
+    str1 = str;
   modifyTime(row, str1);
   modifyType(row, 0);
 
@@ -612,7 +646,8 @@ void Todo::on_DelAlarm() {
 }
 
 void Todo::startTimerAlarm(QString text, qlonglong minValue) {
-  if (minValue < 5) return;
+  if (minValue < 5)
+    return;
 
   Q_UNUSED(text);
 #ifdef Q_OS_ANDROID
@@ -667,7 +702,8 @@ void Todo::on_btnClear_clicked() {
 }
 
 void Todo::on_btnRestore_clicked() {
-  if (getCountRecycle() == 0) return;
+  if (getCountRecycle() == 0)
+    return;
 
   int row = getCurrentIndexRecycle();
   QString strTime = m_Method->setCurrentDateTimeValue();
@@ -684,7 +720,8 @@ void Todo::on_btnRestore_clicked() {
 
 void Todo::on_btnDel_clicked() {
   int row = getCurrentIndexRecycle();
-  if (row < 0) return;
+  if (row < 0)
+    return;
 
   if (!isRestore)
     delVoiceFile(row);
@@ -769,7 +806,8 @@ QString Todo::getTimeStr(QString str) {
     isTime = true;
   }
 
-  if (isTime) return str;
+  if (isTime)
+    return str;
 
   return "";
 }
@@ -966,7 +1004,8 @@ int Todo::getCurrentIndexRecycle() { return 0; }
 QString Todo::getItemTime(int index) {
   QString str = listTodo.at(index);
   QStringList list = str.split("|==|");
-  if (list.count() == 3) return list.at(0);
+  if (list.count() == 3)
+    return list.at(0);
 
   return "00:00:00";
 }
@@ -974,7 +1013,8 @@ QString Todo::getItemTime(int index) {
 QString Todo::getItemTimeRecycle(int index) {
   QString str = listRecycle.at(index);
   QStringList list = str.split("|==|");
-  if (list.count() == 2) return list.at(0);
+  if (list.count() == 2)
+    return list.at(0);
 
   return "11:11:11";
 }
@@ -982,7 +1022,8 @@ QString Todo::getItemTimeRecycle(int index) {
 int Todo::getItemType(int index) {
   QString str = listTodo.at(index);
   QStringList list = str.split("|==|");
-  if (list.count() == 3) return list.at(1).toInt();
+  if (list.count() == 3)
+    return list.at(1).toInt();
 
   return 0;
 }
@@ -996,7 +1037,7 @@ int Todo::setItemHeight(QString strTodoText) {
 
   return fontHeight;
 
-  QTextEdit* edit = new QTextEdit;
+  QTextEdit *edit = new QTextEdit;
   edit->append(strTodoText);
   int itemHeight = fontHeight * 2 + getEditTextHeight(edit);
 
@@ -1055,7 +1096,8 @@ void Todo::modifyTodoText(int index, QString strTodoText) {
 
 void Todo::clearAllRecycle() {
   int count = getCountRecycle();
-  if (count == 0) return;
+  if (count == 0)
+    return;
   for (int i = 0; i < count; i++) {
     delVoiceFile(0);
   }
@@ -1070,14 +1112,16 @@ void Todo::isAlarm(int index) {
   QString strTime = getItemTime(index);
 
   strTime = getTimeStr(strTime);
-  if (strTime != "") a = true;
+  if (strTime != "")
+    a = true;
   qDebug() << "aabb" << a;
   setHighPriority(a);
 }
 
 void Todo::reeditText() {
   int count = getCount();
-  if (count == 0) return;
+  if (count == 0)
+    return;
 
   int row = getCurrentIndex();
   QString strItem = getItemTodoText(row).trimmed();
@@ -1097,39 +1141,40 @@ void Todo::reeditText() {
   }
 
   m_ReeditTodo = new QDialog(this);
-  QVBoxLayout* vbox0 = new QVBoxLayout;
+  QVBoxLayout *vbox0 = new QVBoxLayout;
   m_ReeditTodo->setLayout(vbox0);
   vbox0->setContentsMargins(5, 5, 5, 5);
-  if (!isAndroid) m_ReeditTodo->setModal(true);
+  if (!isAndroid)
+    m_ReeditTodo->setModal(true);
   m_ReeditTodo->setWindowFlag(Qt::FramelessWindowHint);
 
-  QFrame* frame = new QFrame(this);
+  QFrame *frame = new QFrame(this);
   vbox0->addWidget(frame);
 
-  QVBoxLayout* vbox = new QVBoxLayout;
+  QVBoxLayout *vbox = new QVBoxLayout;
 
   frame->setLayout(vbox);
   vbox->setContentsMargins(6, 6, 6, 10);
   vbox->setSpacing(10);
 
-  QLabel* lblTitle = new QLabel(this);
+  QLabel *lblTitle = new QLabel(this);
   lblTitle->adjustSize();
   lblTitle->setWordWrap(true);
   lblTitle->setText(tr("Editor"));
   vbox->addWidget(lblTitle);
   lblTitle->hide();
 
-  QFrame* hframe = new QFrame(this);
+  QFrame *hframe = new QFrame(this);
   hframe->setFrameShape(QFrame::HLine);
   hframe->setStyleSheet("QFrame{background:red;min-height:2px}");
   vbox->addWidget(hframe);
   hframe->hide();
 
-  QTextEdit* edit = new QTextEdit(this);
+  QTextEdit *edit = new QTextEdit(this);
   edit->setAcceptRichText(false);
 
   initTextToolbarDynamic(m_ReeditTodo);
-  EditEventFilter* editFilter =
+  EditEventFilter *editFilter =
       new EditEventFilter(textToolbarDynamic, m_ReeditTodo);
   editFilter->setParent(m_ReeditTodo);
   edit->installEventFilter(editFilter);
@@ -1143,16 +1188,16 @@ void Todo::reeditText() {
   // edit->verticalScrollBar()->setStyleSheet(
   //     mw_one->ui->editDetails->verticalScrollBar()->styleSheet());
 
-  QToolButton* btnCancel = new QToolButton(this);
-  QToolButton* btnCopy = new QToolButton(this);
-  QToolButton* btnShare = new QToolButton(this);
-  QToolButton* btnOk = new QToolButton(this);
+  QToolButton *btnCancel = new QToolButton(this);
+  QToolButton *btnCopy = new QToolButton(this);
+  QToolButton *btnShare = new QToolButton(this);
+  QToolButton *btnOk = new QToolButton(this);
   btnCancel->setText(tr("Cancel"));
   btnCopy->setText(tr("Copy"));
   btnShare->setText(tr("Share"));
   btnOk->setText(tr("OK"));
 
-  QHBoxLayout* hbox = new QHBoxLayout;
+  QHBoxLayout *hbox = new QHBoxLayout;
   hbox->addWidget(btnCancel);
   hbox->addWidget(btnCopy);
   hbox->addWidget(btnShare);
@@ -1167,7 +1212,7 @@ void Todo::reeditText() {
   btnShare->setFixedHeight(50);
   btnOk->setFixedHeight(50);
 
-  QSpacerItem* sparcer_item =
+  QSpacerItem *sparcer_item =
       new QSpacerItem(0, 2, QSizePolicy::Fixed, QSizePolicy::Fixed);
   vbox->addItem(sparcer_item);
 
@@ -1273,7 +1318,7 @@ bool Todo::isVoice(int row) {
   return false;
 }
 
-bool Todo::isVoice(const QString& strTodoText) {
+bool Todo::isVoice(const QString &strTodoText) {
   QString strItem = strTodoText.trimmed();
   QStringList list0 = strItem.split(" ");
   if (list0.count() > 0) {
@@ -1292,20 +1337,22 @@ QString Todo::getVoiceFile(int row) {
     QString str = list0.at(0);
     if (str == tr("Voice")) {
       QString voiceFile = iniDir + "memo/voice/" + strItem.split("\n").at(1);
-      if (QFile::exists(voiceFile)) return voiceFile;
+      if (QFile::exists(voiceFile))
+        return voiceFile;
     }
   }
   return "";
 }
 
-QString Todo::getVoiceFile(const QString& strTodoText) {
+QString Todo::getVoiceFile(const QString &strTodoText) {
   QString strItem = strTodoText.trimmed();
   QStringList list0 = strItem.split(" ");
   if (list0.count() > 0) {
     QString str = list0.at(0);
     if (str == tr("Voice")) {
       QString voiceFile = iniDir + "memo/voice/" + strItem.split("\n").at(1);
-      if (QFile::exists(voiceFile)) return voiceFile;
+      if (QFile::exists(voiceFile))
+        return voiceFile;
     }
   }
   return "";
@@ -1318,7 +1365,8 @@ void Todo::delVoiceFile(int row) {
     QString str = list0.at(0);
     if (str == tr("Voice")) {
       QString voiceFile = iniDir + "memo/voice/" + strItem.split("\n").at(1);
-      if (QFile::exists(voiceFile)) QFile::remove(voiceFile);
+      if (QFile::exists(voiceFile))
+        QFile::remove(voiceFile);
     }
   }
 }
@@ -1330,7 +1378,8 @@ QString Todo::getNumber(QString str) {
     if (str1 != " ") {
       bool isOk;
       str1.toInt(&isOk, 10);
-      if (isOk) str0 = str0 + str1;
+      if (isOk)
+        str0 = str0 + str1;
     }
   }
   return str0;
@@ -1338,7 +1387,8 @@ QString Todo::getNumber(QString str) {
 
 void Todo::goCurrentTodoItem(QString curItem) {
   int count = getCount();
-  if (count == 0) return;
+  if (count == 0)
+    return;
 
   for (int i = 0; i < count; i++) {
     QString item = getItemTodoText(i);
@@ -1353,8 +1403,8 @@ void Todo::on_ShowPlayProgress() {}
 
 void Todo::setDataToTodoList() {
   ui->listTodo->clear();
-  for (const QString& item : listTodo) {
-    QListWidgetItem* listItem = new QListWidgetItem(item);
+  for (const QString &item : listTodo) {
+    QListWidgetItem *listItem = new QListWidgetItem(item);
     ui->listTodo->addItem(listItem);
   }
 }
@@ -1398,11 +1448,9 @@ void Todo::openTodo() {
       mw_one->ui->chkWebDAV->isChecked()) {
     if (!m_CloudBackup->checkWebDAVConnection()) {
       mw_one->safeCloseProgress();
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg(appName,
-                   tr("WebDAV connection failed. Please check the network, "
-                      "website address or login information."),
-                   1);
+      showInfo(appName,
+               tr("WebDAV connection failed. Please check the network, "
+                  "website address or login information."));
 
       QTimer::singleShot(100, mw_one, [this]() { openTodoUI(); });
       return;
@@ -1410,14 +1458,14 @@ void Todo::openTodo() {
 
     QString url = m_CloudBackup->getWebDAVArgument();
 
-    WebDavHelper* helper =
+    WebDavHelper *helper =
         listWebDavFiles(url + "KnotData/", m_CloudBackup->USERNAME,
                         m_CloudBackup->APP_PASSWORD);
 
     // 连接信号
     QObject::connect(
         helper, &WebDavHelper::listCompleted, this,
-        [=](const QList<QPair<QString, QDateTime>>& files) {
+        [=](const QList<QPair<QString, QDateTime>> &files) {
           qDebug() << "获取到文件列表:" << url + "KnotData/";
           qDebug() << "共找到" << files.size() << "个文件:";
 
@@ -1427,8 +1475,8 @@ void Todo::openTodo() {
           }
 
           bool isTodoFile = false;
-          for (const auto& [path, mtime] : files) {
-            QDateTime remoteTime = mtime;  // 创建非const副本
+          for (const auto &[path, mtime] : files) {
+            QDateTime remoteTime = mtime; // 创建非const副本
             remoteTime.toTimeZone(QTimeZone::utc());
             remoteTime = remoteTime.toLocalTime();
 
@@ -1450,7 +1498,7 @@ void Todo::openTodo() {
 
               if (remoteTime > localModi || !QFile::exists(localFile)) {
                 // 初始化下载器
-                WebDavDownloader* downloader = new WebDavDownloader(
+                WebDavDownloader *downloader = new WebDavDownloader(
                     m_CloudBackup->USERNAME, m_CloudBackup->APP_PASSWORD);
 
                 // 连接信号
@@ -1470,7 +1518,8 @@ void Todo::openTodo() {
                       QString zFile = privateDir + "KnotData/todo.json.zip";
 
                       QString dec_file = m_Method->useDec(zFile);
-                      if (dec_file != "") zFile = dec_file;
+                      if (dec_file != "")
+                        zFile = dec_file;
 
                       errorInfo = "";
                       if (!m_Method->decompressFileWithZlib(
@@ -1480,12 +1529,12 @@ void Todo::openTodo() {
                             tr("Decompression failed.Please verify the data "
                                "encryption password.");
 
-                        auto msg = std::make_unique<ShowMessage>(mw_one);
-                        msg->showMsg("Knot", errorInfo, 1);
+                        showInfo("Knot", errorInfo);
                         isPasswordError = true;
                         QFile::remove(zFile);
 
-                        if (isAndroid) m_Method->openMainEntranceWindow();
+                        if (isAndroid)
+                          m_Method->openMainEntranceWindow();
 
                         return;
                       }
@@ -1497,7 +1546,8 @@ void Todo::openTodo() {
                         if (QFileInfo(zipToto).lastModified() >
                             QFileInfo(localTodo).lastModified()) {
                           QString tempFile = iniDir + "temp_todo.tmp";
-                          if (QFile::exists(tempFile)) QFile::remove(tempFile);
+                          if (QFile::exists(tempFile))
+                            QFile::remove(tempFile);
                           QFile::copy(zipToto, tempFile);
                           m_Method->upIniFile(tempFile, localTodo);
                         }
@@ -1532,7 +1582,7 @@ void Todo::openTodo() {
         });
 
     QObject::connect(helper, &WebDavHelper::errorOccurred, this,
-                     [this](const QString& error) {
+                     [this](const QString &error) {
                        qDebug() << "操作失败:" << error;
                        QTimer::singleShot(100, [this]() { openTodoUI(); });
                      });
@@ -1629,9 +1679,11 @@ void Todo::setChkVoice(bool value) {
 
 void Todo::on_btnTestSpeech() {
   int count = mw_one->m_Todo->getCount();
-  if (count == 0) return;
+  if (count == 0)
+    return;
   int row = mw_one->m_Todo->getCurrentIndex();
-  if (row < 0) return;
+  if (row < 0)
+    return;
 
   bool isVoice = mw_one->m_Todo->isVoice(row);
 
@@ -1650,25 +1702,28 @@ void Todo::setAlarmShowValue(bool value) { isTodoAlarmShow = value; }
 
 void Todo::on_btnHigh_clicked() {
   int idx = ui->listTodo->currentRow();
-  if (idx == -1) return;
+  if (idx == -1)
+    return;
   on_btnHigh(idx);
 }
 
 void Todo::on_btnLow_clicked() {
   int idx = ui->listTodo->currentRow();
-  if (idx == -1) return;
+  if (idx == -1)
+    return;
   on_btnLow(idx);
 }
 
 void Todo::on_btnEdit_clicked() {
   int idx = ui->listTodo->currentRow();
-  if (idx == -1) return;
+  if (idx == -1)
+    return;
   QString strText = getItemTodoText(idx);
 
   bool ok = false;
   QString newName = QInputDialog::getText(
       this, tr("Edit"), tr("Enter new content:"), QLineEdit::Normal,
-      strText,  // 默认填入旧内容，方便用户修改
+      strText, // 默认填入旧内容，方便用户修改
       &ok);
 
   // 用户点击了【确定】且输入内容非空
@@ -1684,7 +1739,8 @@ void Todo::on_btnEdit_clicked() {
 
 void Todo::on_btnAlarm_clicked() {
   int idx = ui->listTodo->currentRow();
-  if (idx == -1) return;
+  if (idx == -1)
+    return;
 
   on_btnSetTime(idx);
 }
@@ -1693,13 +1749,15 @@ void Todo::on_btnRecycleBin_clicked() { on_btnRecycle(); }
 
 void Todo::on_btnDone_clicked() {
   int idx = ui->listTodo->currentRow();
-  if (idx == -1) return;
+  if (idx == -1)
+    return;
   addToRecycle(idx);
 }
 
 void Todo::on_btnAddText_clicked() {
   QString todoContent = ui->editTodoText->text().trimmed();
-  if (todoContent.isEmpty()) return;
+  if (todoContent.isEmpty())
+    return;
 
   addToList(todoContent, true);
   ui->editTodoText->clear();

@@ -11,7 +11,7 @@
 
 static QAtomicInt n_Files = 0;
 
-Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
+Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   ui->setupUi(this);
 
   QString old_file = privateDir + "notes_counter.json";
@@ -33,7 +33,8 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
 
   QString path = iniDir + "memo/";
   QDir dir(path);
-  if (!dir.exists()) dir.mkdir(path);
+  if (!dir.exists())
+    dir.mkdir(path);
   htmlFileName = iniDir + "memo.html";
 
   this->installEventFilter(this);
@@ -70,7 +71,7 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   m_linkRegex = QRegularExpression(R"((?<!!)\[([^\]]*)\]\(([^)]+\.md)\))");
 
   // Ctrl+F 快捷键
-  QShortcut* shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
+  QShortcut *shortcut1 = new QShortcut(QKeySequence("Ctrl+F"), this);
   connect(shortcut1, &QShortcut::activated, this, [this]() {
     ui->editFind->setFocus();
     ui->editFind->selectAll();
@@ -79,7 +80,7 @@ Notes::Notes(QWidget* parent) : QDialog(parent), ui(new Ui::Notes) {
   // 清理旧备份
   QDir memoDir(iniDir + "memo/");
   memoDir.setNameFilters(QStringList() << "*.md.bak" << "*.json.bak");
-  foreach (const QString& bakFile, memoDir.entryList()) {
+  foreach (const QString &bakFile, memoDir.entryList()) {
     memoDir.remove(bakFile);
   }
 }
@@ -89,7 +90,7 @@ Notes::~Notes() {
   delete ui;
 }
 
-void Notes::showEvent(QShowEvent* event) {
+void Notes::showEvent(QShowEvent *event) {
   QWidget::showEvent(event);
   if (!m_initialized) {
     int btn_h = ui->btnNext->height();
@@ -120,13 +121,13 @@ void Notes::init() {
   }
 }
 
-void Notes::wheelEvent(QWheelEvent* e) { Q_UNUSED(e); }
-void Notes::keyReleaseEvent(QKeyEvent* event) { event->accept(); }
+void Notes::wheelEvent(QWheelEvent *e) { Q_UNUSED(e); }
+void Notes::keyReleaseEvent(QKeyEvent *event) { event->accept(); }
 void Notes::editVSBarValueChanged() {}
-void Notes::resizeEvent(QResizeEvent* event) { Q_UNUSED(event); }
+void Notes::resizeEvent(QResizeEvent *event) { Q_UNUSED(event); }
 
-bool Notes::eventFilter(QObject* obj, QEvent* evn) {
-  QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+bool Notes::eventFilter(QObject *obj, QEvent *evn) {
+  QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
   if (evn->type() == QEvent::KeyRelease) {
     if (keyEvent->key() == Qt::Key_Back) {
     }
@@ -148,7 +149,7 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
         qInfo() << "笔记问答回车键按下...";
         ui->btnQuestion->click();
         evn->accept();
-        return true;  // 拦截事件，阻止编辑器换行
+        return true; // 拦截事件，阻止编辑器换行
       }
       // Shift + Enter：放行事件，允许换行，不return true
     }
@@ -156,7 +157,7 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
 
 #ifndef Q_OS_ANDROID
   if (obj == m_EditSource) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
 
     // Ctrl+F 处理
     if (keyEvent->matches(QKeySequence::Find)) {
@@ -166,7 +167,7 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
         ui->editFind->setFocus();
       }
       keyEvent->accept();
-      return true;  // 事件过滤器返回true = 拦截事件
+      return true; // 事件过滤器返回true = 拦截事件
     }
 
     if (evn->type() == QEvent::KeyPress) {
@@ -184,7 +185,7 @@ bool Notes::eventFilter(QObject* obj, QEvent* evn) {
   return QWidget::eventFilter(obj, evn);
 }
 
-void Notes::closeEvent(QCloseEvent* event) {
+void Notes::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
 
   isBtnAILinkClicked = false;
@@ -201,7 +202,7 @@ void Notes::closeEvent(QCloseEvent* event) {
     QMessageBox::StandardButton reply = QMessageBox::question(
         this, tr("Notes"), tr("Do you want to save the notes?"),
         QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::Yes  // 默认选中 Yes
+        QMessageBox::Yes // 默认选中 Yes
     );
 
     if (reply == QMessageBox::Yes) {
@@ -214,12 +215,13 @@ void Notes::closeEvent(QCloseEvent* event) {
     new_title = generator.genNewTitle(newText);
 
     int idx = m_NotesList->getNoteListOrgIndex();
-    if (idx == -1) idx = 0;
+    if (idx == -1)
+      idx = 0;
     m_NotesList->renameNote(new_title, idx);
   }
 }
 
-void Notes::paintEvent(QPaintEvent* event) {
+void Notes::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event);
   return;
 }
@@ -255,7 +257,7 @@ void Notes::openEditUI() {
 
   m_EditSource->setWrapMode(QsciScintilla::WrapNone);
   m_EditSource->setText(oldText);
-  m_EditSource->setWrapMode(QsciScintilla::WrapWord);  // 按单词换行
+  m_EditSource->setWrapMode(QsciScintilla::WrapWord); // 按单词换行
 
   if (isLocalAIModel)
     ui->btnAILink->show();
@@ -290,9 +292,11 @@ void Notes::openEditUI() {
 }
 
 void Notes::previewNote() {
-  if (!QFile::exists(currentMDFile)) return;
+  if (!QFile::exists(currentMDFile))
+    return;
 
-  if (!isAndroid) mw_one->showProgress();
+  if (!isAndroid)
+    mw_one->showProgress();
 
   QString title = m_NoteManager->getNoteTitle(currentMDFile);
 
@@ -303,7 +307,7 @@ void Notes::previewNote() {
   });
 
   // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     mw_one->safeCloseProgress();
 
@@ -356,7 +360,8 @@ bool Notes::checkAndUpdateCleanDate() {
     cfg.sync();
   }
 
-  if (needClean) buildCleanFileList();
+  if (needClean)
+    buildCleanFileList();
 
   return needClean;
 }
@@ -373,7 +378,7 @@ void Notes::buildCleanFileList() {
   // 传统下标遍历，无detach，无clazy警告
   int count = orgRemoteFiles.size();
   for (int i = 0; i < count; ++i) {
-    const QString& fullPath = orgRemoteFiles.at(i);
+    const QString &fullPath = orgRemoteFiles.at(i);
 
     // 跳过包含 mainnotes / todo 的备份文件（永不删除）
     if (fullPath.contains("mainnotes") || fullPath.contains("todo")) {
@@ -391,10 +396,12 @@ void Notes::buildCleanFileList() {
 
     // 提取日期
     QRegularExpressionMatch match = reg.match(fullPath);
-    if (!match.hasMatch()) continue;
+    if (!match.hasMatch())
+      continue;
 
     QDate fileDate = QDate::fromString(match.captured(1), "yyyyMMdd");
-    if (!fileDate.isValid()) continue;
+    if (!fileDate.isValid())
+      continue;
 
     // ==============================
     // ✅ 新安全策略：只删除超过 60 天的旧文件
@@ -415,7 +422,7 @@ void Notes::init_all_notes() {
 
   MyNoteRecycle = m_NotesList->getRecycleNoteFiles();
   MyAllNotes.removeIf(
-      [](const QString& f) { return MyNoteRecycle.contains(f); });
+      [](const QString &f) { return MyNoteRecycle.contains(f); });
 
   m_NotesList->listNoteEntry.clear();
   for (int i = 0; i < MyAllNotes.count(); i++) {
@@ -444,11 +451,9 @@ void Notes::openNotes() {
     if (!m_CloudBackup->checkWebDAVConnection()) {
       m_Method->safeCloseInfoWindow(m_Method);
       isWebDAVError = true;
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg(appName,
-                   tr("WebDAV connection failed. Please check the network, "
-                      "website address or login information."),
-                   1);
+      showInfo(appName,
+               tr("WebDAV connection failed. Please check the network, "
+                  "website address or login information."));
 
       QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
       return;
@@ -493,7 +498,7 @@ void Notes::openNotes() {
       orgRemoteDateTime.append(m_CloudBackup->webdavDateTimeList.at(i));
     }
 
-    WebDavHelper* helper =
+    WebDavHelper *helper =
         listWebDavFiles(url + "KnotData/", m_CloudBackup->USERNAME,
                         m_CloudBackup->APP_PASSWORD);
     helper->setParent(this);
@@ -503,13 +508,13 @@ void Notes::openNotes() {
     // 连接信号
     QObject::connect(
         helper, &WebDavHelper::listCompleted, this,
-        [=](const QList<QPair<QString, QDateTime>>& files) {
+        [=](const QList<QPair<QString, QDateTime>> &files) {
           qDebug() << "获取KnotData根目录文件列表:" << url + "KnotData/";
           m_Method->setInfoText(">>" + url + "KnotData/");
           QString info = "共找到 " + QString::number(files.size()) + " 文件";
           qDebug() << info;
 
-          for (const auto& [path, mtime] : files) {
+          for (const auto &[path, mtime] : files) {
             qDebug() << "路径:" << path
                      << "修改时间:" << mtime.toString("yyyy-MM-dd hh:mm:ss");
             QString remote_f = path;
@@ -569,7 +574,7 @@ void Notes::openNotes() {
 
           if (remoteFiles.count() > 0) {
             // 初始化下载器
-            WebDavDownloader* downloader = new WebDavDownloader(
+            WebDavDownloader *downloader = new WebDavDownloader(
                 m_CloudBackup->USERNAME, m_CloudBackup->APP_PASSWORD, this);
 
             // 连接信号
@@ -590,11 +595,9 @@ void Notes::openNotes() {
                     startBackgroundProcessRemoteFiles_MultiThread();
                   } else {
                     qDebug() << "下载失败：" << error;
-                    auto msg = std::make_unique<ShowMessage>(mw_one);
-                    msg->showMsg(
+                    showInfo(
                         appName,
-                        tr("Synchronization failed. Please try again later."),
-                        1);
+                        tr("Synchronization failed. Please try again later."));
                     QTimer::singleShot(100, mw_one,
                                        [this]() { openNotesUI(); });
                   }
@@ -613,7 +616,7 @@ void Notes::openNotes() {
         });
 
     QObject::connect(
-        helper, &WebDavHelper::errorOccurred, this, [=](const QString& error) {
+        helper, &WebDavHelper::errorOccurred, this, [=](const QString &error) {
           qDebug() << "操作失败:" << error;
           QTimer::singleShot(100, mw_one, [this]() { openNotesUI(); });
         });
@@ -632,8 +635,9 @@ void Notes::startBackgroundProcessRemoteFiles_MultiThread() {
 
   // 后台异步，但 串行执行本地处理（安全、稳定、不崩溃）
   QThreadPool::globalInstance()->start([this]() {
-    for (const QString& file : std::as_const(remoteFiles)) {
-      if (isPasswordError) break;
+    for (const QString &file : std::as_const(remoteFiles)) {
+      if (isPasswordError)
+        break;
       processSingleRemoteFile(file);
     }
 
@@ -641,7 +645,7 @@ void Notes::startBackgroundProcessRemoteFiles_MultiThread() {
   });
 }
 
-void Notes::processSingleRemoteFile(const QString& file) {
+void Notes::processSingleRemoteFile(const QString &file) {
   QString temp_f = file;
 
   QString pDir, pFile, kFile, asFile, zFile;
@@ -669,17 +673,15 @@ void Notes::processSingleRemoteFile(const QString& file) {
     kFile = kFile.replace(remoteLastModi + "_", "");
 
     QString dec_file = m_Method->useDec(zFile);
-    if (dec_file != "") zFile = dec_file;
+    if (dec_file != "")
+      zFile = dec_file;
 
     if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
       mw_one->safeCloseProgress();
       errorInfo = tr(
           "Decompression failed. Please verify the data encryption password.");
 
-      QMetaObject::invokeMethod(mw_one, []() {
-        auto msg = std::make_unique<ShowMessage>(mw_one);
-        msg->showMsg("Knot", errorInfo, 1);
-      });
+      QMetaObject::invokeMethod(mw_one, []() { showInfo(appName, errorInfo); });
 
       isPasswordError = true;
       QFile::remove(zFile);
@@ -690,7 +692,8 @@ void Notes::processSingleRemoteFile(const QString& file) {
     QString kUtcStr = m_Method->getFileUTCString(kFile);
     if (pUtcStr > kUtcStr) {
       QString tempFile = iniDir + "temp_notes_ini.tmp";
-      if (QFile::exists(tempFile)) QFile::remove(tempFile);
+      if (QFile::exists(tempFile))
+        QFile::remove(tempFile);
       if (QFile::copy(pFile, tempFile)) {
         m_Method->upIniFile(tempFile, kFile);
         m_Method->delayDelFile(pFile);
@@ -711,7 +714,8 @@ void Notes::processSingleRemoteFile(const QString& file) {
     kFile = kFile.replace(remoteLastModi + "_", "");
 
     QString dec_file = m_Method->useDec(zFile);
-    if (dec_file != "") zFile = dec_file;
+    if (dec_file != "")
+      zFile = dec_file;
 
     if (QFile::exists(zFile)) {
       if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
@@ -720,10 +724,8 @@ void Notes::processSingleRemoteFile(const QString& file) {
             tr("Decompression failed. Please verify the data encryption "
                "password.");
 
-        QMetaObject::invokeMethod(mw_one, []() {
-          auto msg = std::make_unique<ShowMessage>(mw_one);
-          msg->showMsg("Knot", errorInfo, 1);
-        });
+        QMetaObject::invokeMethod(mw_one,
+                                  []() { showInfo("Knot", errorInfo); });
 
         isPasswordError = true;
         QFile::remove(zFile);
@@ -759,7 +761,8 @@ void Notes::processSingleRemoteFile(const QString& file) {
     kFile = kFile.replace(remoteLastModi + "_", "");
 
     QString dec_file = m_Method->useDec(zFile);
-    if (dec_file != "") zFile = dec_file;
+    if (dec_file != "")
+      zFile = dec_file;
 
     if (QFile::exists(zFile)) {
       if (!m_Method->decompressFileWithZlib(zFile, pFile)) {
@@ -768,10 +771,8 @@ void Notes::processSingleRemoteFile(const QString& file) {
             tr("Decompression failed. Please verify the data encryption "
                "password.");
 
-        QMetaObject::invokeMethod(mw_one, []() {
-          auto msg = std::make_unique<ShowMessage>(mw_one);
-          msg->showMsg("Knot", errorInfo, 1);
-        });
+        QMetaObject::invokeMethod(mw_one,
+                                  []() { showInfo("Knot", errorInfo); });
 
         isPasswordError = true;
         QFile::remove(zFile);
@@ -879,13 +880,15 @@ void Notes::loadNotesCounter() {
   QString file = iniDir + "config/notes_counter.json";
 
   QFile f(file);
-  if (!f.open(QIODevice::ReadOnly)) return;
+  if (!f.open(QIODevice::ReadOnly))
+    return;
 
   QJsonParseError err;
   QJsonDocument doc = QJsonDocument::fromJson(f.readAll(), &err);
   f.close();
 
-  if (err.error != QJsonParseError::NoError || !doc.isObject()) return;
+  if (err.error != QJsonParseError::NoError || !doc.isObject())
+    return;
 
   QJsonObject root = doc.object();
   for (auto it = root.begin(); it != root.end(); ++it) {
@@ -909,14 +912,16 @@ void Notes::loadNotesCounter() {
 // ========== 累计（核心逻辑）==========
 void Notes::setNotesCounter() {
   QString m_currentMdId = currentMDFile;
-  if (m_currentMdId.isEmpty()) return;
+  if (m_currentMdId.isEmpty())
+    return;
 
   int64_t now = QDateTime::currentSecsSinceEpoch();
 
   auto it = m_counterMap.find(m_currentMdId);
   if (it != m_counterMap.end()) {
     // ⭐ 防重复：30秒内同文件只计1次
-    if (now - it->last < 30) return;
+    if (now - it->last < 30)
+      return;
     it->count++;
     it->last = now;
   } else {
@@ -958,8 +963,8 @@ void Notes::refreshRecentOpenByCounter() {
 
   // 2. 按 count 降序排列；count 相同时按 last 降序（最近操作的优先）
   std::sort(sortedList.begin(), sortedList.end(),
-            [](const QPair<QString, NoteCounterItem>& a,
-               const QPair<QString, NoteCounterItem>& b) {
+            [](const QPair<QString, NoteCounterItem> &a,
+               const QPair<QString, NoteCounterItem> &b) {
               if (a.second.count != b.second.count)
                 return a.second.count > b.second.count;
               return a.second.last > b.second.last;
@@ -969,17 +974,19 @@ void Notes::refreshRecentOpenByCounter() {
   int addedCount = 0;
   constexpr int MAX_RECENT = 500;
 
-  for (const auto& pair : sortedList) {
-    if (addedCount >= MAX_RECENT) break;  // ✅ 按"实际添加数"而非列表总长度判断
+  for (const auto &pair : sortedList) {
+    if (addedCount >= MAX_RECENT)
+      break; // ✅ 按"实际添加数"而非列表总长度判断
 
-    const QString& mdFile = pair.first;
+    const QString &mdFile = pair.first;
 
     // 跳过已不存在的文件
-    if (!QFile::exists(mdFile)) continue;
+    if (!QFile::exists(mdFile))
+      continue;
 
     QString title = m_Notes->m_NoteManager->getNoteTitle(mdFile);
     m_NotesList->listRecentOpen.append(title + "===" + mdFile);
-    ++addedCount;  // ✅ 只有成功添加才计数
+    ++addedCount; // ✅ 只有成功添加才计数
   }
 
   // 4. 兜底去重（理论上计数器key唯一不会重复）
@@ -992,13 +999,14 @@ void Notes::on_listNoteBook_currentRowChanged(int currentRow) {
 }
 
 void Notes::on_listNoteList_currentRowChanged(int currentRow) {
-  if (currentRow < 0) return;
+  if (currentRow < 0)
+    return;
 
   m_NotesList->clickNoteList(currentRow);
   openEditUI();
 }
 
-void Notes::on_listNoteBook_itemClicked(QListWidgetItem* item) {}
+void Notes::on_listNoteBook_itemClicked(QListWidgetItem *item) {}
 
 void Notes::on_btnNBMenu_clicked() {}
 

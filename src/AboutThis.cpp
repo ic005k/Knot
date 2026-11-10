@@ -5,10 +5,10 @@
 #include "ui_MainWindow.h"
 #include "version.h"
 
-AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {
+AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
 
-  ver = KNOT_VERSION_STR;  //"2.2.19";
+  ver = KNOT_VERSION_STR; //"2.2.19";
 
   this->layout()->setContentsMargins(5, 5, 5, 5);
 
@@ -35,13 +35,13 @@ AboutThis::AboutThis(QWidget* parent) : QDialog(parent), ui(new Ui::AboutThis) {
       "}");
 
   manager = new QNetworkAccessManager(nullptr);
-  connect(manager, SIGNAL(finished(QNetworkReply*)), this,
-          SLOT(replyFinished(QNetworkReply*)));
+  connect(manager, SIGNAL(finished(QNetworkReply *)), this,
+          SLOT(replyFinished(QNetworkReply *)));
 }
 
 AboutThis::~AboutThis() {
   // 中止全部未完成请求
-  for (QNetworkReply* rep : manager->findChildren<QNetworkReply*>()) {
+  for (QNetworkReply *rep : manager->findChildren<QNetworkReply *>()) {
     rep->abort();
     rep->deleteLater();
   }
@@ -51,20 +51,20 @@ AboutThis::~AboutThis() {
   delete ui;
 }
 
-bool AboutThis::eventFilter(QObject* obj, QEvent* evn) {
-  QMouseEvent* event = static_cast<QMouseEvent*>(evn);
+bool AboutThis::eventFilter(QObject *obj, QEvent *evn) {
+  QMouseEvent *event = static_cast<QMouseEvent *>(evn);
   if (obj == ui->lblLogo) {
     if (event->type() == QEvent::MouseButtonDblClick) {
-      if (s_link == "") return true;
-      QClipboard* pClip = QApplication::clipboard();
+      if (s_link == "")
+        return true;
+      QClipboard *pClip = QApplication::clipboard();
       pClip->setText(s_link);
-      auto msg = std::make_unique<ShowMessage>(this);
-      msg->showMsg("Knot", tr("Download link copied.") + "\n\n" + s_link, 1);
+      showInfo("Knot", tr("Download link copied.") + "\n\n" + s_link);
     }
   }
 
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       on_btnBack_About_clicked();
       return true;
@@ -74,9 +74,9 @@ bool AboutThis::eventFilter(QObject* obj, QEvent* evn) {
   return QWidget::eventFilter(obj, evn);
 }
 
-void AboutThis::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
+void AboutThis::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
 
-void AboutThis::resizeEvent(QResizeEvent* event) { Q_UNUSED(event); }
+void AboutThis::resizeEvent(QResizeEvent *event) { Q_UNUSED(event); }
 
 void AboutThis::on_btnHomePage_clicked() {
   QString str;
@@ -93,7 +93,7 @@ void AboutThis::CheckUpdate() {
   manager->get(quest);
 }
 
-void AboutThis::replyFinished(QNetworkReply* reply) {
+void AboutThis::replyFinished(QNetworkReply *reply) {
   QString str = reply->readAll();
   parse_UpdateJSON(str);
   reply->deleteLater();
@@ -107,8 +107,10 @@ QString AboutThis::getUrl(QVariantList list) {
 
     if (fName.contains("android"))
       androidUrl = map["browser_download_url"].toString();
-    if (fName.contains("Mac")) macUrl = map["browser_download_url"].toString();
-    if (fName.contains("Win")) winUrl = map["browser_download_url"].toString();
+    if (fName.contains("Mac"))
+      macUrl = map["browser_download_url"].toString();
+    if (fName.contains("Win"))
+      winUrl = map["browser_download_url"].toString();
     if (fName.contains("Linux"))
       linuxUrl = map["browser_download_url"].toString();
   }
@@ -134,8 +136,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
 
   if (err_rpt.error != QJsonParseError::NoError) {
     if (!blAutoCheckUpdate) {
-      auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-      m_ShowMsg->showMsg(appName, tr("Network error!"), 1);
+      showInfo(appName, tr("Network error!"));
     }
     blAutoCheckUpdate = false;
     return -1;
@@ -148,9 +149,8 @@ int AboutThis::parse_UpdateJSON(QString str) {
     if (isZH_CN) {
 #ifdef Q_OS_ANDROID
       // gitee
-      s_link =
-          "https://gitee.com/ic005k/Knot/releases/download/Latest/"
-          "android-build-Knot-release-signed.apk";
+      s_link = "https://gitee.com/ic005k/Knot/releases/download/Latest/"
+               "android-build-Knot-release-signed.apk";
 #else
       // github
       QString mirror0 = "";
@@ -199,10 +199,8 @@ int AboutThis::parse_UpdateJSON(QString str) {
       }
     } else {
       if (!blAutoCheckUpdate) {
-        auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-        m_ShowMsg->showMsg(tr("Upgrade Check"),
-                           tr("You are currently using the latest version!"),
-                           1);
+        showInfo(tr("Upgrade Check"),
+                 tr("You are currently using the latest version!"));
       }
     }
   }
@@ -239,7 +237,8 @@ void AboutThis::show_download() {
 void AboutThis::on_btnCheckUpdate_clicked() { CheckUpdate(); }
 
 void AboutThis::on_btnDownloadUP_clicked() {
-  if (s_link == "") return;
+  if (s_link == "")
+    return;
 
 #ifdef Q_OS_ANDROID
   show_download();
@@ -271,11 +270,11 @@ void AboutThis::on_btnBack_About_clicked() {
 }
 
 void AboutThis::on_btnCopyDownLoadLink_clicked() {
-  if (s_link == "") return;
-  QClipboard* pClip = QApplication::clipboard();
+  if (s_link == "")
+    return;
+  QClipboard *pClip = QApplication::clipboard();
   pClip->setText(s_link);
-  auto msg = std::make_unique<ShowMessage>(this);
-  msg->showMsg("Knot", tr("Download link copied.") + "\n\n" + s_link, 1);
+  showInfo("Knot", tr("Download link copied.") + "\n\n" + s_link);
 }
 
 void AboutThis::on_btnViewLog_clicked() {

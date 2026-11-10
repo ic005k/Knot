@@ -125,8 +125,7 @@ void StepsOptions::on_btnTestKey_clicked() {
       QThread::msleep(1);
     }
 
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg(appName, m_Steps->strMapKeyTestInfo, 1);
+    showInfo(appName, m_Steps->strMapKeyTestInfo);
 
     // 确保编辑框内容不丢失
     ui->editMapKey->setPlainText(arg1);
