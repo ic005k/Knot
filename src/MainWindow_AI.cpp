@@ -38,9 +38,9 @@ void MainWindow::gotoEnd() {
   }
 }
 
-void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
-                                   const QString& userQuestion) {
-  QWidget* parentWnd = this;
+void MainWindow::sendAiChatRequest(const AiSingleRecord &cfg,
+                                   const QString &userQuestion) {
+  QWidget *parentWnd = this;
   if (m_Preferences->isTestBtnClicked) {
     m_Preferences->isTestBtnClicked = false;
     parentWnd = m_Preferences;
@@ -82,7 +82,7 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
   body["messages"] = messages;
 
   QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
-  QNetworkReply* reply = m_ainetMgr->post(req, postData);
+  QNetworkReply *reply = m_ainetMgr->post(req, postData);
 
   connect(reply, &QNetworkReply::finished, this,
           [this, reply, userQuestion, parentWnd]() {
@@ -164,14 +164,13 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
 
             // qDebug() << aiReplyText;
             //  复制到系统剪贴板
-            QClipboard* clip = QGuiApplication::clipboard();
+            QClipboard *clip = QGuiApplication::clipboard();
             clip->setText(aiReplyText);
 
             m_Preferences->saveAIConfig();
 
             safeCloseProgress();
 
-            auto msg = std::make_unique<ShowMessage>(parentWnd);
             if (m_NotesList->isAINoteRename) {
               m_NotesList->isAINoteRename = false;
               if (isAndroid) {
@@ -194,7 +193,7 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
                                           "reader/DocumentActivity", list);
               } else {
                 m_MsgBox->ui->btnOk->setText(tr("Add Note"));
-                if (msg->showMsg(tr("AI Response Completed"), aiReplyText, 2)) {
+                if (showConfirm(tr("AI Response Completed"), aiReplyText)) {
                   m_Reader->addBookNote(aiReplyText);
                 }
               }
@@ -237,13 +236,13 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord& cfg,
                 m_Method->refreshJavaData("showAiMarkdownDialog", "MyActivity",
                                           list);
               } else {
-                msg->showMsg(tr("AI Response Completed"), aiReplyText, 1);
+                showInfo(tr("AI Response Completed"), aiReplyText);
               }
             }
           });
 }
 
-void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
+void MainWindow::checkAiConnectivity(const AiSingleRecord &cfg,
                                      std::function<void()> onSuccess) {
   QUrl url = buildAiApiUrl(cfg.endpoint);
   if (!url.isValid()) {
@@ -269,12 +268,13 @@ void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
   body["messages"] = messages;
 
   QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
-  QNetworkReply* reply = m_ainetMgr->post(req, postData);
+  QNetworkReply *reply = m_ainetMgr->post(req, postData);
 
   connect(reply, &QNetworkReply::finished, mw_one,
           [this, reply, cfg, onSuccess]() {
             reply->deleteLater();
-            if (!this->isVisible()) return;
+            if (!this->isVisible())
+              return;
 
             QString reqUrl = reply->request().url().toString();
             if (reply->error() != QNetworkReply::NoError) {
@@ -291,22 +291,23 @@ void MainWindow::checkAiConnectivity(const AiSingleRecord& cfg,
             // auto msg = std::make_unique<ShowMessage>(mw_one);
             // QString text = tr("Connection test passed!") + "\n" +
             //               tr("Model ID: %1").arg(cfg.modelId);
-            // msg->showMsg(tr("Success"), text, 1);
+            // showInfo(tr("Success"), text);
 
             m_Preferences->saveAIConfig();
 
             // 连通成功，执行传入的回调函数
-            if (onSuccess) onSuccess();
+            if (onSuccess)
+              onSuccess();
           });
 }
 
-void MainWindow::aiChatQuery(const QString& userQuestion) {
+void MainWindow::aiChatQuery(const QString &userQuestion) {
   // 读取界面配置
   QString ep = m_Preferences->ui->editEndpoint->text().trimmed();
   QString key = m_Preferences->ui->editAIKey->text().trimmed();
   QString mid = m_Preferences->ui->editAIModelID->text().trimmed();
 
-  QWidget* parentWnd = this;
+  QWidget *parentWnd = this;
   if (m_Preferences->isTestBtnClicked) {
     parentWnd = m_Preferences;
   }
@@ -334,15 +335,17 @@ void MainWindow::aiChatQuery(const QString& userQuestion) {
   if (!isAndroid && !m_Notes->isAIQA) {
     showProgress();
   } else {
-    if (m_Steps->isVisible() || m_Preferences->isVisible()) showProgress();
+    if (m_Steps->isVisible() || m_Preferences->isVisible())
+      showProgress();
   }
 
   sendAiChatRequest(cfg, userQuestion);
 }
 
-QUrl MainWindow::buildAiApiUrl(const QString& rawEndpoint) {
+QUrl MainWindow::buildAiApiUrl(const QString &rawEndpoint) {
   QUrl u(rawEndpoint);
-  if (!u.isValid()) return QUrl();
+  if (!u.isValid())
+    return QUrl();
 
   QString path = u.path();
   // 判断路径是否已经以 chat/completions 结尾
@@ -353,7 +356,8 @@ QUrl MainWindow::buildAiApiUrl(const QString& rawEndpoint) {
   }
 
   // 去除末尾多余斜杠再拼接标准接口路径
-  while (path.endsWith("/")) path.chop(1);
+  while (path.endsWith("/"))
+    path.chop(1);
   path += "/chat/completions";
   u.setPath(path);
   return u;
@@ -375,7 +379,7 @@ void MainWindow::setVectorStatus(int status, int current, int total) {
   // ✅ 核心：整体字号变小，圆点通过 <font> 标签单独放大
   // size="+2" 表示在基础字号上增加 2pt，可根据视觉效果微调为 +3 或 +4
   const QString dotHtml = "<font size=\"+2\">●</font>";
-  const QString space = "&nbsp;";  // 使用 HTML 空格保证间距不被压缩
+  const QString space = "&nbsp;"; // 使用 HTML 空格保证间距不被压缩
 
   if (status == 1 && total > 0) {
     double pct = 100.0 * current / total;

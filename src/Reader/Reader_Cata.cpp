@@ -6,7 +6,6 @@ void Reader::showCatalogue() {
   savePageVPos();
 
   setPageVPos();
-  showInfo();
 }
 
 void Reader::gotoCataList(QString htmlFile) {

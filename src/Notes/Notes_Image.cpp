@@ -19,7 +19,8 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
 
     QString strTar = iniDir + "memo/images/" + getDateTimeStr() + "_" +
                      m_Method->generateRandom3() + ".png";
-    if (QFile(strTar).exists()) QFile(strTar).remove();
+    if (QFile(strTar).exists())
+      QFile(strTar).remove();
 
     int nLeftMargin = 9 + 9 + 6;
     QImage img(fileName);
@@ -36,11 +37,8 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
     }
 
     if (!isAndroid) {
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->ui->btnCancel->setText(tr("No"));
-      msg->ui->btnOk->setText(tr("Yes"));
-      bool isYes = msg->showMsg(
-          "Knot", tr("Is the original size of the image used?"), 2);
+      bool isYes =
+          showConfirm("Knot", tr("Is the original size of the image used?"));
       if (isYes) {
         new_w = w;
         new_h = h;
@@ -60,7 +58,8 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
       m_EditSource->insert(strImage);
 #endif
     } else {
-      if (isToAndroidView) insertNote(strImage);
+      if (isToAndroidView)
+        insertNote(strImage);
     }
   }
 
@@ -73,9 +72,10 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
   return strImage;
 }
 
-QString Notes::imageToBase64(const QString& path) {
+QString Notes::imageToBase64(const QString &path) {
   QFile file(path);
-  if (!file.open(QIODevice::ReadOnly)) return "";
+  if (!file.open(QIODevice::ReadOnly))
+    return "";
   QByteArray data = file.readAll();
   return "data:image/png;base64," + data.toBase64();
 }

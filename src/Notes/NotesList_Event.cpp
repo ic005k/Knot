@@ -2,7 +2,7 @@
 #include "src/MainWindow.h"
 
 // 节点双击事件处理（打开对应的笔记）
-void NotesList::onNoteNodeDoubleClicked(const QString& filePath) {
+void NotesList::onNoteNodeDoubleClicked(const QString &filePath) {
   qDebug() << "打开笔记：" << filePath;
   QFileInfo fi(filePath);
   if (fi.exists()) {
@@ -34,18 +34,20 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 
   // 5. 遍历整数索引，复用核心删除逻辑
   for (int qmlIndex : selectedIntIndexes) {
-    QTreeWidgetItem* topItem = twrb->topLevelItem(0);
-    if (!topItem) continue;
+    QTreeWidgetItem *topItem = twrb->topLevelItem(0);
+    if (!topItem)
+      continue;
 
     if (qmlIndex < 0 || qmlIndex >= topItem->childCount()) {
       qWarning() << "无效的twrb子节点索引：" << qmlIndex;
       continue;
     }
 
-    QTreeWidgetItem* curItem = topItem->child(qmlIndex);
+    QTreeWidgetItem *curItem = topItem->child(qmlIndex);
     twrb->setCurrentItem(curItem);
 
-    if (curItem->parent() == NULL) continue;
+    if (curItem->parent() == NULL)
+      continue;
 
     // ===== 核心删除逻辑 =====
     QString md = iniDir + curItem->text(1);
@@ -78,7 +80,8 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
     for (int i = 0; i < tempList.count(); i++) {
       QString file = tempList.at(i);
       QString baseFlag = m_Method->getBaseFlag(md);
-      if (file.contains(baseFlag)) m_Notes->notes_sync_files.removeOne(file);
+      if (file.contains(baseFlag))
+        m_Notes->notes_sync_files.removeOne(file);
     }
 
     qDebug() << "删除笔记后的同步文件列表：" << m_Notes->notes_sync_files;
@@ -94,14 +97,13 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
 }
 
 void NotesList::on_btnDel_Recycle_clicked() {
-  QTreeWidgetItem* curItem = twrb->currentItem();
+  QTreeWidgetItem *curItem = twrb->currentItem();
   if (curItem->parent() == NULL) {
     return;
   } else {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-    if (!m_ShowMsg->showMsg(
-            "Knot", tr("Whether to remove") + "  " + curItem->text(0) + " ? ",
-            2)) {
+
+    if (!showConfirm("Knot", tr("Whether to remove") + "  " + curItem->text(0) +
+                                 " ? ")) {
       return;
     }
 
@@ -122,7 +124,8 @@ void NotesList::on_btnDel_Recycle_clicked() {
     for (int i = 0; i < tempList.count(); i++) {
       QString file = tempList.at(i);
       QString baseFlag = m_Method->getBaseFlag(file);
-      if (file.contains(baseFlag)) m_Notes->notes_sync_files.removeOne(file);
+      if (file.contains(baseFlag))
+        m_Notes->notes_sync_files.removeOne(file);
     }
 
     setDelNoteFlag(curItem->text(1));
@@ -138,10 +141,11 @@ void NotesList::on_btnDel_Recycle_clicked() {
 }
 void NotesList::on_btnClose_clicked() { this->close(); }
 
-void NotesList::moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
-                                   QVector<QString>& delFilesIndex,
-                                   QTreeWidget* twrb) {
-  if (!parentItem) return;
+void NotesList::moveChildToRecycle(QTreeWidgetItem *parentItem, QString iniDir,
+                                   QVector<QString> &delFilesIndex,
+                                   QTreeWidget *twrb) {
+  if (!parentItem)
+    return;
   int childCount = parentItem->childCount();
 
   // 删除以笔记本ID记录的md文件键值对
@@ -150,8 +154,9 @@ void NotesList::moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
 
   // 倒序遍历，删除节点不会影响下标
   for (int i = childCount - 1; i >= 0; --i) {
-    QTreeWidgetItem* child = parentItem->child(i);
-    if (!child) continue;
+    QTreeWidgetItem *child = parentItem->child(i);
+    if (!child)
+      continue;
 
     QString str0 = child->text(0);
     QString str1 = child->text(1);
@@ -167,7 +172,7 @@ void NotesList::moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
       delete child;
     } else {
       // 笔记文件：移入回收站 + 记录待删文件
-      QTreeWidgetItem* recycleItem = new QTreeWidgetItem;
+      QTreeWidgetItem *recycleItem = new QTreeWidgetItem;
       recycleItem->setText(0, str0);
       recycleItem->setText(1, str1);
       addItem(twrb, recycleItem);
@@ -180,10 +185,12 @@ void NotesList::moveChildToRecycle(QTreeWidgetItem* parentItem, QString iniDir,
 }
 
 void NotesList::on_btnDel_clicked() {
-  if (tw->topLevelItemCount() == 0) return;
+  if (tw->topLevelItemCount() == 0)
+    return;
 
-  QTreeWidgetItem* item = tw->currentItem();
-  if (item == NULL) return;
+  QTreeWidgetItem *item = tw->currentItem();
+  if (item == NULL)
+    return;
 
   bool isNoteBook = pNoteBookItems.contains(item);
 
@@ -191,11 +198,8 @@ void NotesList::on_btnDel_clicked() {
   QString strFlag = (isNoteBook) ? tr("NoteBook") : tr("Note");
 
   if (!isAndroid) {
-    auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-    if (!m_ShowMsg->showMsg("Knot",
-                            tr("Move to the recycle bin?") + "\n\n" + strFlag +
-                                " : " + item->text(0),
-                            2)) {
+    if (!showConfirm("Knot", tr("Move to the recycle bin?") + "\n\n" + strFlag +
+                                 " : " + item->text(0))) {
       return;
     }
   }
@@ -212,7 +216,7 @@ void NotesList::on_btnDel_clicked() {
     moveChildToRecycle(item, iniDir, delFiles, twrb);
 
     // 移除并删除当前笔记本自身（兼容顶层 + 嵌套子节点）
-    QTreeWidgetItem* parent = item->parent();
+    QTreeWidgetItem *parent = item->parent();
     if (parent) {
       // 嵌套子笔记本：从父节点移除
       parent->removeChild(item);
@@ -231,7 +235,7 @@ void NotesList::on_btnDel_clicked() {
     str1 = item->text(1);
 
     // 只移当前这一条笔记
-    QTreeWidgetItem* recycleItem = new QTreeWidgetItem;
+    QTreeWidgetItem *recycleItem = new QTreeWidgetItem;
     recycleItem->setText(0, str0);
     recycleItem->setText(1, str1);
     addItem(twrb, recycleItem);
@@ -258,7 +262,7 @@ void NotesList::on_btnDel_clicked() {
 }
 
 void NotesList::on_btnDown_clicked() {
-  QTreeWidgetItem* oldItem = tw->currentItem();
+  QTreeWidgetItem *oldItem = tw->currentItem();
   bool isNoteBook = pNoteBookItems.contains(oldItem);
 
   moveBy(1);
@@ -271,7 +275,7 @@ void NotesList::on_btnDown_clicked() {
 }
 
 void NotesList::on_btnUp_clicked() {
-  QTreeWidgetItem* oldItem = tw->currentItem();
+  QTreeWidgetItem *oldItem = tw->currentItem();
   bool isNoteBook = pNoteBookItems.contains(oldItem);
 
   moveBy(-1);
@@ -290,12 +294,13 @@ void NotesList::on_btnExport_clicked(int idx) {
   QFileDialog fd;
   fileName = fd.getSaveFileName(this, name, name, tr("MD File(*.*)"));
 
-  if (fileName == "") return;
+  if (fileName == "")
+    return;
 
   QString mdfile = MyAllNotes.at(idx);
 
   QString str = loadText(mdfile);
-  QTextEdit* edit = new QTextEdit();
+  QTextEdit *edit = new QTextEdit();
   edit->setAcceptRichText(false);
   edit->setPlainText(str);
 
@@ -318,7 +323,7 @@ int NotesList::on_btnImport_clicked() {
 
   QStringList MDFileList;
 
-  for (const QString& fileName : std::as_const(fileNames)) {
+  for (const QString &fileName : std::as_const(fileNames)) {
     QString strFile = fileName.toLower();
     if (strFile.endsWith(".md") || strFile.endsWith(".txt")) {
       MDFileList.append(fileName);
@@ -335,7 +340,7 @@ int NotesList::on_btnImport_clicked() {
   QFuture<void> future = QtConcurrent::run([this, MDFileList]() {
     qInfo() << "开始后台处理导入的文件...";
     for (int i = 0; i < MDFileList.size(); ++i) {
-      const QString& fileName = MDFileList[i];
+      const QString &fileName = MDFileList[i];
       if (QFile::exists(fileName)) {
         QFileInfo fi(fileName);
         QString name = fi.completeBaseName();
@@ -357,7 +362,7 @@ int NotesList::on_btnImport_clicked() {
     }
   });
 
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this,
           [this, watcher, MDFileList]() {
             // ==============================================
@@ -389,25 +394,29 @@ int NotesList::on_btnImport_clicked() {
 
 void NotesList::clickNoteBook(int index) {
   int count = listNoteBook.count();
-  if (count <= 0) return;
+  if (count <= 0)
+    return;
 
-  if (index < 0 || index >= pNoteBookItems.size()) return;
+  if (index < 0 || index >= pNoteBookItems.size())
+    return;
 
   activateNoteBook(pNoteBookItems[index]);
 }
 
-void NotesList::activateNoteBook(QTreeWidgetItem* notebookItem) {
+void NotesList::activateNoteBook(QTreeWidgetItem *notebookItem) {
   // ===== 1. 纯数据链路（不碰 UI）=====
   int count = pNoteBookItems.size();
-  if (count == 0) return;
+  if (count == 0)
+    return;
 
   int index = pNoteBookItems.indexOf(notebookItem);
-  if (index < 0) return;
+  if (index < 0)
+    return;
 
-  tw->setCurrentItem(notebookItem);  // 内存树
-  pNoteItems.clear();                // 内存列表
-  isActColorFlagStatus = true;       // 内存标志
-  readyNotesData(notebookItem);      // 加载笔记内容
+  tw->setCurrentItem(notebookItem); // 内存树
+  pNoteItems.clear();               // 内存列表
+  isActColorFlagStatus = true;      // 内存标志
+  readyNotesData(notebookItem);     // 加载笔记内容
 
   // ===== 2. 纯 UI 链路（单向写入，不回读）=====
   // 高亮选中项
@@ -425,7 +434,7 @@ void NotesList::clickNoteList(int index) {
 
   ////////////////////////////////////////
 
-  int indexNote = index;  // getNotesListCurrentIndex();
+  int indexNote = index; // getNotesListCurrentIndex();
   if (indexNote < 0) {
     currentMDFile = "";
     return;
@@ -437,7 +446,7 @@ void NotesList::clickNoteList(int index) {
     indexNote = noteCount - 1;
   }
 
-  QTreeWidgetItem* noteItem = pNoteItems.at(indexNote);
+  QTreeWidgetItem *noteItem = pNoteItems.at(indexNote);
   tw->setCurrentItem(noteItem);
 
   qInfo() << "The currently clicked note index=" << indexNote
@@ -445,7 +454,7 @@ void NotesList::clickNoteList(int index) {
           << noteItem->text(1);
 
   QString strMD = noteItem->text(
-      1);  // m_Method->getText3(mw_one->ui->qwNoteList, indexNote);
+      1); // m_Method->getText3(mw_one->ui->qwNoteList, indexNote);
   currentMDFile = iniDir + strMD;
 
   setNoteLabel();
@@ -456,7 +465,7 @@ void NotesList::clickNoteList(int index) {
 
   saveCurrentNoteInfo();
 
-  QTreeWidgetItem* bookItem = noteItem->parent();
+  QTreeWidgetItem *bookItem = noteItem->parent();
   QString strNoteBookID = bookItem->text(3).trimmed();
   if (strNoteBookID.isEmpty()) {
     QString nbid =
@@ -473,16 +482,18 @@ void NotesList::mouseClickNoteBook() {
   isMouseClickNoteBook = true;
 
   int index = getNoteBookCurrentIndex();
-  if (index < 0 || index >= pNoteBookItems.size()) return;
+  if (index < 0 || index >= pNoteBookItems.size())
+    return;
 
   clickNoteBook(index);
 }
 
 void NotesList::mouseClickNoteList() { isMouseClickNoteBook = false; }
 
-void NotesList::saveNotePosition(const QString& NoteBookID,
-                                 const QString& mdFile) {
-  if (NoteBookID.isEmpty() || mdFile.isEmpty()) return;
+void NotesList::saveNotePosition(const QString &NoteBookID,
+                                 const QString &mdFile) {
+  if (NoteBookID.isEmpty() || mdFile.isEmpty())
+    return;
 
   const QString filePath = QDir(privateDir).filePath("noteposition.json");
   QJsonObject rootObj;
@@ -511,26 +522,30 @@ void NotesList::saveNotePosition(const QString& NoteBookID,
   }
 }
 
-QString NotesList::loadNotePosition(const QString& NoteBookID) {
-  if (NoteBookID.isEmpty()) return "";
+QString NotesList::loadNotePosition(const QString &NoteBookID) {
+  if (NoteBookID.isEmpty())
+    return "";
 
   const QString filePath = QDir(privateDir).filePath("noteposition.json");
   QFile file(filePath);
-  if (!file.exists()) return "";
+  if (!file.exists())
+    return "";
 
-  if (!file.open(QIODevice::ReadOnly)) return "";
+  if (!file.open(QIODevice::ReadOnly))
+    return "";
 
   QByteArray rawData = file.readAll();
   file.close();
   QJsonDocument doc = QJsonDocument::fromJson(rawData);
-  if (!doc.isObject()) return "";
+  if (!doc.isObject())
+    return "";
 
   QJsonObject rootObj = doc.object();
   QString mdfile = rootObj[NoteBookID].toString();
   return mdfile;
 }
 
-void NotesList::removeNotebookPositionRecord(const QString& notebookId) {
+void NotesList::removeNotebookPositionRecord(const QString &notebookId) {
   if (notebookId.isEmpty()) {
     qDebug() << "[removeNotebookPositionRecord] notebookId is empty, skip";
     return;

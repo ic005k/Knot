@@ -181,9 +181,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
                            tr("Published at: ") + UpdateTime + "\n" +
                            tr("Release Notes: ") + "\n" + ReleaseNote;
 
-      auto m_ShowMsg = std::make_unique<ShowMessage>(this);
-      m_ShowMsg->ui->btnOk->setText(tr("Download"));
-      bool ret = m_ShowMsg->showMsg("Knot", warningStr, 2);
+      bool ret = showConfirm("Knot", warningStr);
 
       if (ret) {
 #ifdef Q_OS_ANDROID

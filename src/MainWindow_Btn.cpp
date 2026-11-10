@@ -456,11 +456,8 @@ void MainWindow::on_btnCopyNoteLink_clicked() {
   QString strlink = "[" + name + "](" + file + ")";
   QClipboard *clipboard = QApplication::clipboard();
   clipboard->setText(strlink);
-
   QString res = m_Method->escapeAllHtml(strlink);
-
-  auto msg = std::make_unique<ShowMessage>(mw_one);
-  msg->showMsg(appName, res, 1);
+  showInfo(appName, res);
 }
 
 void MainWindow::on_btnSpeak_clicked() {

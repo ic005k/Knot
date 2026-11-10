@@ -546,8 +546,7 @@ void Report::aiAnalysis() {
 
   trimText = trimText.trimmed();
   if (trimText.isEmpty()) {
-    auto msg = std::make_unique<ShowMessage>(this);
-    msg->showMsg(tr("Tip"), tr("No data available"), 0);
+    showInfo(tr("Tip"), tr("No data available"));
     return;
   }
 

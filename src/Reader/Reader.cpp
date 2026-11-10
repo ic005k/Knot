@@ -11,9 +11,9 @@ static int press_y;
 static int relea_x;
 static int relea_y;
 
-EpubReader* reader = nullptr;
+EpubReader *reader = nullptr;
 
-Reader::Reader(QWidget* parent) : QDialog(parent) {
+Reader::Reader(QWidget *parent) : QDialog(parent) {
   strEndFlag = "<p align=center>-----" + tr("bottom") + "-----</p>";
   customCss = loadText(":/res/reader/main.css");
 }
@@ -25,9 +25,9 @@ Reader::~Reader() {
   }
 }
 
-bool Reader::eventFilter(QObject* obj, QEvent* evn) {
+bool Reader::eventFilter(QObject *obj, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
     }
   }
@@ -35,7 +35,7 @@ bool Reader::eventFilter(QObject* obj, QEvent* evn) {
   return QWidget::eventFilter(obj, evn);
 }
 
-void Reader::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event); }
+void Reader::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
 
 void Reader::on_btnOpen_clicked() {
   if (isAndroid) {
@@ -47,7 +47,8 @@ void Reader::on_btnOpen_clicked() {
       QFileDialog::getOpenFileName(this, tr("Knot"), "", tr("Txt Files (*.*)"));
 
   QFileInfo fi(openfile);
-  if (!fi.exists()) return;
+  if (!fi.exists())
+    return;
 
 #ifdef Q_OS_ANDROID
   openfile = m_Method->getRealPathFile(openfile);
@@ -59,7 +60,8 @@ void Reader::on_btnOpen_clicked() {
 void Reader::setReaderStyle() { QColor textColor, baseColor; }
 
 void Reader::startOpenFile(QString openfile) {
-  if (isReport) return;
+  if (isReport)
+    return;
 
   openByMuPdf(openfile);
   return;
@@ -178,7 +180,8 @@ void Reader::openFile(QString openfile) {
       strOpfFile = strFullPath;
       QFileInfo fi(strOpfFile);
       strOpfPath = fi.path() + "/";
-      if (strOpfPath == "./") strOpfPath = "";
+      if (strOpfPath == "./")
+        strOpfPath = "";
 
       qDebug() << "containerXml=" << containerXml
                << "strOpfPath=" << strOpfPath;
@@ -225,7 +228,7 @@ void Reader::openFile(QString openfile) {
       isText = false;
       isEpub = false;
 
-    } else {  // txt file
+    } else { // txt file
       readTextList.clear();
       readTextList = readText(openfile);
       isText = true;
@@ -242,7 +245,7 @@ void Reader::openFile(QString openfile) {
 
     isOpen = true;
 
-  }  // end file exists
+  } // end file exists
 }
 
 QString Reader::get_idref(QString str0) {
@@ -363,10 +366,11 @@ void Reader::initReader() {
   readerFontSize = fsize;
 
   font.setPointSize(fsize);
-  font.setLetterSpacing(QFont::AbsoluteSpacing, 2);  // 字间距
+  font.setLetterSpacing(QFont::AbsoluteSpacing, 2); // 字间距
 
   fileName = Reg.value("/Reader/FileName").toString();
-  if (!QFile(fileName).exists() && isZH_CN) fileName = ":/res/reader/test.txt";
+  if (!QFile(fileName).exists() && isZH_CN)
+    fileName = ":/res/reader/test.txt";
 
   isInitReader = true;
 
@@ -393,7 +397,8 @@ void Reader::getBookList() {
   for (int i = 0; i < count; i++) {
     QString str = Reg.value("/Reader/BookSn" + QString::number(i)).toString();
     QStringList list = str.split("|");
-    if (QFile(list.at(1)).exists()) bookList.append(str);
+    if (QFile(list.at(1)).exists())
+      bookList.append(str);
   }
 
   if (!isAndroid) {
@@ -420,7 +425,8 @@ void Reader::setQMLText(QString txt1) {
 }
 
 void Reader::goUpPage() {
-  if (isSelText) return;
+  if (isSelText)
+    return;
 
   isPageNext = false;
 
@@ -438,22 +444,24 @@ void Reader::goUpPage() {
 
   if (isEpub) {
     htmlIndex--;
-    if (htmlIndex < 0) htmlIndex = 0;
+    if (htmlIndex < 0)
+      htmlIndex = 0;
 
     currentHtmlFile = htmlFiles.at(htmlIndex);
     setQMLHtml(currentHtmlFile, "", "");
   }
 
   setPageVPos();
-  showInfo();
 }
 
 void Reader::goNextPage() {
-  if (isSelText) return;
+  if (isSelText)
+    return;
 
   isPageNext = true;
 
-  if (currentPage > 0 || htmlFiles.count() > 1) savePageVPos();
+  if (currentPage > 0 || htmlFiles.count() > 1)
+    savePageVPos();
 
   if (isText) {
     QString txt1;
@@ -467,13 +475,13 @@ void Reader::goNextPage() {
 
   if (isEpub) {
     htmlIndex++;
-    if (htmlIndex == htmlFiles.count()) htmlIndex = htmlFiles.count() - 1;
+    if (htmlIndex == htmlFiles.count())
+      htmlIndex = htmlFiles.count() - 1;
 
     currentHtmlFile = htmlFiles.at(htmlIndex);
     setQMLHtml(currentHtmlFile, "", "");
   }
   setPageVPos();
-  showInfo();
 }
 
 QString Reader::updateContent() {
@@ -550,12 +558,11 @@ void Reader::setEpubPagePosition(int index, QString htmlFile) {
     setQMLHtml(currentHtmlFile, "", "");
     setPageVPos();
   }
-
-  showInfo();
 }
 
 QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
-  if (!isEpub || !reader->isOpen()) return "";
+  if (!isEpub || !reader->isOpen())
+    return "";
 
   // 获取屏幕宽度（用于判断是否需要缩放）
   int screenWidth = mw_one->width() - 60;
@@ -673,12 +680,12 @@ QString Reader::processHtml(QString htmlFile, bool isWriteFile) {
       QBuffer buffer(&scaledData);
       buffer.open(QIODevice::WriteOnly);
       // 根据原图格式保存（JPEG/PNG等）
-      QString format = "PNG";  // 默认用PNG
+      QString format = "PNG"; // 默认用PNG
       if (imgPathAbs.endsWith(".jpg", Qt::CaseInsensitive) ||
           imgPathAbs.endsWith(".jpeg", Qt::CaseInsensitive)) {
         format = "JPEG";
         // JPEG可设置质量（0-100）
-        scaledImg.save(&buffer, format.toUtf8().data(), 90);  // 高质量
+        scaledImg.save(&buffer, format.toUtf8().data(), 90); // 高质量
       } else {
         scaledImg.save(&buffer, format.toUtf8().data());
       }
@@ -786,9 +793,9 @@ QStringList Reader::readText(QByteArray data) {
   return list1;
 }
 
-void Reader::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
+void Reader::closeEvent(QCloseEvent *event) { Q_UNUSED(event); }
 
-void Reader::paintEvent(QPaintEvent* event) { Q_UNUSED(event); }
+void Reader::paintEvent(QPaintEvent *event) { Q_UNUSED(event); }
 
 void Reader::goBookReadPosition() {
   if (isOpen) {
@@ -816,7 +823,6 @@ void Reader::goBookReadPosition() {
     }
 
     setPageVPos();
-    showInfo();
   }
 }
 
@@ -833,8 +839,8 @@ void Reader::setFontSize(int fontSize) {
   readReadNote();
 }
 
-void Reader::PlainTextEditToFile(QPlainTextEdit* txtEdit, QString fileName) {
-  QFile* file;
+void Reader::PlainTextEditToFile(QPlainTextEdit *txtEdit, QString fileName) {
+  QFile *file;
   file = new QFile;
   file->setFileName(fileName);
   bool ok = file->open(QIODevice::WriteOnly | QIODevice::Text);
@@ -909,31 +915,14 @@ qreal Reader::getVPos() { return 0; }
 
 qreal Reader::getVHeight() { return 0; }
 
-void Reader::showInfo() {
-  cPage = 0;
-  tPage = 0;
-  if (isText) {
-    cPage = currentPage + 1;
-    tPage = totalPages;
-  }
-
-  if (isEpub) {
-    cPage = htmlIndex + 1;
-    tPage = htmlFiles.count();
-  }
-
-  updateReaderProperty(cPage, tPage);
-  readReadNote();
-}
-
 void Reader::updateReaderProperty(int currentPage, int totalPages) {}
 
 QString Reader::getNCX_File(QString path) {
-  QDir* dir = new QDir(path);
+  QDir *dir = new QDir(path);
   QStringList filter;
   filter << "*.ncx";
   dir->setNameFilters(filter);
-  QList<QFileInfo>* fileInfo = new QList<QFileInfo>(dir->entryInfoList(filter));
+  QList<QFileInfo> *fileInfo = new QList<QFileInfo>(dir->entryInfoList(filter));
   for (int i = 0; i < fileInfo->size(); i++) {
     if (fileInfo->at(i).exists()) {
       QString file = fileInfo->at(i).filePath();
@@ -946,14 +935,17 @@ QString Reader::getNCX_File(QString path) {
 void Reader::proceImg() {
   QString imgdir = strOpfPath + "Images";
   QDir dir0(imgdir);
-  if (!dir0.exists()) imgdir = strOpfPath + "images";
+  if (!dir0.exists())
+    imgdir = strOpfPath + "images";
   QDir dir2(imgdir);
-  if (!dir2.exists()) imgdir = strOpfPath + "graphics";
+  if (!dir2.exists())
+    imgdir = strOpfPath + "graphics";
   QDir dir1(imgdir);
-  if (!dir1.exists()) imgdir = strOpfPath;
+  if (!dir1.exists())
+    imgdir = strOpfPath;
   qDebug() << "Image Dir : " << imgdir;
 
-  QDir* dir = new QDir(imgdir);
+  QDir *dir = new QDir(imgdir);
   QStringList filter;
   filter << "*.png"
          << "*.jpg"
@@ -961,7 +953,7 @@ void Reader::proceImg() {
          << "*.bmp"
          << "*.svg";
   dir->setNameFilters(filter);
-  QList<QFileInfo>* fileInfo = new QList<QFileInfo>(dir->entryInfoList(filter));
+  QList<QFileInfo> *fileInfo = new QList<QFileInfo>(dir->entryInfoList(filter));
   for (int i = 0; i < fileInfo->size(); i++) {
     if (fileInfo->at(i).exists()) {
       QString file = fileInfo->at(i).filePath();
@@ -977,7 +969,8 @@ void Reader::proceImg() {
       double r = (double)w / h;
       if (w > mw_one->width() - 104 || file.contains("cover")) {
         new_w = mw_one->width() - 104;
-        if (file.contains("cover")) new_w = mw_one->width() - 25;
+        if (file.contains("cover"))
+          new_w = mw_one->width() - 25;
         new_h = new_w / r;
         QPixmap pix;
         // pix = QPixmap::fromImage(img.scaled(new_w, new_h));
@@ -1021,9 +1014,9 @@ QString Reader::getUriRealPath(QString uripath) {
 
     // 调用Java方法
     QJniObject result = activity.callMethod<jstring>(
-        "getUriPath",                              // 方法名
-        "(Ljava/lang/String;)Ljava/lang/String;",  // 方法签名
-        javaUriPath.object<jstring>()              // 参数
+        "getUriPath",                             // 方法名
+        "(Ljava/lang/String;)Ljava/lang/String;", // 方法签名
+        javaUriPath.object<jstring>()             // 参数
     );
 
     if (result.isValid()) {
@@ -1051,7 +1044,8 @@ void Reader::getReadList() {
     }
   }
 
-  if (bookList.count() == 0) return;
+  if (bookList.count() == 0)
+    return;
 
   // m_Method->clearAllBakList(mw_one->ui->qwBookList);
   // m_Method->clearAllBakListQV(qvBookList);
@@ -1087,49 +1081,23 @@ void Reader::getReadList() {
   }
 }
 
-void Reader::clearAllReaderRecords() {
-  int index = -1;  // m_Method->getCurrentIndexFromQV(qvBookList);
-  if (index < 0) return;
+void Reader::clearAllReaderRecords() {}
 
-  QString bookFlag = "";  // m_Method->getText3QV(qvBookList, index);
-  if (bookFlag == "pdf" || bookFlag == "none") return;
-
-  QString n_str = bookList.at(index);
-  QStringList list = n_str.split("|");
-  QString c_name = "";
-  if (list.count() == 3) {
-    c_name = list.at(2);
-  } else
-    return;
-
+void Reader::clearReaderRecords(const QString &c_name) {
   QString file_ini = iniDir + "bookini/" + c_name + ".ini";
   if (!QFile::exists(file_ini)) {
     return;
   }
 
-  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-  if (!m_ShowMsg->showMsg(
-          "Knot",
-          tr("Clear reading marks for the current book?") + "\n\n " + file_ini,
-          2))
-    return;
-
-  QFile::remove(file_ini);
-}
-
-void Reader::clearReaderRecords(const QString& c_name) {
-  QString file_ini = iniDir + "bookini/" + c_name + ".ini";
-  if (!QFile::exists(file_ini)) {
-    return;
-  }
-
-  if (QFile::remove(file_ini)) qInfo() << "阅读记录已清除：" << file_ini;
+  if (QFile::remove(file_ini))
+    qInfo() << "阅读记录已清除：" << file_ini;
 }
 
 void Reader::openBookListItem() {
-  int index = 0;  // m_Method->getCurrentIndexFromQV(qvBookList);
+  int index = 0; // m_Method->getCurrentIndexFromQV(qvBookList);
 
-  if (index < 0) return;
+  if (index < 0)
+    return;
 
   QString str = bookList.at(index);
   QStringList listBooks = str.split("|");
@@ -1146,7 +1114,8 @@ void Reader::openBookListItem() {
 }
 
 void Reader::backDir() {
-  if (!QFile(fileName).exists()) return;
+  if (!QFile(fileName).exists())
+    return;
 
   setEpubPagePosition(mainDirIndex, "");
   qDebug() << "mainDirIndex: " << mainDirIndex;
@@ -1191,17 +1160,19 @@ QString Reader::getCoverPicFile(QString htmlFile) {
 }
 
 // 拷贝文件夹：
-bool Reader::copyDirectoryFiles(const QString& fromDir, const QString& toDir,
+bool Reader::copyDirectoryFiles(const QString &fromDir, const QString &toDir,
                                 bool coverFileIfExist) {
   QDir sourceDir(fromDir);
   QDir targetDir(toDir);
   if (!targetDir.exists()) { /**< 如果目标目录不存在，则进行创建 */
-    if (!targetDir.mkdir(targetDir.absolutePath())) return false;
+    if (!targetDir.mkdir(targetDir.absolutePath()))
+      return false;
   }
 
   QFileInfoList fileInfoList = sourceDir.entryInfoList();
   foreach (QFileInfo fileInfo, fileInfoList) {
-    if (fileInfo.fileName() == "." || fileInfo.fileName() == "..") continue;
+    if (fileInfo.fileName() == "." || fileInfo.fileName() == "..")
+      continue;
 
     if (fileInfo.isDir()) { /**< 当为目录时，递归的进行copy */
       if (!copyDirectoryFiles(fileInfo.filePath(),
@@ -1225,9 +1196,12 @@ bool Reader::copyDirectoryFiles(const QString& fromDir, const QString& toDir,
 
 void Reader::on_hSlider_sliderReleased(int position) {
   int max = 0;
-  if (isText) max = totalPages;
-  if (isEpub) max = htmlFiles.count();
-  if (position >= max) position = max;
+  if (isText)
+    max = totalPages;
+  if (isEpub)
+    max = htmlFiles.count();
+  if (position >= max)
+    position = max;
   sPos = position;
   getLines();
   setPageVPos();
@@ -1240,23 +1214,23 @@ void Reader::getLines() {
     QString txt1;
     txt1 = updateContent();
 
-    qsShow =
-        "<p style='line-height:32px; width:100% ; white-space: pre-wrap; "
-        "'>" +
-        txt1 + "</p>";
+    qsShow = "<p style='line-height:32px; width:100% ; white-space: pre-wrap; "
+             "'>" +
+             txt1 + "</p>";
     setQMLText(qsShow);
   }
 
   if (isEpub) {
     htmlIndex = sPos - 1;
-    if (htmlIndex < 0) htmlIndex = 0;
+    if (htmlIndex < 0)
+      htmlIndex = 0;
 
     currentHtmlFile = htmlFiles.at(htmlIndex);
     setQMLHtml(currentHtmlFile, "", "");
   }
 }
 
-QString Reader::getNavFileInternalPath(const QByteArray& opfContent) {
+QString Reader::getNavFileInternalPath(const QByteArray &opfContent) {
   // 先将QByteArray转为QString（按UTF-8编码，EPUB标准编码）
   QString opfStr = QString::fromUtf8(opfContent);
 
@@ -1280,7 +1254,7 @@ QString Reader::getNavFileInternalPath(const QByteArray& opfContent) {
     qWarning() << "id=\"nav\"的item标签中未找到href属性";
     return QString();
   }
-  hrefStart += 6;  // 跳过 "href=\""
+  hrefStart += 6; // 跳过 "href=\""
 
   int hrefEnd = opfStr.indexOf("\"", hrefStart);
   if (hrefEnd == -1) {
@@ -1335,13 +1309,13 @@ QStringList Reader::ncx2html() {
     return htmlList;
   }
 
-  QPlainTextEdit* plain_edit = new QPlainTextEdit;
+  QPlainTextEdit *plain_edit = new QPlainTextEdit;
   plain_edit->appendPlainText("<html>");
   plain_edit->appendPlainText("<body>");
   plain_edit->appendPlainText("<style>.my-link {color: #336699;} </style>");
 
-  QTextEdit* text_edit = new QTextEdit;
-  QTextEdit* text_edit0 = new QTextEdit;
+  QTextEdit *text_edit = new QTextEdit;
+  QTextEdit *text_edit0 = new QTextEdit;
 
   QByteArray data = reader->readFile(ncxFile);
   QString strHtml0 = m_Method->convertDataToUnicode(data);
@@ -1447,12 +1421,18 @@ QString Reader::getSkipText(QString htmlFile, QString skipID) {
   for (int i = 0; i < list.count(); i++) {
     QString item = list.at(i);
     if (item.contains(skipID)) {
-      if (item.contains("h1")) hxHeight = "32";
-      if (item.contains("h2")) hxHeight = "24";
-      if (item.contains("h3")) hxHeight = "18";
-      if (item.contains("h4")) hxHeight = "16";
-      if (item.contains("h5")) hxHeight = "13";
-      if (item.contains("h6")) hxHeight = "12";
+      if (item.contains("h1"))
+        hxHeight = "32";
+      if (item.contains("h2"))
+        hxHeight = "24";
+      if (item.contains("h3"))
+        hxHeight = "18";
+      if (item.contains("h4"))
+        hxHeight = "16";
+      if (item.contains("h5"))
+        hxHeight = "13";
+      if (item.contains("h6"))
+        hxHeight = "12";
 
       QStringList l0 = item.split(">");
       QString txt = l0.at(1);
@@ -1503,7 +1483,7 @@ void Reader::openBookByLocal() {
   }
 }
 
-void Reader::openByMuPdf(const QString& bookfile) {
+void Reader::openByMuPdf(const QString &bookfile) {
   fileName = bookfile;
   for (int i = 0; i < bookList.count(); i++) {
     QString str = bookList.at(i);
@@ -1531,11 +1511,11 @@ void Reader::readBookDone() {
 
     mw_one->safeCloseProgress();
 
-    auto msg = std::make_unique<ShowMessage>(mw_one);
-    msg->showMsg("Knot", tr("The EPUB file was opened with an error."), 1);
+    showInfo("Knot", tr("The EPUB file was opened with an error."));
 
     if (!isText) {
-      if (htmlFiles.count() > 0) isEpub = true;
+      if (htmlFiles.count() > 0)
+        isEpub = true;
     }
     return;
   }
@@ -1543,7 +1523,8 @@ void Reader::readBookDone() {
   QFileInfo fi(fileName);
   QString epubName = strEpubTitle;
   QString name_l = epubName.toLower();
-  if (epubName == "" || name_l.contains("unknown")) epubName = fi.baseName();
+  if (epubName == "" || name_l.contains("unknown"))
+    epubName = fi.baseName();
   if (isEpub)
     currentBookName = epubName;
   else
@@ -1679,9 +1660,10 @@ void Reader::ContinueReading() {
 }
 
 void Reader::shareBook() {
-  int index = 0;  // m_Method->getCurrentIndexFromQV(qvBookList);
+  int index = 0; // m_Method->getCurrentIndexFromQV(qvBookList);
 
-  if (index < 0) return;
+  if (index < 0)
+    return;
 
   QString str = bookList.at(index);
   QStringList listBooks = str.split("|");
@@ -1691,13 +1673,13 @@ void Reader::shareBook() {
   }
 }
 
-bool Reader::eventFilterReader(QObject* watch, QEvent* evn) {
+bool Reader::eventFilterReader(QObject *watch, QEvent *evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-bool Reader::handleTouchPress(const QPointF& globalPos) { return true; }
+bool Reader::handleTouchPress(const QPointF &globalPos) { return true; }
 
-void Reader::handleDoubleClick(const QPointF& globalPos) {}
+void Reader::handleDoubleClick(const QPointF &globalPos) {}
 
 bool Reader::getDefaultOpen() {
   QSettings Reg(privateDir + "choice_book.ini", QSettings::IniFormat);
@@ -1726,12 +1708,12 @@ void Reader::on_SetReaderFunVisible() {}
 ///////////////////////////////////////////////////////////////////////////////////
 
 // 1：正确初始化
-TextChunkModel::TextChunkModel(QObject* parent) : QAbstractListModel(parent) {
+TextChunkModel::TextChunkModel(QObject *parent) : QAbstractListModel(parent) {
   // 初始化角色名
   m_roleNames[TextRole] = "text";
 }
 
-void TextChunkModel::splitContent(const QString& fullText) {
+void TextChunkModel::splitContent(const QString &fullText) {
   beginResetModel();
   m_chunks.clear();
   m_chunks.append(fullText);
@@ -1741,7 +1723,7 @@ void TextChunkModel::splitContent(const QString& fullText) {
 
   // 扩展正则表达式匹配范围
   static QRegularExpression regex(
-      R"((</?([a-zA-Z]+)[^>]*>)(.*?)(?=</?\2[^>]*>|$))",  // 匹配完整标签结构
+      R"((</?([a-zA-Z]+)[^>]*>)(.*?)(?=</?\2[^>]*>|$))", // 匹配完整标签结构
       QRegularExpression::CaseInsensitiveOption |
           QRegularExpression::DotMatchesEverythingOption |
           QRegularExpression::UseUnicodePropertiesOption);
@@ -1778,7 +1760,7 @@ void TextChunkModel::splitContent(const QString& fullText) {
 }
 
 // 辅助方法：验证标签嵌套有效性
-bool TextChunkModel::isValidNesting(const QString& htmlBlock) {
+bool TextChunkModel::isValidNesting(const QString &htmlBlock) {
   QStack<QString> tagStack;
   QRegularExpression tagRegex(R"(<(/?)([a-zA-Z]+)[^>]*>)");
 
@@ -1786,9 +1768,9 @@ bool TextChunkModel::isValidNesting(const QString& htmlBlock) {
   while (it.hasNext()) {
     QRegularExpressionMatch match = it.next();
     QString tagName = match.captured(2).toLower();
-    if (match.captured(1).isEmpty()) {  // 开始标签
+    if (match.captured(1).isEmpty()) { // 开始标签
       tagStack.push(tagName);
-    } else {  // 结束标签
+    } else { // 结束标签
       if (tagStack.isEmpty() || tagStack.pop() != tagName) {
         return false;
       }
@@ -1798,7 +1780,7 @@ bool TextChunkModel::isValidNesting(const QString& htmlBlock) {
 }
 
 // 处理复杂结构（递归实现）
-void TextChunkModel::handleComplexStructure(QString& text, int& currentPos) {
+void TextChunkModel::handleComplexStructure(QString &text, int &currentPos) {
   QRegularExpression deepRegex(R"(<(div|section|article)\b[^>]*>)",
                                QRegularExpression::CaseInsensitiveOption);
   QRegularExpressionMatch match = deepRegex.match(text, currentPos);
@@ -1820,14 +1802,15 @@ void TextChunkModel::handleComplexStructure(QString& text, int& currentPos) {
 // 3：完善角色定义
 QHash<int, QByteArray> TextChunkModel::roleNames() const {
   return {
-      {TextRole, "text"},           // 自定义角色
-      {Qt::DisplayRole, "display"}  // 保留默认角色
+      {TextRole, "text"},          // 自定义角色
+      {Qt::DisplayRole, "display"} // 保留默认角色
   };
 }
 
 // 4：正确实现数据访问
-QVariant TextChunkModel::data(const QModelIndex& index, int role) const {
-  if (!index.isValid() || index.row() >= m_chunks.size()) return QVariant();
+QVariant TextChunkModel::data(const QModelIndex &index, int role) const {
+  if (!index.isValid() || index.row() >= m_chunks.size())
+    return QVariant();
 
   if (role == TextRole || role == Qt::DisplayRole)
     return m_chunks.at(index.row());
@@ -1843,8 +1826,9 @@ void TextChunkModel::clear() {
 }
 
 // 6：正确实现追加方法
-void TextChunkModel::appendChunks(const QStringList& chunks) {
-  if (chunks.isEmpty()) return;
+void TextChunkModel::appendChunks(const QStringList &chunks) {
+  if (chunks.isEmpty())
+    return;
 
   beginInsertRows(QModelIndex(), m_chunks.size(),
                   m_chunks.size() + chunks.size() - 1);
@@ -1852,7 +1836,7 @@ void TextChunkModel::appendChunks(const QStringList& chunks) {
   endInsertRows();
 }
 
-int TextChunkModel::rowCount(const QModelIndex& parent) const {
+int TextChunkModel::rowCount(const QModelIndex &parent) const {
   return parent.isValid() ? 0 : m_chunks.size();
 }
 
@@ -1862,11 +1846,11 @@ QVariantMap TextChunkModel::get(int index) const {
   // 检查索引是否有效
   if (index < 0 || index >= m_chunks.size()) {
     qWarning() << "Invalid index:" << index;
-    return result;  // 返回空对象
+    return result; // 返回空对象
   }
 
   // 通过角色名填充数据（需与 roleNames() 中的定义一致）
-  result["text"] = m_chunks.at(index);  // 文本数据存储在 m_chunks
+  result["text"] = m_chunks.at(index); // 文本数据存储在 m_chunks
 
   return result;
 }
@@ -1874,8 +1858,8 @@ QVariantMap TextChunkModel::get(int index) const {
 //////////////////////////////////////////////////////////////////////////////////////
 
 // 解析nav文件内容，生成目录结构
-QList<TocItem> Reader::parseTocFromNavFile(const QByteArray& navContent) {
-  QList<TocItem> tocItems;  // 最终的目录列表
+QList<TocItem> Reader::parseTocFromNavFile(const QByteArray &navContent) {
+  QList<TocItem> tocItems; // 最终的目录列表
   QXmlStreamReader reader(navContent);
 
   // 解析XML，查找目录容器
@@ -1885,14 +1869,14 @@ QList<TocItem> Reader::parseTocFromNavFile(const QByteArray& navContent) {
     // 1. 定位到目录根容器 <nav epub:type="toc">
     if (token == QXmlStreamReader::StartElement) {
       // 修正：QStringView -> QString 比较
-      if (reader.name().toString() == "nav") {  // 此处添加.toString()
+      if (reader.name().toString() == "nav") { // 此处添加.toString()
         // 检查是否为目录容器（epub:type="toc"）
         QXmlStreamAttributes attrs = reader.attributes();
         QString epubType = attrs.value("epub:type").toString();
         if (epubType == "toc") {
           //  进入容器后，解析内部的列表结构
           tocItems = parseOlElement(reader);
-          break;  // 解析完目录后退出
+          break; // 解析完目录后退出
         }
       }
     }
@@ -1909,7 +1893,7 @@ QList<TocItem> Reader::parseTocFromNavFile(const QByteArray& navContent) {
 }
 
 // 递归解析 <ol> 元素（提取章节列表）
-QList<TocItem> Reader::parseOlElement(QXmlStreamReader& reader) {
+QList<TocItem> Reader::parseOlElement(QXmlStreamReader &reader) {
   QList<TocItem> items;
 
   while (!reader.atEnd() && !reader.hasError()) {
@@ -1917,14 +1901,14 @@ QList<TocItem> Reader::parseOlElement(QXmlStreamReader& reader) {
 
     // 遇到 </ol> 则结束当前层级解析（修正比较）
     if (token == QXmlStreamReader::EndElement &&
-        reader.name().toString() == "ol") {  // 此处添加.toString()
+        reader.name().toString() == "ol") { // 此处添加.toString()
       break;
     }
 
     // 解析每个列表项 <li>（修正比较）
     if (token == QXmlStreamReader::StartElement &&
-        reader.name().toString() == "li") {   // 此处添加.toString()
-      TocItem item = parseLiElement(reader);  // 解析单个章节
+        reader.name().toString() == "li") {  // 此处添加.toString()
+      TocItem item = parseLiElement(reader); // 解析单个章节
       if (!item.title.isEmpty()) {
         items.append(item);
       }
@@ -1935,7 +1919,7 @@ QList<TocItem> Reader::parseOlElement(QXmlStreamReader& reader) {
 }
 
 // 解析 <li> 元素（提取单个章节的标题、链接和子章节）
-TocItem Reader::parseLiElement(QXmlStreamReader& reader) {
+TocItem Reader::parseLiElement(QXmlStreamReader &reader) {
   TocItem item;
 
   while (!reader.atEnd() && !reader.hasError()) {
@@ -1943,27 +1927,27 @@ TocItem Reader::parseLiElement(QXmlStreamReader& reader) {
 
     // 遇到 </li> 则结束当前章节解析（修正比较）
     if (token == QXmlStreamReader::EndElement &&
-        reader.name().toString() == "li") {  // 此处添加.toString()
+        reader.name().toString() == "li") { // 此处添加.toString()
       break;
     }
 
     // 解析章节链接 <a> 标签（标题和href）（修正比较）
     if (token == QXmlStreamReader::StartElement &&
-        reader.name().toString() == "a") {  // 此处添加.toString()
+        reader.name().toString() == "a") { // 此处添加.toString()
       // 提取链接（href属性）
       QXmlStreamAttributes attrs = reader.attributes();
       item.href = attrs.value("href").toString();
 
       // 提取标题（<a>标签内的文本）
       if (reader.readNext() == QXmlStreamReader::Characters) {
-        item.title = reader.text().toString().trimmed();  // 去除首尾空格
+        item.title = reader.text().toString().trimmed(); // 去除首尾空格
       }
     }
 
     // 解析子章节（嵌套的 <ol> 元素）（修正比较）
     if (token == QXmlStreamReader::StartElement &&
-        reader.name().toString() == "ol") {      // 此处添加.toString()
-      item.childItems = parseOlElement(reader);  // 递归解析子章节
+        reader.name().toString() == "ol") {     // 此处添加.toString()
+      item.childItems = parseOlElement(reader); // 递归解析子章节
     }
   }
 
@@ -1971,11 +1955,11 @@ TocItem Reader::parseLiElement(QXmlStreamReader& reader) {
 }
 
 // 递归打印目录项（辅助函数）
-void Reader::debugPrintTocItems(const QList<TocItem>& tocItems, int level) {
+void Reader::debugPrintTocItems(const QList<TocItem> &tocItems, int level) {
   // 层级缩进（每级缩进4个空格，方便区分层级）
   QString indent(level * 4, ' ');
 
-  for (const TocItem& item : tocItems) {
+  for (const TocItem &item : tocItems) {
     // 打印当前目录项的标题和链接
     qDebug() << indent << "标题：" << item.title << "，链接：" << item.href;
 
@@ -1986,7 +1970,7 @@ void Reader::debugPrintTocItems(const QList<TocItem>& tocItems, int level) {
   }
 }
 
-QString Reader::getEpub3Title(const QString& opfFile) {
+QString Reader::getEpub3Title(const QString &opfFile) {
   // 读取OPF文件内容
   QByteArray opfContent = reader->readFile(opfFile);
 
@@ -2029,7 +2013,7 @@ QString Reader::getEpub3Title(const QString& opfFile) {
 }
 
 // 判断 XML 当前节点是不是 DC 标准的 <dc:title> 标题节点
-bool Reader::isDcTitleElement(const QXmlStreamReader& xml) {
+bool Reader::isDcTitleElement(const QXmlStreamReader &xml) {
   using namespace Qt::StringLiterals;
   const QStringView dcNamespace = u"http://purl.org/dc/elements/1.1/"_s;
   return xml.name() == u"title"_s && xml.namespaceUri() == dcNamespace;
@@ -2068,7 +2052,8 @@ void Reader::openReader() {
   startDateTime = QDateTime::currentDateTime();
   totalHours = readTotalHours();
 
-  if (!isGpsRun) keepScreenOn();
+  if (!isGpsRun)
+    keepScreenOn();
 
   initTTS();
 
@@ -2117,15 +2102,18 @@ void Reader::openReader() {
 double Reader::readTotalHours() {
   QString path = iniDir + "reader.json";
   QFile file(path);
-  if (!file.exists()) return 0.0;
+  if (!file.exists())
+    return 0.0;
 
-  if (!file.open(QIODevice::ReadOnly)) return 0.0;
+  if (!file.open(QIODevice::ReadOnly))
+    return 0.0;
 
   QByteArray data = file.readAll();
   file.close();
 
   QJsonDocument doc = QJsonDocument::fromJson(data);
-  if (doc.isNull()) return 0.0;
+  if (doc.isNull())
+    return 0.0;
 
   QJsonObject obj = doc.object();
   return obj.value("totalHours").toDouble(0.0);
@@ -2139,7 +2127,8 @@ bool Reader::writeTotalHours(double value) {
   QJsonDocument doc(obj);
 
   QFile file(path);
-  if (!file.open(QIODevice::WriteOnly)) return false;
+  if (!file.open(QIODevice::WriteOnly))
+    return false;
 
   file.write(doc.toJson(QJsonDocument::Indented));
   file.close();
@@ -2154,7 +2143,7 @@ void Reader::showBookPageUp() {}
 
 void Reader::closeBookPage() {}
 
-void Reader::modifyText2(int currentIndex, const QString& text) {}
+void Reader::modifyText2(int currentIndex, const QString &text) {}
 
 void Reader::keepScreenOn() {
 #ifdef Q_OS_ANDROID
@@ -2162,9 +2151,9 @@ void Reader::keepScreenOn() {
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
     QJniObject::callStaticMethod<void>(
-        "com/x/MyActivity",           // Java 类路径（注意用 / 代替 .）
-        "keepScreenOn",               // 方法名
-        "(Landroid/app/Activity;)V",  // 方法签名
+        "com/x/MyActivity",          // Java 类路径（注意用 / 代替 .）
+        "keepScreenOn",              // 方法名
+        "(Landroid/app/Activity;)V", // 方法签名
         activity.object<jobject>());
   } else {
     qWarning() << "keepScreenOn: activity is invalid";
@@ -2191,20 +2180,20 @@ void Reader::resetTextSelection() {}
 
 void Reader::setBookPagePressHold(bool value) {}
 
-void Reader::setEditText(const QString& txt, const QString& direction) {}
+void Reader::setEditText(const QString &txt, const QString &direction) {}
 
 void Reader::setStartEnd(int start, int end) {
   startNote = start;
   endNote = end;
 }
 
-QString Reader::sanitizeFileName(const QString& name) {
+QString Reader::sanitizeFileName(const QString &name) {
   // 1. 获取当前操作系统的所有非法文件名字符
   // Qt 内部已处理 Windows/Android/Linux/macOS 的差异
   QString illegalChars =
       QDir::separator() == '/'
-          ? QStringLiteral("[/\\0]")               // Unix-like: 仅 / 和 \0
-          : QStringLiteral("[<>:\"/\\\\|?*\\0]");  // Windows: 完整非法集
+          ? QStringLiteral("[/\\0]")              // Unix-like: 仅 / 和 \0
+          : QStringLiteral("[<>:\"/\\\\|?*\\0]"); // Windows: 完整非法集
 
   // 2. 一行替换 + 去首尾空白点
   QString safe = name;

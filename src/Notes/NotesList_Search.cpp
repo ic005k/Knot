@@ -3,15 +3,15 @@
 #include "src/MainWindow.h"
 
 // 文件搜索实现
-QStringList findMarkdownFiles(const QString& dirPath) {
+QStringList findMarkdownFiles(const QString &dirPath) {
   Q_UNUSED(dirPath);
 
   QList<QString> paths;
   QDir dir(iniDir + "memo/");
   const QStringList files = dir.entryList(QStringList() << "*.md", QDir::Files);
-  for (const QString& file : files) {
+  for (const QString &file : files) {
     QFileInfo info(dir.absoluteFilePath(file));
-    QString canonicalPath = info.canonicalFilePath();  // 规范化路径
+    QString canonicalPath = info.canonicalFilePath(); // 规范化路径
     if (!canonicalPath.isEmpty() && info.exists()) {
       paths.append(canonicalPath);
     }
@@ -20,26 +20,27 @@ QStringList findMarkdownFiles(const QString& dirPath) {
   return QSet<QString>(paths.begin(), paths.end()).values();
 }
 
-QStringList findMarkdownFilesToSort(const QString& dirPath) {
+QStringList findMarkdownFilesToSort(const QString &dirPath) {
   QDir dir(dirPath);
-  if (!dir.exists()) return {};
+  if (!dir.exists())
+    return {};
 
   // 1. 仅获取文件名列表（不依赖 QDir::Time，避免不可靠的目录项排序）
   const QStringList files =
       dir.entryList({"*.md"}, QDir::Files | QDir::NoDotAndDotDot,
-                    QDir::Name  // 用 Name 排序作为稳定的初始顺序，开销极低
+                    QDir::Name // 用 Name 排序作为稳定的初始顺序，开销极低
       );
 
   // 2. 【关键】一次性批量获取真实修改时间（O(n) 次 I/O）
   struct NoteEntry {
     QString path;
-    qint64 msecs;  // 用毫秒级整数比较，比 QDateTime 快一个数量级
+    qint64 msecs; // 用毫秒级整数比较，比 QDateTime 快一个数量级
   };
 
   QVector<NoteEntry> entries;
   entries.reserve(files.size());
 
-  for (const QString& file : files) {
+  for (const QString &file : files) {
     QString absPath = dir.absoluteFilePath(file);
     QFileInfo info(absPath);
     // lastModified() 触发真实的 stat 调用，获取准确时间
@@ -48,14 +49,14 @@ QStringList findMarkdownFilesToSort(const QString& dirPath) {
 
   // 3. 【关键】纯内存排序（零 I/O，O(n log n) 次整数比较）
   std::sort(entries.begin(), entries.end(),
-            [](const NoteEntry& a, const NoteEntry& b) {
-              return a.msecs > b.msecs;  // 降序：最新的在前
+            [](const NoteEntry &a, const NoteEntry &b) {
+              return a.msecs > b.msecs; // 降序：最新的在前
             });
 
   // 4. 提取路径返回
   QStringList result;
   result.reserve(entries.size());
-  for (const auto& entry : entries) {
+  for (const auto &entry : entries) {
     result.append(entry.path);
   }
 
@@ -66,8 +67,8 @@ QStringList findMarkdownFilesToSort(const QString& dirPath) {
   return result;
 }
 
-MySearchResult searchInFile(const QString& filePath,
-                            const QRegularExpression& regex) {
+MySearchResult searchInFile(const QString &filePath,
+                            const QRegularExpression &regex) {
   MySearchResult result;
   QFile file(filePath);
   if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -85,21 +86,21 @@ MySearchResult searchInFile(const QString& filePath,
 }
 
 // 结果归并
-void reduceResults(ResultsMap& result, const MySearchResult& partial) {
+void reduceResults(ResultsMap &result, const MySearchResult &partial) {
   if (!partial.filePath.isEmpty()) {
     result[partial.filePath] = partial;
   }
 }
 
-QFuture<QVector<ExactMatchResult>> NotesList::performSearchAsync(
-    const QString& dirPath, const QString& keyword) {
+QFuture<QVector<ExactMatchResult>>
+NotesList::performSearchAsync(const QString &dirPath, const QString &keyword) {
   return QtConcurrent::run([dirPath, keyword]() {
     QVector<ExactMatchResult> results;
     QStringList files = findMarkdownFiles(dirPath);
     QStringList cycleFiles = m_NotesList->getRecycleNoteFiles();
 
     files.removeIf(
-        [&cycleFiles](const QString& f) { return cycleFiles.contains(f); });
+        [&cycleFiles](const QString &f) { return cycleFiles.contains(f); });
 
     QRegularExpression regex(
         keyword, QRegularExpression::CaseInsensitiveOption |
@@ -110,7 +111,7 @@ QFuture<QVector<ExactMatchResult>> NotesList::performSearchAsync(
         QString("(%1)").arg(QRegularExpression::escape(keyword)),
         QRegularExpression::CaseInsensitiveOption);
 
-    for (const QString& file : files) {
+    for (const QString &file : files) {
       ExactMatchResult emr;
       emr.filePath = file;
       emr.title = m_Notes->m_NoteManager->getNoteTitle(file);
@@ -203,7 +204,8 @@ void NotesList::startFind(QString strFind) {
 }
 
 void NotesList::onSearchFinished() {
-  if (!watcher) return;
+  if (!watcher)
+    return;
   mw_one->safeCloseProgress();
 
   const QVector<ExactMatchResult> exactResults = watcher->result();
@@ -211,20 +213,17 @@ void NotesList::onSearchFinished() {
   QStringList list;
 
   if (exactResults.isEmpty()) {
-    // m_searchModel.setResults({});
-    //  mui->lblNoteSearchResult->setText(tr("Note Search Results: 0"));
-    //  auto msg = std::make_unique<ShowMessage>(mw_one);
-    //  msg->showMsg("Knot", tr("No match was found."), 1);
+
   } else {
     // ========== 适配层：ExactMatchResult → SearchResult ==========
     QVector<SearchResult> adaptedResults;
     adaptedResults.reserve(exactResults.size());
 
-    for (const auto& emr : exactResults) {
+    for (const auto &emr : exactResults) {
       SearchResult sr;
       sr.filePath = emr.filePath;
       sr.title = emr.title;
-      sr.preview = emr.preview;  // 已在后台清洗完毕，直接赋值
+      sr.preview = emr.preview; // 已在后台清洗完毕，直接赋值
       adaptedResults.append(sr);
 
       list.append(sr.title + "===" + sr.preview + "===" + sr.filePath);
@@ -253,30 +252,31 @@ void NotesList::startBackgroundTaskUpdateFilesIndex() {
   });
 
   // 可选：使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database update completed.";
     mw_one->safeCloseProgress();
 
     QStringList cycleFiles = getRecycleNoteFiles();
-    if (cycleFiles.count() > 0) startBackgroundTaskDelFilesIndex(cycleFiles);
+    if (cycleFiles.count() > 0)
+      startBackgroundTaskDelFilesIndex(cycleFiles);
 
     watcher->deleteLater();
   });
   watcher->setFuture(future);
 }
 
-void NotesList::startBackgroundTaskDelFilesIndex(const QStringList& files) {
+void NotesList::startBackgroundTaskDelFilesIndex(const QStringList &files) {
   QFuture<void> future = QtConcurrent::run([files]() {
 
   });
 
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Database del files completed.";
 
     // ✅ 内存操作回到主线程，安全且无性能损失
-    for (const QString& file : files) {
+    for (const QString &file : files) {
       m_Notes->m_NoteManager->removeNote(file);
 
       // 清理向量引擎中的向量(暂时不清理，因为这只是让笔记进入回收站）
@@ -305,7 +305,7 @@ void NotesList::showFindNotes() {
 
 QString NotesList::getSearchResultQmlFile() { return ""; }
 
-void NotesList::startVectorSerach(const QString& text) {
+void NotesList::startVectorSerach(const QString &text) {
   QTimer::singleShot(300, this, [this, text]() {
     // 空文本时清空结果
     if (text.trimmed().isEmpty()) {
@@ -313,7 +313,8 @@ void NotesList::startVectorSerach(const QString& text) {
       return;
     }
 
-    if (!g_cpu_supports_llama) return;
+    if (!g_cpu_supports_llama)
+      return;
 
     mw_one->mySearchText = text;
 
@@ -380,7 +381,7 @@ void NotesList::startVectorSerach(const QString& text) {
 
               QStringList listJG;
 
-              for (const auto& item : results) {
+              for (const auto &item : results) {
                 SearchResult sr;
                 sr.filePath = item.filePath;
 
@@ -481,7 +482,7 @@ void NotesList::startVectorSerach(const QString& text) {
   });
 }
 
-void NotesList::onSearchTextChanged(const QString& text) {
+void NotesList::onSearchTextChanged(const QString &text) {
   isEditBoxSearchTextChanged = true;
   startVectorSerach(text);
 }
@@ -521,7 +522,7 @@ void NotesList::popupAndroidNoteLinkList(QVector<SearchResult> adaptedResults) {
       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 
   // 5. 循环遍历 SearchResult，转换为 AiLinkItem 存入 List
-  for (const SearchResult& res : adaptedResults) {
+  for (const SearchResult &res : adaptedResults) {
     jstring jPath = env->NewStringUTF(res.filePath.toUtf8().constData());
     jstring jTitle = env->NewStringUTF(res.title.toUtf8().constData());
     jstring jPreview = env->NewStringUTF(res.preview.toUtf8().constData());

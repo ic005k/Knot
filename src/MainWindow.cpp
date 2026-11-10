@@ -3,25 +3,25 @@
 #include "SearchWorker.h"
 #include "defines.h"
 
-MainWindow* mw_one = nullptr;
-QSettings* iniPreferences;
+MainWindow *mw_one = nullptr;
+QSettings *iniPreferences;
 
-CloudBackup* m_CloudBackup;
-QTreeWidgetItem* parentItem;
-Reader* m_Reader;
-Method* m_Method;
-Notes* m_Notes;
-NotesList* m_NotesList;
-StepsOptions* m_StepsOptions;
-Steps* m_Steps;
-QTabWidget* tabData;
-CategoryList* m_CategoryList;
-ColorDialog* colorDlg;
-PrintPDF* m_PrintPDF = nullptr;
+CloudBackup *m_CloudBackup;
+QTreeWidgetItem *parentItem;
+Reader *m_Reader;
+Method *m_Method;
+Notes *m_Notes;
+NotesList *m_NotesList;
+StepsOptions *m_StepsOptions;
+Steps *m_Steps;
+QTabWidget *tabData;
+CategoryList *m_CategoryList;
+ColorDialog *colorDlg;
+PrintPDF *m_PrintPDF = nullptr;
 QTreeWidget *twrb, *tw;
-ShowMessage* m_MsgBox = nullptr;
+ShowMessage *m_MsgBox = nullptr;
 
-MainWindow::MainWindow(QWidget* parent)
+MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget* parent)
 
   loading = false;
 
-  QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
+  QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
   startRead(strDate);
 
   get_Today(tw);
@@ -106,7 +106,7 @@ void MainWindow::readDataInThread(int ExceptIndex) {
   int count = tabData->tabBar()->count();
   for (int i = 0; i < count; i++) {
     if (i != ExceptIndex) {
-      QTreeWidget* tw = (QTreeWidget*)tabData->widget(i);
+      QTreeWidget *tw = (QTreeWidget *)tabData->widget(i);
       readData(tw);
     }
   }
@@ -127,10 +127,14 @@ void MainWindow::execDeskShortcut() {
 
 void MainWindow::on_ExecShortcut() {
   keyType = m_Method->getKeyType();
-  if (keyType == "todo") m_Todo->NewTodo();
-  if (keyType == "note") mw_one->ui->btnNotes->click();
-  if (keyType == "reader") m_Reader->ContinueReading();
-  if (keyType == "add") mw_one->ui->btnAdd->click();
+  if (keyType == "todo")
+    m_Todo->NewTodo();
+  if (keyType == "note")
+    mw_one->ui->btnNotes->click();
+  if (keyType == "reader")
+    m_Reader->ContinueReading();
+  if (keyType == "add")
+    mw_one->ui->btnAdd->click();
   if (keyType == "exercise") {
     // QTimer::singleShot(100, this, []() { mw_one->ui->btnSteps->click(); });
     mw_one->ui->btnSteps->click();
@@ -159,7 +163,8 @@ void MainWindow::on_timerSyncData() {
 }
 
 void MainWindow::startSyncData() {
-  if (initMain) return;
+  if (initMain)
+    return;
   timerSyncData->start(10000);
 }
 
@@ -171,7 +176,7 @@ MainWindow::~MainWindow() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       m_workerThread->quit();
-      m_workerThread->wait(2000);  // 最多等待2秒
+      m_workerThread->wait(2000); // 最多等待2秒
     }
     // 信号槽绑定了finished自动deleteLater，这里置空即可
     m_workerThread = nullptr;
@@ -196,9 +201,9 @@ MainWindow::~MainWindow() {
 
   if (m_ainetMgr) {
     // 1. 中止所有未完成AI网络请求
-    const QList<QNetworkReply*> replies =
-        m_ainetMgr->findChildren<QNetworkReply*>();
-    for (QNetworkReply* rep : replies) {
+    const QList<QNetworkReply *> replies =
+        m_ainetMgr->findChildren<QNetworkReply *>();
+    for (QNetworkReply *rep : replies) {
       rep->abort();
       rep->deleteLater();
       qDebug() << "[MainWindow] Abort pending AI reply";
@@ -210,7 +215,7 @@ MainWindow::~MainWindow() {
 
   // ========== 1. 处理一次性线程（仅执行一次，自动退出） ==========
   // 模板函数：统一处理一次性非子对象线程（wait()等待完成 + delete释放）
-  auto releaseOneShotThread = [](auto& thread) {  // 用auto&替代QThread*&
+  auto releaseOneShotThread = [](auto &thread) { // 用auto&替代QThread*&
     if (thread) {
       if (thread->isRunning()) {
         thread->wait();
@@ -233,10 +238,10 @@ MainWindow::~MainWindow() {
   // ========== 2. 处理循环线程（GetGpsDataThread，已有stop()） ==========
   if (myGetGpsDataThread) {
     if (myGetGpsDataThread->isRunning()) {
-      myGetGpsDataThread->stop();  // 停止循环
-      myGetGpsDataThread->wait();  // 等待退出
+      myGetGpsDataThread->stop(); // 停止循环
+      myGetGpsDataThread->wait(); // 等待退出
     }
-    delete myGetGpsDataThread;  // 释放内存
+    delete myGetGpsDataThread; // 释放内存
     myGetGpsDataThread = nullptr;
   }
 
@@ -266,7 +271,8 @@ void MainWindow::startSave(QString str_type) {
 }
 
 void MainWindow::startRead(QString Date) {
-  if (!isSaveEnd || loading) return;
+  if (!isSaveEnd || loading)
+    return;
 
   readDate = Date;
   if (!isReadEnd) {
@@ -299,12 +305,13 @@ int MainWindow::calcStringPixelHeight(QFont font, int n_font_size) {
   return fm.height();
 }
 
-bool MainWindow::del_Data(QTreeWidget* tw) {
-  if (tw->topLevelItemCount() == 0) return false;
+bool MainWindow::del_Data(QTreeWidget *tw) {
+  if (tw->topLevelItemCount() == 0)
+    return false;
 
   bool isTodayData = false;
 
-  QTreeWidgetItem* topItem = nullptr;
+  QTreeWidgetItem *topItem = nullptr;
 
   strDate = m_Method->setCurrentDateValue();
   for (int i = 0; i < tw->topLevelItemCount(); i++) {
@@ -328,8 +335,7 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
     else
       strTip = tr("Only the current day's records can be deleted.");
 
-    // auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-    // m_ShowMsg->showMsg(str, strTip, 1);
+    // showInfo(str, strTip);
 
     return false;
   } else {
@@ -352,8 +358,7 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
       else
         strTip = tr("The last record of today will be deleted.");
 
-      // auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-      // if (!m_ShowMsg->showMsg(str, strTip + "\n\n" + str1, 2)) return false;
+      // if (!showConfirm(str, strTip + "\n\n" + str1)) return false;
 
       strLatestModify = tr("Del Item") + " ( " + getTabText() + " ) ";
 
@@ -367,7 +372,8 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
         amount = amount + str.toDouble();
       }
       QString str_amount = QString("%1").arg(amount, 0, 'f', 2);
-      if (str_amount == "0.00") str_amount = "";
+      if (str_amount == "0.00")
+        str_amount = "";
       topItem->setText(1, QString::number(childCount - 1));
       topItem->setText(2, str_amount);
 
@@ -384,7 +390,7 @@ bool MainWindow::del_Data(QTreeWidget* tw) {
 
   int topCount = tw->topLevelItemCount();
   if (topCount > 0) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(0);
+    QTreeWidgetItem *topItem = tw->topLevelItem(0);
     tw->setCurrentItem(topItem);
   }
 
@@ -405,10 +411,11 @@ void MainWindow::saveTab() {
   int CurrentIndex = tabData->currentIndex();
   Reg.setValue("CurrentIndex", CurrentIndex);
   for (int i = 0; i < TabCount; i++) {
-    if (isBreak) break;
+    if (isBreak)
+      break;
     Reg.setValue("TabName" + QString::number(i), tabData->tabText(i));
 
-    QTreeWidget* tw = (QTreeWidget*)tabData->widget(i);
+    QTreeWidget *tw = (QTreeWidget *)tabData->widget(i);
     Reg.setValue("twName" + QString::number(i), tw->objectName());
   }
 
@@ -416,7 +423,7 @@ void MainWindow::saveTab() {
   m_Method->upIniFile(tempFile, endFile);
 }
 
-void MainWindow::get_Today(QTreeWidget* tw) {
+void MainWindow::get_Today(QTreeWidget *tw) {
   int count = tw->topLevelItemCount();
   if (count <= 0) {
     today = 0;
@@ -431,7 +438,7 @@ void MainWindow::get_Today(QTreeWidget* tw) {
     today = 0;
 }
 
-void MainWindow::closeEvent(QCloseEvent* event) {
+void MainWindow::closeEvent(QCloseEvent *event) {
   if (m_Todo->isTodoAlarmShow) {
     m_Todo->closeTodoAlarm();
     event->ignore();
@@ -530,8 +537,10 @@ void MainWindow::resetWinPos() {
   w = Reg.value("w").toInt();
   h = Reg.value("h").toInt();
 
-  if (x < 0) x = 0;
-  if (y < 0) y = 0;
+  if (x < 0)
+    x = 0;
+  if (y < 0)
+    y = 0;
 
   if (x >= 0 && y >= 0 && w > 0 && h > 0) {
     this->setGeometry(x, y, w, h);
@@ -539,13 +548,15 @@ void MainWindow::resetWinPos() {
 }
 
 void MainWindow::on_twItemClicked() {
-  QTreeWidget* tw = (QTreeWidget*)mw_one->ui->tabWidget->currentWidget();
-  if (!tw->currentIndex().isValid()) return;
+  QTreeWidget *tw = (QTreeWidget *)mw_one->ui->tabWidget->currentWidget();
+  if (!tw->currentIndex().isValid())
+    return;
 
-  QTreeWidgetItem* item = tw->currentItem();
-  if (item->parent() == NULL && item->childCount() == 0) return;
+  QTreeWidgetItem *item = tw->currentItem();
+  if (item->parent() == NULL && item->childCount() == 0)
+    return;
 
-  QTreeWidgetItem* pItem = NULL;
+  QTreeWidgetItem *pItem = NULL;
 
   QString stra;
   if (item->parent() == NULL) {
@@ -581,7 +592,8 @@ void MainWindow::on_twItemClicked() {
     QString str = stra + " " + CurrentYear;
     QString strYearMonth = get_Year(str) + get_Month(str);
     if (!isTabChanged) {
-      if (strYearMonth == CurrentYearMonth) return;
+      if (strYearMonth == CurrentYearMonth)
+        return;
     } else
       isTabChanged = false;
     startRead(strDate);
@@ -602,19 +614,19 @@ void MainWindow::on_twItemClicked() {
 void MainWindow::on_twItemDoubleClicked() {
   // m_EditRecord->monthSum();
 
-  QTreeWidget* tw = (QTreeWidget*)mw_one->ui->tabWidget->currentWidget();
-  QTreeWidgetItem* item = tw->currentItem();
+  QTreeWidget *tw = (QTreeWidget *)mw_one->ui->tabWidget->currentWidget();
+  QTreeWidgetItem *item = tw->currentItem();
   if (item->childCount() == 0 && item->parent()->childCount() > 0) {
     if (item->parent()->text(3).toInt() != QDate::currentDate().year()) {
-      auto msg = std::make_unique<ShowMessage>(mw_one);
-      msg->showMsg("Knot",
-                   tr("Only the data of the current year can be modified."), 1);
+      showInfo(appName,
+               tr("Only the data of the current year can be modified."));
       return;
     }
 
     QString t = item->text(0);
     QStringList l0 = t.split(".");
-    if (l0.count() == 2) t = l0.at(1);
+    if (l0.count() == 2)
+      t = l0.at(1);
     QStringList list = t.split(":");
     QString sh, sm, ss;
     if (list.count() == 3) {
@@ -674,7 +686,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
     return;
   }
 
-  QTreeWidget* tw = (QTreeWidget*)tabData->widget(index);
+  QTreeWidget *tw = (QTreeWidget *)tabData->widget(index);
   tw->setFocus();
 
   if (!loading) {
@@ -693,7 +705,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 void MainWindow::clickMainDate(int index) {
   listMainDateDetail.clear();
 
-  QTreeWidget* tw = get_tw(ui->tabWidget->currentIndex());
+  QTreeWidget *tw = get_tw(ui->tabWidget->currentIndex());
   int maindateIndex = index;
 
   int topIndex = tw->topLevelItemCount() - maindateIndex - 1;
@@ -703,12 +715,12 @@ void MainWindow::clickMainDate(int index) {
     return;
   }
 
-  QTreeWidgetItem* topItem = tw->topLevelItem(topIndex);
+  QTreeWidgetItem *topItem = tw->topLevelItem(topIndex);
   int childCount = topItem->childCount();
   QString text0, text1, text2, text3;
 
   for (int j = 0; j < childCount; j++) {
-    QTreeWidgetItem* childItem = topItem->child(j);
+    QTreeWidgetItem *childItem = topItem->child(j);
     text0 = childItem->text(0);
     text1 = childItem->text(1);
     text2 = childItem->text(2);
@@ -721,8 +733,9 @@ void MainWindow::clickMainDate(int index) {
   m_Method->refreshMainDateDetail();
 }
 
-bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
-  if (loading) return QWidget::eventFilter(watch, evn);
+bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
+  if (loading)
+    return QWidget::eventFilter(watch, evn);
 
   /*if (evn->type() == QEvent::KeyPress) {
     QKeyEvent* key = static_cast<QKeyEvent*>(evn);
@@ -737,10 +750,11 @@ bool MainWindow::eventFilter(QObject* watch, QEvent* evn) {
 }
 
 void MainWindow::sendFakeTouch() {
-  QWidget* w = mw_one->ui->frameMain;
-  if (!w) return;
+  QWidget *w = mw_one->ui->frameMain;
+  if (!w)
+    return;
 
-  auto send = [&](const QPoint& p) {
+  auto send = [&](const QPoint &p) {
     const QPointF pf(p);
 
     QMouseEvent press(QEvent::MouseButtonPress, pf, pf, Qt::LeftButton,
@@ -762,14 +776,14 @@ void MainWindow::sendFakeTouch() {
 
 void MainWindow::clearWidgetFocus() {
   // InputMethodReset::instance().fullReset();
-  if (QWidget* focused = focusWidget()) {
+  if (QWidget *focused = focusWidget()) {
     focused->clearFocus();
   }
 
   closeTextToolBar();
 }
 
-void MainWindow::hideEvent(QHideEvent* event) { QWidget::hideEvent(event); }
+void MainWindow::hideEvent(QHideEvent *event) { QWidget::hideEvent(event); }
 
 bool MainWindow::bakData() {
   // ✅ 先清理（总共只保留最新10个）
@@ -780,7 +794,8 @@ bool MainWindow::bakData() {
 
   // set zip filename
   QString pass = encPassword;
-  if (pass.length() > 0) pass = "_encrypt";
+  if (pass.length() > 0)
+    pass = "_encrypt";
   QString str = m_Notes->getDateTimeStr();
   zipfile = bakfileDir + str + pass + "_Knot.zip";
 
@@ -798,7 +813,8 @@ bool MainWindow::bakData() {
 
   // enc data
   QString enc_file = m_Method->useEnc(zipfile);
-  if (enc_file != "") zipfile = enc_file;
+  if (enc_file != "")
+    zipfile = enc_file;
 
   return true;
 }
@@ -809,13 +825,15 @@ bool MainWindow::bakData() {
  * @param pattern 文件名匹配模式（通配符）
  * @param maxKeep 保留数量
  */
-void MainWindow::cleanOldBackups(const QString& dirPath, const QString& pattern,
+void MainWindow::cleanOldBackups(const QString &dirPath, const QString &pattern,
                                  int maxKeep) {
   QDir dir(dirPath);
-  if (!dir.exists()) return;
+  if (!dir.exists())
+    return;
 
   // 参数保护
-  if (maxKeep < 0) maxKeep = 0;
+  if (maxKeep < 0)
+    maxKeep = 0;
 
   // 1. 获取所有匹配文件，不使用QDir任何内置排序
   QFileInfoList allFiles =
@@ -824,7 +842,7 @@ void MainWindow::cleanOldBackups(const QString& dirPath, const QString& pattern,
   // 2. 手动按【最后修改时间lastModified】降序排序
   // 新文件放前面，旧文件放列表尾部
   std::sort(allFiles.begin(), allFiles.end(),
-            [](const QFileInfo& fa, const QFileInfo& fb) {
+            [](const QFileInfo &fa, const QFileInfo &fb) {
               return fa.lastModified() > fb.lastModified();
             });
 
@@ -842,7 +860,7 @@ void MainWindow::cleanOldBackups(const QString& dirPath, const QString& pattern,
 
   // 3. 删除：从maxKeep下标开始，全部是更早的旧文件
   for (int i = maxKeep; i < allFiles.size(); ++i) {
-    const QFileInfo& fi = allFiles[i];
+    const QFileInfo &fi = allFiles[i];
     if (QFile::remove(fi.absoluteFilePath())) {
       qInfo() << "[Backup] Deleted:" << fi.fileName();
     } else {
@@ -852,13 +870,16 @@ void MainWindow::cleanOldBackups(const QString& dirPath, const QString& pattern,
 }
 
 void MainWindow::showProgress() {
-  if (dlgProg) closeProgress();  // 先关旧的
+  if (dlgProg)
+    closeProgress(); // 先关旧的
   dlgProg = m_Method->getProgBar();
-  if (!initMain) dlgProg->show();
+  if (!initMain)
+    dlgProg->show();
 }
 
 void MainWindow::closeProgress() {
-  if (dlgProg == nullptr) return;
+  if (dlgProg == nullptr)
+    return;
 
   if (!initMain && dlgProg) {
     dlgProg->close();
@@ -902,12 +923,12 @@ QString MainWindow::get_Year(QString date) {
   return "";
 }
 
-QTreeWidget* MainWindow::get_tw(int tabIndex) {
-  QTreeWidget* tw = (QTreeWidget*)tabData->widget(tabIndex);
+QTreeWidget *MainWindow::get_tw(int tabIndex) {
+  QTreeWidget *tw = (QTreeWidget *)tabData->widget(tabIndex);
   return tw;
 }
 
-void MainWindow::paintEvent(QPaintEvent* event) {
+void MainWindow::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event);
 
   // 获取背景色
@@ -932,7 +953,7 @@ void MainWindow::startInitReport() {
   myReadEBookThread->start();
 }
 
-void MainWindow::changeEvent(QEvent* event) {
+void MainWindow::changeEvent(QEvent *event) {
   if (event->type() == QEvent::WindowStateChange) {
   }
 }
@@ -1004,11 +1025,11 @@ int MainWindow::getMaxDay(QString sy, QString sm) {
   return maxDay;
 }
 
-void MainWindow::on_editAmount_textChanged(const QString& arg1) {
+void MainWindow::on_editAmount_textChanged(const QString &arg1) {
   m_EditRecord->on_editAmount_textChanged(arg1);
 }
 
-void MainWindow::on_editCategory_textChanged(const QString& arg1) {
+void MainWindow::on_editCategory_textChanged(const QString &arg1) {
   m_EditRecord->on_editCategory_textChanged(arg1);
 }
 
@@ -1054,13 +1075,13 @@ void MainWindow::on_rbRunning_clicked() {}
 
 void MainWindow::on_editFindNote_returnPressed() {}
 
-void MainWindow::on_cboxWebDAV_currentTextChanged(const QString& arg1) {
+void MainWindow::on_cboxWebDAV_currentTextChanged(const QString &arg1) {
   m_CloudBackup->changeComBoxWebDAV(arg1);
 }
 
 void MainWindow::ReadChartData() {
   int index = tabData->currentIndex();
-  QTreeWidget* tw = (QTreeWidget*)tabData->widget(index);
+  QTreeWidget *tw = (QTreeWidget *)tabData->widget(index);
 
   strY = get_Year(readDate);
   strM = get_Month(readDate);
@@ -1107,16 +1128,17 @@ void MainWindow::on_tabMotion_currentChanged(int index) {
 
 void MainWindow::on_chkZip_clicked() { m_Preferences->on_chkZip_clicked(); }
 
-void MainWindow::on_editPassword_textChanged(const QString& arg1) {
+void MainWindow::on_editPassword_textChanged(const QString &arg1) {
   m_Preferences->on_editPassword_textChanged(arg1);
 }
 
-void MainWindow::on_editValidate_textChanged(const QString& arg1) {
+void MainWindow::on_editValidate_textChanged(const QString &arg1) {
   m_Preferences->on_editValidate_textChanged(arg1);
 }
 
-void MainWindow::on_editAutoStopTTS_textChanged(const QString& arg1) {
-  if (arg1.length() > 0) m_Reader->setAutoStopPlayTime();
+void MainWindow::on_editAutoStopTTS_textChanged(const QString &arg1) {
+  if (arg1.length() > 0)
+    m_Reader->setAutoStopPlayTime();
 }
 
 void MainWindow::on_chkAutoStopTTS_clicked(bool checked) {
@@ -1126,9 +1148,9 @@ void MainWindow::on_chkAutoStopTTS_clicked(bool checked) {
     m_Reader->m_autoStopDeadline = QDateTime();
 }
 
-void MainWindow::showEvent(QShowEvent* event) { QMainWindow::showEvent(event); }
+void MainWindow::showEvent(QShowEvent *event) { QMainWindow::showEvent(event); }
 
-void MainWindow::on_editTitleKey_textChanged(const QString& arg1) {
+void MainWindow::on_editTitleKey_textChanged(const QString &arg1) {
   QString keyword = arg1.trimmed();
   QVariantList data;
 
@@ -1138,9 +1160,9 @@ void MainWindow::on_editTitleKey_textChanged(const QString& arg1) {
   } else {
     // 关键词搜索分支：严格对齐buildRecentList字段结构
     auto matchList = m_Notes->m_NoteManager->searchTitleWithPath(keyword);
-    for (const auto& pair : matchList) {
-      const QString& title = pair.first;
-      const QString& fullPath = pair.second;
+    for (const auto &pair : matchList) {
+      const QString &title = pair.first;
+      const QString &fullPath = pair.second;
 
       QVariantMap row;
       row["title"] = title;
@@ -1166,10 +1188,11 @@ QVariantList MainWindow::buildRecentList() {
   QVariantList result;
   const QString sepStr = "===";
 
-  const QStringList& recentList = m_NotesList->listRecentOpen;
-  for (const QString& line : recentList) {
+  const QStringList &recentList = m_NotesList->listRecentOpen;
+  for (const QString &line : recentList) {
     int splitPos = line.indexOf(sepStr);
-    if (splitPos == -1) continue;  // 格式不合法，直接跳过
+    if (splitPos == -1)
+      continue; // 格式不合法，直接跳过
 
     QString title = line.left(splitPos).trimmed();
     QString relPath = line.mid(splitPos + sepStr.size()).trimmed();
@@ -1184,7 +1207,7 @@ QVariantList MainWindow::buildRecentList() {
       row["title"] = title;
       row["path"] = fullPath;
       row["relPath"] = relPath;
-      row["uid"] = fullPath;  // 使用完整路径作为唯一标识
+      row["uid"] = fullPath; // 使用完整路径作为唯一标识
 
       result.append(row);
     }
@@ -1192,7 +1215,7 @@ QVariantList MainWindow::buildRecentList() {
   return result;
 }
 
-void MainWindow::setDisplayResult(const QVariantList& list) {}
+void MainWindow::setDisplayResult(const QVariantList &list) {}
 
 void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
 

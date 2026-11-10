@@ -263,9 +263,7 @@ void MainHelper::delBakFile() {
   int index = 0; // m_Method->getCurrentIndexFromQW(mw_one->ui->qwBakList);
   QString bak_file = ""; // m_Method->getText3(mw_one->ui->qwBakList, index);
 
-  auto m_ShowMsg = std::make_unique<ShowMessage>(mw_one);
-  if (!m_ShowMsg->showMsg("Knot",
-                          tr("Whether to remove") + "  " + bak_file + " ? ", 2))
+  if (!showConfirm(appName, tr("Whether to remove") + "  " + bak_file + " ? "))
     return;
 
   QFile file(bak_file);

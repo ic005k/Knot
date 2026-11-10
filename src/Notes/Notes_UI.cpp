@@ -253,14 +253,11 @@ void Notes::on_btnPDF_clicked() {
     doc->print(printer);
 
     if (isAndroid) {
-      auto msg1 = std::make_unique<ShowMessage>(mw_one);
-      msg1->ui->btnCancel->setText(tr("No"));
-      msg1->ui->btnOk->setText(tr("Yes"));
-      if (msg1->showMsg("PDF",
+      if (showConfirm("PDF",
                         tr("The PDF file is successfully exported.") + "\n\n" +
                             tr("Want to share this PDF file?") + "\n\n" +
-                            pdfFileName,
-                        2)) {
+                            pdfFileName
+                        )) {
         if (QFile::exists(pdfFileName)) {
           mw_one->m_ReceiveShare->shareImage(tr("Share to"), pdfFileName,
                                              "*/*");
