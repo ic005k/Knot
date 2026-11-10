@@ -30,7 +30,6 @@ jobs:
 
     env:
       targetName: Knot
-      VERSION: Linux
       orgName: Knot
       ONEDRIVE_SECRET: ${{ secrets.ONEDRIVE_SECRET }}
       QT_VERSION: ${{ matrix.qt_ver }}
@@ -100,6 +99,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+
+      # ========== 提取版本号（从 CMakeLists.txt 读取真实版本） ==========
+      - name: Extract version from CMakeLists.txt
+        id: version
+        run: |
+          APP_VER=$(grep -oP 'project\(\w+\s+VERSION\s+\K[\d.]+' CMakeLists.txt)
+          if [ -z "$APP_VER" ]; then
+            echo "ERROR: 无法从 CMakeLists.txt 提取版本号"
+            exit 1
+          fi
+          echo "Extracted version: $APP_VER"
+          echo "APP_VERSION=$APP_VER" >> $GITHUB_ENV
+          echo "version=$APP_VER" >> $GITHUB_OUTPUT
 
       - name: build ubuntu
         run: |
@@ -199,11 +211,11 @@ jobs:
           cp -a bin/release "${{ env.targetName }}-Linux-x86_64"
           chmod +x "${{ env.targetName }}-Linux-x86_64/AppRun"
 
-          tar -czf "${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz" \
+          tar -czf "${{ env.targetName }}-${{ env.APP_VERSION }}-x86_64.tar.gz" \
                     "${{ env.targetName }}-Linux-x86_64"
 
-          ls -lh "${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz"
-          tar -tzf "${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz" | head -30
+          ls -lh "${{ env.targetName }}-${{ env.APP_VERSION }}-x86_64.tar.gz"
+          tar -tzf "${{ env.targetName }}-${{ env.APP_VERSION }}-x86_64.tar.gz" | head -30
 
       # ========== 打包 3/4: .deb (Debian/Ubuntu) ==========
       - name: package deb
@@ -221,25 +233,45 @@ jobs:
           mkdir -p "$DEB_ROOT/usr/bin"
           mkdir -p "$DEB_ROOT/usr/share/applications"
           mkdir -p "$DEB_ROOT/usr/share/icons/hicolor/256x256/apps"
+          mkdir -p "$DEB_ROOT/usr/share/icons/hicolor/128x128/apps"
+          mkdir -p "$DEB_ROOT/usr/share/icons/hicolor/48x48/apps"
 
+          # --- 复制应用文件 ---
           cp -a bin/release/. "$DEB_ROOT/opt/${{ env.targetName }}/"
+
+          # --- 创建 /usr/bin 符号链接 ---
           ln -s "/opt/${{ env.targetName }}/AppRun" "$DEB_ROOT/usr/bin/${{ env.targetName }}"
 
-          if [ -f "bin/release/default.desktop" ]; then
-            sed 's|^Exec=.*|Exec=/opt/'"${{ env.targetName }}"'/AppRun|' \
-              "bin/release/default.desktop" \
-              > "$DEB_ROOT/usr/share/applications/${{ env.targetName }}.desktop"
-          fi
+          # --- 生成完整的 .desktop 文件（heredoc 终止标记必须与脚本同级，剥离后顶格）---
+          cat > "$DEB_ROOT/usr/share/applications/${{ env.targetName }}.desktop" << 'DESKTOPEOF'
+          [Desktop Entry]
+          Type=Application
+          Name=Knot
+          GenericName=Text Editor
+          Comment=A cross-platform Qt application
+          Exec=/opt/Knot/AppRun %f
+          Icon=Knot
+          Terminal=false
+          Categories=Utility;TextEditor;Development;
+          MimeType=text/plain;text/markdown;text/x-c;application/x-shellscript;
+          StartupNotify=true
+          Keywords=text;editor;markdown;qt;
+          DESKTOPEOF
 
+          # --- 安装图标（多尺寸，桌面环境按需查找）---
           if [ -f "bin/release/icon.png" ]; then
-            cp bin/release/icon.png \
-               "$DEB_ROOT/usr/share/icons/hicolor/256x256/apps/${{ env.targetName }}.png"
+            cp bin/release/icon.png "$DEB_ROOT/usr/share/icons/hicolor/256x256/apps/${{ env.targetName }}.png"
+            cp bin/release/icon.png "$DEB_ROOT/usr/share/icons/hicolor/128x128/apps/${{ env.targetName }}.png"
+            cp bin/release/icon.png "$DEB_ROOT/usr/share/icons/hicolor/48x48/apps/${{ env.targetName }}.png"
           fi
 
+          # --- 计算安装大小 ---
           INSTALLED_SIZE=$(du -sk "$DEB_ROOT" | cut -f1)
+
+          # --- 生成 DEBIAN/control（使用真实版本号）---
           {
             echo "Package: ${{ env.targetName }}"
-            echo "Version: 1.0-${{ env.VERSION }}"
+            echo "Version: ${{ env.APP_VERSION }}"
             echo "Section: x11"
             echo "Priority: optional"
             echo "Architecture: amd64"
@@ -251,9 +283,9 @@ jobs:
           } > "$DEB_ROOT/DEBIAN/control"
 
           dpkg-deb --build --root-owner-group "$DEB_ROOT" \
-            "${{ env.targetName }}_${{ env.VERSION }}_amd64.deb"
+            "${{ env.targetName }}_${{ env.APP_VERSION }}_amd64.deb"
 
-          ls -lh "${{ env.targetName }}_${{ env.VERSION }}_amd64.deb"
+          ls -lh "${{ env.targetName }}_${{ env.APP_VERSION }}_amd64.deb"
 
       # ========== 打包 4/4: .rpm (Fedora/openSUSE/RHEL) ==========
       - name: package rpm
@@ -269,27 +301,71 @@ jobs:
           mkdir -p "$RPM_WORK"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
           cp -a bin/release "$RPM_WORK/SOURCES/${{ env.targetName }}-Linux-x86_64"
 
+          # --- 将 desktop 和 icon 也放入 SOURCES（heredoc 终止标记必须与脚本同级）---
+          cat > "$RPM_WORK/SOURCES/${{ env.targetName }}.desktop" << 'DESKTOPEOF'
+          [Desktop Entry]
+          Type=Application
+          Name=Knot
+          GenericName=Text Editor
+          Comment=A cross-platform Qt application
+          Exec=/opt/Knot/AppRun %f
+          Icon=Knot
+          Terminal=false
+          Categories=Utility;TextEditor;Development;
+          MimeType=text/plain;text/markdown;text/x-c;application/x-shellscript;
+          StartupNotify=true
+          Keywords=text;editor;markdown;qt;
+          DESKTOPEOF
+
+          if [ -f "bin/release/icon.png" ]; then
+            cp bin/release/icon.png "$RPM_WORK/SOURCES/${{ env.targetName }}.png"
+          fi
+
+          # --- 生成 spec 文件（使用真实版本号 + 完整文件列表）---
           {
             echo "Name: ${{ env.targetName }}"
-            echo "Version: 1.0"
-            echo "Release: 1.${{ env.VERSION }}"
+            echo "Version: ${{ env.APP_VERSION }}"
+            echo "Release: 1"
             echo "Summary: ${{ env.targetName }} - Qt Application"
             echo "License: MIT"
             echo "URL: https://github.com/${{ github.repository }}"
             echo "BuildArch: x86_64"
+            echo "Requires: hicolor-icon-theme"
             echo ""
             echo "%description"
             echo "${{ env.targetName }} application for Linux."
             echo ""
             echo "%install"
+            # 应用主文件
             echo "mkdir -p %{buildroot}/opt/${{ env.targetName }}"
             echo "cp -a $RPM_WORK/SOURCES/${{ env.targetName }}-Linux-x86_64/. %{buildroot}/opt/${{ env.targetName }}/"
+            # 符号链接
             echo "mkdir -p %{buildroot}/usr/bin"
             echo "ln -s /opt/${{ env.targetName }}/AppRun %{buildroot}/usr/bin/${{ env.targetName }}"
+            # desktop 文件
+            echo "mkdir -p %{buildroot}/usr/share/applications"
+            echo "install -m 644 $RPM_WORK/SOURCES/${{ env.targetName }}.desktop \\"
+            echo "  %{buildroot}/usr/share/applications/${{ env.targetName }}.desktop"
+            # 图标（多尺寸）
+            echo "if [ -f $RPM_WORK/SOURCES/${{ env.targetName }}.png ]; then"
+            echo "  mkdir -p %{buildroot}/usr/share/icons/hicolor/256x256/apps"
+            echo "  mkdir -p %{buildroot}/usr/share/icons/hicolor/128x128/apps"
+            echo "  mkdir -p %{buildroot}/usr/share/icons/hicolor/48x48/apps"
+            echo "  install -m 644 $RPM_WORK/SOURCES/${{ env.targetName }}.png \\"
+            echo "    %{buildroot}/usr/share/icons/hicolor/256x256/apps/${{ env.targetName }}.png"
+            echo "  install -m 644 $RPM_WORK/SOURCES/${{ env.targetName }}.png \\"
+            echo "    %{buildroot}/usr/share/icons/hicolor/128x128/apps/${{ env.targetName }}.png"
+            echo "  install -m 644 $RPM_WORK/SOURCES/${{ env.targetName }}.png \\"
+            echo "    %{buildroot}/usr/share/icons/hicolor/48x48/apps/${{ env.targetName }}.png"
+            echo "fi"
             echo ""
             echo "%files"
             echo "/opt/${{ env.targetName }}"
             echo "/usr/bin/${{ env.targetName }}"
+            echo "%{_datadir}/applications/${{ env.targetName }}.desktop"
+            echo "%{_datadir}/icons/hicolor/256x256/apps/${{ env.targetName }}.png"
+            echo "%{_datadir}/icons/hicolor/128x128/apps/${{ env.targetName }}.png"
+            echo "%{_datadir}/icons/hicolor/48x48/apps/${{ env.targetName }}.png"
           } > "$RPM_WORK/SPECS/${{ env.targetName }}.spec"
 
           rpmbuild -bb "$RPM_WORK/SPECS/${{ env.targetName }}.spec" \
@@ -297,42 +373,43 @@ jobs:
 
           RPM_FILE=$(find "$RPM_WORK/RPMS" -name "${{ env.targetName }}-*.rpm" | head -1)
           if [ -z "$RPM_FILE" ]; then
-            echo "ERROR: rpm 文件未生成"
+            echo "ERROR: rpm file not generated"
             find "$RPM_WORK" -name "*.rpm" || true
             exit 1
           fi
-          cp "$RPM_FILE" "${{ env.targetName }}-1.0-${{ env.VERSION }}.x86_64.rpm"
-          ls -lh "${{ env.targetName }}-1.0-${{ env.VERSION }}.x86_64.rpm"
+          cp "$RPM_FILE" \
+             "${{ env.targetName }}-${{ env.APP_VERSION }}-1.x86_64.rpm"
+          ls -lh "${{ env.targetName }}-${{ env.APP_VERSION }}-1.x86_64.rpm"
 
       # ========== 上传 Artifacts ==========
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
-          path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
+          name: ${{ env.orgName }}-${{ env.APP_VERSION }}-x86_64.AppImage
+          path: ${{ env.targetName }}-${{ env.APP_VERSION }}-x86_64.AppImage
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.tar.gz
-          path: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz
+          name: ${{ env.orgName }}-${{ env.APP_VERSION }}-x86_64.tar.gz
+          path: ${{ env.targetName }}-${{ env.APP_VERSION }}-x86_64.tar.gz
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.VERSION }}-amd64.deb
-          path: ${{ env.targetName }}_${{ env.VERSION }}_amd64.deb
+          name: ${{ env.orgName }}-${{ env.APP_VERSION }}-amd64.deb
+          path: ${{ env.targetName }}_${{ env.APP_VERSION }}_amd64.deb
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.rpm
-          path: ${{ env.targetName }}-1.0-${{ env.VERSION }}.x86_64.rpm
+          name: ${{ env.orgName }}-${{ env.APP_VERSION }}-x86_64.rpm
+          path: ${{ env.targetName }}-${{ env.APP_VERSION }}-1.x86_64.rpm
 
       # ========== 上传 Release ==========
-      - name: uploadRelease
+      - name: uploadRelease (AppImage)
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.AppImage
-          asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.AppImage
+          file: ${{ env.targetName }}-${{ env.APP_VERSION }}-x86_64.AppImage
+          asset_name: ${{ env.orgName }}-${{ env.APP_VERSION }}-x86_64.AppImage
           tag: ${{ github.ref }}
           overwrite: true
 
@@ -341,8 +418,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.targetName }}-${{ env.VERSION }}-x86_64.tar.gz
-          asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.tar.gz
+          file: ${{ env.targetName }}-${{ env.APP_VERSION }}-x86_64.tar.gz
+          asset_name: ${{ env.orgName }}-${{ env.APP_VERSION }}-x86_64.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
 
@@ -351,8 +428,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.targetName }}_${{ env.VERSION }}_amd64.deb
-          asset_name: ${{ env.orgName }}-${{ env.VERSION }}_amd64.deb
+          file: ${{ env.targetName }}_${{ env.APP_VERSION }}_amd64.deb
+          asset_name: ${{ env.orgName }}-${{ env.APP_VERSION }}-amd64.deb
           tag: ${{ github.ref }}
           overwrite: true
 
@@ -361,7 +438,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.targetName }}-1.0-${{ env.VERSION }}.x86_64.rpm
-          asset_name: ${{ env.orgName }}-${{ env.VERSION }}-x86_64.rpm
+          file: ${{ env.targetName }}-${{ env.APP_VERSION }}-1.x86_64.rpm
+          asset_name: ${{ env.orgName }}-${{ env.APP_VERSION }}-x86_64.rpm
           tag: ${{ github.ref }}
           overwrite: true
