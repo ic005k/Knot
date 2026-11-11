@@ -617,7 +617,6 @@ SOURCES += \
     src/Comm/Method.cpp \
     src/Comm/QAESEncryption.cpp \
     src/Comm/ReceiveShare.cpp \
-    src/Comm/ShowMessage.cpp \
     src/Comm/TextEditToolbar.cpp \
     src/Comm/Time24Picker.cpp \
     src/Comm/WheelWidget.cpp \
@@ -1011,7 +1010,6 @@ HEADERS += \
     src/Comm/Method.h \
     src/Comm/QAESEncryption.h \
     src/Comm/ReceiveShare.h \
-    src/Comm/ShowMessage.h \
     src/Comm/TextEditToolbar.h \
     src/Comm/Time24Picker.h \
     src/Comm/WheelWidget.h \
@@ -1081,7 +1079,6 @@ FORMS += \
     src/AutoUpdate.ui \
     src/CategoryList.ui \
     src/CloudBackup.ui \
-    src/Comm/ShowMessage.ui \
     src/DateSelector.ui \
     src/MainWindow.ui \
     src/Notes/MoveTo.ui \
@@ -1397,6 +1394,3 @@ android {
     LIBS += -pthread
     DEFINES += GGML_USE_NEON GGML_NO_AVX GGML_USE_DOTPROD GGML_USE_FP16_VECTOR_ARITHMETIC
 }
-
-
-

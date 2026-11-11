@@ -45,9 +45,9 @@
 #include <QTextDocument>
 #include <QTextDocumentFragment>
 #include <algorithm>
-#include <cstdlib>  // 用于 getenv
+#include <cstdlib> // 用于 getenv
 #ifdef __linux__
-#include <unistd.h>  // Linux 下的 unsetenv/setenv
+#include <unistd.h> // Linux 下的 unsetenv/setenv
 #endif
 
 #ifndef Q_OS_ANDROID
@@ -58,7 +58,7 @@
 
 #include "TitleGenerator.h"
 #include "defines.h"
-#include "src/Comm/ShowMessage.h"
+
 #include "src/Notes/ColorDialog.h"
 #include "src/Notes/NoteDiffManager.h"
 #include "src/Notes/NoteManager.h"
@@ -73,10 +73,10 @@ class Notes;
 
 // 自定义 ListWidgetItem，存储搜索结果的位置信息
 struct TextMatch {
-  int line;          // 行号
-  int index;         // 列号（起始位置）
-  int length;        // 匹配长度
-  QString lineText;  // 该行完整文本
+  int line;         // 行号
+  int index;        // 列号（起始位置）
+  int length;       // 匹配长度
+  QString lineText; // 该行完整文本
 };
 
 struct NoteCounterItem {
@@ -85,17 +85,17 @@ struct NoteCounterItem {
 };
 
 struct ContextWords {
-  QStringList before;  // 光标前的字词（按从近到远排列）
-  QStringList after;   // 光标后的字词（按从近到远排列）
+  QStringList before; // 光标前的字词（按从近到远排列）
+  QStringList after;  // 光标后的字词（按从近到远排列）
 };
 
 class Notes : public QDialog {
   Q_OBJECT
 
- public:
-  explicit Notes(QWidget* parent = nullptr);
+public:
+  explicit Notes(QWidget *parent = nullptr);
   ~Notes();
-  Ui::Notes* ui;
+  Ui::Notes *ui;
 
   bool isAIQA = false;
 
@@ -104,7 +104,7 @@ class Notes : public QDialog {
   //   以 "IMG:" 开头 → 图片绝对路径
   //   以 "TXT:" 开头 → 摘要文本
   //   空字符串     → 无可预览内容
-  QString parsePreviewData(const QString& lineText, int cursorPos = -1);
+  QString parsePreviewData(const QString &lineText, int cursorPos = -1);
 
   QAtomicInteger<int> m_skipCount{0};
 
@@ -120,22 +120,22 @@ class Notes : public QDialog {
 
   bool isRequestOpenNoteEditor = false;
 
-  NoteManager* m_NoteManager;
+  NoteManager *m_NoteManager;
 
   QString new_title;
 
 #ifndef Q_OS_ANDROID
-  QsciScintilla* m_EditSource = nullptr;
+  QsciScintilla *m_EditSource = nullptr;
 #endif
 
-  QTimer* timerEditNote;
+  QTimer *timerEditNote;
   int px, py, mx, my;
 
   bool isTextChange;
 
   QString htmlBuffer;
-  QTextEdit* byTextEdit;
-  QLineEdit* byLineEdit;
+  QTextEdit *byTextEdit;
+  QLineEdit *byLineEdit;
   int androidKeyH;
   int start;
   int end;
@@ -161,7 +161,7 @@ class Notes : public QDialog {
   void findText();
   void show_findTextBack();
 
-  bool selectPDFFormat(QPrinter* printer);
+  bool selectPDFFormat(QPrinter *printer);
   void on_btnPDF_clicked();
 
   QString insertImage(QString fileName, bool isToAndroidView);
@@ -201,7 +201,7 @@ class Notes : public QDialog {
 
   void initEditor();
 
-  void openBrowserOnce(const QString& htmlPath);
+  void openBrowserOnce(const QString &htmlPath);
 
   void init_md();
 
@@ -213,30 +213,30 @@ class Notes : public QDialog {
 
   QStringList orgRemoteFiles;
 
-  QList<QJsonObject> loadAllDiffs(const QString& diffFilePath);
+  QList<QJsonObject> loadAllDiffs(const QString &diffFilePath);
 
-  bool appendDiffToFile(const QString& diffFilePath,
-                        const QString& noteFilePath, const QString& strDiff,
-                        const QString& diffHtml);
-  QString getCurrentJSON(const QString& md);
+  bool appendDiffToFile(const QString &diffFilePath,
+                        const QString &noteFilePath, const QString &strDiff,
+                        const QString &diffHtml);
+  QString getCurrentJSON(const QString &md);
 
-  void delRemoteFile(const QStringList& Files);
+  void delRemoteFile(const QStringList &Files);
 
-  bool openUrl(const QString& url);
+  bool openUrl(const QString &url);
 
   void refreshNote();
 
   bool checkAndUpdateCleanDate();
 
-  bool removeNoteVector(const QString& mdFilePath);
+  bool removeNoteVector(const QString &mdFilePath);
 
-  bool syncNoteVectorsBatchToDb(const QString& mdFilePath);
+  bool syncNoteVectorsBatchToDb(const QString &mdFilePath);
 
-  QString readNoteFileSafeFromRaw(const QByteArray& raw);
+  QString readNoteFileSafeFromRaw(const QByteArray &raw);
 
-  void popupNoteLinkList(const QString& arg1);
+  void popupNoteLinkList(const QString &arg1);
 
-  QString getCursorPosText(const QString& fullText, int cursorPos,
+  QString getCursorPosText(const QString &fullText, int cursorPos,
                            int textCount);
   bool isBtnAILinkClicked = false;
   bool isAndroidAILinkGen = false;
@@ -257,15 +257,15 @@ class Notes : public QDialog {
   void showLoadingDialog();
   void dismissLoadingDialog();
 
- protected:
-  void keyReleaseEvent(QKeyEvent* event) override;
-  void resizeEvent(QResizeEvent* event) override;
-  bool eventFilter(QObject* obj, QEvent* event) override;
-  void paintEvent(QPaintEvent* pEvent) override;
-  void closeEvent(QCloseEvent* event) override;
-  void showEvent(QShowEvent* event) override;
+protected:
+  void keyReleaseEvent(QKeyEvent *event) override;
+  void resizeEvent(QResizeEvent *event) override;
+  bool eventFilter(QObject *obj, QEvent *event) override;
+  void paintEvent(QPaintEvent *pEvent) override;
+  void closeEvent(QCloseEvent *event) override;
+  void showEvent(QShowEvent *event) override;
 
- public slots:
+public slots:
   void on_btnNext_clicked();
 
   void editVSBarValueChanged();
@@ -296,10 +296,10 @@ class Notes : public QDialog {
 
   void delLink(QString link);
 
- signals:
+signals:
   void syncFinished();
 
- private slots:
+private slots:
 
   void editSource_textChanged();
 
@@ -309,13 +309,13 @@ class Notes : public QDialog {
 
   void on_editFind_returnPressed();
 
-  void on_editFind_textChanged(const QString& arg1);
+  void on_editFind_textChanged(const QString &arg1);
 
   void on_btnView_clicked();
 
-  void on_editNoteLink_textChanged(const QString& arg1);
+  void on_editNoteLink_textChanged(const QString &arg1);
 
-  void onPopupItemClicked(QListWidgetItem* item);
+  void onPopupItemClicked(QListWidgetItem *item);
 
   void on_btnReplace_clicked();
 
@@ -331,13 +331,13 @@ class Notes : public QDialog {
 
   void on_btnClearQuestion_clicked();
 
-  void onSearchResultClicked(QListWidgetItem* item);
+  void onSearchResultClicked(QListWidgetItem *item);
 
   void on_listNoteBook_currentRowChanged(int currentRow);
 
   void on_listNoteList_currentRowChanged(int currentRow);
 
-  void on_listNoteBook_itemClicked(QListWidgetItem* item);
+  void on_listNoteBook_itemClicked(QListWidgetItem *item);
 
   void on_btnNBMenu_clicked();
 
@@ -355,26 +355,26 @@ class Notes : public QDialog {
 
   void on_btnRecycleBin_clicked();
 
- private:
-  void findAllAndShowResults(const QString& text);
+private:
+  void findAllAndShowResults(const QString &text);
   void updateResultCount(int count);
-  QTimer* m_findDebounceTimer = nullptr;
+  QTimer *m_findDebounceTimer = nullptr;
   int m_searchGeneration = 0;
-  void startBackgroundSearch(const QString& keyword);
-  void applySearchResults(const QList<TextMatch>& matches,
-                          const QStringList& htmlList);
+  void startBackgroundSearch(const QString &keyword);
+  void applySearchResults(const QList<TextMatch> &matches,
+                          const QStringList &htmlList);
 
 #ifdef VECTOR_SEARCH
-  QString loadNoteFullText(const QString& mdPath);
+  QString loadNoteFullText(const QString &mdPath);
 #endif
 
   QHash<QString, NoteCounterItem> m_counterMap;
 
-  void updateImagePreview(const QString& lineText, int cursorPos);
-  QString generateSmartSummary(const QString& filePath);
+  void updateImagePreview(const QString &lineText, int cursorPos);
+  QString generateSmartSummary(const QString &filePath);
   QRegularExpression m_linkRegex;
   QRegularExpression m_imgRegex;
-  QCache<QString, QString> m_summaryCache;  // 默认上限100条
+  QCache<QString, QString> m_summaryCache; // 默认上限100条
 
   static inline QMutex s_embMutex;
   static inline QMutex s_vecDbMutex;
@@ -405,60 +405,60 @@ class Notes : public QDialog {
 
   int newHeight = 0;
 
-  void wheelEvent(QWheelEvent* e) override;
+  void wheelEvent(QWheelEvent *e) override;
 
   QColor StringToColor(QString mRgbStr);
 
   void setOpenSearchResultForAndroid(bool isValue, QString strSearchText);
 
 #ifndef Q_OS_ANDROID
-  void initMarkdownEditor(QsciScintilla* editor);
+  void initMarkdownEditor(QsciScintilla *editor);
 #endif
 
-  void searchText(const QString& text, bool forward);
+  void searchText(const QString &text, bool forward);
   void searchNext();
   void searchPrevious();
 
-  void searchWithCount(const QString& text);
+  void searchWithCount(const QString &text);
   QList<QPair<int, int>> m_matchPositions;
   int m_currentMatchIndex = -1;
   void jumpToNextMatch();
   void jumpToPrevMatch();
 
 #ifndef Q_OS_ANDROID
-  QsciLexerMarkdown* markdownLexer = nullptr;
+  QsciLexerMarkdown *markdownLexer = nullptr;
 
-  QString takeFirstNTokens(const QString& text, int count = 10);
+  QString takeFirstNTokens(const QString &text, int count = 10);
 
-  int getCursorCharOffset(QsciScintilla* editor);
+  int getCursorCharOffset(QsciScintilla *editor);
 #endif
 
   void initMarkdownLexer();
-  QString imageToBase64(const QString& path);
+  QString imageToBase64(const QString &path);
   QString addImagePathToHtml(QString strhtml);
 
   void initEditorScrollBars();
 
-  void saveEditorState(const QString& filePath);
-  void restoreEditorState(const QString& filePath);
+  void saveEditorState(const QString &filePath);
+  void restoreEditorState(const QString &filePath);
 
-  QString getFileVersion(const QString& filePath);
-  void updateDiff(const QString& oldText, const QString& newText);
+  QString getFileVersion(const QString &filePath);
+  void updateDiff(const QString &oldText, const QString &newText);
 
   void zipNoteToSyncList();
   void refreshLocalHtmlFileInAndroid();
 
-  void processSingleRemoteFile(const QString& file);
+  void processSingleRemoteFile(const QString &file);
   void startBackgroundProcessRemoteFiles_MultiThread();
   void buildCleanFileList();
-  void insertNoteLink(const QString& title, const QString& path);
+  void insertNoteLink(const QString &title, const QString &path);
   void switchMdDarkTheme(bool dark);
   void applyMdLexerTheme(bool darkMode);
   void highlightCurrentResult(int line, int index);
-  void buildHighlightedItem(QListWidgetItem* item, int lineNum,
-                            const QString& displayPrefix, const QString& prefix,
-                            const QString& match, const QString& suffix,
-                            const QString& displaySuffix);
+  void buildHighlightedItem(QListWidgetItem *item, int lineNum,
+                            const QString &displayPrefix, const QString &prefix,
+                            const QString &match, const QString &suffix,
+                            const QString &displaySuffix);
 
   QString lightPCScrollbarStyle = R"(
         /* Light Vertical Scrollbar */
@@ -511,4 +511,4 @@ class Notes : public QDialog {
         })";
 };
 
-#endif  // NOTES_H
+#endif // NOTES_H

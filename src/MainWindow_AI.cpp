@@ -192,10 +192,6 @@ void MainWindow::sendAiChatRequest(const AiSingleRecord &cfg,
                                           "showAiMarkdownDialog",
                                           "reader/DocumentActivity", list);
               } else {
-                m_MsgBox->ui->btnOk->setText(tr("Add Note"));
-                if (showConfirm(tr("AI Response Completed"), aiReplyText)) {
-                  m_Reader->addBookNote(aiReplyText);
-                }
               }
             } else if (m_Notes->isAIQA) {
               m_Notes->ui->editAnswer->setText(aiReplyText);
@@ -288,7 +284,6 @@ void MainWindow::checkAiConnectivity(const AiSingleRecord &cfg,
               return;
             }
             // 连通测试弹窗提示
-            // auto msg = std::make_unique<ShowMessage>(mw_one);
             // QString text = tr("Connection test passed!") + "\n" +
             //               tr("Model ID: %1").arg(cfg.modelId);
             // showInfo(tr("Success"), text);

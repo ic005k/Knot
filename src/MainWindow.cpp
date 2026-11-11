@@ -19,7 +19,6 @@ CategoryList *m_CategoryList;
 ColorDialog *colorDlg;
 PrintPDF *m_PrintPDF = nullptr;
 QTreeWidget *twrb, *tw;
-ShowMessage *m_MsgBox = nullptr;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {

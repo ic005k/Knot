@@ -52,7 +52,7 @@
 #include <QTreeWidgetItem>
 
 #include "BakFileList.h"
-#include "Comm/ui_ShowMessage.h"
+
 #include "Exercise/ui_StepsOptions.h"
 #include "MainHelper.h"
 #include "Notes/ui_Notes.h"
@@ -64,7 +64,7 @@
 #include "src/CloudBackup.h"
 #include "src/Comm/Method.h"
 #include "src/Comm/ReceiveShare.h"
-#include "src/Comm/ShowMessage.h"
+
 #include "src/Comm/TextEditToolbar.h"
 #include "src/EditRecord.h"
 #include "src/Exercise/Steps.h"
@@ -104,41 +104,40 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-extern MainWindow* mw_one;
-extern QSettings* iniPreferences;
+extern MainWindow *mw_one;
+extern QSettings *iniPreferences;
 
-extern CloudBackup* m_CloudBackup;
-extern QTreeWidgetItem* parentItem;
-extern Reader* m_Reader;
-extern Method* m_Method;
-extern Notes* m_Notes;
-extern NotesList* m_NotesList;
-extern StepsOptions* m_StepsOptions;
-extern Steps* m_Steps;
-extern QTabWidget* tabData;
-extern CategoryList* m_CategoryList;
-extern ColorDialog* colorDlg;
-extern PrintPDF* m_PrintPDF;
+extern CloudBackup *m_CloudBackup;
+extern QTreeWidgetItem *parentItem;
+extern Reader *m_Reader;
+extern Method *m_Method;
+extern Notes *m_Notes;
+extern NotesList *m_NotesList;
+extern StepsOptions *m_StepsOptions;
+extern Steps *m_Steps;
+extern QTabWidget *tabData;
+extern CategoryList *m_CategoryList;
+extern ColorDialog *colorDlg;
+extern PrintPDF *m_PrintPDF;
 extern QTreeWidget *twrb, *tw;
-extern ShowMessage* m_MsgBox;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
- public:
-  MainWindow(QWidget* parent = nullptr);
+public:
+  MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
-  Ui::MainWindow* ui;
+  Ui::MainWindow *ui;
 
   QStringList listMyEventTitle, listMainDate, listMainDateDetail;
 
   void emitAndroidBackSignal() { emit androidBackSignal(); }
 
-  QMenu* mainMenu = nullptr;
+  QMenu *mainMenu = nullptr;
 
   int x, y, w, h;
 
-  QInputDialog* m_RenameDlg = nullptr;
+  QInputDialog *m_RenameDlg = nullptr;
 
   QString strStyle = QStringLiteral(
       "QCheckBox {"
@@ -203,7 +202,7 @@ class MainWindow : public QMainWindow {
 
   QString strLatestModify = tr("None");
 
-  QDialog* dlgProg = nullptr;
+  QDialog *dlgProg = nullptr;
 
   void setMini();
 
@@ -227,11 +226,10 @@ class MainWindow : public QMainWindow {
 
   int mwh;
 
-  QString listStyle =
-      "QListWidget{item-background: "
-      "rgb(244,23,24); item-color:rgb(255,255,255); "
-      "border-radius:2px;border:2px "
-      "solid red;}";
+  QString listStyle = "QListWidget{item-background: "
+                      "rgb(244,23,24); item-color:rgb(255,255,255); "
+                      "border-radius:2px;border:2px "
+                      "solid red;}";
   int sRate = 0;
   qreal ax, ay, az, gx, gy, gz;
   int testCount1 = 0;
@@ -240,20 +238,20 @@ class MainWindow : public QMainWindow {
 
   qlonglong CurTableCount = 0;
 
-  static void get_Today(QTreeWidget*);
+  static void get_Today(QTreeWidget *);
 
-  SaveThread* mySaveThread;
-  ReadChartThread* myReadChartThread;
-  ReadTWThread* m_ReadTWThread;
-  ReadEBookThread* myReadEBookThread;
-  BakDataThread* myBakDataThread;
-  ImportDataThread* myImportDataThread;
-  SearchThread* mySearchThread;
-  UpdateGpsMapThread* myUpdateGpsMapThread;
-  GetGpsDataThread* myGetGpsDataThread;
-  BakFileList* m_BakFileList;
+  SaveThread *mySaveThread;
+  ReadChartThread *myReadChartThread;
+  ReadTWThread *m_ReadTWThread;
+  ReadEBookThread *myReadEBookThread;
+  BakDataThread *myBakDataThread;
+  ImportDataThread *myImportDataThread;
+  SearchThread *mySearchThread;
+  UpdateGpsMapThread *myUpdateGpsMapThread;
+  GetGpsDataThread *myGetGpsDataThread;
+  BakFileList *m_BakFileList;
 
-  QThread* m_workerThread;
+  QThread *m_workerThread;
 
   static void ReadChartData();
   static int get_Day(QString date);
@@ -265,42 +263,42 @@ class MainWindow : public QMainWindow {
   QList<QVariant> qmlFreqValues;
   QList<QVariant> qmlAmountValues;
 
-  AboutThis* m_AboutThis;
-  EditRecord* m_EditRecord;
-  Todo* m_Todo;
-  Report* m_Report;
-  Preferences* m_Preferences;
+  AboutThis *m_AboutThis;
+  EditRecord *m_EditRecord;
+  Todo *m_Todo;
+  Report *m_Report;
+  Preferences *m_Preferences;
 
-  TodoAlarm* m_TodoAlarm;
-  DateSelector* m_DateSelector = nullptr;
+  TodoAlarm *m_TodoAlarm;
+  DateSelector *m_DateSelector = nullptr;
 
-  ReceiveShare* m_ReceiveShare;
-  MainHelper* m_MainHelper;
+  ReceiveShare *m_ReceiveShare;
+  MainHelper *m_MainHelper;
 
-  QList<QTreeWidgetItem*> findItemList;
+  QList<QTreeWidgetItem *> findItemList;
   bool isFindTextChange = false;
   int findPos = 0;
 
-  QTimer* timer;
+  QTimer *timer;
 
-  QTimer* timerSyncData;
-  QTimer* tmeStartRecordAudio;
+  QTimer *timerSyncData;
+  QTimer *tmeStartRecordAudio;
 
-  static void readData(QTreeWidget*);
+  static void readData(QTreeWidget *);
 
   static void saveTab();
   bool isSlide = false;
   void init_TotalData();
 
-  bool del_Data(QTreeWidget*);
-  static QTreeWidget* get_tw(int tabIndex);
+  bool del_Data(QTreeWidget *);
+  static QTreeWidget *get_tw(int tabIndex);
 
   static QStringList get_MonthList(QString strY, QString strM);
   static void drawMonthChart();
 
   static void SaveFile(QString);
 
-  static void init_Stats(QTreeWidget*);
+  static void init_Stats(QTreeWidget *);
 
   void startSave(QString);
   void startRead(QString);
@@ -351,16 +349,16 @@ class MainWindow : public QMainWindow {
 
   void init_ButtonStyle();
 
-  void setToolButtonAnimation(QToolButton* btn, bool setMyStyle);
-  void init_Menu(QMenu* mainMenu);
+  void setToolButtonAnimation(QToolButton *btn, bool setMyStyle);
+  void init_Menu(QMenu *mainMenu);
   void init_Theme();
   void init_UIWidget();
-  QTreeWidget* init_TreeWidget(QString name);
+  QTreeWidget *init_TreeWidget(QString name);
 
-  void sendAiChatRequest(const AiSingleRecord& cfg,
-                         const QString& userQuestion);
-  void aiChatQuery(const QString& userQuestion);
-  void checkAiConnectivity(const AiSingleRecord& cfg,
+  void sendAiChatRequest(const AiSingleRecord &cfg,
+                         const QString &userQuestion);
+  void aiChatQuery(const QString &userQuestion);
+  void checkAiConnectivity(const AiSingleRecord &cfg,
                            std::function<void()> onSuccess);
 
   void setVectorStatus(int status, int current, int total);
@@ -371,31 +369,31 @@ class MainWindow : public QMainWindow {
 
   void on_btnAIExerciseSuggestions_clicked();
 
-  void addTab(const QString& customTabText);
+  void addTab(const QString &customTabText);
 
-  void renameTab(const QString& newName);
+  void renameTab(const QString &newName);
 
   void delTab();
   void clickMainDate(int index);
 
-  void cleanOldBackups(const QString& dirPath, const QString& pattern,
+  void cleanOldBackups(const QString &dirPath, const QString &pattern,
                        int maxKeep);
 
- protected:
-  void closeEvent(QCloseEvent* event) override;
-  bool eventFilter(QObject* watch, QEvent* evn) override;
-  void paintEvent(QPaintEvent* event) override;
-  void changeEvent(QEvent* event) override;
-  void resizeEvent(QResizeEvent* event) override;
+protected:
+  void closeEvent(QCloseEvent *event) override;
+  bool eventFilter(QObject *watch, QEvent *evn) override;
+  void paintEvent(QPaintEvent *event) override;
+  void changeEvent(QEvent *event) override;
+  void resizeEvent(QResizeEvent *event) override;
 
-  void hideEvent(QHideEvent* event) override;
+  void hideEvent(QHideEvent *event) override;
 
-  void showEvent(QShowEvent* event) override;
+  void showEvent(QShowEvent *event) override;
 
- public slots:
+public slots:
   void on_btnAISteps_clicked();
   void on_btnRecentOpen_clicked();
-  void on_btnAIBookExplanation_clicked(const QString& selectedText);
+  void on_btnAIBookExplanation_clicked(const QString &selectedText);
 
   void safeCloseProgress();
 
@@ -469,7 +467,7 @@ class MainWindow : public QMainWindow {
 
   void on_openKnotBakDir();
 
-  void on_btnStartSearch_clicked(const QString& searchStr);
+  void on_btnStartSearch_clicked(const QString &searchStr);
 
   void on_btnChart();
 
@@ -483,7 +481,7 @@ class MainWindow : public QMainWindow {
 
   void on_ExecShortcut();
 
-  void on_btnFindNotes_clicked(const QString& kw);
+  void on_btnFindNotes_clicked(const QString &kw);
 
   void on_btnShowBookmark_clicked();
 
@@ -547,7 +545,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnAIReportAnalysis_clicked();
 
- private slots:
+private slots:
 
   void onAndroidBackHandle();
 
@@ -567,9 +565,9 @@ class MainWindow : public QMainWindow {
 
   void on_btnOkEditRecord_clicked();
 
-  void on_editAmount_textChanged(const QString& arg1);
+  void on_editAmount_textChanged(const QString &arg1);
 
-  void on_editCategory_textChanged(const QString& arg1);
+  void on_editCategory_textChanged(const QString &arg1);
 
   void on_editDetails_textChanged();
 
@@ -615,7 +613,7 @@ class MainWindow : public QMainWindow {
 
   void on_btnCopyNoteLink_clicked();
 
-  void on_cboxWebDAV_currentTextChanged(const QString& arg1);
+  void on_cboxWebDAV_currentTextChanged(const QString &arg1);
 
   void on_btnShowCboxList_clicked();
 
@@ -639,17 +637,17 @@ class MainWindow : public QMainWindow {
 
   void on_chkZip_clicked();
 
-  void on_editPassword_textChanged(const QString& arg1);
+  void on_editPassword_textChanged(const QString &arg1);
 
-  void on_editValidate_textChanged(const QString& arg1);
+  void on_editValidate_textChanged(const QString &arg1);
 
-  void on_editAutoStopTTS_textChanged(const QString& arg1);
+  void on_editAutoStopTTS_textChanged(const QString &arg1);
 
   void on_chkAutoStopTTS_clicked(bool checked);
 
   void on_actionCopyLog();
 
-  void on_editTitleKey_textChanged(const QString& arg1);
+  void on_editTitleKey_textChanged(const QString &arg1);
 
   void on_btnOpenSearchView_clicked();
 
@@ -657,9 +655,9 @@ class MainWindow : public QMainWindow {
 
   void on_btnTodo_clicked();
 
- private:
-  QNetworkAccessManager* m_ainetMgr;
-  QUrl buildAiApiUrl(const QString& rawEndpoint);
+private:
+  QNetworkAccessManager *m_ainetMgr;
+  QUrl buildAiApiUrl(const QString &rawEndpoint);
   bool isMoveEntry;
 
   int nFlashCount = 0;
@@ -683,10 +681,10 @@ class MainWindow : public QMainWindow {
 
   void init_Thread_Timer();
 
-  void setDisplayResult(const QVariantList& list);
+  void setDisplayResult(const QVariantList &list);
 
- signals:
+signals:
   void androidBackSignal();
 };
 
-#endif  // MAINWINDOW_H
+#endif // MAINWINDOW_H

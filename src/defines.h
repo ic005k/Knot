@@ -21,6 +21,8 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <atomic>
+#include <qmainwindow.h>
+#include <qwidget.h>
 #include <utility>
 
 #include "CloudBackup.h"
@@ -37,7 +39,6 @@ class NotesList;
 class StepsOptions;
 class Steps;
 class ReaderSet;
-class ShowMessage;
 class CategoryList;
 class ColorDialog;
 class PrintPDF;
@@ -55,6 +56,7 @@ inline QSharedMemory sharedMemory;
 #endif
 
 extern Method *m_Method;
+extern MainWindow *mw_one;
 
 inline QPointer<TextEditToolbar> textToolbar;
 inline QPointer<TextEditToolbar> textToolbarDynamic;
@@ -334,32 +336,7 @@ template <typename Func> inline void safeInvoke(Func &&func) {
   QMetaObject::invokeMethod(qApp, std::forward<Func>(func), Qt::AutoConnection);
 }
 
-/**
- * @brief 通用信息提示框 (仅确定按钮)
- */
-inline void showInfo(const QString &title, const QString &text,
-                     QWidget *parent = nullptr) {
-  // 如果 parent 为空，默认使用主窗口作为父级，防止弹窗位置乱跑
-  if (!parent && qApp->activeWindow()) {
-    parent = qApp->activeWindow();
-  }
-  QMessageBox::information(parent, title, text);
-}
-
-/**
- * @brief 通用确认提示框 (确定/取消 或 Yes/No)
- * @return true: 用户点击了确定/Yes; false: 用户点击了取消/No/关闭
- */
-inline bool showConfirm(const QString &title, const QString &text,
-                        QWidget *parent = nullptr) {
-  if (!parent && qApp->activeWindow()) {
-    parent = qApp->activeWindow();
-  }
-
-  // 使用 Question 图标，更符合"询问"的语义
-  // 这里使用了 Yes/No，Ok/Cancel，可替换为 QMessageBox::Ok |
-  // QMessageBox::Cancel
-  return QMessageBox::question(parent, title, text,
-                               QMessageBox::Yes | QMessageBox::No) ==
-         QMessageBox::Yes;
-}
+void showInfo(const QString &title, const QString &text,
+              QWidget *parent = nullptr);
+bool showConfirm(const QString &title, const QString &text,
+                 QWidget *parent = nullptr);

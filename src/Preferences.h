@@ -16,7 +16,6 @@
 #include <QToolButton>
 #include <memory>
 
-#include "src/Comm/ShowMessage.h"
 #include "src/Comm/TextEditToolbar.h"
 
 struct AiSingleRecord {
