@@ -28,8 +28,6 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
 #include <QtCore/QIODevice>
 #include "quazip_global.h"
 
-#include <zlib.h>
-
 class QuaZIODevicePrivate;
 
 /// A class to compress/decompress QIODevice.
@@ -98,6 +96,6 @@ protected:
   /// Implementation of QIODevice::writeData().
   qint64 writeData(const char *data, qint64 maxSize) override;
 private:
-  QuaZIODevicePrivate *d;
+  QuaZIODevicePrivate *d{};
 };
 #endif // QUAZIP_QUAZIODEVICE_H

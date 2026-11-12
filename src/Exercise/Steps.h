@@ -1,7 +1,6 @@
 #ifndef STEPS_H
 #define STEPS_H
 
-#include <QAccelerometer>
 #include <QDebug>
 #include <QDialog>
 #include <QGeoCoordinate>
@@ -74,56 +73,56 @@ class CompassWidget;
 class Steps : public QDialog {
   Q_OBJECT
 
- public:
-  explicit Steps(QWidget* parent = nullptr);
+public:
+  explicit Steps(QWidget *parent = nullptr);
   ~Steps();
-  Ui::Steps* ui;
+  Ui::Steps *ui;
 
   QString strCurrentTemp, strCurrentWeatherIcon;
 
   QString ai_latlon_text = "";
 
-  QDialog* m_remarksDialog = nullptr;
+  QDialog *m_remarksDialog = nullptr;
 
   QString ai_stepstext = "";
   bool isAiSteps = false;
 
   QString strMapKeyTestInfo;
 
-  GeoAddressResolver* addressResolver = nullptr;
+  GeoAddressResolver *addressResolver = nullptr;
   QString m_lastAddress;
   bool isShowRoute = false;
 
-  Speedometer* m_speedometer;
+  Speedometer *m_speedometer;
 
   QString btnRoundStyle =
       "QToolButton {"
-      "   border-radius: 40px;"        // 设置圆角半径为按钮宽度的一半
-      "   background-color: #00AF50;"  // 设置背景颜色
-      "   color: white;"               // 设置文字颜色
-      "   min-width: 80px;"            // 设置最小宽度
-      "   min-height: 80px;"           // 设置最小高度
+      "   border-radius: 40px;"       // 设置圆角半径为按钮宽度的一半
+      "   background-color: #00AF50;" // 设置背景颜色
+      "   color: white;"              // 设置文字颜色
+      "   min-width: 80px;"           // 设置最小宽度
+      "   min-height: 80px;"          // 设置最小高度
       "}"
       "QToolButton:hover {"
-      "   background-color: #00AF50;"  // 设置鼠标悬停时的背景颜色
+      "   background-color: #00AF50;" // 设置鼠标悬停时的背景颜色
       "}"
       "QToolButton:pressed {"
-      "   background-color: #3d8b40;"  // 设置按钮按下时的背景颜色
+      "   background-color: #3d8b40;" // 设置按钮按下时的背景颜色
       "}";
 
   QString btnRoundStyleRed =
       "QToolButton {"
-      "   border-radius: 40px;"        // 设置圆角半径为按钮宽度的一半
-      "   background-color: #FF0000;"  // 设置背景颜色
-      "   color: white;"               // 设置文字颜色
-      "   min-width: 80px;"            // 设置最小宽度
-      "   min-height: 80px;"           // 设置最小高度
+      "   border-radius: 40px;"       // 设置圆角半径为按钮宽度的一半
+      "   background-color: #FF0000;" // 设置背景颜色
+      "   color: white;"              // 设置文字颜色
+      "   min-width: 80px;"           // 设置最小宽度
+      "   min-height: 80px;"          // 设置最小高度
       "}"
       "QToolButton:hover {"
-      "   background-color: #FF0000;"  // 设置鼠标悬停时的背景颜色
+      "   background-color: #FF0000;" // 设置鼠标悬停时的背景颜色
       "}"
       "QToolButton:pressed {"
-      "   background-color: #3d8b40;"  // 设置按钮按下时的背景颜色
+      "   background-color: #3d8b40;" // 设置按钮按下时的背景颜色
       "}";
 
   QString lblStyle =
@@ -169,12 +168,12 @@ class Steps : public QDialog {
 
   void getAddress(double lat, double lon);
 
- protected:
-  void keyReleaseEvent(QKeyEvent* event) override;
+protected:
+  void keyReleaseEvent(QKeyEvent *event) override;
 
-  bool eventFilter(QObject* obj, QEvent* event) override;
+  bool eventFilter(QObject *obj, QEvent *event) override;
 
- public:
+public:
   void closeSteps();
 
   QStringList listText;
@@ -182,7 +181,7 @@ class Steps : public QDialog {
   QList<QVariantList> m_Altitude;
   int nYear, nMonth;
 
-  QTimer* tmeRefreshSteps;
+  QTimer *tmeRefreshSteps;
 
   bool isChkPlayRunVoice = false;
 
@@ -192,7 +191,7 @@ class Steps : public QDialog {
   QString bearingToDirection(double bearing);
   double calculateBearing(double lat1, double lon1, double lat2, double lon2);
 
-  QDialog* statsDialog = nullptr;
+  QDialog *statsDialog = nullptr;
 
   void on_btnReset_clicked();
 
@@ -215,9 +214,9 @@ class Steps : public QDialog {
   void saveMovementType();
   void setVibrate();
 
-  void writeCSV(const QString& filePath, const QList<QStringList>& data);
+  void writeCSV(const QString &filePath, const QList<QStringList> &data);
 
-  void appendToCSV(const QString& filePath, const QStringList& data);
+  void appendToCSV(const QString &filePath, const QStringList &data);
   void updateInfoText(QString strDistance, QString strSpeed);
   QString getCurrentDate();
   void updateHardSensorSteps();
@@ -237,26 +236,26 @@ class Steps : public QDialog {
 
   void prepareDestroy();
   QString getDirectionText();
-  QLabel* getLabelGpsInfoWidget();
+  QLabel *getLabelGpsInfoWidget();
   void refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
                          QList<QVariantList> m_Altitude);
-  QVector<MonthData> loadSportsData(const QString& year, int month) const;
-  QStringList getSportsDataSummary(const QVector<MonthData>& data,
-                                   const QString& year);
+  QVector<MonthData> loadSportsData(const QString &year, int month) const;
+  QStringList getSportsDataSummary(const QVector<MonthData> &data,
+                                   const QString &year);
   void getMySportData(QString strYear, int m);
   int getCurrentCount();
 
-  QVariantList processSensorData(const QVariantList& rawData, int screenWidth);
-  QVariantList lttbDownsample(const QVariantList& data, int targetPoints);
-  QVariantList medianFilter(const QVariantList& data, int windowSize);
- public slots:
+  QVariantList processSensorData(const QVariantList &rawData, int screenWidth);
+  QVariantList lttbDownsample(const QVariantList &data, int targetPoints);
+  QVariantList medianFilter(const QVariantList &data, int windowSize);
+public slots:
   void clearAllGpsList();
   void getGpsTrack(int index);
   void openMapWindow();
   void getRouteList(int index);
-  void getRemarks(const QString& strGpsTime);
+  void getRemarks(const QString &strGpsTime);
   void updateGetGpsData();
- private slots:
+private slots:
 
   void refreshSteps();
 
@@ -278,11 +277,11 @@ class Steps : public QDialog {
 
   void on_chkPlayRunVoice_clicked(bool checked);
 
- private:
+private:
   int curCount;
   QStringList listSteps;
   QString stepsThreshold;
-  QThread* geoThread;
+  QThread *geoThread;
   QString str_type = "";
   bool latValid = false;
   bool lonValid = false;
@@ -291,14 +290,14 @@ class Steps : public QDialog {
   bool isGetAddressSuccess;
   QMutex m_dataMutex;
 
-  QDateTime m_lastGetAddressTime;    // 上次获取地址的时间
-  QDateTime m_lastFetchWeatherTime;  // 上次请求天气的时间
+  QDateTime m_lastGetAddressTime;   // 上次获取地址的时间
+  QDateTime m_lastFetchWeatherTime; // 上次请求天气的时间
   bool isInitTime;
 
-  float saveInterval = 0.008f;  // 每8米记录一次（徒步/跑步）
+  float saveInterval = 0.008f; // 每8米记录一次（徒步/跑步）
 
   std::vector<int> m_stepData;
-  StepHillChart* m_stepChart;
+  StepHillChart *m_stepChart;
 
   double bearing1;
 
@@ -327,7 +326,7 @@ class Steps : public QDialog {
   double m_distance;
   double m_TotalDistance, oldTotalDistance;
   double m_speed;
-  float m_lastSaveDistance = 0.0f;  // 上次记录数据时的总距离
+  float m_lastSaveDistance = 0.0f; // 上次记录数据时的总距离
   QDateTime m_startTime;
   QTime m_time;
 
@@ -347,20 +346,20 @@ class Steps : public QDialog {
   QString dAltitude = "0.00";
 
   // 地形距离统计
-  double m_uphillDistance = 0.0;    // 上坡总距离（公里）
-  double m_flatDistance = 0.0;      // 平路总距离（公里）
-  double m_downhillDistance = 0.0;  // 下坡总距离（公里）
+  double m_uphillDistance = 0.0;   // 上坡总距离（公里）
+  double m_flatDistance = 0.0;     // 平路总距离（公里）
+  double m_downhillDistance = 0.0; // 下坡总距离（公里）
 
   // 海拔差阈值（单位：米），可根据实际场景调整
-  const double UPHILL_THRESHOLD = 0.5;  // 海拔差 > 0.5m 视为上坡
+  const double UPHILL_THRESHOLD = 0.5; // 海拔差 > 0.5m 视为上坡
   // 海拔差 < -0.5m 视为下坡 介于两者之间视为平路
   const double DOWNHILL_THRESHOLD = -0.5;
-  const double EPS = 1e-6;  // 浮点数容差
+  const double EPS = 1e-6; // 浮点数容差
 
   int gaussianWindowSize = 3;
   double gaussianSigma = 1.0;
-  double outlierThreshold = 5.0;     // 距离阈值，可根据实际情况调整
-  double outlierAltThreshold = 5.0;  // 海拔变化阈值（比如超过5米视为异常）
+  double outlierThreshold = 5.0;    // 距离阈值，可根据实际情况调整
+  double outlierAltThreshold = 5.0; // 海拔变化阈值（比如超过5米视为异常）
 
   void insertGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6, QString t7,
@@ -391,14 +390,14 @@ class Steps : public QDialog {
   void appendTrackPointAndroid(double latitude, double longitude);
   void addTrackDataToAndroid(double latitude, double longitude);
   void clearTrackDataToAndroid();
-  void setDateLabelToAndroid(const QString& str);
-  void setInfoLabelToAndroid(const QString& str);
+  void setDateLabelToAndroid(const QString &str);
+  void setInfoLabelToAndroid(const QString &str);
 
-  void saveRoute(const QString& file, const QString& time, double lat,
-                 double lon, const QString& address);
+  void saveRoute(const QString &file, const QString &time, double lat,
+                 double lon, const QString &address);
   void setAddressResolverConnect();
   QString strJsonRouteFile, strJsonSpeedFile;
-  QStringList readRoute(const QString& file);
+  QStringList readRoute(const QString &file);
 
   bool isInChina(double lat, double lon);
 
@@ -411,18 +410,18 @@ class Steps : public QDialog {
   void updateGpsList(int curIndex, QString t0, QString t1, QString t2,
                      QString t3, QString t4, QString t5, QString t6);
   void refreshRoute();
-  void saveSpeedData(const QString& jsonFile, double speed, double altitude);
-  QVariantList getSpeedData(const QString& jsonFile);
-  QString getJsonRouteFile(const QString& strGpsList);
+  void saveSpeedData(const QString &jsonFile, double speed, double altitude);
+  QVariantList getSpeedData(const QString &jsonFile);
+  QString getJsonRouteFile(const QString &strGpsList);
 
   void updateTerrainUI();
-  void calculateTerrainDistance(const QVector<GPSCoordinate>& optimizedData);
+  void calculateTerrainDistance(const QVector<GPSCoordinate> &optimizedData);
   void resetTerrainDistance();
-  QVariantList getAltitudeData(const QString& jsonFile);
+  QVariantList getAltitudeData(const QString &jsonFile);
   void getTerrain();
-  CompassWidget* compass;
+  CompassWidget *compass;
 
-  QString getGpsListFilePath(const QString& strGpsList);
+  QString getGpsListFilePath(const QString &strGpsList);
   double getGpsLatitude();
   double getGpsLongitude();
   double getGpsMySpeed();
@@ -431,10 +430,10 @@ class Steps : public QDialog {
   bool startGPSFromService();
   void stopGPSFromService();
   void initUI();
- signals:
+signals:
   void distanceChanged(double distance);
 
   void speedChanged();
 };
 
-#endif  // STEPS_H
+#endif // STEPS_H

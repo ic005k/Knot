@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(Knot VERSION 26.11.12 LANGUAGES C CXX)
+project(Knot VERSION 26.11.20 LANGUAGES C CXX)
 
 # ============================================================
 # ✅ 全局 MSVC 编译选项（必须在 add_library / add_executable 之前）
@@ -28,8 +28,8 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src)
 # 1. Qt 模块查找
 # ============================================================
 find_package(Qt6 REQUIRED COMPONENTS
-    Core Gui Widgets Network PrintSupport Sensors Sql
-    Xml Svg Concurrent LinguistTools Core5Compat Positioning
+    Core Gui Widgets Network PrintSupport Sql
+    Xml Svg Concurrent LinguistTools Positioning
 )
 
 # ============================================================
@@ -123,6 +123,12 @@ if(NOT WIN32)
 endif()
 
 # --- QuaZip (AUTOMOC 必须在添加源文件前设置) ---
+# 根据模板生成 quazip_config.h
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/quazip/quazip_config.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/quazip_config.h"
+    @ONLY
+)
 add_library(knot_quazip STATIC)
 set_target_properties(knot_quazip PROPERTIES AUTOMOC ON)
 
@@ -130,11 +136,15 @@ set_target_properties(knot_quazip PROPERTIES AUTOMOC ON)
 target_compile_definitions(knot_quazip PRIVATE
     QUAZIP_STATIC          # 告诉 QuaZip 内部代码不要使用 __declspec
     QUAZIP_BUILD_STATIC    # 部分版本使用此宏
+    QUAZIP_QT_MAJOR_VERSION=6
 )
 
 file(GLOB QUAZIP_SOURCES CONFIGURE_DEPENDS lib/quazip/*.cpp lib/quazip/*.c)
 target_sources(knot_quazip PRIVATE ${QUAZIP_SOURCES})
-target_include_directories(knot_quazip PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/quazip)
+target_include_directories(knot_quazip PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/quazip
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
 target_link_libraries(knot_quazip PUBLIC knot_zlib Qt6::Core)
 
 # --- cmark-gfm ---
@@ -366,10 +376,9 @@ endif()
 # 全平台公共链接
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::PrintSupport
-    Qt6::Sensors Qt6::Sql
+    Qt6::Sql
     Qt6::Xml Qt6::Svg Qt6::Concurrent
     Qt6::Positioning
-    Qt6::Core5Compat
     llama ggml llama_common
     knot_zlib knot_quazip knot_cmark_gfm knot_sqlite
     # ✅ 仅非 Android 平台链接 qscintilla

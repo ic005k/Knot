@@ -4,7 +4,6 @@
 #include <qmath.h>
 
 #include <QAbstractButton>
-#include <QAccelerometerReading>
 #include <QCheckBox>
 #include <QClipboard>
 #include <QInputMethod>
@@ -27,7 +26,6 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFileDialog>
-#include <QGyroscope>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QInputDialog>
@@ -41,7 +39,6 @@
 #include <QRandomGenerator>
 #include <QScrollBar>
 #include <QScroller>
-#include <QSensorManager>
 #include <QSettings>
 #include <QSplitter>
 #include <QStringList>

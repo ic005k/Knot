@@ -631,7 +631,7 @@ extern unzFile unzOpenInternal (voidpf file,
 
         if (ZSEEK64(us.z_filefunc, us.filestream,
                                       central_pos,ZLIB_FILEFUNC_SEEK_SET)!=0)
-        err=UNZ_ERRNO;
+            err=UNZ_ERRNO;
 
         /* the signature, already checked */
         if (unz64local_getLong(&us.z_filefunc, us.filestream,&uL)!=UNZ_OK)
@@ -679,7 +679,21 @@ extern unzFile unzOpenInternal (voidpf file,
         if (unz64local_getLong64(&us.z_filefunc, us.filestream,&us.offset_central_dir)!=UNZ_OK)
             err=UNZ_ERRNO;
 
+        /* For ZIP64 archives, we still need to read the comment size from the regular
+           end of central directory record if it exists */
         us.gi.size_comment = 0;
+        {
+            ZPOS64_T regular_central_pos = unz64local_SearchCentralDir(&us.z_filefunc, us.filestream);
+            if (regular_central_pos != 0)
+            {
+                /* Found regular end of central directory, read the comment length. Comment length is at offset 20. */
+                if (ZSEEK64(us.z_filefunc, us.filestream, regular_central_pos + 20, ZLIB_FILEFUNC_SEEK_SET) == 0)
+                {
+                    /* Read comment length field (2 bytes at offset 20) */
+                    unz64local_getShort(&us.z_filefunc, us.filestream, &us.gi.size_comment);
+                }
+            }
+        }
     }
     else
     {
@@ -1054,7 +1068,7 @@ local int unz64local_GetCurrentFileInfoInternal (unzFile file,
             /* ZIP64 extra fields */
             if (headerId == 0x0001)
             {
-                uLong uL;
+                uLong _uL;
 
                 if(file_info.uncompressed_size == (ZPOS64_T)0xFFFFFFFFu)
                 {
@@ -1078,7 +1092,7 @@ local int unz64local_GetCurrentFileInfoInternal (unzFile file,
                 if(file_info.disk_num_start == 0xFFFFFFFFu)
                 {
                     /* Disk Start Number */
-                    if (unz64local_getLong(&s->z_filefunc, s->filestream,&uL) != UNZ_OK)
+                    if (unz64local_getLong(&s->z_filefunc, s->filestream, &_uL) != UNZ_OK)
                         err=UNZ_ERRNO;
                 }
 
@@ -2066,7 +2080,23 @@ extern int ZEXPORT unzGetGlobalComment (unzFile file, char * szComment, uLong uS
     if (uReadThis>s->gi.size_comment)
         uReadThis = s->gi.size_comment;
 
-    if (ZSEEK64(s->z_filefunc,s->filestream,s->central_pos+22,ZLIB_FILEFUNC_SEEK_SET)!=0)
+    /* For ZIP64 archives, the central_pos points to ZIP64 EOCD, but comment is in regular EOCD */
+    ZPOS64_T comment_pos = s->central_pos + 22;
+    if (s->gi.size_comment > 0) {
+        /* Check if this might be a ZIP64 archive by looking for ZIP64 EOCD signature */
+        uLong signature = 0;
+        if (ZSEEK64(s->z_filefunc, s->filestream, s->central_pos, ZLIB_FILEFUNC_SEEK_SET) == 0 &&
+            unz64local_getLong(&s->z_filefunc, s->filestream, &signature) == UNZ_OK &&
+            signature == 0x06064b50) {
+            /* This is ZIP64 EOCD, need to find regular EOCD for comment */
+            ZPOS64_T regular_eocd_pos = unz64local_SearchCentralDir(&s->z_filefunc, s->filestream);
+            if (regular_eocd_pos != 0) {
+                comment_pos = regular_eocd_pos + 22;
+            }
+        }
+    }
+    
+    if (ZSEEK64(s->z_filefunc,s->filestream,comment_pos,ZLIB_FILEFUNC_SEEK_SET)!=0)
         return UNZ_ERRNO;
 
     if (uReadThis>0)
@@ -2151,3 +2181,4 @@ int ZEXPORT unzClearFlags(unzFile file, unsigned flags)
     s->flags &= ~flags;
     return UNZ_OK;
 }
+

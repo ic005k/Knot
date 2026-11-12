@@ -1,11 +1,13 @@
 #include "Method.h"
 
 #include <QKeyEvent>
+#include <QStringConverter>
+#include <QStringDecoder>
 
 #include "src/Comm/IOSCircularProgress.h"
 #include "src/MainWindow.h"
 
-Method::Method(QWidget* parent) : QDialog(parent) {
+Method::Method(QWidget *parent) : QDialog(parent) {
   this->installEventFilter(this);
 
   QSettings Reg(privateDir + "notes.ini", QSettings::IniFormat);
@@ -16,12 +18,12 @@ Method::Method(QWidget* parent) : QDialog(parent) {
 
   connect(
       this, &Method::sigUpdateProgressAndText, this,
-      [this](const QString& text, int max, int val) {
-        this->setInfoText(text);             // 刷新文本
-        this->infoProgBar->setMaximum(max);  // 刷新进度条最大值
-        this->infoProgBar->setValue(val);    // 刷新进度条当前值
+      [this](const QString &text, int max, int val) {
+        this->setInfoText(text);            // 刷新文本
+        this->infoProgBar->setMaximum(max); // 刷新进度条最大值
+        this->infoProgBar->setValue(val);   // 刷新进度条当前值
       },
-      Qt::QueuedConnection);  // 线程绝对安全
+      Qt::QueuedConnection); // 线程绝对安全
 }
 
 void Method::init() {
@@ -52,7 +54,8 @@ QString Method::getRealPathFile(QString strFile) {
     for (int i = 0; i < 5; i++) {
       driver = "/storage/emulated/" + QString::number(i) + "/";
       realFile = driver + r_file;
-      if (QFile(realFile).exists()) break;
+      if (QFile(realFile).exists())
+        break;
     }
   }
 
@@ -83,9 +86,9 @@ void Method::closeGrayWindows() {
   }
 }
 
-QInputDialog* Method::inputDialog(QString windowsTitle, QString lblEdit,
+QInputDialog *Method::inputDialog(QString windowsTitle, QString lblEdit,
                                   QString defaultValue) {
-  QInputDialog* idlg = new QInputDialog(this);
+  QInputDialog *idlg = new QInputDialog(this);
   idlg->hide();
 
   // 无边框基础属性
@@ -227,9 +230,9 @@ void Method::clearAll() {
 
 void Method::setCurrentIndex(int index) {}
 
-bool Method::eventFilter(QObject* watchDlgSearch, QEvent* evn) {
+bool Method::eventFilter(QObject *watchDlgSearch, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       close();
       return true;
@@ -239,10 +242,10 @@ bool Method::eventFilter(QObject* watchDlgSearch, QEvent* evn) {
   return QWidget::eventFilter(watchDlgSearch, evn);
 }
 
-void Method::startSearch(QList<SearchItem> data, const QString& searchStr) {
+void Method::startSearch(QList<SearchItem> data, const QString &searchStr) {
   resultsList.clear();
 
-  for (const SearchItem& item : data) {
+  for (const SearchItem &item : data) {
     QString tabStr = item.tabName;
     QString strYear = item.strYear;
     QString weeks = item.weeks;
@@ -291,23 +294,34 @@ void Method::startSearch(QList<SearchItem> data, const QString& searchStr) {
       }
 
       if (list.count() == 2) {
-        if (is0 && is1) isYes = true;
-        if (is0 && is2) isYes = true;
-        if (is0 && is3) isYes = true;
-        if (is1 && is2) isYes = true;
-        if (is1 && is3) isYes = true;
-        if (is2 && is3) isYes = true;
+        if (is0 && is1)
+          isYes = true;
+        if (is0 && is2)
+          isYes = true;
+        if (is0 && is3)
+          isYes = true;
+        if (is1 && is2)
+          isYes = true;
+        if (is1 && is3)
+          isYes = true;
+        if (is2 && is3)
+          isYes = true;
       }
 
       if (list.count() == 3) {
-        if (is0 && is1 && is2) isYes = true;
-        if (is0 && is1 && is3) isYes = true;
-        if (is0 && is2 && is3) isYes = true;
-        if (is1 && is2 && is3) isYes = true;
+        if (is0 && is1 && is2)
+          isYes = true;
+        if (is0 && is1 && is3)
+          isYes = true;
+        if (is0 && is2 && is3)
+          isYes = true;
+        if (is1 && is2 && is3)
+          isYes = true;
       }
 
       if (list.count() >= 4) {
-        if (is0 && is1 && is2 && is3) isYes = true;
+        if (is0 && is1 && is2 && is3)
+          isYes = true;
       }
 
       QString s_total = txt0 + txt1 + txt2 + txt3;
@@ -322,7 +336,8 @@ void Method::startSearch(QList<SearchItem> data, const QString& searchStr) {
       }
 
       if (isYes) {
-        if (n_count < list.count()) isYes = false;
+        if (n_count < list.count())
+          isYes = false;
       }
 
     } else {
@@ -354,7 +369,7 @@ void Method::startSearch() {
   int tabCount = tabData->count();
 
   for (int j = 0; j < tabCount; j++) {
-    QTreeWidget* tw = mw_one->get_tw(j);
+    QTreeWidget *tw = mw_one->get_tw(j);
     QString tabStr = tabData->tabText(j);
 
     for (int i = 0; i < tw->topLevelItemCount(); i++) {
@@ -365,12 +380,12 @@ void Method::startSearch() {
       QString day =
           strMonthDay.split(" ").at(1) + " " + strMonthDay.split(" ").at(2);
 
-      QTreeWidgetItem* topItem;
+      QTreeWidgetItem *topItem;
       topItem = tw->topLevelItem(i);
       int childCount = topItem->childCount();
       for (int j = 0; j < childCount; j++) {
         QString txt0, txt1, txt2, txt3;
-        QTreeWidgetItem* childItem = topItem->child(j);
+        QTreeWidgetItem *childItem = topItem->child(j);
 
         QString strTime = childItem->text(0);
         if (strTime.split(".").count() == 2) {
@@ -418,23 +433,34 @@ void Method::startSearch() {
           }
 
           if (list.count() == 2) {
-            if (is0 && is1) isYes = true;
-            if (is0 && is2) isYes = true;
-            if (is0 && is3) isYes = true;
-            if (is1 && is2) isYes = true;
-            if (is1 && is3) isYes = true;
-            if (is2 && is3) isYes = true;
+            if (is0 && is1)
+              isYes = true;
+            if (is0 && is2)
+              isYes = true;
+            if (is0 && is3)
+              isYes = true;
+            if (is1 && is2)
+              isYes = true;
+            if (is1 && is3)
+              isYes = true;
+            if (is2 && is3)
+              isYes = true;
           }
 
           if (list.count() == 3) {
-            if (is0 && is1 && is2) isYes = true;
-            if (is0 && is1 && is3) isYes = true;
-            if (is0 && is2 && is3) isYes = true;
-            if (is1 && is2 && is3) isYes = true;
+            if (is0 && is1 && is2)
+              isYes = true;
+            if (is0 && is1 && is3)
+              isYes = true;
+            if (is0 && is2 && is3)
+              isYes = true;
+            if (is1 && is2 && is3)
+              isYes = true;
           }
 
           if (list.count() >= 4) {
-            if (is0 && is1 && is2 && is3) isYes = true;
+            if (is0 && is1 && is2 && is3)
+              isYes = true;
           }
 
           QString s_total = txt0 + txt1 + txt2 + txt3;
@@ -449,7 +475,8 @@ void Method::startSearch() {
           }
 
           if (isYes) {
-            if (n_count < list.count()) isYes = false;
+            if (n_count < list.count())
+              isYes = false;
           }
 
         } else {
@@ -488,9 +515,9 @@ void Method::startSearch() {
  * @param bold 是否加粗（可选，默认 true）
  * @return 格式化后的 HTML 字符串
  */
-QString Method::highlightTextInHtml(const QString& originalText,
-                                    const QString& targetText,
-                                    const QString& color, bool bold) {
+QString Method::highlightTextInHtml(const QString &originalText,
+                                    const QString &targetText,
+                                    const QString &color, bool bold) {
   if (targetText.isEmpty()) {
     // 如果目标为空，只做换行和转义处理
     QString result = originalText.toHtmlEscaped();
@@ -532,7 +559,8 @@ void Method::initSearchResults() {
 
   // mw_one->ui->lblSearchResult->setText(tr("Results") + " : " +
   // QString::number(count));
-  if (count == 0) return;
+  if (count == 0)
+    return;
 
   generateData(count);
 
@@ -573,14 +601,14 @@ void Method::generateData(int count) {
 }
 
 void Method::setCellText(int row, int column, QString str,
-                         QTableWidget* table) {
+                         QTableWidget *table) {
   QString a0("<span style=\"color: white;background: red;\">");
   QString a1("</span>");
 
   if (str.contains(searchStr)) {
     str = str.replace(searchStr, a0 + searchStr + a1);
 
-    QLabel* lbl = new QLabel();
+    QLabel *lbl = new QLabel();
     lbl->adjustSize();
     lbl->setWordWrap(true);
     lbl->setText(str);
@@ -604,13 +632,14 @@ QString Method::getLastModified(QString file) {
 }
 
 void Method::clickMainDateData(int index) {
-  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
-  int maindateIndex = index;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
+  QTreeWidget *tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
+  int maindateIndex = index; // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
   int maindateCount =
-      mw_one->listMainDate.count();  // getCountFromQW(mw_one->ui->qwMainDate);
+      mw_one->listMainDate.count(); // getCountFromQW(mw_one->ui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
 
-  if (topIndex < 0) return;
+  if (topIndex < 0)
+    return;
 
   tw->setCurrentItem(tw->topLevelItem(topIndex));
 
@@ -618,21 +647,23 @@ void Method::clickMainDateData(int index) {
 }
 
 void Method::clickMainEventData() {
-  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
-  int maindateIndex = 0;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
+  QTreeWidget *tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
+  int maindateIndex = 0; // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
   int maindateCount =
-      mw_one->listMainDate.count();  // getCountFromQW(mw_one->ui->qwMainDate);
+      mw_one->listMainDate.count(); // getCountFromQW(mw_one->ui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - maindateCount + maindateIndex;
-  int childIndex = 0;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
+  int childIndex = 0; // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
   tw->setCurrentItem(tw->topLevelItem(topIndex)->child(childIndex));
 
-  if (topIndex < 0) return;
-  if (childIndex < 0) return;
+  if (topIndex < 0)
+    return;
+  if (childIndex < 0)
+    return;
 
   mw_one->on_twItemClicked();
 }
 
-void Method::setSCrollPro(QObject* obj) {
+void Method::setSCrollPro(QObject *obj) {
   QScrollerProperties sp;
   sp.setScrollMetric(QScrollerProperties::DragStartDistance, 0.001);
   sp.setScrollMetric(QScrollerProperties::ScrollingCurve,
@@ -640,12 +671,12 @@ void Method::setSCrollPro(QObject* obj) {
   sp.setScrollMetric(QScrollerProperties::DragVelocitySmoothingFactor, 0.001);
   sp.setScrollMetric(QScrollerProperties::FrameRate,
                      QScrollerProperties::FrameRates::Fps60);
-  QScroller* qs = QScroller::scroller(obj);
+  QScroller *qs = QScroller::scroller(obj);
   qs->setScrollerProperties(sp);
 }
 
-QDialog* Method::getProgBar() {
-  QDialog* dlg;
+QDialog *Method::getProgBar() {
+  QDialog *dlg;
   dlg = new QDialog(this);
   dlg->setWindowFlag(Qt::FramelessWindowHint);
   dlg->setModal(true);
@@ -655,10 +686,10 @@ QDialog* Method::getProgBar() {
 
   dlg->setFixedHeight(100);
   dlg->setFixedWidth(130);
-  QVBoxLayout* vbox = new QVBoxLayout;
+  QVBoxLayout *vbox = new QVBoxLayout;
   dlg->setLayout(vbox);
 
-  QLabel* lbl = new QLabel();
+  QLabel *lbl = new QLabel();
   if (isDark) {
     dlg->setStyleSheet("background-color: rgb(30, 30, 30);");
     lbl->setStyleSheet("color:#ffffff;");
@@ -669,31 +700,30 @@ QDialog* Method::getProgBar() {
   font.setPointSize(9);
   lbl->setFont(font);
   lbl->setText(tr("Processing..."));
-  lbl->setAlignment(Qt::AlignHCenter);  // | Qt::AlignVCenter);
+  lbl->setAlignment(Qt::AlignHCenter); // | Qt::AlignVCenter);
   vbox->addWidget(lbl);
 
   if (nProgressBarType == 1) {
-    QProgressBar* prog = new QProgressBar(this);
-    prog->setStyleSheet(
-        "QProgressBar{border:0px solid #FFFFFF;"
-        "height:25;"
-        "background:rgb(25,255,25);"
-        "text-align:right;"
-        "color:rgb(255,255,255);"
-        "border-radius:0px;}"
+    QProgressBar *prog = new QProgressBar(this);
+    prog->setStyleSheet("QProgressBar{border:0px solid #FFFFFF;"
+                        "height:25;"
+                        "background:rgb(25,255,25);"
+                        "text-align:right;"
+                        "color:rgb(255,255,255);"
+                        "border-radius:0px;}"
 
-        "QProgressBar:chunk{"
-        "border-radius:0px;"
-        "background-color:rgba(18,150,219,255);"
-        "}");
+                        "QProgressBar:chunk{"
+                        "border-radius:0px;"
+                        "background-color:rgba(18,150,219,255);"
+                        "}");
     prog->setMaximum(0);
     prog->setMinimum(0);
     vbox->addWidget(prog);
   }
 
   if (nProgressBarType == 2) {
-    IOSCircularProgress* progress = new IOSCircularProgress(this);
-    progress->setProgress(0.00);  // 设置进度值0~1
+    IOSCircularProgress *progress = new IOSCircularProgress(this);
+    progress->setProgress(0.00); // 设置进度值0~1
     vbox->addWidget(progress, 0, Qt::AlignHCenter | Qt::AlignVCenter);
   }
 
@@ -715,7 +745,8 @@ QString Method::getRecycleTabName(QString keyStr) {
   QSettings Reg(iniDir + "del_tabname.ini", QSettings::IniFormat);
 
   QString tabName = Reg.value(keyStr).toString();
-  if (tabName.trimmed().length() == 0) tabName = "None";
+  if (tabName.trimmed().length() == 0)
+    tabName = "None";
   return tabName;
 }
 
@@ -734,21 +765,21 @@ void Method::setDark(bool dark) {
 #ifdef Q_OS_ANDROID
 
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  activity.callMethod<void>("setDark",  // 方法名
-                            "(Z)V",     // 参数类型为boolean，返回void
-                            dark        // 传入bool参数，Qt自动转换为jboolean
+  activity.callMethod<void>("setDark", // 方法名
+                            "(Z)V",    // 参数类型为boolean，返回void
+                            dark       // 传入bool参数，Qt自动转换为jboolean
   );
 
 #endif
 }
 
-QString Method::setToolButtonQss(QToolButton* btn, int radius, int padding,
-                                 const QString& normalColor,
-                                 const QString& normalTextColor,
-                                 const QString& hoverColor,
-                                 const QString& hoverTextColor,
-                                 const QString& pressedColor,
-                                 const QString& pressedTextColor) {
+QString Method::setToolButtonQss(QToolButton *btn, int radius, int padding,
+                                 const QString &normalColor,
+                                 const QString &normalTextColor,
+                                 const QString &hoverColor,
+                                 const QString &hoverTextColor,
+                                 const QString &pressedColor,
+                                 const QString &pressedTextColor) {
   QStringList list;
 
   // 普通状态
@@ -776,8 +807,8 @@ QString Method::setToolButtonQss(QToolButton* btn, int radius, int padding,
                       "}")
                   .arg(pressedTextColor, pressedColor));
 
-  const QString& disabledColor = "#CCCCCC";
-  const QString& disabledTextColor = "#999999";
+  const QString &disabledColor = "#CCCCCC";
+  const QString &disabledTextColor = "#999999";
   list.append(QString("QToolButton:disabled{"
                       "color:%1;"
                       "background:%2;"
@@ -789,13 +820,13 @@ QString Method::setToolButtonQss(QToolButton* btn, int radius, int padding,
   return qss;
 }
 
-QString Method::setPushButtonQss(QPushButton* btn, int radius, int padding,
-                                 const QString& normalColor,
-                                 const QString& normalTextColor,
-                                 const QString& hoverColor,
-                                 const QString& hoverTextColor,
-                                 const QString& pressedColor,
-                                 const QString& pressedTextColor) {
+QString Method::setPushButtonQss(QPushButton *btn, int radius, int padding,
+                                 const QString &normalColor,
+                                 const QString &normalTextColor,
+                                 const QString &hoverColor,
+                                 const QString &hoverTextColor,
+                                 const QString &pressedColor,
+                                 const QString &pressedTextColor) {
   QStringList list;
   list.append(QString("QPushButton{border-style:none;padding:%1px;border-"
                       "radius:%2px;color:%3;background:%4;}")
@@ -835,7 +866,7 @@ QString Method::getCustomColor() {
     QColor selectedColor = m_EnColorPicker->selectedColor();
     strColor = selectedColor.name();
     qDebug() << "color=" << strColor;
-    return strColor;  // 默认返回RGB格式 "#RRGGBB"
+    return strColor; // 默认返回RGB格式 "#RRGGBB"
     // 如需包含透明度：return selectedColor.name(QColor::HexArgb);
   } else {
     return NULL;
@@ -865,7 +896,7 @@ QString Method::getCustomColor() {
   }
 #else
 
-  QColorDialog* colorDlg = new QColorDialog(this);
+  QColorDialog *colorDlg = new QColorDialog(this);
   QFont f = getNewFont(17);
 
   colorDlg->setFont(f);
@@ -951,7 +982,8 @@ void Method::closeFilePicker() {
 void Method::setAndroidProgressInfo(QString info) {
   Q_UNUSED(info);
 
-  if (mw_one->initMain) return;
+  if (mw_one->initMain)
+    return;
 
 #ifdef Q_OS_ANDROID
 
@@ -974,7 +1006,8 @@ void Method::showTempActivity() {
 }
 
 void Method::showAndroidProgressBar() {
-  if (mw_one->initMain) return;
+  if (mw_one->initMain)
+    return;
 
 #ifdef Q_OS_ANDROID
 
@@ -985,7 +1018,8 @@ void Method::showAndroidProgressBar() {
 }
 
 void Method::closeAndroidProgressBar() {
-  if (mw_one->initMain) return;
+  if (mw_one->initMain)
+    return;
 
 #ifdef Q_OS_ANDROID
 
@@ -995,10 +1029,10 @@ void Method::closeAndroidProgressBar() {
 #endif
 }
 
-void Method::setQLabelImage(QLabel* lbl, int w, int h, QString imgFile) {
+void Method::setQLabelImage(QLabel *lbl, int w, int h, QString imgFile) {
   lbl->setFixedHeight(h);
   lbl->setFixedWidth(w);
-  QPixmap* pixmap = new QPixmap(imgFile);
+  QPixmap *pixmap = new QPixmap(imgFile);
   pixmap->scaled(lbl->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
   lbl->setScaledContents(true);
   lbl->setPixmap(*pixmap);
@@ -1031,7 +1065,7 @@ void Method::playMyText(QString text) {
                                        jText.object<jstring>());
 
     qDebug() << "[TTS] Play command sent: " << text;
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     qDebug() << "[TTS] Play exception: " << e.what();
     // 清理JNI环境未处理异常，避免影响后续调用
     QJniEnvironment env;
@@ -1062,7 +1096,7 @@ void Method::stopPlayMyText() {
                                        "()V");
 
     qDebug() << "[TTS] Stop command sent";
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     qDebug() << "[TTS] Stop exception: " << e.what();
     QJniEnvironment env;
     if (env->ExceptionCheck()) {
@@ -1177,9 +1211,12 @@ QString Method::FormatHHMMSS(qint32 total) {
   QString min = QString::number(mm, 10);
   QString sec = QString::number(ss, 10);
 
-  if (hour.length() == 1) hour = "0" + hour;
-  if (min.length() == 1) min = "0" + min;
-  if (sec.length() == 1) sec = "0" + sec;
+  if (hour.length() == 1)
+    hour = "0" + hour;
+  if (min.length() == 1)
+    min = "0" + min;
+  if (sec.length() == 1)
+    sec = "0" + sec;
 
   QString strTime = hour + ":" + min + ":" + sec;
   return strTime;
@@ -1214,11 +1251,16 @@ void Method::setDateTimePickerFlag(QString flag, int y, int m, int d, int h,
     Reg.setValue("/DateTime/flag", "hm");
   }
 
-  if (y == 0) y = 2022;
-  if (m == 0) m = 1;
-  if (d == 0) d = 1;
-  if (h == 0) h = 0;
-  if (mm == 0) mm = 0;
+  if (y == 0)
+    y = 2022;
+  if (m == 0)
+    m = 1;
+  if (d == 0)
+    d = 1;
+  if (h == 0)
+    h = 0;
+  if (mm == 0)
+    mm = 0;
 
   Reg.setValue("/DateTime/y", y);
   Reg.setValue("/DateTime/m", m);
@@ -1390,9 +1432,9 @@ void Method::setAndroidFontSize(int nSize) {
 #endif
 }
 
-bool Method::decompressWithPassword(const QString& zipPath,
-                                    const QString& extractDir,
-                                    const QString& password) {
+bool Method::decompressWithPassword(const QString &zipPath,
+                                    const QString &extractDir,
+                                    const QString &password) {
   QuaZip zip(zipPath);
   if (!zip.open(QuaZip::mdUnzip)) {
     qWarning() << "[ERROR] Failed to open zip:" << zip.getZipError() << zipPath;
@@ -1431,9 +1473,9 @@ bool Method::decompressWithPassword(const QString& zipPath,
       // 尝试读取数据以验证密码
       char buffer[1024];
       qint64 bytesRead = testFile.read(buffer, sizeof(buffer));
-      testFile.close();  // 无论读取是否成功都需关闭文件
+      testFile.close(); // 无论读取是否成功都需关闭文件
 
-      if (bytesRead == -1) {  // 读取失败表明密码错误
+      if (bytesRead == -1) { // 读取失败表明密码错误
         passwordValid = false;
         qWarning() << "[ERROR] Password read failed for"
                    << zip.getCurrentFileName();
@@ -1519,7 +1561,7 @@ bool Method::decompressWithPassword(const QString& zipPath,
 
       // 确保密码使用 UTF-8 编码
       QByteArray passwordBytes = password.toUtf8();
-      const char* passData = passwordBytes.constData();
+      const char *passData = passwordBytes.constData();
 
       openSuccess = file.open(QIODevice::ReadOnly, passData);
     } else {
@@ -1545,7 +1587,7 @@ bool Method::decompressWithPassword(const QString& zipPath,
     }
 
     // 分块读写（优化缓冲区管理）
-    constexpr qint64 BUFFER_SIZE = 4 * 1024 * 1024;  // 4MB
+    constexpr qint64 BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
     QByteArray buffer;
     buffer.resize(BUFFER_SIZE);
 
@@ -1560,7 +1602,7 @@ bool Method::decompressWithPassword(const QString& zipPath,
         readSuccess = false;
         break;
       } else if (bytesRead == 0) {
-        break;  // 正常结束
+        break; // 正常结束
       }
 
       const qint64 bytesWritten = outFile.write(buffer.constData(), bytesRead);
@@ -1577,7 +1619,7 @@ bool Method::decompressWithPassword(const QString& zipPath,
     file.close();
     outFile.close();
 
-    if (!readSuccess) {  //|| totalBytes == 0) {
+    if (!readSuccess) { //|| totalBytes == 0) {
       qWarning() << "[WARN] Removed incomplete file:" << absPath;
 
       // QFile::remove(absPath);
@@ -1599,24 +1641,24 @@ bool Method::decompressWithPassword(const QString& zipPath,
 // QuaZip错误码转字符串
 QString Method::quazipErrorString(int code) {
   switch (code) {
-    case UNZ_OK:
-      return "No error";
-    case UNZ_END_OF_LIST_OF_FILE:
-      return "End of file list";
-    case UNZ_ERRNO:
-      return "File IO error";
-    case UNZ_PARAMERROR:
-      return "Invalid parameter";
-    default:
-      return QString("Unknown error (%1)").arg(code);
+  case UNZ_OK:
+    return "No error";
+  case UNZ_END_OF_LIST_OF_FILE:
+    return "End of file list";
+  case UNZ_ERRNO:
+    return "File IO error";
+  case UNZ_PARAMERROR:
+    return "Invalid parameter";
+  default:
+    return QString("Unknown error (%1)").arg(code);
   }
 }
 
-bool Method::compressDirectory(const QString& zipPath, const QString& sourceDir,
-                               const QString& password) {
+bool Method::compressDirectory(const QString &zipPath, const QString &sourceDir,
+                               const QString &password) {
   QuaZip zip(zipPath);
   zip.setFileNameCodec("UTF-8");
-  zip.setZip64Enabled(false);  // 禁用 ZIP64（除非必要）
+  zip.setZip64Enabled(false); // 禁用 ZIP64（除非必要）
 
   if (!zip.open(QuaZip::mdCreate)) {
     qWarning() << "Failed to create zip:" << zip.getZipError();
@@ -1667,7 +1709,7 @@ bool Method::compressDirectory(const QString& zipPath, const QString& sourceDir,
 
     // 确保密码使用 UTF-8 编码
     QByteArray passwordBytes = password.toUtf8();
-    const char* passData = useEncryption ? passwordBytes.constData() : nullptr;
+    const char *passData = useEncryption ? passwordBytes.constData() : nullptr;
 
     // 重要：与7zip的压缩参数完全一直，高度兼容，特别是加密的时候
     if (!zipFile.open(QIODevice::WriteOnly, newInfo, passData, 0, Z_DEFLATED,
@@ -1678,10 +1720,11 @@ bool Method::compressDirectory(const QString& zipPath, const QString& sourceDir,
     }
 
     QFile inFile(filePath);
-    if (!inFile.open(QIODevice::ReadOnly)) return false;
+    if (!inFile.open(QIODevice::ReadOnly))
+      return false;
 
     // 分块写入
-    constexpr qint64 BUFFER_SIZE = 4 * 1024 * 1024;  // 4MB
+    constexpr qint64 BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
     QByteArray buffer;
     buffer.resize(BUFFER_SIZE);
 
@@ -1702,8 +1745,8 @@ bool Method::compressDirectory(const QString& zipPath, const QString& sourceDir,
   return true;
 }
 
-bool Method::compressFile(const QString& zipPath, const QString& filePath,
-                          const QString& password) {
+bool Method::compressFile(const QString &zipPath, const QString &filePath,
+                          const QString &password) {
   QFileInfo fi(zipPath);
   QString strDir = fi.absolutePath();
   QDir dir;
@@ -1712,7 +1755,7 @@ bool Method::compressFile(const QString& zipPath, const QString& filePath,
 
   QuaZip zip(zipPath);
   zip.setFileNameCodec("UTF-8");
-  zip.setZip64Enabled(false);  // 禁用 ZIP64（除非必要）
+  zip.setZip64Enabled(false); // 禁用 ZIP64（除非必要）
 
   if (!zip.open(QuaZip::mdCreate)) {
     qWarning() << "Failed to create zip:" << zip.getZipError();
@@ -1731,7 +1774,7 @@ bool Method::compressFile(const QString& zipPath, const QString& filePath,
 
   // 确保密码使用 UTF-8 编码
   QByteArray passwordBytes = password.toUtf8();
-  const char* passData = useEncryption ? passwordBytes.constData() : nullptr;
+  const char *passData = useEncryption ? passwordBytes.constData() : nullptr;
 
   // 重要：与7zip的压缩参数完全一直，高度兼容，特别是加密的时候
   if (!zipFile.open(QIODevice::WriteOnly, newInfo, passData, 0, Z_DEFLATED,
@@ -1741,10 +1784,11 @@ bool Method::compressFile(const QString& zipPath, const QString& filePath,
   }
 
   QFile inFile(filePath);
-  if (!inFile.open(QIODevice::ReadOnly)) return false;
+  if (!inFile.open(QIODevice::ReadOnly))
+    return false;
 
   // 分块写入
-  constexpr qint64 BUFFER_SIZE = 4 * 1024 * 1024;  // 4MB
+  constexpr qint64 BUFFER_SIZE = 4 * 1024 * 1024; // 4MB
   QByteArray buffer;
   buffer.resize(BUFFER_SIZE);
 
@@ -1769,35 +1813,36 @@ bool Method::compressFile(const QString& zipPath, const QString& filePath,
 
 QByteArray Method::generateRandomBytes(int length) {
   QByteArray bytes(length, 0);
-  if (RAND_bytes(reinterpret_cast<unsigned char*>(bytes.data()), length) != 1) {
-    return QByteArray();  // 返回空表示生成失败
+  if (RAND_bytes(reinterpret_cast<unsigned char *>(bytes.data()), length) !=
+      1) {
+    return QByteArray(); // 返回空表示生成失败
   }
   return bytes;
 }
 
-QByteArray Method::deriveKey(const QString& password, const QByteArray& salt,
+QByteArray Method::deriveKey(const QString &password, const QByteArray &salt,
                              int keyLength) {
   QByteArray key(keyLength, 0);
-  const int iterations = 10000;  // 迭代次数
-  const EVP_MD* digest = EVP_sha256();
+  const int iterations = 10000; // 迭代次数
+  const EVP_MD *digest = EVP_sha256();
 
   if (PKCS5_PBKDF2_HMAC(
           password.toUtf8().constData(),                             // 密码明文
           password.length(),                                         // 密码长度
-          reinterpret_cast<const unsigned char*>(salt.constData()),  // 盐值
+          reinterpret_cast<const unsigned char *>(salt.constData()), // 盐值
           salt.size(),                                               // 盐长度
           iterations,                                                // 迭代次数
           digest,                                                    // 哈希算法
           keyLength,                                    // 输出密钥长度
-          reinterpret_cast<unsigned char*>(key.data())  // 输出缓冲区
+          reinterpret_cast<unsigned char *>(key.data()) // 输出缓冲区
           ) != 1) {
-    return QByteArray();  // 返回空表示失败
+    return QByteArray(); // 返回空表示失败
   }
   return key;
 }
 
-bool Method::encryptFile(const QString& inputPath, const QString& outputPath,
-                         const QString& password) {
+bool Method::encryptFile(const QString &inputPath, const QString &outputPath,
+                         const QString &password) {
   // 生成随机盐和IV（带错误日志）
   QByteArray salt = generateRandomBytes(16);
   QByteArray iv = generateRandomBytes(16);
@@ -1841,7 +1886,7 @@ bool Method::encryptFile(const QString& inputPath, const QString& outputPath,
   }
 
   // 初始化加密上下文（显式设置填充）
-  EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
   if (!ctx) {
     qDebug() << "EVP上下文创建失败";
     inFile.close();
@@ -1850,8 +1895,8 @@ bool Method::encryptFile(const QString& inputPath, const QString& outputPath,
   }
   if (EVP_EncryptInit_ex(
           ctx, EVP_aes_256_cbc(), nullptr,
-          reinterpret_cast<const unsigned char*>(key.constData()),
-          reinterpret_cast<const unsigned char*>(iv.constData())) != 1) {
+          reinterpret_cast<const unsigned char *>(key.constData()),
+          reinterpret_cast<const unsigned char *>(iv.constData())) != 1) {
     qDebug() << "加密初始化失败: "
              << ERR_error_string(ERR_get_error(), nullptr);
     EVP_CIPHER_CTX_free(ctx);
@@ -1859,24 +1904,24 @@ bool Method::encryptFile(const QString& inputPath, const QString& outputPath,
     outFile.close();
     return false;
   }
-  EVP_CIPHER_CTX_set_padding(ctx, 1);  // 显式启用PKCS#7填充
+  EVP_CIPHER_CTX_set_padding(ctx, 1); // 显式启用PKCS#7填充
 
   // 动态分配缓冲区（避免栈溢出）
   const int bufferSize = 4096;
-  unsigned char* inBuf = new unsigned char[bufferSize];
-  unsigned char* outBuf = new unsigned char[bufferSize + EVP_MAX_BLOCK_LENGTH];
+  unsigned char *inBuf = new unsigned char[bufferSize];
+  unsigned char *outBuf = new unsigned char[bufferSize + EVP_MAX_BLOCK_LENGTH];
   bool success = true;
   int outLen = 0;
 
   // 分块加密
   while (true) {
-    qint64 bytesRead = inFile.read(reinterpret_cast<char*>(inBuf), bufferSize);
+    qint64 bytesRead = inFile.read(reinterpret_cast<char *>(inBuf), bufferSize);
     if (bytesRead < 0) {
       qDebug() << "文件读取错误: " << inFile.errorString();
       success = false;
       break;
     } else if (bytesRead == 0) {
-      break;  // 文件结束
+      break; // 文件结束
     }
 
     if (EVP_EncryptUpdate(ctx, outBuf, &outLen, inBuf, bytesRead) != 1) {
@@ -1886,7 +1931,7 @@ bool Method::encryptFile(const QString& inputPath, const QString& outputPath,
       break;
     }
 
-    qint64 written = outFile.write(reinterpret_cast<char*>(outBuf), outLen);
+    qint64 written = outFile.write(reinterpret_cast<char *>(outBuf), outLen);
     if (written != outLen) {
       qDebug() << "加密数据写入不完整: " << outFile.errorString();
       success = false;
@@ -1901,8 +1946,9 @@ bool Method::encryptFile(const QString& inputPath, const QString& outputPath,
                << ERR_error_string(ERR_get_error(), nullptr);
       success = false;
     } else {
-      qint64 written = outFile.write(reinterpret_cast<char*>(outBuf), outLen);
-      if (written != outLen) success = false;
+      qint64 written = outFile.write(reinterpret_cast<char *>(outBuf), outLen);
+      if (written != outLen)
+        success = false;
     }
   }
 
@@ -1937,13 +1983,14 @@ bool Method::encryptFile(const QString& inputPath, const QString& outputPath,
   return success;
 }
 
-bool Method::encryptFile_Old(const QString& inputPath,
-                             const QString& outputPath,
-                             const QString& password) {
+bool Method::encryptFile_Old(const QString &inputPath,
+                             const QString &outputPath,
+                             const QString &password) {
   // 生成随机盐和IV
   QByteArray salt = generateRandomBytes(16);
   QByteArray iv = generateRandomBytes(16);
-  if (salt.isEmpty() || iv.isEmpty()) return false;
+  if (salt.isEmpty() || iv.isEmpty())
+    return false;
 
   // 打开文件
   QFile inFile(inputPath);
@@ -1959,15 +2006,16 @@ bool Method::encryptFile_Old(const QString& inputPath,
 
   // 密钥派生
   QByteArray key = deriveKey(password, salt, 32);
-  if (key.isEmpty()) return false;
+  if (key.isEmpty())
+    return false;
 
   // 初始化加密上下文
-  EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
   if (!ctx ||
       EVP_EncryptInit_ex(
           ctx, EVP_aes_256_cbc(), nullptr,
-          reinterpret_cast<const unsigned char*>(key.constData()),
-          reinterpret_cast<const unsigned char*>(iv.constData())) != 1) {
+          reinterpret_cast<const unsigned char *>(key.constData()),
+          reinterpret_cast<const unsigned char *>(iv.constData())) != 1) {
     EVP_CIPHER_CTX_free(ctx);
     return false;
   }
@@ -1977,12 +2025,12 @@ bool Method::encryptFile_Old(const QString& inputPath,
   unsigned char inBuf[bufferSize], outBuf[bufferSize + EVP_MAX_BLOCK_LENGTH];
   int bytesRead = 0, outLen = 0;
 
-  while ((bytesRead = inFile.read((char*)inBuf, bufferSize)) > 0) {
+  while ((bytesRead = inFile.read((char *)inBuf, bufferSize)) > 0) {
     if (EVP_EncryptUpdate(ctx, outBuf, &outLen, inBuf, bytesRead) != 1) {
       EVP_CIPHER_CTX_free(ctx);
       return false;
     }
-    outFile.write((char*)outBuf, outLen);
+    outFile.write((char *)outBuf, outLen);
   }
 
   // 处理最后的数据块
@@ -1990,7 +2038,7 @@ bool Method::encryptFile_Old(const QString& inputPath,
     EVP_CIPHER_CTX_free(ctx);
     return false;
   }
-  outFile.write((char*)outBuf, outLen);
+  outFile.write((char *)outBuf, outLen);
 
   EVP_CIPHER_CTX_free(ctx);
 
@@ -2001,8 +2049,8 @@ bool Method::encryptFile_Old(const QString& inputPath,
   return true;
 }
 
-bool Method::decryptFile(const QString& inputPath, const QString& outputPath,
-                         const QString& password) {
+bool Method::decryptFile(const QString &inputPath, const QString &outputPath,
+                         const QString &password) {
   QFile inFile(inputPath);
   QFile outFile(outputPath);
 
@@ -2039,7 +2087,7 @@ bool Method::decryptFile(const QString& inputPath, const QString& outputPath,
   }
 
   // 4. 初始化 OpenSSL 上下文（启用填充）
-  EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
   if (!ctx) {
     qDebug() << "无法创建 EVP 上下文";
     inFile.close();
@@ -2048,8 +2096,8 @@ bool Method::decryptFile(const QString& inputPath, const QString& outputPath,
   }
   if (EVP_DecryptInit_ex(
           ctx, EVP_aes_256_cbc(), nullptr,
-          reinterpret_cast<const unsigned char*>(key.constData()),
-          reinterpret_cast<const unsigned char*>(iv.constData())) != 1) {
+          reinterpret_cast<const unsigned char *>(key.constData()),
+          reinterpret_cast<const unsigned char *>(iv.constData())) != 1) {
     qDebug() << "解密初始化失败："
              << ERR_error_string(ERR_get_error(), nullptr);
     EVP_CIPHER_CTX_free(ctx);
@@ -2057,24 +2105,24 @@ bool Method::decryptFile(const QString& inputPath, const QString& outputPath,
     outFile.close();
     return false;
   }
-  EVP_CIPHER_CTX_set_padding(ctx, 1);  // 显式启用 PKCS#7 填充
+  EVP_CIPHER_CTX_set_padding(ctx, 1); // 显式启用 PKCS#7 填充
 
   // 5. 动态分配缓冲区（避免栈溢出）
   const int bufferSize = 4096 + EVP_MAX_BLOCK_LENGTH;
-  unsigned char* inBuf = new unsigned char[bufferSize];
-  unsigned char* outBuf = new unsigned char[bufferSize];
+  unsigned char *inBuf = new unsigned char[bufferSize];
+  unsigned char *outBuf = new unsigned char[bufferSize];
   int bytesRead = 0, outLen = 0;
   bool success = true;
 
   // 6. 分块解密（修复读取循环）
-  while ((bytesRead = inFile.read((char*)inBuf, bufferSize)) > 0) {
+  while ((bytesRead = inFile.read((char *)inBuf, bufferSize)) > 0) {
     if (EVP_DecryptUpdate(ctx, outBuf, &outLen, inBuf, bytesRead) != 1) {
       qDebug() << "解密分块失败："
                << ERR_error_string(ERR_get_error(), nullptr);
       success = false;
       break;
     }
-    if (outFile.write((char*)outBuf, outLen) != outLen) {
+    if (outFile.write((char *)outBuf, outLen) != outLen) {
       qDebug() << "写入输出文件失败：" << outFile.errorString();
       success = false;
       break;
@@ -2089,7 +2137,7 @@ bool Method::decryptFile(const QString& inputPath, const QString& outputPath,
       success = false;
       isPasswordError = true;
     } else {
-      if (outFile.write((char*)outBuf, outLen) != outLen) {
+      if (outFile.write((char *)outBuf, outLen) != outLen) {
         qDebug() << "写入最终块失败：" << outFile.errorString();
         success = false;
       }
@@ -2106,7 +2154,7 @@ bool Method::decryptFile(const QString& inputPath, const QString& outputPath,
 
   // 9. 验证输出文件完整性
   if (success) {
-    qint64 expectedSize = inFile.size() - 32;  // 加密文件去头（salt + iv）
+    qint64 expectedSize = inFile.size() - 32; // 加密文件去头（salt + iv）
     qint64 actualSize = outFile.size();
     if (actualSize != expectedSize) {
       qDebug() << "文件大小不匹配，预期：" << expectedSize << "实际："
@@ -2149,8 +2197,8 @@ QString Method::useEnc(QString m_file) {
   return "";
 }
 
-bool Method::compressFileWithZlib(const QString& sourcePath,
-                                  const QString& destPath, int level) {
+bool Method::compressFileWithZlib(const QString &sourcePath,
+                                  const QString &destPath, int level) {
   // compressFile(..., Z_BEST_SPEED);    // 最快速度
   // compressFile(..., Z_DEFAULT_COMPRESSION); // 平衡模式
   // compressFile(..., Z_BEST_COMPRESSION);    // 最高压缩率
@@ -2179,7 +2227,7 @@ bool Method::compressFileWithZlib(const QString& sourcePath,
     return false;
   }
 
-  constexpr int CHUNK_SIZE = 128 * 1024;  // 128KB分块
+  constexpr int CHUNK_SIZE = 128 * 1024; // 128KB分块
   char inBuffer[CHUNK_SIZE];
   char outBuffer[CHUNK_SIZE];
 
@@ -2196,12 +2244,12 @@ bool Method::compressFileWithZlib(const QString& sourcePath,
     }
 
     zs.avail_in = bytesRead;
-    zs.next_in = reinterpret_cast<Bytef*>(inBuffer);
+    zs.next_in = reinterpret_cast<Bytef *>(inBuffer);
 
     // 压缩并写入目标文件
     do {
       zs.avail_out = CHUNK_SIZE;
-      zs.next_out = reinterpret_cast<Bytef*>(outBuffer);
+      zs.next_out = reinterpret_cast<Bytef *>(outBuffer);
 
       int ret = deflate(&zs, (srcFile.atEnd() ? Z_FINISH : Z_NO_FLUSH));
       if (ret == Z_STREAM_ERROR) {
@@ -2233,8 +2281,8 @@ bool Method::compressFileWithZlib(const QString& sourcePath,
   return success;
 }
 
-bool Method::decompressFileWithZlib(const QString& sourcePath,
-                                    const QString& destPath) {
+bool Method::decompressFileWithZlib(const QString &sourcePath,
+                                    const QString &destPath) {
   QFile srcFile(sourcePath);
   if (!srcFile.open(QIODevice::ReadOnly)) {
     qWarning() << "无法打开压缩文件:" << sourcePath;
@@ -2276,12 +2324,12 @@ bool Method::decompressFileWithZlib(const QString& sourcePath,
     }
 
     zs.avail_in = bytesRead;
-    zs.next_in = reinterpret_cast<Bytef*>(inBuffer);
+    zs.next_in = reinterpret_cast<Bytef *>(inBuffer);
 
     // 解压并写入目标文件
     do {
       zs.avail_out = CHUNK_SIZE;
-      zs.next_out = reinterpret_cast<Bytef*>(outBuffer);
+      zs.next_out = reinterpret_cast<Bytef *>(outBuffer);
 
       int ret = inflate(&zs, Z_NO_FLUSH);
       if (ret == Z_NEED_DICT || ret == Z_DATA_ERROR || ret == Z_MEM_ERROR) {
@@ -2312,7 +2360,7 @@ bool Method::decompressFileWithZlib(const QString& sourcePath,
   return success;
 }
 
-QString Method::getFileSize(const qint64& size, int precision) {
+QString Method::getFileSize(const qint64 &size, int precision) {
   double sizeAsDouble = size;
   static QStringList measures;
   if (measures.isEmpty())
@@ -2362,27 +2410,25 @@ void Method::setOSFlag() {
 }
 
 // 设置明亮模式
-void Method::setEditLightMode(QTextEdit* textEdit) {
-  textEdit->setStyleSheet(
-      "QTextEdit {"
-      "    background-color: #FFFFFF;"  // 白色背景
-      "    color: #000000;"             // 黑色文字
-      "    border: 1px solid #CCCCCC;"  // 浅灰色边框
-      "}");
+void Method::setEditLightMode(QTextEdit *textEdit) {
+  textEdit->setStyleSheet("QTextEdit {"
+                          "    background-color: #FFFFFF;" // 白色背景
+                          "    color: #000000;"            // 黑色文字
+                          "    border: 1px solid #CCCCCC;" // 浅灰色边框
+                          "}");
 }
 
 // 设置暗黑模式
-void Method::setEditDarkMode(QTextEdit* textEdit) {
-  textEdit->setStyleSheet(
-      "QTextEdit {"
-      "    background-color: #2D2D30;"  // 深灰色背景
-      "    color: #F1F1F1;"             // 白色文字
-      "    border: 1px solid #555555;"  // 深灰色边框
-      "}");
+void Method::setEditDarkMode(QTextEdit *textEdit) {
+  textEdit->setStyleSheet("QTextEdit {"
+                          "    background-color: #2D2D30;" // 深灰色背景
+                          "    color: #F1F1F1;"            // 白色文字
+                          "    border: 1px solid #555555;" // 深灰色边框
+                          "}");
 }
 
 // 初始化数据库
-bool Method::createDatabase(const QString& dbFileName) {
+bool Method::createDatabase(const QString &dbFileName) {
   // 使用唯一连接名称（基于数据库文件名）
   QString connectionName =
       QString("db_connection_%1").arg(QDateTime::currentMSecsSinceEpoch());
@@ -2433,7 +2479,7 @@ bool Method::createDatabase(const QString& dbFileName) {
   return success;
 }
 
-void Method::saveTreeToDB(QTreeWidget* tree, const QString& dbFileName) {
+void Method::saveTreeToDB(QTreeWidget *tree, const QString &dbFileName) {
   // 创建临时数据库连接
   QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "save_connection");
   db.setDatabaseName(dbFileName);
@@ -2465,9 +2511,9 @@ void Method::saveTreeToDB(QTreeWidget* tree, const QString& dbFileName) {
 
   // 保存顶层项
   for (int i = 0; i < tree->topLevelItemCount(); ++i) {
-    QTreeWidgetItem* topItem = tree->topLevelItem(i);
+    QTreeWidgetItem *topItem = tree->topLevelItem(i);
 
-    QSqlQuery q(db);  // 关键：传入db连接
+    QSqlQuery q(db); // 关键：传入db连接
     q.prepare(
         "INSERT INTO top_items (col0, col1, col2, col3) VALUES (?, ?, ?, ?)");
     for (int col = 0; col < 4; ++col) {
@@ -2476,7 +2522,7 @@ void Method::saveTreeToDB(QTreeWidget* tree, const QString& dbFileName) {
 
     if (!q.exec()) {
       qDebug() << "Insert top item error:" << q.lastError().text();
-      continue;  // 继续处理其他项
+      continue; // 继续处理其他项
     }
 
     // 获取刚插入的顶层项ID
@@ -2484,18 +2530,17 @@ void Method::saveTreeToDB(QTreeWidget* tree, const QString& dbFileName) {
 
     // 保存子项
     for (int ch = 0; ch < topItem->childCount(); ++ch) {
-      QTreeWidgetItem* child = topItem->child(ch);
+      QTreeWidgetItem *child = topItem->child(ch);
 
-      QSqlQuery qc(db);  // 关键：传入db连接
-      qc.prepare(
-          "INSERT INTO child_items "
-          "(parent_id, time, amount, category, detail) "
-          "VALUES (?, ?, ?, ?, ?)");
+      QSqlQuery qc(db); // 关键：传入db连接
+      qc.prepare("INSERT INTO child_items "
+                 "(parent_id, time, amount, category, detail) "
+                 "VALUES (?, ?, ?, ?, ?)");
       qc.addBindValue(topId);
-      qc.addBindValue(child->text(0));  // 时间
-      qc.addBindValue(child->text(1));  // 金额（作为TEXT存储）
-      qc.addBindValue(child->text(2));  // 分类
-      qc.addBindValue(child->text(3));  // 详情
+      qc.addBindValue(child->text(0)); // 时间
+      qc.addBindValue(child->text(1)); // 金额（作为TEXT存储）
+      qc.addBindValue(child->text(2)); // 分类
+      qc.addBindValue(child->text(3)); // 详情
 
       if (!qc.exec()) {
         qDebug() << "Insert child item error:" << qc.lastError().text();
@@ -2515,7 +2560,7 @@ void Method::saveTreeToDB(QTreeWidget* tree, const QString& dbFileName) {
 }
 
 // 从数据库加载数据到TreeWidget
-void Method::loadTreeFromDB(QTreeWidget* tree, const QString& dbFileName) {
+void Method::loadTreeFromDB(QTreeWidget *tree, const QString &dbFileName) {
   tree->clear();
 
   // 创建临时数据库连接（避免影响全局连接）
@@ -2533,7 +2578,7 @@ void Method::loadTreeFromDB(QTreeWidget* tree, const QString& dbFileName) {
 
   // 查询顶层项
   QSqlQuery topQuery("SELECT id, col0, col1, col2, col3 FROM top_items", db);
-  QMap<qint64, QTreeWidgetItem*> topItems;
+  QMap<qint64, QTreeWidgetItem *> topItems;
 
   while (topQuery.next()) {
     auto item = new QTreeWidgetItem(tree);
@@ -2545,19 +2590,18 @@ void Method::loadTreeFromDB(QTreeWidget* tree, const QString& dbFileName) {
   }
 
   // 查询子项
-  QSqlQuery childQuery(
-      "SELECT parent_id, time, amount, category, detail "
-      "FROM child_items",
-      db);
+  QSqlQuery childQuery("SELECT parent_id, time, amount, category, detail "
+                       "FROM child_items",
+                       db);
 
   while (childQuery.next()) {
     qint64 parentId = childQuery.value(0).toLongLong();
     if (auto parent = topItems.value(parentId)) {
       auto child = new QTreeWidgetItem(parent);
-      child->setText(0, childQuery.value(1).toString());  // 时间
-      child->setText(1, childQuery.value(2).toString());  // 金额
-      child->setText(2, childQuery.value(3).toString());  // 分类
-      child->setText(3, childQuery.value(4).toString());  // 详情
+      child->setText(0, childQuery.value(1).toString()); // 时间
+      child->setText(1, childQuery.value(2).toString()); // 金额
+      child->setText(2, childQuery.value(3).toString()); // 分类
+      child->setText(3, childQuery.value(4).toString()); // 详情
     }
   }
 
@@ -2590,28 +2634,28 @@ QString Method::setCurrentDateTimeValue() {
 }
 
 QString Method::formatSecondsToHMS(qlonglong seconds) {
-  qlonglong totalSecs = qAbs(seconds);  // 先处理绝对值
+  qlonglong totalSecs = qAbs(seconds); // 先处理绝对值
   qlonglong hours = totalSecs / 3600;
   qlonglong minutes = (totalSecs % 3600) / 60;
   qlonglong secs = totalSecs % 60;
 
   // 构建格式化字符串
-  QString result =
-      QString("%1:%2:%3")
-          .arg(hours)                       // 小时部分直接转换，允许超过两位
-          .arg(minutes, 2, 10, QChar('0'))  // 分钟保持两位，不足补0
-          .arg(secs, 2, 10, QChar('0'));    // 秒保持两位，不足补0
+  QString result = QString("%1:%2:%3")
+                       .arg(hours) // 小时部分直接转换，允许超过两位
+                       .arg(minutes, 2, 10, QChar('0')) // 分钟保持两位，不足补0
+                       .arg(secs, 2, 10, QChar('0'));   // 秒保持两位，不足补0
 
-  return seconds < 0 ? "-" + result : result;  // 添上负号（如果需要）
+  return seconds < 0 ? "-" + result : result; // 添上负号（如果需要）
 }
 
-QStringList Method::removeDuplicatesFromQStringList(const QStringList& list) {
+QStringList Method::removeDuplicatesFromQStringList(const QStringList &list) {
   QSet<QString> seen;
   QStringList result;
   result.reserve(list.size());
 
-  for (const QString& str : list) {
-    if (seen.contains(str)) continue;
+  for (const QString &str : list) {
+    if (seen.contains(str))
+      continue;
     seen.insert(str);
     result.append(str);
   }
@@ -2622,9 +2666,9 @@ QStringList Method::removeDuplicatesFromQStringList(const QStringList& list) {
 bool Method::getLockScreenStatus() {
 #ifdef Q_OS_ANDROID
   jboolean locked = QJniObject::callStaticMethod<jboolean>(
-      ANDROID_MAIN_ACTIVITY,  // Java类全名
-      "getLockScreenStatus",  // 方法名
-      "()Z"                   // JNI签名（boolean无参数）
+      ANDROID_MAIN_ACTIVITY, // Java类全名
+      "getLockScreenStatus", // 方法名
+      "()Z"                  // JNI签名（boolean无参数）
   );
 
   return static_cast<bool>(locked);
@@ -2632,10 +2676,10 @@ bool Method::getLockScreenStatus() {
   return false;
 }
 
-void Method::set_ToolButtonStyle(QObject* parent) {
+void Method::set_ToolButtonStyle(QObject *parent) {
   QObjectList btnList = getAllToolButton(getAllUIControls(parent));
   for (int i = 0; i < btnList.count(); i++) {
-    QToolButton* btn = (QToolButton*)btnList.at(i);
+    QToolButton *btn = (QToolButton *)btnList.at(i);
 
     // if (btn != m_Steps->ui->btnGPS && btn != m_Steps->ui->btnPause) {
     setToolButtonQss(btn, 4, 5, "#3B82F6", "#FFFFFF", "#3B82F6", "#FFFFFF",
@@ -2644,10 +2688,10 @@ void Method::set_ToolButtonStyle(QObject* parent) {
   }
 }
 
-void Method::set_PushButtonStyle(QObject* parent) {
+void Method::set_PushButtonStyle(QObject *parent) {
   QObjectList btnList = getAllPushButton(getAllUIControls(parent));
   for (int i = 0; i < btnList.count(); i++) {
-    QPushButton* btn = (QPushButton*)btnList.at(i);
+    QPushButton *btn = (QPushButton *)btnList.at(i);
 
     setPushButtonQss(btn, 5, 3, "#3498DB", "#FFFFFF", "#3498DB", "#FFFFFF",
                      "#2483C7", "#A0DAFB");
@@ -2656,7 +2700,7 @@ void Method::set_PushButtonStyle(QObject* parent) {
 
 QObjectList Method::getAllToolButton(QObjectList lstUIControls) {
   QObjectList lst;
-  foreach (QObject* obj, lstUIControls) {
+  foreach (QObject *obj, lstUIControls) {
     if (obj->metaObject()->className() == QStringLiteral("QToolButton")) {
       lst.append(obj);
     }
@@ -2666,7 +2710,7 @@ QObjectList Method::getAllToolButton(QObjectList lstUIControls) {
 
 QObjectList Method::getAllPushButton(QObjectList lstUIControls) {
   QObjectList lst;
-  foreach (QObject* obj, lstUIControls) {
+  foreach (QObject *obj, lstUIControls) {
     if (obj->metaObject()->className() == QStringLiteral("QPushButton")) {
       lst.append(obj);
     }
@@ -2676,7 +2720,7 @@ QObjectList Method::getAllPushButton(QObjectList lstUIControls) {
 
 QObjectList Method::getAllTreeWidget(QObjectList lstUIControls) {
   QObjectList lst;
-  foreach (QObject* obj, lstUIControls) {
+  foreach (QObject *obj, lstUIControls) {
     if (obj->metaObject()->className() == QStringLiteral("QTreeWidget")) {
       lst.append(obj);
     }
@@ -2686,7 +2730,7 @@ QObjectList Method::getAllTreeWidget(QObjectList lstUIControls) {
 
 QObjectList Method::getAllLineEdit(QObjectList lstUIControls) {
   QObjectList lst;
-  foreach (QObject* obj, lstUIControls) {
+  foreach (QObject *obj, lstUIControls) {
     if (obj->metaObject()->className() == QStringLiteral("QLineEdit")) {
       lst.append(obj);
     }
@@ -2696,7 +2740,7 @@ QObjectList Method::getAllLineEdit(QObjectList lstUIControls) {
 
 QObjectList Method::getAllTextEdit(QObjectList lstUIControls) {
   QObjectList lst;
-  foreach (QObject* obj, lstUIControls) {
+  foreach (QObject *obj, lstUIControls) {
     if (obj->metaObject()->className() == QStringLiteral("QTextEdit")) {
       lst.append(obj);
     }
@@ -2704,7 +2748,7 @@ QObjectList Method::getAllTextEdit(QObjectList lstUIControls) {
   return lst;
 }
 
-QObjectList Method::getAllUIControls(QObject* parent) {
+QObjectList Method::getAllUIControls(QObject *parent) {
   QObjectList lstOfChildren, lstTemp;
   if (parent) {
     lstOfChildren = parent->children();
@@ -2715,7 +2759,7 @@ QObjectList Method::getAllUIControls(QObject* parent) {
 
   lstTemp = lstOfChildren;
 
-  foreach (QObject* obj, lstTemp) {
+  foreach (QObject *obj, lstTemp) {
     QObjectList lst = getAllUIControls(obj);
     if (!lst.isEmpty()) {
       lstOfChildren.append(lst);
@@ -2756,13 +2800,13 @@ bool Method::copyFileToPath(QString sourceDir, QString toDir,
   if (!QFile::exists(sourceDir)) {
     return false;
   }
-  QDir* createfile = new QDir;
+  QDir *createfile = new QDir;
   bool exist = createfile->exists(toDir);
   if (exist) {
     if (coverFileIfExist) {
       createfile->remove(toDir);
     }
-  }  // end if
+  } // end if
 
   if (!QFile::copy(sourceDir, toDir)) {
     return false;
@@ -2772,30 +2816,30 @@ bool Method::copyFileToPath(QString sourceDir, QString toDir,
 
 QString Method::convertDataToUnicode(QByteArray data) {
   QString text = "";
+
   // 首先检查BOM
   if (data.startsWith("\xEF\xBB\xBF")) {
-    text = QString::fromUtf8(data.mid(3));  // 跳过BOM
+    text = QString::fromUtf8(data.mid(3)); // 跳过BOM
   } else if (data.startsWith("\xFF\xFE") || data.startsWith("\xFE\xFF")) {
-    // UTF-16 BOM
-    QTextCodec* codec = QTextCodec::codecForName("UTF-16");
-    text = codec->toUnicode(data);
+    // UTF-16 BOM：使用 QStringDecoder 自动处理大小端和 BOM
+    QStringDecoder decoder(QStringConverter::Utf16);
+    text = decoder.decode(data);
   } else {
     // 使用更健壮的编码检测
     if (isUtf8(data)) {
       text = QString::fromUtf8(data);
     } else {
       // 尝试常见编码
-      QTextCodec* codec = nullptr;
 
       // 尝试GBK/GB2312 (中文)
-      codec = QTextCodec::codecForName("GBK");
-      QString gbkText = codec->toUnicode(data);
+      // Qt6 原生不再提供 codecForName("GBK")。
+      // 在中文 Windows 下，fromLocal8Bit 等价于 GBK 解码。
+      QString gbkText = QString::fromLocal8Bit(data);
       if (isValidText(gbkText)) {
         text = gbkText;
       } else {
-        // 尝试ISO 8859-1 (Latin-1)
-        codec = QTextCodec::codecForName("ISO 8859-1");
-        text = codec->toUnicode(data);
+        // 尝试 ISO 8859-1 (Latin-1)，Qt6 原生自带 fromLatin1
+        text = QString::fromLatin1(data);
       }
     }
   }
@@ -2803,7 +2847,7 @@ QString Method::convertDataToUnicode(QByteArray data) {
 }
 
 // 改进的UTF-8检测函数
-bool Method::isUtf8(const QByteArray& data) {
+bool Method::isUtf8(const QByteArray &data) {
   int i = 0;
   int length = data.length();
   int utf8Chars = 0;
@@ -2815,13 +2859,13 @@ bool Method::isUtf8(const QByteArray& data) {
 
     // 判断UTF-8字符的字节数
     if ((c & 0x80) == 0) {
-      bytes = 1;  // 0xxxxxxx
+      bytes = 1; // 0xxxxxxx
     } else if ((c & 0xE0) == 0xC0) {
-      bytes = 2;  // 110xxxxx
+      bytes = 2; // 110xxxxx
     } else if ((c & 0xF0) == 0xE0) {
-      bytes = 3;  // 1110xxxx
+      bytes = 3; // 1110xxxx
     } else if ((c & 0xF8) == 0xF0) {
-      bytes = 4;  // 11110xxx
+      bytes = 4; // 11110xxx
     } else {
       invalidBytes++;
       bytes = 1;
@@ -2841,22 +2885,25 @@ bool Method::isUtf8(const QByteArray& data) {
       }
     }
 
-    if (bytes > 1) utf8Chars++;
+    if (bytes > 1)
+      utf8Chars++;
     i += bytes;
   }
 
   // 如果没有发现UTF-8多字节字符，或者无效字节太多，认为不是UTF-8
-  if (utf8Chars == 0) return false;
+  if (utf8Chars == 0)
+    return false;
   double validRatio = 1.0 - (double)invalidBytes / length;
-  return validRatio > 0.9;  // 至少90%的字节有效
+  return validRatio > 0.9; // 至少90%的字节有效
 }
 
 // 辅助函数：检查文本是否包含足够的有效字符
-bool Method::isValidText(const QString& text) {
+bool Method::isValidText(const QString &text) {
   int validChars = 0;
   int totalChars = text.length();
 
-  if (totalChars == 0) return false;
+  if (totalChars == 0)
+    return false;
 
   for (QChar c : text) {
     if (c.isPrint() || c.isSpace()) {
@@ -2874,13 +2921,13 @@ void Method::upIniFile(QString tempFile, QString endFile) {
     QFile::remove(endFile);
     if (!QFile::rename(tempFile, endFile)) {
       qWarning() << "重命名失败:" << tempFile << "->" << endFile;
-      QFile::remove(tempFile);  // 清理临时文件
+      QFile::remove(tempFile); // 清理临时文件
       return;
     }
   }
 }
 
-QStringList Method::getMdFilesInDir(const QString& dirPath,
+QStringList Method::getMdFilesInDir(const QString &dirPath,
                                     bool includeFullPath) {
   QStringList mdFiles;
   QDir dir(dirPath);
@@ -2898,7 +2945,7 @@ QStringList Method::getMdFilesInDir(const QString& dirPath,
   QFileInfoList fileInfoList = dir.entryInfoList();
 
   // 提取文件名或完整路径
-  foreach (const QFileInfo& fileInfo, fileInfoList) {
+  foreach (const QFileInfo &fileInfo, fileInfoList) {
     if (includeFullPath) {
       mdFiles << fileInfo.absoluteFilePath();
     } else {
@@ -2909,7 +2956,7 @@ QStringList Method::getMdFilesInDir(const QString& dirPath,
   return mdFiles;
 }
 
-void Method::showInfoWindow(const QString& info) {
+void Method::showInfoWindow(const QString &info) {
   // 先关闭已存在的窗口
   closeInfoWindow();
 
@@ -2934,14 +2981,14 @@ void Method::showInfoWindow(const QString& info) {
   // ==================== 布局重构开始 ====================
 
   // 主布局：垂直方向 [内容区 + 进度条]
-  QVBoxLayout* mainLayout = new QVBoxLayout(infoWindow);
+  QVBoxLayout *mainLayout = new QVBoxLayout(infoWindow);
   mainLayout->setContentsMargins(14, 14, 14, 10);
   mainLayout->setSpacing(8);
 
   // 内容区：水平方向 [圆形计时器 | 文本]
-  QHBoxLayout* contentLayout = new QHBoxLayout();
+  QHBoxLayout *contentLayout = new QHBoxLayout();
   contentLayout->setSpacing(isAndroid ? 16 : 12);
-  contentLayout->setAlignment(Qt::AlignVCenter);  // ✅ 关键：整体垂直居中
+  contentLayout->setAlignment(Qt::AlignVCenter); // ✅ 关键：整体垂直居中
 
   // 左侧：圆形数秒组件（固定尺寸，垂直居中）
   /*IOSCircularProgress* circularTimer = new IOSCircularProgress(infoWindow);
@@ -2957,9 +3004,9 @@ void Method::showInfoWindow(const QString& info) {
   lblInfo->setFrameShape(QFrame::NoFrame);
   lblInfo->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   lblInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  contentLayout->addWidget(lblInfo, 1);  // ✅ stretch=1，自动填满剩余宽度
+  contentLayout->addWidget(lblInfo, 1); // ✅ stretch=1，自动填满剩余宽度
 
-  mainLayout->addLayout(contentLayout, 1);  // 内容区占满可用高度
+  mainLayout->addLayout(contentLayout, 1); // 内容区占满可用高度
 
   // 底部：进度条（独立一行，贴底）
   infoProgBar = new QProgressBar(infoWindow);
@@ -2974,7 +3021,8 @@ void Method::showInfoWindow(const QString& info) {
   if (isAndroid) {
     font.setPointSize(15);
   } else {
-    if (mainW > 360) mainW = 360;
+    if (mainW > 360)
+      mainW = 360;
     font.setPointSize(9);
   }
   infoWindow->setFixedWidth(mainW);
@@ -2990,7 +3038,7 @@ void Method::showInfoWindow(const QString& info) {
       mainPos.y() + (mw_one->geometry().height() - infoWindow->height()) / 2;
 
   // 屏幕边界检查
-  QScreen* screen = QApplication::screenAt(mainPos);
+  QScreen *screen = QApplication::screenAt(mainPos);
   if (screen) {
     QRect screenRect = screen->availableGeometry();
     y = qMax(y, screenRect.top());
@@ -3020,12 +3068,13 @@ void Method::closeInfoWindow() {
 #endif
 }
 
-void Method::safeCloseInfoWindow(Method* m) {
-  if (!m) return;
+void Method::safeCloseInfoWindow(Method *m) {
+  if (!m)
+    return;
   QTimer::singleShot(100, m, [m]() { m->closeInfoWindow(); });
 }
 
-void Method::setInfoText(const QString& newText) {
+void Method::setInfoText(const QString &newText) {
   if (!infoWindow || !lblInfo) {
     return;
   }
@@ -3033,10 +3082,11 @@ void Method::setInfoText(const QString& newText) {
   lblInfo->setText(newText);
 }
 
-int Method::getFlagToday(QTreeWidget* tw) {
-  if (tw->topLevelItemCount() == 0) return 0;
+int Method::getFlagToday(QTreeWidget *tw) {
+  if (tw->topLevelItemCount() == 0)
+    return 0;
 
-  QTreeWidgetItem* topitem = tw->topLevelItem(tw->topLevelItemCount() - 1);
+  QTreeWidgetItem *topitem = tw->topLevelItem(tw->topLevelItemCount() - 1);
   QString t0, t3;
   int y, m, d;
   t0 = topitem->text(0);
@@ -3050,7 +3100,8 @@ int Method::getFlagToday(QTreeWidget* tw) {
   cm = QDate::currentDate().month();
   cd = QDate::currentDate().day();
   int isFlagToday = 0;
-  if (y == cy && m == cm && d == cd) isFlagToday = 1;
+  if (y == cy && m == cm && d == cd)
+    isFlagToday = 1;
 
   return isFlagToday;
 }
@@ -3069,20 +3120,22 @@ int Method::getFlagToday(QTreeWidget* tw) {
   return utcTime.toString("yyyyMMddHHmmss");  // 无特殊字符，适合嵌入文件名
 }*/
 
-QString Method::getFileUTCString(const QString& file) {
+QString Method::getFileUTCString(const QString &file) {
   QFileInfo fileInfo(file);
-  if (!fileInfo.exists()) return "00000000000000";
+  if (!fileInfo.exists())
+    return "00000000000000";
 
   // 直接读取文件修改时间，强制指定UTC时区，一步到位
   // QDateTime standardUTC = fileInfo.lastModified(QTimeZone::UTC);
   QDateTime standardUTC = fileInfo.fileTime(QFile::FileModificationTime);
 
-  if (!standardUTC.isValid()) return "00000000000000";
+  if (!standardUTC.isValid())
+    return "00000000000000";
 
   return standardUTC.toString("yyyyMMddHHmmss");
 }
 
-QString Method::getBaseFlag(const QString& file) {
+QString Method::getBaseFlag(const QString &file) {
   QFileInfo fi(file);
   QString fn = fi.fileName();
   QStringList list = fn.split("_");
@@ -3097,7 +3150,8 @@ QString Method::getBaseFlag(const QString& file) {
   } else
     baseFlag = fn;
 
-  if (baseFlag.contains(".md.zip")) baseFlag = baseFlag.replace(".md.zip", "");
+  if (baseFlag.contains(".md.zip"))
+    baseFlag = baseFlag.replace(".md.zip", "");
 
   qDebug() << "baseFlag=" << baseFlag;
 
@@ -3133,16 +3187,18 @@ void Method::setAccessCount(int count) {
 }
 
 int Method::getAccessCount() {
-  if (count1 > 0) return count1;
-  if (count2 > 0) return count2;
+  if (count1 > 0)
+    return count1;
+  if (count2 > 0)
+    return count2;
   return 0;
 }
 
-void Method::setLineEditToolBar(QObject* parent, EditEventFilter* editFilter) {
+void Method::setLineEditToolBar(QObject *parent, EditEventFilter *editFilter) {
   QObjectList btnList = getAllLineEdit(getAllUIControls(parent));
 
   for (int i = 0; i < btnList.count(); i++) {
-    QLineEdit* btn = (QLineEdit*)btnList.at(i);
+    QLineEdit *btn = (QLineEdit *)btnList.at(i);
     if (btn != mw_one->ui->editPassword && btn != mw_one->ui->editValidate &&
         btn != m_StepsOptions->ui->editStepLength &&
         btn != m_StepsOptions->ui->editStepsThreshold)
@@ -3151,11 +3207,11 @@ void Method::setLineEditToolBar(QObject* parent, EditEventFilter* editFilter) {
   }
 }
 
-void Method::setTextEditToolBar(QObject* parent, EditEventFilter* editFilter) {
+void Method::setTextEditToolBar(QObject *parent, EditEventFilter *editFilter) {
   QObjectList btnList = getAllTextEdit(getAllUIControls(parent));
 
   for (int i = 0; i < btnList.count(); i++) {
-    QTextEdit* btn = (QTextEdit*)btnList.at(i);
+    QTextEdit *btn = (QTextEdit *)btnList.at(i);
 
     if (btn != m_StepsOptions->ui->editMapKey) {
       btn->installEventFilter(editFilter);
@@ -3177,10 +3233,10 @@ bool Method::isInChinaOnline(int timeout) {
   request.setHeader(QNetworkRequest::UserAgentHeader,
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
 
-  for (const QString& urlStr : urls) {  // 遍历接口，第一个成功的即返回结果
+  for (const QString &urlStr : urls) { // 遍历接口，第一个成功的即返回结果
     QUrl url(urlStr);
     request.setUrl(url);
-    QNetworkReply* reply = manager.get(request);
+    QNetworkReply *reply = manager.get(request);
 
     QEventLoop loop;
     QTimer timer;
@@ -3194,7 +3250,7 @@ bool Method::isInChinaOnline(int timeout) {
     // 处理超时或网络错误
     if (!timer.isActive() || reply->error() != QNetworkReply::NoError) {
       reply->deleteLater();
-      continue;  // 尝试下一个接口
+      continue; // 尝试下一个接口
     }
 
     // 读取响应并判断是否包含"中国"
@@ -3206,7 +3262,7 @@ bool Method::isInChinaOnline(int timeout) {
     if (data.contains("中国") || data.contains("CN")) {
       return true;
     } else {
-      return false;  // 明确返回非中国，无需尝试下一个接口
+      return false; // 明确返回非中国，无需尝试下一个接口
     }
   }
 
@@ -3238,23 +3294,24 @@ QList<SearchItem> Method::exportAllDataForSearch() {
   int tabCount = tabData->count();
 
   for (int j = 0; j < tabCount; j++) {
-    QTreeWidget* tw = mw_one->get_tw(j);
+    QTreeWidget *tw = mw_one->get_tw(j);
     QString tabStr = tabData->tabText(j);
 
     for (int i = 0; i < tw->topLevelItemCount(); i++) {
-      QTreeWidgetItem* topItem = tw->topLevelItem(i);
+      QTreeWidgetItem *topItem = tw->topLevelItem(i);
 
       QString strYear = topItem->text(3);
       QString strMonthDay = topItem->text(0);
       QStringList mdParts = strMonthDay.split(" ");
-      if (mdParts.size() < 3) continue;
+      if (mdParts.size() < 3)
+        continue;
 
       QString weeks = mdParts[0];
       QString day = mdParts[1] + " " + mdParts[2];
 
       int childCount = topItem->childCount();
       for (int c = 0; c < childCount; c++) {
-        QTreeWidgetItem* childItem = topItem->child(c);
+        QTreeWidgetItem *childItem = topItem->child(c);
 
         SearchItem item;
         item.tabName = tabStr;
@@ -3275,7 +3332,7 @@ QList<SearchItem> Method::exportAllDataForSearch() {
   return dataList;
 }
 
-void Method::delayDelFile(const QString& filePath) {
+void Method::delayDelFile(const QString &filePath) {
   // 延迟删除，确保文件句柄释放
   QTimer::singleShot(100, this, [=]() {
     bool ok = QFile::remove(filePath);
@@ -3285,7 +3342,7 @@ void Method::delayDelFile(const QString& filePath) {
   });
 }
 
-QString Method::escapeAllHtml(const QString& src) {
+QString Method::escapeAllHtml(const QString &src) {
   QString res = src;
   // 标准HTML实体转义（必须先转&，否则后面实体被二次转义）
   res.replace("&", "&amp;");
@@ -3302,9 +3359,10 @@ QString Method::escapeAllHtml(const QString& src) {
   return res;
 }
 
-void Method::setWinPos(QWidget* w, int width, int pos) {
-  QScreen* screen = w->screen();
-  if (!screen) screen = QGuiApplication::primaryScreen();
+void Method::setWinPos(QWidget *w, int width, int pos) {
+  QScreen *screen = w->screen();
+  if (!screen)
+    screen = QGuiApplication::primaryScreen();
   QRect avail = screen->availableGeometry();
 
   int winW = width;

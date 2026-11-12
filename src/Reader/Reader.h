@@ -15,7 +15,6 @@
 #include <QPlainTextEdit>
 #include <QProcess>
 #include <QProgressBar>
-#include <QRegExp>
 #include <QRegularExpression>
 #include <QSaveFile>
 #include <QSettings>
@@ -24,7 +23,6 @@
 #include <QStringList>
 #include <QTextBlock>
 #include <QTextBrowser>
-#include <QTextCodec>
 #include <QVBoxLayout>
 #include <QXmlStreamReader>
 #include <vector>

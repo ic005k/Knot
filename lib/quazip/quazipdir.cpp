@@ -32,9 +32,9 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
 class QuaZipDirPrivate: public QSharedData {
     friend class QuaZipDir;
 private:
-    QuaZipDirPrivate(QuaZip *zip, const QString &dir = QString()):
-        zip(zip), dir(dir) {}
-    QuaZip *zip;
+    explicit QuaZipDirPrivate(QuaZip *_zip, const QString &_dir = QString()):
+        zip(_zip), dir(_dir) {}
+    QuaZip *zip{};
     QString dir;
     QuaZip::CaseSensitivity caseSensitivity{QuaZip::csDefault};
     QDir::Filters filter{QDir::NoFilter};
@@ -93,7 +93,7 @@ bool QuaZipDir::cd(const QString &directoryName)
             if (!dir.cd(QLatin1String("/")))
                 return false;
         }
-        QStringList path = dirName.split(QLatin1String("/"), SkipEmptyParts);
+        const QStringList path = dirName.split(QLatin1String("/"), SkipEmptyParts);
         for (const auto& step : path) {
 #ifdef QUAZIP_QUAZIPDIR_DEBUG
             qDebug("QuaZipDir::cd(%s): going to %s",
@@ -199,14 +199,15 @@ static void QuaZipDir_convertInfoList(const QList<QuaZipFileInfo64> &from,
   */
 class QuaZipDirRestoreCurrent {
 public:
-    inline QuaZipDirRestoreCurrent(QuaZip *zip):
-        zip(zip), currentFile(zip->getCurrentFileName()) {}
+    explicit inline QuaZipDirRestoreCurrent(QuaZip *_zip):
+        zip(_zip), currentFile(zip->getCurrentFileName()) {}
     inline ~QuaZipDirRestoreCurrent()
     {
         zip->setCurrentFile(currentFile);
     }
+    Q_DISABLE_COPY_MOVE(QuaZipDirRestoreCurrent)
 private:
-    QuaZip *zip;
+    QuaZip *zip{};
     QString currentFile;
 };
 /// \endcond
@@ -215,11 +216,11 @@ private:
 class QuaZipDirComparator
 {
     private:
-        QDir::SortFlags sort;
+        QDir::SortFlags sort{QDir::NoSort};
         static QString getExtension(const QString &name);
         int compareStrings(const QString &string1, const QString &string2);
     public:
-        inline QuaZipDirComparator(QDir::SortFlags sort): sort(sort) {}
+        explicit inline QuaZipDirComparator(QDir::SortFlags _sort): sort(_sort) {}
         bool operator()(const QuaZipFileInfo64 &info1, const QuaZipFileInfo64 &info2);
 };
 
@@ -293,8 +294,8 @@ bool QuaZipDirComparator::operator()(const QuaZipFileInfo64 &info1,
 }
 
 template<typename TFileInfoList>
-bool QuaZipDirPrivate::entryInfoList(QStringList nameFilters,
-    QDir::Filters filter, QDir::SortFlags sort, TFileInfoList &result) const
+bool QuaZipDirPrivate::entryInfoList(QStringList _nameFilters,
+    QDir::Filters _filter, QDir::SortFlags sort, TFileInfoList &result) const
 {
     QString basePath = simplePath();
     if (!basePath.isEmpty())
@@ -305,12 +306,12 @@ bool QuaZipDirPrivate::entryInfoList(QStringList nameFilters,
     if (!zip->goToFirstFile()) {
         return zip->getZipError() == UNZ_OK;
     }
-    QDir::Filters fltr = filter;
+    QDir::Filters fltr = _filter;
     if (fltr == QDir::NoFilter)
         fltr = this->filter;
     if (fltr == QDir::NoFilter)
         fltr = QDir::AllEntries;
-    QStringList nmfltr = nameFilters;
+    QStringList nmfltr = _nameFilters;
     if (nmfltr.isEmpty())
         nmfltr = this->nameFilters;
     QSet<QString> dirsFound;
@@ -376,7 +377,7 @@ QList<QuaZipFileInfo> QuaZipDir::entryInfoList(const QStringList &nameFilters,
 {
     QList<QuaZipFileInfo> result;
     if (!d->entryInfoList(nameFilters, filters, sort, result))
-        return QList<QuaZipFileInfo>();
+        return {};
     return result;
 }
 
@@ -391,7 +392,7 @@ QList<QuaZipFileInfo64> QuaZipDir::entryInfoList64(const QStringList &nameFilter
 {
     QList<QuaZipFileInfo64> result;
     if (!d->entryInfoList(nameFilters, filters, sort, result))
-        return QList<QuaZipFileInfo64>();
+        return {};
     return result;
 }
 
@@ -406,7 +407,7 @@ QStringList QuaZipDir::entryList(const QStringList &nameFilters,
 {
     QStringList result;
     if (!d->entryInfoList(nameFilters, filters, sort, result))
-        return QStringList();
+        return {};
     return result;
 }
 

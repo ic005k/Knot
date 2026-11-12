@@ -22,6 +22,8 @@ Original ZIP package is copyrighted by Gilles Vollant and contributors,
 see quazip/(un)zip.h files for details. Basically it's the zlib license.
 */
 
+#include <zlib.h>
+
 #include "quaziodevice.h"
 
 #define QUAZIO_INBUFSIZE 4096
@@ -32,10 +34,11 @@ class QuaZIODevicePrivate {
     friend class QuaZIODevice;
     QuaZIODevicePrivate(QIODevice *io, QuaZIODevice *q);
     ~QuaZIODevicePrivate();
-    QIODevice *io;
-    QuaZIODevice *q;
-    z_stream zins;
-    z_stream zouts;
+    Q_DISABLE_COPY_MOVE(QuaZIODevicePrivate)
+    QIODevice *io{};
+    QuaZIODevice *q{};
+    z_stream zins{};
+    z_stream zouts{};
     char *inBuf{nullptr};
     int inBufPos{0};
     int inBufSize{0};
@@ -48,9 +51,9 @@ class QuaZIODevicePrivate {
     int doFlush(QString &error);
 };
 
-QuaZIODevicePrivate::QuaZIODevicePrivate(QIODevice *io, QuaZIODevice *q):
-  io(io),
-  q(q)
+QuaZIODevicePrivate::QuaZIODevicePrivate(QIODevice *_io, QuaZIODevice *_q):
+  io(_io),
+  q(_q)
 {
   zins.zalloc = (alloc_func) nullptr;
   zins.zfree = (free_func) nullptr;
@@ -157,7 +160,7 @@ QuaZIODevice::QuaZIODevice(QIODevice *io, QObject *parent):
     QIODevice(parent),
     d(new QuaZIODevicePrivate(io, this))
 {
-  connect(io, SIGNAL(readyRead()), SIGNAL(readyRead()));
+  connect(io, &QIODevice::readyRead, this, &QIODevice::readyRead);
 }
 
 QuaZIODevice::~QuaZIODevice()

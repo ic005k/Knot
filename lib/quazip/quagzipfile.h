@@ -28,8 +28,6 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
 #include <QtCore/QIODevice>
 #include "quazip_global.h"
 
-#include <zlib.h>
-
 class QuaGzipFilePrivate;
 
 /// GZIP file
@@ -102,7 +100,7 @@ private:
     // not implemented by design to disable copy
     QuaGzipFile(const QuaGzipFile &that);
     QuaGzipFile& operator=(const QuaGzipFile &that);
-    QuaGzipFilePrivate *d;
+    QuaGzipFilePrivate *d{};
 };
 
 #endif // QUAZIP_QUAGZIPFILE_H

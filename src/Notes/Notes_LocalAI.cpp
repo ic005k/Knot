@@ -2,7 +2,8 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <QMutexLocker>
-#include <QTextCodec>
+#include <QStringConverter>
+#include <QStringDecoder>
 
 #include "defines.h"
 #include "src/AI/EmbeddingEngine.h"
@@ -14,7 +15,7 @@
 
 #ifdef VECTOR_SEARCH
 
-bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
+bool Notes::syncNoteVectorsBatchToDb(const QString &mdFilePath) {
   // ✅ 一次性读取原始字节 + 计算稳定指纹 + 安全解码
   QFile f(mdFilePath);
   if (!f.open(QIODevice::ReadOnly)) {
@@ -39,11 +40,14 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
                << "| decoded_chars:" << mdContent.size();
   }
 
-  if (mdContent.trimmed().isEmpty()) return true;
+  if (mdContent.trimmed().isEmpty())
+    return true;
 
-  if (!isLocalAIModel || !g_embEngine || !g_embEngine->isValid()) return false;
-  auto* embEngine = dynamic_cast<EmbeddingEngine*>(g_embEngine.get());
-  if (!embEngine || !g_vectorDb) return false;
+  if (!isLocalAIModel || !g_embEngine || !g_embEngine->isValid())
+    return false;
+  auto *embEngine = dynamic_cast<EmbeddingEngine *>(g_embEngine.get());
+  if (!embEngine || !g_vectorDb)
+    return false;
 
   // ✅ 检查内容是否变更
   {
@@ -60,16 +64,18 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   ChunkConfig config;
 
   // ✅ 从引擎获取真实上限，而非依赖默认配置
-  config.maxTokens = embEngine->maxTokens();  // 510 (即 trainCtx - 2)
-  config.overlapTokens = 64;                  // 建议设置合理的重叠窗口
+  config.maxTokens = embEngine->maxTokens(); // 510 (即 trainCtx - 2)
+  config.overlapTokens = 64;                 // 建议设置合理的重叠窗口
 
   MarkdownChunker chunker(*embEngine, config);
   auto chunks = chunker.splitForBatch(mdFilePath, mdContent);
-  if (chunks.isEmpty()) return true;
+  if (chunks.isEmpty())
+    return true;
 
   QStringList texts;
   texts.reserve(chunks.size());
-  for (const auto& c : chunks) texts.append(c.content);
+  for (const auto &c : chunks)
+    texts.append(c.content);
 
   QElapsedTimer timer;
 
@@ -101,7 +107,8 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
     QMutexLocker dbLock(&s_vecDbMutex);
     bool insertAllOk = true;
 
-    if (!g_vectorDb->beginTransaction()) goto dbEnd;
+    if (!g_vectorDb->beginTransaction())
+      goto dbEnd;
 
     // ✅ 批量写入前准备语句（零开销重入）
     if (!g_vectorDb->prepareInsertStmts()) {
@@ -125,15 +132,15 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
 
       // ✅ 严格对齐 VectorDb.h 的 9 参数签名及顺序
       if (!g_vectorDb->executeInsert(
-              mdFilePath,             // noteId
-              chunks[i].chunkIndex,   // chunkIndex
-              chunks[i].charStart,    // charStart (qint64)
-              chunks[i].charEnd,      // charEnd (qint64)
-              chunks[i].sectionPath,  // sectionPath
-              chunks[i].content,      // content (fallback)
-              chunks[i].contentHash,  // contentHash (原始32字节SHA-256)
-              currentHash,            // noteHash
-              vec)) {                 // vec (QVector<float>)
+              mdFilePath,            // noteId
+              chunks[i].chunkIndex,  // chunkIndex
+              chunks[i].charStart,   // charStart (qint64)
+              chunks[i].charEnd,     // charEnd (qint64)
+              chunks[i].sectionPath, // sectionPath
+              chunks[i].content,     // content (fallback)
+              chunks[i].contentHash, // contentHash (原始32字节SHA-256)
+              currentHash,           // noteHash
+              vec)) {                // vec (QVector<float>)
         insertAllOk = false;
         break;
       }
@@ -159,10 +166,12 @@ bool Notes::syncNoteVectorsBatchToDb(const QString& mdFilePath) {
   return dbSuccess;
 }
 
-bool Notes::removeNoteVector(const QString& mdFilePath) {
-  if (!g_cpu_supports_llama) return false;
+bool Notes::removeNoteVector(const QString &mdFilePath) {
+  if (!g_cpu_supports_llama)
+    return false;
 
-  if (!isLocalAIModel) return false;
+  if (!isLocalAIModel)
+    return false;
 
   if (!g_vectorDb) {
     qWarning() << "删除向量：向量数据库未初始化";
@@ -187,9 +196,10 @@ bool Notes::removeNoteVector(const QString& mdFilePath) {
   }
 }
 
-QString Notes::loadNoteFullText(const QString& mdPath) {
+QString Notes::loadNoteFullText(const QString &mdPath) {
   QFile f(mdPath);
-  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return "";
+  if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+    return "";
   QString text = f.readAll();
   f.close();
   return text;
@@ -197,21 +207,25 @@ QString Notes::loadNoteFullText(const QString& mdPath) {
 
 #endif
 
-QString Notes::readNoteFileSafeFromRaw(const QByteArray& raw) {
-  if (raw.isEmpty()) return {};
+QString Notes::readNoteFileSafeFromRaw(const QByteArray &raw) {
+  if (raw.isEmpty())
+    return {};
 
+  // 处理带有 UTF-8 BOM 的情况
   if (raw.startsWith("\xEF\xBB\xBF")) {
     QString text = QString::fromUtf8(raw.mid(3));
     text.replace("\r\n", "\n").replace('\r', '\n');
     return text;
   }
 
-  QTextCodec::ConverterState state;
-  QTextCodec* utf8Codec = QTextCodec::codecForName("UTF-8");
-  QString text = utf8Codec->toUnicode(raw.constData(), raw.size(), &state);
+  // 使用 QStringDecoder 替代 QTextCodec 进行 UTF-8 解码及错误检测
+  QStringDecoder decoder(QStringConverter::Utf8);
+  QString text = decoder.decode(raw);
 
   bool hasGbkPattern = false;
-  if (state.invalidChars > 0) {
+
+  // decoder.hasError() 完美替代了原代码的 state.invalidChars > 0
+  if (decoder.hasError()) {
     for (qsizetype i = 0; i < raw.size() - 1 && !hasGbkPattern; ++i) {
       quint8 hi = static_cast<quint8>(raw[i]);
       quint8 lo = static_cast<quint8>(raw[i + 1]);
@@ -220,12 +234,16 @@ QString Notes::readNoteFileSafeFromRaw(const QByteArray& raw) {
     }
   }
 
-  if (state.invalidChars > 0 && hasGbkPattern) {
-    qDebug() << "[ENCODING] Fallback to GBK, invalidChars:"
-             << state.invalidChars;
-    text = QTextCodec::codecForName("GBK")->toUnicode(raw);
+  // 如果 UTF-8 解码失败，且数据中包含疑似 GBK 的双字节特征，则回退
+  if (decoder.hasError() && hasGbkPattern) {
+    qDebug() << "[ENCODING] Fallback to GBK";
+
+    // 在纯 Qt6 中，使用 fromLocal8Bit 替代原先显式的 GBK 解码。
+    // 注意：此方法在中文 Windows 系统下默认按 GBK 解析，是最接近的平替。
+    text = QString::fromLocal8Bit(raw);
   }
 
+  // 统一换行符
   text.replace("\r\n", "\n").replace('\r', '\n');
   return text;
 }
