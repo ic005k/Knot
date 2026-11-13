@@ -346,7 +346,7 @@ void NotesList::genCursorText() {
   QString curText =
       QString::number(curPos) + "  (\"" + str0 + "|" + str1 + "\"" + ")";
   QString filePath = privateDir + "cursor_text.txt";
-
+  QFile::remove(filePath);
   // 使用Qt的原子写入函数
   if (!safeWriteFile(filePath, curText)) {
     qCritical() << "Failed to write cursor_text file:" << filePath;
