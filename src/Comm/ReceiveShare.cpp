@@ -2,21 +2,21 @@
 
 #include "src/MainWindow.h"
 
-ReceiveShare::ReceiveShare(QWidget* parent) : QDialog(parent) {}
+ReceiveShare::ReceiveShare(QWidget *parent) : QDialog(parent) {}
 
 ReceiveShare::~ReceiveShare() {}
 
-void ReceiveShare::closeEvent(QCloseEvent* event) {
+void ReceiveShare::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event)
-  QClipboard* m_Clip = QApplication::clipboard();
+  QClipboard *m_Clip = QApplication::clipboard();
   m_Clip->setText(strReceiveShareData);
 
   m_Method->closeGrayWindows();
 }
 
-bool ReceiveShare::eventFilter(QObject* watch, QEvent* evn) {
+bool ReceiveShare::eventFilter(QObject *watch, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = dynamic_cast<QKeyEvent*>(evn);  // 安全转换
+    QKeyEvent *keyEvent = dynamic_cast<QKeyEvent *>(evn); // 安全转换
     if (keyEvent && keyEvent->key() == Qt::Key_Back) {
       Close();
       return true;
@@ -117,12 +117,14 @@ void ReceiveShare::addToNote(bool isInsert) {
   strReceiveShareData = getShareString();
   shareType = getShareType();
 
-  QTextEdit* edit = new QTextEdit;
+  QTextEdit *edit = new QTextEdit;
   QString strBuffer = loadText(currentMDFile);
   edit->setPlainText(strBuffer);
   int curPos = getCursorPos();
-  if (curPos < 0) curPos = 0;
-  if (curPos > strBuffer.length()) curPos = strBuffer.length();
+  if (curPos < 0)
+    curPos = 0;
+  if (curPos > strBuffer.length())
+    curPos = strBuffer.length();
   QTextCursor tmpCursor = edit->textCursor();
   tmpCursor.setPosition(curPos);
   edit->setTextCursor(tmpCursor);
@@ -197,7 +199,7 @@ void ReceiveShare::openNoteEditor() {
 
 QObjectList ReceiveShare::getAllFrame(QObjectList lstUIControls) {
   QObjectList lst;
-  foreach (QObject* obj, lstUIControls) {
+  foreach (QObject *obj, lstUIControls) {
     if (obj->metaObject()->className() == QStringLiteral("QFrame")) {
       lst.append(obj);
     }
@@ -217,15 +219,17 @@ void ReceiveShare::closeAllChildWindows() {
     m_Steps->close();
   }
 
-  if (m_Steps->isVisible()) m_Steps->close();
+  if (m_Steps->isVisible())
+    m_Steps->close();
 
   if (mw_one->m_Preferences->isVisible())
     mw_one->m_Preferences->ui->btnBack->click();
 
-  if (mw_one->ui->frameOne->isVisible()) mw_one->ui->btnBack_One->click();
+  if (mw_one->ui->frameOne->isVisible())
+    mw_one->ui->btnBack_One->click();
 }
 
-void ReceiveShare::shareString(const QString& title, const QString& content) {
+void ReceiveShare::shareString(const QString &title, const QString &content) {
   Q_UNUSED(title);
   Q_UNUSED(content);
 #ifdef Q_OS_ANDROID
@@ -243,8 +247,8 @@ void ReceiveShare::shareString(const QString& title, const QString& content) {
 #endif
 }
 
-void ReceiveShare::shareImage(const QString& title, const QString& path,
-                              const QString& fileType) {
+void ReceiveShare::shareImage(const QString &title, const QString &path,
+                              const QString &fileType) {
   Q_UNUSED(title);
   Q_UNUSED(path);
   Q_UNUSED(fileType);
@@ -265,8 +269,8 @@ void ReceiveShare::shareImage(const QString& title, const QString& path,
 #endif
 }
 
-void ReceiveShare::shareImages(const QString& title,
-                               const QStringList& imagesPathList) {
+void ReceiveShare::shareImages(const QString &title,
+                               const QStringList &imagesPathList) {
   Q_UNUSED(title);
   Q_UNUSED(imagesPathList);
 #ifdef Q_OS_ANDROID
@@ -296,7 +300,7 @@ void ReceiveShare::bringAppToForeground() {
     QJniObject::callStaticMethod<void>(
         "com/x/MyService", "bringAppToForegroundFromService", "()V");
 
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     qDebug() << "Bring App to foreground exception: " << e.what();
     QJniEnvironment env;
     if (env->ExceptionCheck()) {
@@ -313,7 +317,8 @@ void ReceiveShare::bringAppToForeground() {
 }
 
 void ReceiveShare::goReceiveShare() {
-  m_Method->showTempActivity();
+  // m_Method->showTempActivity();
+
   QString method = mw_one->m_ReceiveShare->getShareMethod();
   if (method == "todo") {
     strReceiveShareData = getShareString();
@@ -323,7 +328,7 @@ void ReceiveShare::goReceiveShare() {
 
     closeAllChildWindows();
 
-    mw_one->ui->btnTodo->click();
+    mw_one->m_Todo->openTodo();
   }
 
   if (method == "appendNote") {
@@ -338,17 +343,17 @@ void ReceiveShare::goReceiveShare() {
     shareType = getShareType();
     if (shareType == "text/plain") {
       strReceiveShareData = getShareString();
-      QClipboard* pClip = QApplication::clipboard();
+      QClipboard *pClip = QApplication::clipboard();
       pClip->setText(strReceiveShareData);
     }
 
     if (shareType == "image/*") {
-      QClipboard* clip = QApplication::clipboard();
+      QClipboard *clip = QApplication::clipboard();
       int imgCount = getImgCount();
       for (int i = 0; i < imgCount; i++) {
         QString imgFile =
             "/storage/emulated/0/.Knot/img" + QString::number(i) + ".png";
-        QImage* image = new QImage();
+        QImage *image = new QImage();
         if (image->load(imgFile)) {
           clip->setPixmap(QPixmap::fromImage(*image));
         }

@@ -1093,6 +1093,7 @@ public class NoteEditor
             "onDestroy saving: " + MyActivity.strMDFile + " -> " + pos
         );
         saveCursorPosAsync(MyActivity.strMDFile, pos);
+        PublicJavaCallCpp("gen_cursor_text");
 
         mIsDestroyed = true;
 

@@ -433,6 +433,7 @@ void Notes::init_all_notes() {
 }
 
 void Notes::openNotes() {
+  m_Method->closeMainEntranceWindow();
   m_NotesList->cancelRebuildNotesVector();
   if (isLocalAIModel) {
   } else {

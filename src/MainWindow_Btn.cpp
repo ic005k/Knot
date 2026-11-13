@@ -613,6 +613,10 @@ void MainWindow::on_btnShowCboxList_clicked() {
   mw_one->ui->cboxWebDAV->showPopup();
 }
 
+void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
+
+void MainWindow::on_btnTodo_clicked() { m_Todo->openTodo(); }
+
 void MainWindow::onAndroidBackHandle() {
   if (mw_one->dlgProg != nullptr || m_Method->infoWindow != nullptr) {
     return;

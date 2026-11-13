@@ -1215,7 +1215,3 @@ QVariantList MainWindow::buildRecentList() {
 }
 
 void MainWindow::setDisplayResult(const QVariantList &list) {}
-
-void MainWindow::on_btnReader_clicked() { m_Reader->openReader(); }
-
-void MainWindow::on_btnTodo_clicked() { m_Todo->openTodo(); }

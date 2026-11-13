@@ -757,8 +757,8 @@ public class ShareReceiveActivity
             return strBuf.toString();
         } catch (Exception ex) {
             ex.printStackTrace();
+            return "";
         }
-        return null;
     }
 
     public void writeTextFile(String content, String filename) {
@@ -783,6 +783,8 @@ public class ShareReceiveActivity
     }
 
     private void setInsertFlag() {
+        if (cursorText == null || cursorText.isEmpty()) return;
+
         // Set insert flag
         String strTV = tv.getText().toString();
         int indexTV = strTV.indexOf(cursorText);

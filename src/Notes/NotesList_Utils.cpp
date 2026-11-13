@@ -1,9 +1,10 @@
 #include "NotesList.h"
+#include "defines.h"
 #include "src/MainWindow.h"
 
 QStringList NotesList::getRecycleNoteFiles() {
   QStringList cycleFiles;
-  QTreeWidgetItem* cycleTopItem = twrb->topLevelItem(0);
+  QTreeWidgetItem *cycleTopItem = twrb->topLevelItem(0);
   int count = cycleTopItem->childCount();
   for (int i = 0; i < count; i++) {
     QString filePath = iniDir + cycleTopItem->child(i)->text(1);
@@ -26,12 +27,13 @@ bool NotesList::delFile(QString file) {
   return isOk;
 }
 
-void NotesList::addItemToQW_Level(QObject* qmlRoot, const QString& t0,
-                                  const QString& t1, const QString& t2,
-                                  const QString& t3, const QString& t4,
+void NotesList::addItemToQW_Level(QObject *qmlRoot, const QString &t0,
+                                  const QString &t1, const QString &t2,
+                                  const QString &t3, const QString &t4,
                                   int fontSize, int level, int parentIndex,
                                   bool isExpand) {
-  if (!qmlRoot) return;
+  if (!qmlRoot)
+    return;
 
   // QML addItem 完整参数顺序：t0,t1,t2,t3,t4,f_size,level,parentIndex,isExpand
   QMetaObject::invokeMethod(
@@ -41,9 +43,10 @@ void NotesList::addItemToQW_Level(QObject* qmlRoot, const QString& t0,
       Q_ARG(QVariant, parentIndex), Q_ARG(QVariant, isExpand));
 }
 
-void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
-                                 int level, QStringList& result) {
-  if (!item) return;
+void NotesList::traverseTreeItem(QTreeWidgetItem *item, int parentQmlIndex,
+                                 int level, QStringList &result) {
+  if (!item)
+    return;
 
   // 普通笔记跳过
   if (!item->text(1).isEmpty()) {
@@ -60,7 +63,7 @@ void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
   int noteCount = 0;
   int totalChild = item->childCount();
   for (int n = 0; n < totalChild; ++n) {
-    QTreeWidgetItem* child = item->child(n);
+    QTreeWidgetItem *child = item->child(n);
     if (!child->text(1).isEmpty()) {
       noteCount++;
     }
@@ -92,7 +95,7 @@ void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
 
   // 递归子笔记本
   for (int j = 0; j < totalChild; ++j) {
-    QTreeWidgetItem* childItem = item->child(j);
+    QTreeWidgetItem *childItem = item->child(j);
     if (childItem->text(1).isEmpty()) {
       traverseTreeItem(childItem, currentQmlIndex, level + 1, result);
     }
@@ -101,14 +104,14 @@ void NotesList::traverseTreeItem(QTreeWidgetItem* item, int parentQmlIndex,
 
 void NotesList::setColorFlag(QString strColor) {}
 
-void NotesList::getAllFiles(const QString& foldPath, QStringList& folds,
-                            const QStringList& formats) {
+void NotesList::getAllFiles(const QString &foldPath, QStringList &folds,
+                            const QStringList &formats) {
   QDirIterator it(foldPath, QDir::Files | QDir::NoDotAndDotDot,
                   QDirIterator::Subdirectories);
   while (it.hasNext()) {
     it.next();
     QFileInfo fileInfo = it.fileInfo();
-    if (formats.contains(fileInfo.suffix())) {  // 检测格式，按需保存
+    if (formats.contains(fileInfo.suffix())) { // 检测格式，按需保存
       folds << fileInfo.absoluteFilePath();
     }
   }
@@ -125,12 +128,12 @@ int NotesList::getNotesListCount() {
 }
 
 int NotesList::getNoteBookCurrentIndex() {
-  int index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
+  int index = 0; // m_Method->getCurrentIndexFromQW(mui->qwNoteBook);
   return index;
 }
 
 int NotesList::getNotesListCurrentIndex() {
-  int index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwNoteList);
+  int index = 0; // m_Method->getCurrentIndexFromQW(mui->qwNoteList);
   return index;
 }
 
@@ -143,7 +146,7 @@ void NotesList::setNotesListCurrentIndex(int index) {
 }
 
 int NotesList::getNoteBookIndex_twToqml() {
-  QTreeWidgetItem* item = tw->currentItem();
+  QTreeWidgetItem *item = tw->currentItem();
   int index = 0;
   if (item->parent() == NULL) {
     index = tw->indexOfTopLevelItem(item);
@@ -152,10 +155,12 @@ int NotesList::getNoteBookIndex_twToqml() {
     int index1 = 0;
     int count = item->parent()->childCount();
     for (int i = 0; i < count; i++) {
-      QTreeWidgetItem* item0 = item->parent()->child(i);
-      if (item0 == item) break;
+      QTreeWidgetItem *item0 = item->parent()->child(i);
+      if (item0 == item)
+        break;
 
-      if (item0->text(1).isEmpty()) index1++;
+      if (item0->text(1).isEmpty())
+        index1++;
     }
 
     index = index0 + index1 + 1;
@@ -165,11 +170,11 @@ int NotesList::getNoteBookIndex_twToqml() {
 }
 
 QString NotesList::getNoteBookText0(int index) {
-  return "";  // m_Method->getText0(mui->qwNoteBook, index);
+  return ""; // m_Method->getText0(mui->qwNoteBook, index);
 }
 
 QString NotesList::getNotesListText0(int index) {
-  return "";  // m_Method->getText0(mui->qwNoteList, index);
+  return ""; // m_Method->getText0(mui->qwNoteList, index);
 }
 
 void NotesList::modifyNoteBookText0(QString text0, int index) {
@@ -184,7 +189,8 @@ void NotesList::setNoteLabel() {
   QString notesSum = QString::number(getNotesListCount());
   int index_note = getNotesListCurrentIndex();
   QString notesSn = "";
-  if (index_note >= 0) notesSn = QString::number(index_note + 1) + "/";
+  if (index_note >= 0)
+    notesSn = QString::number(index_note + 1) + "/";
   // mui->lblNoteList->setText(notesSn + notesSum);
   int index = getNoteBookCurrentIndex();
   // m_Method->modifyItemText3(mui->qwNoteBook, index, notesSum);
@@ -194,7 +200,7 @@ void NotesList::loadAllRecycle() {
   QStringList list;
   int childCount = twrb->topLevelItem(0)->childCount();
   for (int i = 0; i < childCount; i++) {
-    QTreeWidgetItem* childItem = twrb->topLevelItem(0)->child(i);
+    QTreeWidgetItem *childItem = twrb->topLevelItem(0)->child(i);
     QString text0 = childItem->text(0);
     QString text3 = iniDir + childItem->text(1);
 
@@ -223,12 +229,12 @@ void NotesList::initQmlTree() {
   QString strItem, strChildItem;
   int topcount = tw->topLevelItemCount();
   for (int i = 0; i < topcount; i++) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
+    QTreeWidgetItem *topItem = tw->topLevelItem(i);
     strItem = topItem->text(0);
     auto parentItem = addQmlTreeTopItem(strItem);
     int childcount = topItem->childCount();
     for (int j = 0; j < childcount; j++) {
-      QTreeWidgetItem* childItem = topItem->child(j);
+      QTreeWidgetItem *childItem = topItem->child(j);
       strChildItem = childItem->text(0);
       if (childItem->text(1).isEmpty()) {
         auto parentItem2 =
@@ -245,13 +251,13 @@ void NotesList::initQmlTree() {
   }
 }
 
-QStringList NotesList::extractLocalImagesFromMarkdown(const QString& filePath) {
+QStringList NotesList::extractLocalImagesFromMarkdown(const QString &filePath) {
   QStringList images;
   QFile file(filePath);
 
   // 打开文件
   if (!file.open(QIODevice::ReadOnly)) {
-    return images;  // 返回空列表如果打开失败
+    return images; // 返回空列表如果打开失败
   }
 
   QTextStream in(&file);
@@ -264,7 +270,7 @@ QStringList NotesList::extractLocalImagesFromMarkdown(const QString& filePath) {
 
   while (matchIterator.hasNext()) {
     QRegularExpressionMatch match = matchIterator.next();
-    QString captured = match.captured(1).trimmed();  // 去除首尾空格
+    QString captured = match.captured(1).trimmed(); // 去除首尾空格
 
     // 提取第一个空格前的部分作为路径（处理可能存在的标题）
     QString path = captured.section(' ', 0, 0);
@@ -288,7 +294,7 @@ QStringList NotesList::getValidMDFiles() { return validMDFiles; }
 template class QFutureWatcher<ResultsMap>;
 
 // 安全的文件写入函数
-bool NotesList::safeWriteFile(const QString& filePath, const QString& content) {
+bool NotesList::safeWriteFile(const QString &filePath, const QString &content) {
   QTemporaryFile tempFile;
   if (tempFile.open()) {
     QTextStream stream(&tempFile);
@@ -301,6 +307,27 @@ bool NotesList::safeWriteFile(const QString& filePath, const QString& content) {
   return false;
 }
 
+int NotesList::getCursorPos() {
+  // currentMDFile
+  const QString CURSOR_JSON_PATH = privateDir + "cursor_positions.json";
+  QFile f(CURSOR_JSON_PATH);
+  if (!f.exists() || f.size() <= 0)
+    return 0;
+
+  if (!f.open(QIODevice::ReadOnly))
+    return 0;
+  QByteArray raw = f.readAll();
+  f.close();
+
+  QJsonParseError err;
+  QJsonDocument doc = QJsonDocument::fromJson(raw, &err);
+  if (err.error != QJsonParseError::NoError || !doc.isObject())
+    return 0;
+
+  QJsonObject obj = doc.object();
+  return obj.value(currentMDFile).toInt(0);
+}
+
 void NotesList::genCursorText() {
   // 直接从文件读取内容（避免创建临时UI组件）
   QString strBuffer = loadText(currentMDFile);
@@ -309,7 +336,7 @@ void NotesList::genCursorText() {
     return;
   }
 
-  int curPos = mw_one->m_ReceiveShare->getCursorPos();
+  int curPos = getCursorPos();
   curPos = qBound(0, curPos, strBuffer.length());
 
   // 使用QString方法替代QTextCursor操作
@@ -365,7 +392,7 @@ void NotesList::clearMD_Pic() {
       QRegularExpression::CaseInsensitiveOption);
 
   // 1. 解析所有Markdown文件，提取引用的图片
-  foreach (const QString& mdFilePath, allmdFiles) {
+  foreach (const QString &mdFilePath, allmdFiles) {
     QFile mdFile(mdFilePath);
     if (!mdFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
       qWarning() << "无法打开Markdown文件:" << mdFilePath;
@@ -396,7 +423,7 @@ void NotesList::clearMD_Pic() {
   int deletedCount = 0;
   int failedCount = 0;
 
-  foreach (const QString& imgFilePath, allimgFiles) {
+  foreach (const QString &imgFilePath, allimgFiles) {
     QFileInfo imgInfo(imgFilePath);
     QString imgFileName = imgInfo.fileName();
 
@@ -421,7 +448,8 @@ void NotesList::clearMD_Pic() {
   if (mw_one->ui->chkAutoSync->isChecked() &&
       mw_one->ui->chkWebDAV->isChecked()) {
     int count = needDelWebDAVFiles.count();
-    if (count > 0) m_Notes->delRemoteFile(needDelWebDAVFiles);
+    if (count > 0)
+      m_Notes->delRemoteFile(needDelWebDAVFiles);
     m_Method->setAccessCount(needDelWebDAVFiles.count());
   }
 
@@ -429,15 +457,15 @@ void NotesList::clearMD_Pic() {
            << "个, 删除失败:" << failedCount << "个";
 }
 
-void NotesList::addItem(QTreeWidget* tw, QTreeWidgetItem* item) {
+void NotesList::addItem(QTreeWidget *tw, QTreeWidgetItem *item) {
   item->setIcon(0, QIcon(":/res/n.png"));
   tw->setFocus();
   if (tw == twrb) {
     tw->setCurrentItem(tw->topLevelItem(0));
-    QTreeWidgetItem* curItem = tw->currentItem();
+    QTreeWidgetItem *curItem = tw->currentItem();
     curItem->addChild(item);
   } else {
-    QTreeWidgetItem* curItem = tw->currentItem();
+    QTreeWidgetItem *curItem = tw->currentItem();
     curItem->addChild(item);
   }
 
@@ -457,8 +485,8 @@ void NotesList::resetQML_List() {
   int indexNoteBook = getNoteBookCurrentIndex();
   int indexNote = getNotesListCurrentIndex();
 
-  QTreeWidgetItem* pOldNoteBook = nullptr;
-  QTreeWidgetItem* pOldNote = nullptr;
+  QTreeWidgetItem *pOldNoteBook = nullptr;
+  QTreeWidgetItem *pOldNote = nullptr;
 
   // 合法索引才取值，避免 at(-1) 崩溃
   if (indexNoteBook >= 0 && indexNoteBook < pNoteBookItems.size()) {
@@ -501,12 +529,13 @@ void NotesList::resetQML_List() {
 
 void NotesList::resetQML_Recycle() {
   int childCount = twrb->topLevelItem(0)->childCount();
-  if (childCount == 0) return;
+  if (childCount == 0)
+    return;
 
   loadAllRecycle();
 
   int index = 0;
-  QTreeWidgetItem* item = twrb->currentItem();
+  QTreeWidgetItem *item = twrb->currentItem();
   if (item->parent() == NULL) {
     index = -1;
   } else {
@@ -518,7 +547,7 @@ void NotesList::resetQML_Recycle() {
 
 void NotesList::saveCurrentNoteInfo() {
   const QString iniPath = QDir(iniDir).filePath("curmd.ini");
-  const QString tempIniPath = iniPath + ".tmp";  // 临时文件，原子替换
+  const QString tempIniPath = iniPath + ".tmp"; // 临时文件，原子替换
 
   // 先写入临时文件，不覆盖原文件
   {
@@ -526,7 +555,7 @@ void NotesList::saveCurrentNoteInfo() {
     QString str = currentMDFile;
     QString main_md = str.replace(iniDir, "");
     reg.setValue("/MainNotes/currentItem", main_md);
-    reg.sync();  // 确保全部落盘到临时文件
+    reg.sync(); // 确保全部落盘到临时文件
   }
 
   // 原子替换原文件（IO安全核心：先删旧文件再改名，避免截断）
@@ -553,13 +582,13 @@ void NotesList::saveCurrentNoteInfo() {
     iniFile.write(tempFile.readAll());
     tempFile.close();
     iniFile.close();
-    tempFile.remove();  // 删除临时垃圾文件
+    tempFile.remove(); // 删除临时垃圾文件
   }
 }
 
 void NotesList::setTWRBCurrentItem() {
-  int index = 0;  // m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
-  QTreeWidgetItem* topItem = twrb->topLevelItem(0);
+  int index = 0; // m_Method->getCurrentIndexFromQW(mui->qwNoteRecycle);
+  QTreeWidgetItem *topItem = twrb->topLevelItem(0);
   twrb->setCurrentItem(topItem->child(index));
 }
 
@@ -567,16 +596,19 @@ void NotesList::setTWCurrentItem() {
   int index0, index1;
   index0 = getNoteBookCurrentIndex();
   index1 = getNotesListCurrentIndex();
-  if (index0 >= 0) tw->setCurrentItem(pNoteBookItems.at(index0));
-  if (index1 >= 0) tw->setCurrentItem(pNoteItems.at(index1));
+  if (index0 >= 0)
+    tw->setCurrentItem(pNoteBookItems.at(index0));
+  if (index1 >= 0)
+    tw->setCurrentItem(pNoteItems.at(index1));
 }
 
 void NotesList::setNoteBookCurrentItem() {
   int index = getNoteBookCurrentIndex();
-  if (index < 0) return;
+  if (index < 0)
+    return;
 
-  QString text1 = "";  // m_Method->getText1(mui->qwNoteBook, index);
-  QString text2 = "";  // m_Method->getText2(mui->qwNoteBook, index);
+  QString text1 = ""; // m_Method->getText1(mui->qwNoteBook, index);
+  QString text2 = ""; // m_Method->getText2(mui->qwNoteBook, index);
   if (text2.isEmpty()) {
     tw->setCurrentItem(tw->topLevelItem(text1.toInt()));
 
@@ -587,8 +619,8 @@ void NotesList::setNoteBookCurrentItem() {
       indexMain = list.at(0).toInt();
       indexChild = list.at(1).toInt();
 
-      QTreeWidgetItem* topItem = tw->topLevelItem(indexMain);
-      QTreeWidgetItem* childItem = topItem->child(indexChild);
+      QTreeWidgetItem *topItem = tw->topLevelItem(indexMain);
+      QTreeWidgetItem *childItem = topItem->child(indexChild);
       tw->setCurrentItem(childItem);
     }
   }
@@ -601,7 +633,7 @@ QStringList NotesList::getAllNotePaths() {
   dir.setNameFilters({"*.md"});
 
   QStringList paths;
-  for (const auto& fi : dir.entryInfoList()) {
+  for (const auto &fi : dir.entryInfoList()) {
     paths.append(fi.absoluteFilePath());
   }
   return paths;

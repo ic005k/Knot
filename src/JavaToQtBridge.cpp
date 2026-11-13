@@ -284,6 +284,9 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
       mw_one,
       [strType]() {
         try {
+          if (strType == "gen_cursor_text") {
+            safeDelayedInvoke(100, []() { m_NotesList->genCursorText(); });
+          }
 
           if (strType == "exec_desktop_shortcut") {
             JavaNotify_8();
@@ -302,7 +305,8 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
           }
 
           if (strType == "goto_receive_share") {
-            mw_one->m_ReceiveShare->goReceiveShare();
+            safeDelayedInvoke(
+                100, []() { mw_one->m_ReceiveShare->goReceiveShare(); });
           }
 
           if (strType == "JavaNotify_4") {
