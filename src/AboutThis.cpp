@@ -4,6 +4,7 @@
 #include "ui_AboutThis.h"
 #include "ui_MainWindow.h"
 #include "version.h"
+#include <qlogging.h>
 
 AboutThis::AboutThis(QWidget *parent) : QDialog(parent), ui(new Ui::AboutThis) {
   ui->setupUi(this);
@@ -101,32 +102,42 @@ void AboutThis::replyFinished(QNetworkReply *reply) {
 
 QString AboutThis::getUrl(QVariantList list) {
   QString androidUrl, macUrl, winUrl, linuxUrl;
+
   for (int i = 0; i < list.count(); i++) {
     QVariantMap map = list[i].toMap();
     QString fName = map["name"].toString();
+    QString url = map["browser_download_url"].toString();
+    QString lowerName = fName.toLower();
 
-    if (fName.contains("android"))
-      androidUrl = map["browser_download_url"].toString();
-    if (fName.contains("Mac"))
-      macUrl = map["browser_download_url"].toString();
-    if (fName.contains("Win"))
-      winUrl = map["browser_download_url"].toString();
-    if (fName.contains("Linux"))
-      linuxUrl = map["browser_download_url"].toString();
+    // Android: 只取 apk
+    if (androidUrl.isEmpty() && lowerName.endsWith(".apk")) {
+      androidUrl = url;
+    }
+    // macOS: 只取 arm64 的 dmg
+    else if (macUrl.isEmpty() && lowerName.endsWith(".dmg") &&
+             lowerName.contains("arm64")) {
+      macUrl = url;
+    }
+    // Windows: 只取 Win64 的 zip
+    else if (winUrl.isEmpty() && lowerName.contains("win") &&
+             lowerName.endsWith(".zip")) {
+      winUrl = url;
+    }
+    // Linux: 只取 AppImage
+    else if (linuxUrl.isEmpty() && lowerName.endsWith(".appimage")) {
+      linuxUrl = url;
+    }
   }
 
 #ifdef Q_OS_ANDROID
   return androidUrl;
 #endif
-
 #ifdef Q_OS_MAC
   return macUrl;
 #endif
-
 #ifdef Q_OS_WIN
   return winUrl;
 #endif
-
   return linuxUrl;
 }
 
@@ -145,6 +156,7 @@ int AboutThis::parse_UpdateJSON(QString str) {
     QJsonObject root_Obj = root_Doc.object();
 
     QVariantList list = root_Obj.value("assets").toArray().toVariantList();
+    // qInfo() << "list=" << list;
     QString Url = getUrl(list);
     if (isZH_CN) {
 #ifdef Q_OS_ANDROID
