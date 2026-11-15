@@ -58,15 +58,15 @@ void Notes::MD2Html(QString mdFile) {
 }
 
 QString Notes::addImagePathToHtml(QString strhtml) {
-  QTextEdit* edit = new QTextEdit;
-  QPlainTextEdit* edit1 = new QPlainTextEdit;
+  QTextEdit *edit = new QTextEdit;
+  QPlainTextEdit *edit1 = new QPlainTextEdit;
   strhtml = strhtml.replace("><", ">\n<");
   edit->setPlainText(strhtml);
   QString str, str_2, str_3;
   for (int i = 0; i < edit->document()->lineCount(); i++) {
     // 原始行，保留全部首尾空格，不trim！
     str = getTextEditLineText(edit, i);
-    QString lineRaw = str;  // 保存原始带空格行
+    QString lineRaw = str; // 保存原始带空格行
 
     // 仅临时修剪用于判断是否是img标签
     QString lineTrim = str.trimmed();
@@ -86,11 +86,13 @@ QString Notes::addImagePathToHtml(QString strhtml) {
       if (list1.count() > 1)
         strSrc = "\"file://" + iniDir + "memo/" + list1.at(1) + " ";
       QStringList list2 = str1.split("/memo/");
-      if (list2.count() > 1) str_2 = list2.at(1);
+      if (list2.count() > 1)
+        str_2 = list2.at(1);
       str = "<img src=\"file:///" + iniDir + "memo/" + str_2;
       str = "<a href=" + strSrc + ">" + str + "</a>";
       QStringList list3 = str_2.split("\"");
-      if (list3.count() > 0) str_3 = list3.at(0);
+      if (list3.count() > 0)
+        str_3 = list3.at(0);
       QString imgFile = iniDir + "memo/" + str_3;
       QImage img(imgFile);
       if (img.width() >= mw_one->width() - 25) {
@@ -119,7 +121,7 @@ QString Notes::formatMDText(QString text) {
   return text.replace(re, "\n\n");
 }
 
-void Notes::saveEditorState(const QString& filePath) {
+void Notes::saveEditorState(const QString &filePath) {
   Q_UNUSED(filePath);
 #ifndef Q_OS_ANDROID
   QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
@@ -143,7 +145,18 @@ void Notes::saveEditorState(const QString& filePath) {
 #endif
 }
 
-void Notes::restoreEditorState(const QString& filePath) {
+void Notes::resetEditorPos() {
+  QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);
+  int x, y, w, h;
+  x = settings.value("x", 0).toInt();
+  y = settings.value("y", 20).toInt();
+  w = settings.value("w", this->width()).toInt();
+  h = settings.value("h", this->height()).toInt();
+  move(x, y);
+  resize(w, h);
+}
+
+void Notes::restoreEditorState(const QString &filePath) {
   Q_UNUSED(filePath);
 #ifndef Q_OS_ANDROID
   QSettings settings(privateDir + "editor_config.ini", QSettings::IniFormat);

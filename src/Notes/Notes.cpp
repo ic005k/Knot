@@ -83,6 +83,8 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
   foreach (const QString &bakFile, memoDir.entryList()) {
     memoDir.remove(bakFile);
   }
+
+  resetEditorPos();
 }
 
 Notes::~Notes() {

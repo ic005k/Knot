@@ -440,6 +440,7 @@ private:
   void initEditorScrollBars();
 
   void saveEditorState(const QString &filePath);
+  void resetEditorPos();
   void restoreEditorState(const QString &filePath);
 
   QString getFileVersion(const QString &filePath);
