@@ -58,7 +58,7 @@ All dependencies are preserved in original format for maintenance and upgrades:
 | Project Name | Functionality | Repository Link |
 |--------------|---------------|-----------------|
 | **llama.cpp** | High-performance LLM inference engine | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) |
-| **sqlite-vec** | Read-write vector database | [asg017/sqlite-vec](https://github.com/asg017/sqlite-vec) |
+| **sqlite-vec** | Read-write vector database(amalgamation) | [asg017/sqlite-vec](https://github.com/asg017/sqlite-vec) |
 
 ### Other Dependencies
 | Project Name | Functionality | Repository Link |
