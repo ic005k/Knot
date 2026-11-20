@@ -1,6 +1,6 @@
 // The implementation of the Qt specific subclass of ScintillaBase.
 //
-// Copyright (c) 2024 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2026 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla2.
 // 

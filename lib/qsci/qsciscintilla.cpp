@@ -2,7 +2,7 @@
 // Scintilla.  It is modelled on QTextEdit - a method of the same name should
 // behave in the same way.
 //
-// Copyright (c) 2024 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2026 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla2.
 // 
@@ -4270,6 +4270,7 @@ QString QsciScintilla::annotation(int line) const
 {
     int size = SendScintilla(SCI_ANNOTATIONGETTEXT, line, (const char *)0);
     char *buf = new char[size + 1];
+    SendScintilla(SCI_ANNOTATIONGETTEXT, line, (char *)buf);
 
     QString qs = bytesAsText(buf, size);
     delete[] buf;

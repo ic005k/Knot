@@ -1,6 +1,6 @@
 // This module implements the QsciPrinter class.
 //
-// Copyright (c) 2024 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2026 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla2.
 // 

@@ -2,7 +2,7 @@
 // macOS.  It is a separate file to avoid clashes between macOS and Scintilla
 // data types.
 //
-// Copyright (c) 2024 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2026 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla2.
 // 
@@ -31,8 +31,7 @@
 #include <QStringList>
 #include <QVariant>
 
-#include <QMacPasteboardMime>
-// #include <qmacpasteboardmime.h>
+#include <QMacPasteboardMime>
 
 
 static const QLatin1String mimeRectangular("text/x-qscintilla-rectangular");

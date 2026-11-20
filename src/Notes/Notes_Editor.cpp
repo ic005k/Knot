@@ -3,9 +3,9 @@
 
 #include <QFontDatabase>
 
+#include "MainWindow.h"
+#include "Notes/Notes.h"
 #include "defines.h"
-#include "src/MainWindow.h"
-#include "src/Notes/Notes.h"
 
 void Notes::initEditor() {
 #ifndef Q_OS_ANDROID
@@ -35,8 +35,10 @@ void Notes::initEditor() {
             QString lineText = m_EditSource->text(line);
 
             // ✅ 安全去除行尾换行，不影响 index 的有效性
-            if (lineText.endsWith(QLatin1Char('\n'))) lineText.chop(1);
-            if (lineText.endsWith(QLatin1Char('\r'))) lineText.chop(1);
+            if (lineText.endsWith(QLatin1Char('\n')))
+              lineText.chop(1);
+            if (lineText.endsWith(QLatin1Char('\r')))
+              lineText.chop(1);
 
             // ✅ 将 index 作为光标位置传入
             updateImagePreview(lineText, index);
@@ -46,7 +48,7 @@ void Notes::initEditor() {
 }
 
 #ifndef Q_OS_ANDROID
-void Notes::initMarkdownEditor(QsciScintilla* editor) {
+void Notes::initMarkdownEditor(QsciScintilla *editor) {
   QFont defaultFont = QFont(this->font().family(), fontSize);
   markdownLexer->setFont(defaultFont, -1);
   markdownLexer->setFont(defaultFont, QsciLexerMarkdown::CodeBlock);
@@ -170,7 +172,7 @@ void Notes::editSource_textChanged() { isTextChange = true; }
 
 // 搜索功能
 
-void Notes::searchText(const QString& text, bool forward) {
+void Notes::searchText(const QString &text, bool forward) {
 #ifndef Q_OS_ANDROID
   m_lastSearchText = text;
 
@@ -204,7 +206,7 @@ void Notes::searchText(const QString& text, bool forward) {
 // ============================================================
 // 查找所有匹配项并填充 QListWidget
 // ============================================================
-void Notes::findAllAndShowResults(const QString& text) {
+void Notes::findAllAndShowResults(const QString &text) {
 #ifndef Q_OS_ANDROID
   ui->listSearchResults->clear();
 
@@ -213,13 +215,13 @@ void Notes::findAllAndShowResults(const QString& text) {
     return;
   }
 
-  QString fullText = m_EditSource->text();  // 获取编辑器全部文本
+  QString fullText = m_EditSource->text(); // 获取编辑器全部文本
   QStringList lines = fullText.split('\n');
 
   int totalCount = 0;
 
   for (int i = 0; i < lines.size(); ++i) {
-    const QString& lineText = lines[i];
+    const QString &lineText = lines[i];
     int pos = 0;
 
     // 在同一行中查找所有出现的位置
@@ -232,7 +234,7 @@ void Notes::findAllAndShowResults(const QString& text) {
 
       // ---------- 构造带上下文的预览文本 ----------
       // 上下文：显示匹配关键词前后各若干字符
-      const int contextChars = 15;  // 前后各取15个字符作为上下文
+      const int contextChars = 15; // 前后各取15个字符作为上下文
 
       int previewStart = qMax(0, pos - contextChars);
       int previewEnd =
@@ -252,7 +254,7 @@ void Notes::findAllAndShowResults(const QString& text) {
           displaySuffix;
 
       // ---------- 创建 QListWidgetItem ----------
-      QListWidgetItem* item = new QListWidgetItem(ui->listSearchResults);
+      QListWidgetItem *item = new QListWidgetItem(ui->listSearchResults);
 
       // 行号标签 + 预览
       QString itemText = QString("[Row %1]  %2").arg(i + 1).arg(preview);
@@ -269,7 +271,7 @@ void Notes::findAllAndShowResults(const QString& text) {
                            displaySuffix);
 
       totalCount++;
-      pos += text.length();  // 继续向后查找（支持重叠可改为 pos++）
+      pos += text.length(); // 继续向后查找（支持重叠可改为 pos++）
     }
   }
 
@@ -287,12 +289,12 @@ void Notes::findAllAndShowResults(const QString& text) {
 // ============================================================
 // 构造高亮的 QListWidgetItem
 // ============================================================
-void Notes::buildHighlightedItem(QListWidgetItem* item, int lineNum,
-                                 const QString& displayPrefix,
-                                 const QString& prefix, const QString& match,
-                                 const QString& suffix,
-                                 const QString& displaySuffix) {
-  auto escape = [](const QString& s) -> QString {
+void Notes::buildHighlightedItem(QListWidgetItem *item, int lineNum,
+                                 const QString &displayPrefix,
+                                 const QString &prefix, const QString &match,
+                                 const QString &suffix,
+                                 const QString &displaySuffix) {
+  auto escape = [](const QString &s) -> QString {
     QString e = s;
     e.replace("&", "&amp;");
     e.replace("<", "&lt;");
@@ -303,12 +305,11 @@ void Notes::buildHighlightedItem(QListWidgetItem* item, int lineNum,
   // 预构建 HTML 字符串，存入 UserRole+1
   // （UserRole 仍存 TextMatch 数据，UserRole+1 存显示用 HTML）
   QString html =
-      QString(
-          "<span style='color:#888;'>[Row %1]</span>&nbsp;&nbsp;"
-          "<span style='color:#aaa;'>%2%3</span>"
-          "<span style='background-color:#FFEB3B; color:#000; "
-          "font-weight:bold; padding:1px 2px; border-radius:2px;'>%4</span>"
-          "<span style='color:#aaa;'>%5%6</span>")
+      QString("<span style='color:#888;'>[Row %1]</span>&nbsp;&nbsp;"
+              "<span style='color:#aaa;'>%2%3</span>"
+              "<span style='background-color:#FFEB3B; color:#000; "
+              "font-weight:bold; padding:1px 2px; border-radius:2px;'>%4</span>"
+              "<span style='color:#aaa;'>%5%6</span>")
           .arg(lineNum + 1)
           .arg(escape(displayPrefix), escape(prefix))
           .arg(escape(match))
@@ -348,7 +349,7 @@ void Notes::updateResultCount(int count) {
 // ============================================================
 // 点击搜索结果 → 跳转到编辑器对应位置并高亮
 // ============================================================
-void Notes::onSearchResultClicked(QListWidgetItem* item) {
+void Notes::onSearchResultClicked(QListWidgetItem *item) {
 #ifndef Q_OS_ANDROID
 
   TextMatch result = item->data(Qt::UserRole).value<TextMatch>();
@@ -374,7 +375,7 @@ void Notes::onSearchResultClicked(QListWidgetItem* item) {
 // ============================================================
 void Notes::highlightCurrentResult(int line, int index) {
   for (int i = 0; i < ui->listSearchResults->count(); ++i) {
-    QListWidgetItem* item = ui->listSearchResults->item(i);
+    QListWidgetItem *item = ui->listSearchResults->item(i);
     TextMatch r = item->data(Qt::UserRole).value<TextMatch>();
 
     if (r.line == line && r.index == index) {
@@ -399,7 +400,8 @@ void Notes::searchPrevious() {
 
 void Notes::jumpToNextMatch() {
 #ifndef Q_OS_ANDROID
-  if (m_matchPositions.isEmpty()) return;
+  if (m_matchPositions.isEmpty())
+    return;
   m_currentMatchIndex = (m_currentMatchIndex + 1) % m_matchPositions.size();
   auto pos = m_matchPositions[m_currentMatchIndex];
   m_EditSource->SendScintilla(QsciScintilla::SCI_SETSELECTIONSTART, pos.first);
@@ -412,7 +414,8 @@ void Notes::jumpToNextMatch() {
 
 void Notes::jumpToPrevMatch() {
 #ifndef Q_OS_ANDROID
-  if (m_matchPositions.isEmpty()) return;
+  if (m_matchPositions.isEmpty())
+    return;
   m_currentMatchIndex = (m_currentMatchIndex - 1 + m_matchPositions.size()) %
                         m_matchPositions.size();
   auto pos = m_matchPositions[m_currentMatchIndex];
@@ -442,7 +445,8 @@ void Notes::initMarkdownLexer() {
 // 一键切换深色/亮色（外部切换主题直接调用这个）
 void Notes::switchMdDarkTheme(bool dark) {
 #ifndef Q_OS_ANDROID
-  if (!markdownLexer || !m_EditSource) return;
+  if (!markdownLexer || !m_EditSource)
+    return;
   applyMdLexerTheme(dark);
   m_EditSource->recolor();
 #endif
@@ -644,7 +648,7 @@ void Notes::applyMdLexerTheme(bool darkMode) {
 #endif
 }
 
-void Notes::updateImagePreview(const QString& lineText, int cursorPos) {
+void Notes::updateImagePreview(const QString &lineText, int cursorPos) {
   QString result = parsePreviewData(lineText, cursorPos);
 
   // ✅ 统一重置样式（防止状态切换时残留）
@@ -672,7 +676,7 @@ void Notes::updateImagePreview(const QString& lineText, int cursorPos) {
     // ===== 场景1：图片链接存在但文件失效 =====
     ui->lblNoteImage->setText(QStringLiteral("🖼️"));
     ui->lblNoteImage->setStyleSheet(
-        "font-size: 28px; color: #c66;");  // 偏红暗示异常
+        "font-size: 28px; color: #c66;"); // 偏红暗示异常
 
   } else if (result.startsWith(QStringLiteral("TXT:"))) {
     // ===== 场景B：笔记有效 =====
@@ -687,7 +691,7 @@ void Notes::updateImagePreview(const QString& lineText, int cursorPos) {
     // ===== 场景2：笔记链接存在但文件失效 =====
     ui->lblNoteImage->setText(QStringLiteral("📄"));
     ui->lblNoteImage->setStyleSheet(
-        "font-size: 28px; color: #c66;");  // 与图片失效同色系
+        "font-size: 28px; color: #c66;"); // 与图片失效同色系
 
   } else {
     // ===== 场景3：当前行无任何链接 → 仅清除内容，组件保持可见 =====
@@ -696,11 +700,12 @@ void Notes::updateImagePreview(const QString& lineText, int cursorPos) {
   }
 }
 
-QString Notes::generateSmartSummary(const QString& filePath) {
+QString Notes::generateSmartSummary(const QString &filePath) {
   QString cacheKey =
       filePath + "|" +
       QString::number(QFileInfo(filePath).lastModified().toSecsSinceEpoch());
-  if (auto* cached = m_summaryCache.object(cacheKey)) return *cached;
+  if (auto *cached = m_summaryCache.object(cacheKey))
+    return *cached;
 
   QFile file(filePath);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -721,17 +726,20 @@ QString Notes::generateSmartSummary(const QString& filePath) {
   // 2. 合并多余空白，保留纯文本
   QStringList lines = content.split('\n', Qt::SkipEmptyParts);
   QString plainText;
-  for (const auto& line : lines) {
+  for (const auto &line : std::as_const(lines)) { // 使用 std::as_const 包裹
     QString trimmed = line.trimmed();
-    if (!trimmed.isEmpty()) plainText += trimmed + " ";
+    if (!trimmed.isEmpty())
+      plainText += trimmed + " ";
   }
   plainText = plainText.trimmed();
 
-  if (plainText.isEmpty()) return QStringLiteral("📄 空文档");
+  if (plainText.isEmpty())
+    return QStringLiteral("📄 空文档");
 
   // 3. ✅ 国际化智能截断（约50个字符宽度）
   const int maxLen = 50;
-  if (plainText.length() <= maxLen) return plainText;
+  if (plainText.length() <= maxLen)
+    return plainText;
 
   QString summary;
   int charCount = 0;
@@ -754,7 +762,8 @@ QString Notes::generateSmartSummary(const QString& filePath) {
       // 拉丁/数字等字符
       summary += ch;
       // 非CJK字符每2个算1个视觉宽度（粗略估算）
-      if (!lastWasCjk) charCount++;
+      if (!lastWasCjk)
+        charCount++;
       lastWasCjk = false;
     }
   }
@@ -771,16 +780,16 @@ QString Notes::generateSmartSummary(const QString& filePath) {
   QString result = (plainText.length() <= maxLen) ? plainText : summary + "…";
 
   m_summaryCache.insert(cacheKey, new QString(result));
-  return result;  // 统一返回带省略号的完整结果
+  return result; // 统一返回带省略号的完整结果
 }
 
-QString Notes::parsePreviewData(const QString& lineText, int cursorPos) {
+QString Notes::parsePreviewData(const QString &lineText, int cursorPos) {
   // 用于存储候选结果的结构体
   struct PreviewCandidate {
-    QString type;     // "IMG", "TXT", "IMG_ERR", "NOTE_ERR"
-    QString data;     // 路径、摘要或错误信息
-    qsizetype start;  // 匹配起始位置
-    qsizetype end;    // 匹配结束位置
+    QString type;    // "IMG", "TXT", "IMG_ERR", "NOTE_ERR"
+    QString data;    // 路径、摘要或错误信息
+    qsizetype start; // 匹配起始位置
+    qsizetype end;   // 匹配结束位置
   };
 
   QList<PreviewCandidate> candidates;
@@ -822,7 +831,7 @@ QString Notes::parsePreviewData(const QString& lineText, int cursorPos) {
 
   // ===== 3. 根据光标位置精确选择 =====
   if (cursorPos >= 0) {
-    for (const auto& c : candidates) {
+    for (const auto &c : candidates) {
       if (cursorPos >= c.start && cursorPos <= c.end) {
         return c.type + ":" + c.data;
       }
@@ -831,12 +840,12 @@ QString Notes::parsePreviewData(const QString& lineText, int cursorPos) {
 
   // ===== 4. 兜底：按文本出现顺序返回第一个 =====
   std::sort(candidates.begin(), candidates.end(),
-            [](const PreviewCandidate& a, const PreviewCandidate& b) {
+            [](const PreviewCandidate &a, const PreviewCandidate &b) {
               return a.start < b.start;
             });
 
   if (!candidates.isEmpty()) {
-    const auto& first = candidates.first();
+    const auto &first = candidates.first();
     return first.type + ":" + first.data;
   }
 
@@ -845,7 +854,7 @@ QString Notes::parsePreviewData(const QString& lineText, int cursorPos) {
 }
 
 // 启动后台搜索（QPointer 守卫）
-void Notes::startBackgroundSearch(const QString& keyword) {
+void Notes::startBackgroundSearch(const QString &keyword) {
 #ifndef Q_OS_ANDROID
   if (keyword.isEmpty()) {
     ui->listSearchResults->clear();
@@ -857,13 +866,13 @@ void Notes::startBackgroundSearch(const QString& keyword) {
   const int currentGeneration = ++m_searchGeneration;
   QPointer<Notes> guard(this);
 
-  QtConcurrent::run([guard, fullText, keyword, currentGeneration]() {
+  (void)QtConcurrent::run([guard, fullText, keyword, currentGeneration]() {
     // ========== 后台线程 ==========
     QStringList lines = fullText.split('\n');
     QList<TextMatch> matches;
     QStringList htmlList;
 
-    auto escape = [](const QString& s) -> QString {
+    auto escape = [](const QString &s) -> QString {
       QString e = s;
       e.replace("&", "&amp;");
       e.replace("<", "&lt;");
@@ -872,7 +881,7 @@ void Notes::startBackgroundSearch(const QString& keyword) {
     };
 
     for (int i = 0; i < lines.size(); ++i) {
-      const QString& lineText = lines[i];
+      const QString &lineText = lines[i];
       int pos = 0;
 
       while ((pos = lineText.indexOf(keyword, pos, Qt::CaseInsensitive)) !=
@@ -898,15 +907,15 @@ void Notes::startBackgroundSearch(const QString& keyword) {
             (previewEnd < lineText.length()) ? QStringLiteral("…") : QString();
 
         // 后台线程中，HTML 只包含结构和类名，永远不变
-        QString html = QStringLiteral(
-                           "<span class='ln'>[Row %1]</span>&nbsp;&nbsp;"
+        QString html =
+            QStringLiteral("<span class='ln'>[Row %1]</span>&nbsp;&nbsp;"
                            "<span class='ctx'>%2%3</span>"
                            "<span class='hl'>%4</span>"
                            "<span class='ctx'>%5%6</span>")
-                           .arg(i + 1)
-                           .arg(escape(displayPrefix), escape(prefix))
-                           .arg(escape(match))
-                           .arg(escape(suffix), escape(displaySuffix));
+                .arg(i + 1)
+                .arg(escape(displayPrefix), escape(prefix))
+                .arg(escape(match))
+                .arg(escape(suffix), escape(displaySuffix));
 
         matches.append(result);
         htmlList.append(html);
@@ -915,13 +924,16 @@ void Notes::startBackgroundSearch(const QString& keyword) {
     }
 
     // ========== 回到主线程 ==========
-    if (!guard) return;
+    if (!guard)
+      return;
     QMetaObject::invokeMethod(
         guard.data(),
         [guard, matches, htmlList, currentGeneration]() {
-          if (!guard) return;
-          Notes* self = guard.data();
-          if (currentGeneration != self->m_searchGeneration) return;
+          if (!guard)
+            return;
+          Notes *self = guard.data();
+          if (currentGeneration != self->m_searchGeneration)
+            return;
           self->applySearchResults(matches, htmlList);
         },
         Qt::QueuedConnection);
@@ -929,16 +941,16 @@ void Notes::startBackgroundSearch(const QString& keyword) {
 #endif
 }
 
-void Notes::applySearchResults(const QList<TextMatch>& matches,
-                               const QStringList& htmlList) {
+void Notes::applySearchResults(const QList<TextMatch> &matches,
+                               const QStringList &htmlList) {
 #ifndef Q_OS_ANDROID
   ui->listSearchResults->setUpdatesEnabled(false);
   ui->listSearchResults->clear();
 
   for (int i = 0; i < matches.size(); ++i) {
-    const TextMatch& match = matches[i];
+    const TextMatch &match = matches[i];
 
-    QListWidgetItem* item = new QListWidgetItem(ui->listSearchResults);
+    QListWidgetItem *item = new QListWidgetItem(ui->listSearchResults);
     item->setText(
         QStringLiteral("[Row %1]  %2").arg(match.line + 1).arg(match.lineText));
 
