@@ -310,10 +310,9 @@ void Notes::buildHighlightedItem(QListWidgetItem *item, int lineNum,
               "<span style='background-color:#FFEB3B; color:#000; "
               "font-weight:bold; padding:1px 2px; border-radius:2px;'>%4</span>"
               "<span style='color:#aaa;'>%5%6</span>")
-          .arg(lineNum + 1)
-          .arg(escape(displayPrefix), escape(prefix))
-          .arg(escape(match))
-          .arg(escape(suffix), escape(displaySuffix));
+          .arg(QString::number(lineNum + 1), escape(displayPrefix),
+               escape(prefix), escape(match), escape(suffix),
+               escape(displaySuffix));
 
   item->setData(Qt::UserRole + 1, html);
 
@@ -912,10 +911,9 @@ void Notes::startBackgroundSearch(const QString &keyword) {
                            "<span class='ctx'>%2%3</span>"
                            "<span class='hl'>%4</span>"
                            "<span class='ctx'>%5%6</span>")
-                .arg(i + 1)
-                .arg(escape(displayPrefix), escape(prefix))
-                .arg(escape(match))
-                .arg(escape(suffix), escape(displaySuffix));
+                .arg(QString::number(i + 1), escape(displayPrefix),
+                     escape(prefix), escape(match), escape(suffix),
+                     escape(displaySuffix));
 
         matches.append(result);
         htmlList.append(html);
