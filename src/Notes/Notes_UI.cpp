@@ -7,94 +7,152 @@ void Notes::on_btnDone_clicked() { saveMDFile(); }
 void Notes::on_btnInsertTable_clicked() {
 #ifndef Q_OS_ANDROID
   QString table = "|Title1|Title2|\n|------|------|\n";
-  m_EditSource->insert(table);
+  QByteArray utf8Text = table.toUtf8();
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8Text.constData()));
 #endif
 }
 
 void Notes::on_btnS1_clicked() {
 #ifndef Q_OS_ANDROID
+  // 获取选区文本
+  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
+  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
+  bool hasSel = (selStart != selEnd);
 
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Bold Italic");
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("_**" + str + "**_");
-  else
-    m_EditSource->replaceSelectedText("_**" + str + "**_");
+  QString str;
+  if (hasSel) {
+    QByteArray raw(selEnd - selStart, '\0');
+    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
+    str = QString::fromUtf8(raw);
+  } else {
+    str = tr("Bold Italic");
+  }
 
+  QString wrapped = "_**" + str + "**_";
+  QByteArray utf8 = wrapped.toUtf8();
+
+  // SCI_REPLACESEL 同时处理"有选区替换"和"无选区插入"两种情况
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
 #endif
 }
 
 void Notes::on_btnS2_clicked() {
 #ifndef Q_OS_ANDROID
+  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
+  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
+  bool hasSel = (selStart != selEnd);
 
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Italic");
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("_" + str + "_");
-  else
-    m_EditSource->replaceSelectedText("_" + str + "_");
+  QString str;
+  if (hasSel) {
+    QByteArray raw(selEnd - selStart, '\0');
+    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
+    str = QString::fromUtf8(raw);
+  } else {
+    str = tr("Italic");
+  }
 
+  QString wrapped = "_" + str + "_";
+  QByteArray utf8 = wrapped.toUtf8();
+
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
 #endif
 }
 
 void Notes::on_btnS3_clicked() {
 #ifndef Q_OS_ANDROID
+  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
+  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
 
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Underline");
+  QString str;
+  if (selStart != selEnd) {
+    QByteArray raw(selEnd - selStart, '\0');
+    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
+    str = QString::fromUtf8(raw);
+  } else {
+    str = tr("Underline");
+  }
 
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("<u>" + str + "</u>");
-  else
-    m_EditSource->replaceSelectedText("<u>" + str + "</u>");
-
+  QByteArray utf8 = ("<u>" + str + "</u>").toUtf8();
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
 #endif
 }
 
 void Notes::on_btnS4_clicked() {
 #ifndef Q_OS_ANDROID
+  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
+  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
 
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Strickout");
+  QString str;
+  if (selStart != selEnd) {
+    QByteArray raw(selEnd - selStart, '\0');
+    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
+    str = QString::fromUtf8(raw);
+  } else {
+    str = tr("Strickout");
+  }
 
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("~~" + str + "~~");
-  else
-    m_EditSource->replaceSelectedText("~~" + str + "~~");
-
+  QByteArray utf8 = ("~~" + str + "~~").toUtf8();
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
 #endif
 }
+
 void Notes::on_btnS5_clicked() {
 #ifndef Q_OS_ANDROID
+  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
+  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
 
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Bold");
-  if (!m_EditSource->hasSelectedText())
-    m_EditSource->insert("**" + str + "**");
-  else
-    m_EditSource->replaceSelectedText("**" + str + "**");
+  QString str;
+  if (selStart != selEnd) {
+    QByteArray raw(selEnd - selStart, '\0');
+    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
+    str = QString::fromUtf8(raw);
+  } else {
+    str = tr("Bold");
+  }
 
+  QByteArray utf8 = ("**" + str + "**").toUtf8();
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
 #endif
 }
 
 void Notes::on_btnColor_clicked() {
 #ifndef Q_OS_ANDROID
-
   QString strColor = m_Method->getCustomColor();
-  if (strColor.isEmpty()) return;
+  if (strColor.isEmpty())
+    return;
 
-  QString str = m_EditSource->selectedText();
-  if (str == "") str = tr("Color");
-  m_EditSource->insert("<font color=" + strColor + ">" + str + "</font>");
+  // 获取选区文本
+  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
+  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
 
+  QString str;
+  if (selStart != selEnd) {
+    QByteArray raw(selEnd - selStart, '\0');
+    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
+    str = QString::fromUtf8(raw);
+  } else {
+    str = tr("Color");
+  }
+
+  // 拼接并插入（SCI_REPLACESEL 在无选区时等价于 insert）
+  QByteArray utf8 =
+      ("<font color=" + strColor + ">" + str + "</font>").toUtf8();
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
 #endif
 }
 
 void Notes::on_btnPaste_clicked() {
 #ifndef Q_OS_ANDROID
 
-  const QClipboard* clipboard = QApplication::clipboard();
-  const QMimeData* mimeData = clipboard->mimeData();
+  const QClipboard *clipboard = QApplication::clipboard();
+  const QMimeData *mimeData = clipboard->mimeData();
   if (mimeData->hasImage()) {
     QImage img = qvariant_cast<QImage>(mimeData->imageData());
     if (!img.isNull()) {
@@ -112,7 +170,7 @@ void Notes::on_btnPaste_clicked() {
 #endif
 }
 
-bool Notes::selectPDFFormat(QPrinter* printer) {
+bool Notes::selectPDFFormat(QPrinter *printer) {
   QSettings settings;
 
   // 选择纸张尺寸
@@ -247,17 +305,15 @@ void Notes::on_btnPDF_clicked() {
   auto doc = new QTextDocument(this);
   doc->setHtml(html);
 
-  auto* printer = new QPrinter(QPrinter::HighResolution);
+  auto *printer = new QPrinter(QPrinter::HighResolution);
 
   if (selectPDFFormat(printer)) {
     doc->print(printer);
 
     if (isAndroid) {
-      if (showConfirm("PDF",
-                        tr("The PDF file is successfully exported.") + "\n\n" +
-                            tr("Want to share this PDF file?") + "\n\n" +
-                            pdfFileName
-                        )) {
+      if (showConfirm("PDF", tr("The PDF file is successfully exported.") +
+                                 "\n\n" + tr("Want to share this PDF file?") +
+                                 "\n\n" + pdfFileName)) {
         if (QFile::exists(pdfFileName)) {
           mw_one->m_ReceiveShare->shareImage(tr("Share to"), pdfFileName,
                                              "*/*");
@@ -277,7 +333,8 @@ void Notes::on_btnView_clicked() {
 
 // 搜索
 void Notes::on_btnFind_clicked() {
-  if (ui->editFind->text().trimmed() == "") return;
+  if (ui->editFind->text().trimmed() == "")
+    return;
 }
 void Notes::on_btnPrev_clicked() {
   ui->editFind->setFocus();
@@ -289,7 +346,7 @@ void Notes::on_btnNext_clicked() {
 }
 void Notes::on_editFind_returnPressed() { searchNext(); }
 
-void Notes::on_editFind_textChanged(const QString& arg1) {
+void Notes::on_editFind_textChanged(const QString &arg1) {
   const QString trimmedText = arg1.trimmed();
   m_lastSearchText = trimmedText;
 
@@ -312,9 +369,19 @@ void Notes::on_btnReplace_clicked() {
   QString search = ui->editFind->text().trimmed();
   QString replace = ui->editReplace->text();
 
-  if (search.isEmpty() || !m_EditSource->hasSelectedText()) return;
+  if (search.isEmpty())
+    return;
 
-  m_EditSource->replaceSelectedText(replace);
+  // 检查是否有选区
+  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
+  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
+  if (selStart == selEnd)
+    return;
+
+  // 替换当前选区
+  QByteArray utf8 = replace.toUtf8();
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
   isTextChange = true;
 #endif
 }
@@ -323,22 +390,27 @@ void Notes::on_btnReplace_clicked() {
 void Notes::on_btnFindReplace_clicked() {
 #ifndef Q_OS_ANDROID
   QString search = ui->editFind->text().trimmed();
-  // 替换输入框
   QString replace = ui->editReplace->text();
 
-  if (search.isEmpty()) return;
+  if (search.isEmpty())
+    return;
 
-  // 如果当前没有选中 = 先搜索一次
-  if (!m_EditSource->hasSelectedText()) {
+  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
+  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
+
+  // 如果当前没有选区，先搜索一次
+  if (selStart == selEnd) {
     searchNext();
     return;
   }
 
   // 执行替换
-  m_EditSource->replaceSelectedText(replace);
+  QByteArray utf8 = replace.toUtf8();
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
   isTextChange = true;
 
-  // 立即查找下一个（核心功能：替换后自动找下一个）
+  // 立即查找下一个
   searchNext();
 #endif
 }
@@ -349,41 +421,54 @@ void Notes::on_btnReplaceAll_clicked() {
   QString search = ui->editFind->text().trimmed();
   QString replace = ui->editReplace->text();
 
-  if (search.isEmpty()) return;
+  if (search.isEmpty())
+    return;
 
-  // ==============================================
-  // ✅ 正确保存：光标位置 + 锚点位置（两个都要存）
-  // ==============================================
-  int origCurPos =
-      m_EditSource->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
-  int origAnchor = m_EditSource->SendScintilla(QsciScintilla::SCI_GETANCHOR);
+  // 保存光标和锚点位置（字节偏移）
+  int origCurPos = m_EditSource->send(SCI_GETCURRENTPOS, 0, 0);
+  int origAnchor = m_EditSource->send(SCI_GETANCHOR, 0, 0);
 
-  // 回到文档开头
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETANCHOR, 0);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETCURRENTPOS, 0);
+  // 设置搜索目标为整个文档
+  m_EditSource->send(SCI_SETTARGETRANGE, 0,
+                     m_EditSource->send(SCI_GETLENGTH, 0, 0));
+
+  // 设置搜索标志：默认区分大小写、非正则、非单词边界
+  // 如需与 findFirst 参数对齐，请根据实际 UI 选项调整 SCI_SETSEARCHFLAGS
+  m_EditSource->send(SCI_SETSEARCHFLAGS, SCFIND_MATCHCASE, 0);
+
+  QByteArray searchUtf8 = search.toUtf8();
+  QByteArray replaceUtf8 = replace.toUtf8();
 
   int count = 0;
-  bool found =
-      m_EditSource->findFirst(search, false, false, false, false, true);
+  int pos =
+      m_EditSource->send(SCI_SEARCHINTARGET, searchUtf8.length(),
+                         reinterpret_cast<sptr_t>(searchUtf8.constData()));
 
-  while (found) {
-    m_EditSource->replaceSelectedText(replace);
+  while (pos != -1) {
+    // SCI_REPLACETARGET 替换上一次 SEARCHINTARGET 命中的目标
+    m_EditSource->send(SCI_REPLACETARGET, replaceUtf8.length(),
+                       reinterpret_cast<sptr_t>(replaceUtf8.constData()));
     count++;
     isTextChange = true;
-    found = m_EditSource->findNext();
+
+    // 替换后文档长度变化，需重新设定目标范围为当前位置到文档末尾
+    int newLen = m_EditSource->send(SCI_GETLENGTH, 0, 0);
+    int curTargetEnd = m_EditSource->send(SCI_GETTARGETEND, 0, 0);
+    m_EditSource->send(SCI_SETTARGETRANGE, curTargetEnd, newLen);
+
+    pos = m_EditSource->send(SCI_SEARCHINTARGET, searchUtf8.length(),
+                             reinterpret_cast<sptr_t>(searchUtf8.constData()));
   }
 
-  // ==============================================
-  // ✅ 正确恢复：两个位置一起恢复 → 完全无选中
-  // ==============================================
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETANCHOR, origAnchor);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETCURRENTPOS, origCurPos);
+  // 恢复原始光标和锚点
+  m_EditSource->send(SCI_SETANCHOR, origAnchor, 0);
+  m_EditSource->send(SCI_SETCURRENTPOS, origCurPos, 0);
 
-  qDebug() << "全部替换完成：" << count << " 处";
+  qDebug() << "全部替换完成：" << count << "处";
 #endif
 }
 
-void Notes::popupNoteLinkList(const QString& arg1) {
+void Notes::popupNoteLinkList(const QString &arg1) {
   QString keyword = arg1.trimmed();
 
   // 空内容隐藏
@@ -395,7 +480,7 @@ void Notes::popupNoteLinkList(const QString& arg1) {
   QStringList matches;
   if (isBtnAILinkClicked) {
     for (int i = 0; i < m_NotesList->adaptedResults.size(); ++i) {
-      const SearchResult& item = m_NotesList->adaptedResults[i];
+      const SearchResult &item = m_NotesList->adaptedResults[i];
       matches.append(item.preview);
     }
 
@@ -409,12 +494,12 @@ void Notes::popupNoteLinkList(const QString& arg1) {
 }
 
 // 链接自动补全
-void Notes::on_editNoteLink_textChanged(const QString& arg1) {
+void Notes::on_editNoteLink_textChanged(const QString &arg1) {
   isBtnAILinkClicked = false;
   popupNoteLinkList(arg1);
 }
 
-void Notes::onPopupItemClicked(QListWidgetItem* item) {
+void Notes::onPopupItemClicked(QListWidgetItem *item) {
   Q_UNUSED(item);
 #ifndef Q_OS_ANDROID
 
@@ -449,10 +534,11 @@ void Notes::onPopupItemClicked(QListWidgetItem* item) {
 #endif
 }
 
-void Notes::insertNoteLink(const QString& title, const QString& path) {
+void Notes::insertNoteLink(const QString &title, const QString &path) {
   // 1. 通过标题获取路径
   QString fullPath = path;
-  if (fullPath.isEmpty()) return;
+  if (fullPath.isEmpty())
+    return;
 
   // 2. 转成相对路径 memo/xxx.md
   QString basePath = iniDir;
@@ -463,7 +549,9 @@ void Notes::insertNoteLink(const QString& title, const QString& path) {
 
   // 4. 插入编辑器
 #ifndef Q_OS_ANDROID
-  m_EditSource->insert(link);
+  QByteArray utf8 = link.toUtf8();
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
 #endif
 
   // 5. 清空输入框
@@ -471,7 +559,8 @@ void Notes::insertNoteLink(const QString& title, const QString& path) {
 }
 
 void Notes::on_btnInsertNoteLink_clicked() {
-  if (ui->listNoteLink->currentRow() < 0) return;
+  if (ui->listNoteLink->currentRow() < 0)
+    return;
 
   onPopupItemClicked(ui->listNoteLink->currentItem());
 }
@@ -483,7 +572,7 @@ void Notes::on_btnAILink_clicked() {
 
   // 前后各10个字词
   int cursorPos = getCursorCharOffset(m_EditSource);
-  QString result = getCursorPosText(m_EditSource->text(), cursorPos, 10);
+  QString result = getCursorPosText(getFullText(), cursorPos, 10);
   qDebug() << "前后各取10各字词：" << result;
 
   m_NotesList->startVectorSerach(result);
@@ -510,8 +599,9 @@ void Notes::on_btnAILink_clicked() {
  * @param count 要取的字词数量（默认10）
  * @return 截取后的子串，若不足count个字词则返回原串
  */
-QString Notes::takeFirstNTokens(const QString& text, int count) {
-  if (text.isEmpty() || count <= 0) return text;
+QString Notes::takeFirstNTokens(const QString &text, int count) {
+  if (text.isEmpty() || count <= 0)
+    return text;
 
   int len = text.length();
   int i = 0;
@@ -541,7 +631,8 @@ QString Notes::takeFirstNTokens(const QString& text, int count) {
   }
 
   // tokenCount < count 说明不够10个，返回原串
-  if (tokenCount < count) return text;
+  if (tokenCount < count)
+    return text;
 
   // 截取从开头到第10个token结束位置的子串
   // 注意：此时 i 恰好停在第10个token之后的第一个字符
@@ -554,21 +645,20 @@ QString Notes::takeFirstNTokens(const QString& text, int count) {
  * @brief 获取 QScintilla 编辑器中光标的字符偏移量（UTF-16 索引）
  * @return 从文档开头到光标位置的字符数，可直接传给 getCursorPosText()
  */
-int Notes::getCursorCharOffset(QsciScintilla* editor) {
-  if (!editor) return 0;
 
-  int line, index;
-  editor->getCursorPosition(&line, &index);
+int Notes::getCursorCharOffset(ScintillaEdit *editor) {
+  int bytePos = editor->send(SCI_GETCURRENTPOS, 0, 0);
+  if (bytePos <= 0)
+    return 0;
 
-  // positionFromLineIndex 返回的是字节偏移（取决于编码）
-  // 对于 QString 操作，我们需要 UTF-16 字符偏移
-  long pos = editor->positionFromLineIndex(line, index);
+  // 仅读取光标前的 UTF-8 字节，避免复制整个文档
+  QByteArray raw(bytePos, '\0');
+  m_EditSource->send(SCI_GETTEXT, bytePos + 1,
+                     reinterpret_cast<sptr_t>(raw.data()));
+  // SCI_GETTEXT 写入包含 \0 终止符，实际内容为前 bytePos 字节
 
-  // QScintilla 内部使用 UTF-8，而 QString 是 UTF-16
-  // 必须将 UTF-8 字节偏移转换为 UTF-16 字符偏移
-  QByteArray utf8 = editor->text().toUtf8();
-  QString text = QString::fromUtf8(utf8.left(pos));
-  return text.length();
+  QString text = QString::fromUtf8(raw);
+  return text.length(); // UTF-16 字符数
 }
 
 #endif
@@ -580,9 +670,10 @@ int Notes::getCursorCharOffset(QsciScintilla* editor) {
  * @param textCount  光标每侧需要获取的字词数量
  * @return 拼接后的上下文字符串，保留原始格式；不足则返回实际可用部分
  */
-QString Notes::getCursorPosText(const QString& fullText, int cursorPos,
+QString Notes::getCursorPosText(const QString &fullText, int cursorPos,
                                 int textCount) {
-  if (fullText.isEmpty() || textCount <= 0) return {};
+  if (fullText.isEmpty() || textCount <= 0)
+    return {};
 
   // 安全钳制光标位置
   cursorPos = qBound(0, cursorPos, fullText.length());
@@ -593,13 +684,15 @@ QString Notes::getCursorPosText(const QString& fullText, int cursorPos,
   while (leftStart > 0 && leftCount < textCount) {
     --leftStart;
     // 跳过空白（空白不计数，但会被包含在截取范围内）
-    if (fullText[leftStart].isSpace()) continue;
+    if (fullText[leftStart].isSpace())
+      continue;
 
     // 遇到非空白 = 一个 token 的末尾（从右往左看）
     ++leftCount;
 
     // 如果是 CJK 字符，单字即一个 token，leftStart 已指向它
-    if (isCjkChar(fullText[leftStart])) continue;
+    if (isCjkChar(fullText[leftStart]))
+      continue;
 
     // 西文词：继续向左直到遇到空白或 CJK 边界
     while (leftStart > 0 && !fullText[leftStart - 1].isSpace() &&
@@ -638,9 +731,11 @@ QString Notes::getCursorPosText(const QString& fullText, int cursorPos,
 
 void Notes::on_btnQuestion_clicked() {
   QString fullPrompt = ui->editQuestion->toPlainText().trimmed();
-  if (fullPrompt.isEmpty()) return;
+  if (fullPrompt.isEmpty())
+    return;
 
-  if (!isEnabledAiApi) return;
+  if (!isEnabledAiApi)
+    return;
 
   isAIQA = true;
   ui->progQA->setRange(0, 0);

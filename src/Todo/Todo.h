@@ -23,25 +23,25 @@ class Todo;
 class Todo : public QDialog {
   Q_OBJECT
 
- public:
-  explicit Todo(QWidget* parent = nullptr);
-  Ui::Todo* ui;
+public:
+  explicit Todo(QWidget *parent = nullptr);
+  Ui::Todo *ui;
   ~Todo();
 
   QStringList listTodo, listRecycle;
 
-  TodoRecycleBin* m_TodoRecycleBin;
+  TodoRecycleBin *m_TodoRecycleBin;
 
   QString strAlarmTime, strAlarmText;
 
-  QDialog* m_ReeditTodo = nullptr;
+  QDialog *m_ReeditTodo = nullptr;
 
   bool isTodoAlarmShow = false;
 
   bool isNeedAddToTodoList = false;
   QString strNeedAddToTodoText;
   int nInterval = 500;
-  QTimer* tmePlayProgress;
+  QTimer *tmePlayProgress;
 
   bool isToday = false;
   QStringList tableLists;
@@ -69,7 +69,7 @@ class Todo : public QDialog {
 
   qlonglong getSecond(QString strDateTime);
 
-  int getEditTextHeight(QTextEdit* edit);
+  int getEditTextHeight(QTextEdit *edit);
 
   void insertItem(QString strTime, int type, QString strText, int curIndex);
   int getCurrentIndex();
@@ -90,7 +90,7 @@ class Todo : public QDialog {
 
   int setItemHeight(QString strTodoText);
 
- public slots:
+public slots:
   void saveTodo();
   void refreshTableLists();
   void refreshAlarm();
@@ -118,12 +118,12 @@ class Todo : public QDialog {
 
   void setAlarmShowValue(bool value);
 
- protected:
-  void keyReleaseEvent(QKeyEvent* event) override;
-  void closeEvent(QCloseEvent* event) override;
-  bool eventFilter(QObject* watch, QEvent* evn) override;
+protected:
+  void keyReleaseEvent(QKeyEvent *event) override;
+  void closeEvent(QCloseEvent *event) override;
+  bool eventFilter(QObject *watch, QEvent *evn) override;
 
- public:
+public:
   void playAlarmVoice();
 
   void changeTodoIcon(bool isToday);
@@ -168,61 +168,61 @@ class Todo : public QDialog {
   void openTodoUI();
   void openTodo();
   void showTodoAlarm();
-  void showAlarmWindow(const QString& strTime, const QString& strText,
-                       const QString& strTodoAlarmActiveTime);
-  QString getVoiceFile(const QString& strTodoText);
-  bool isVoice(const QString& strTodoText);
+  void showAlarmWindow(const QString &strTime, const QString &strText,
+                       const QString &strTodoAlarmActiveTime);
+  QString getVoiceFile(const QString &strTodoText);
+  bool isVoice(const QString &strTodoText);
 
   void clearJavaNotify();
-  void openClockActivity(const QString& content);
+  void openClockActivity(const QString &content);
   void openTodoListWindow(QStringList list);
   void openTodoRecycleWindow(QStringList list);
 
   void openTodoAlarmWindow(QStringList list);
   void cppRefreshTodoCardList();
   void setDataToTodoList();
- private slots:
+private slots:
   void on_ShowRecordTime();
 
   void on_ShowPlayProgress();
 
+  void on_btnRecycleBin_clicked();
+
+  void on_btnAddText_clicked();
+
+private:
   void on_btnHigh_clicked();
 
   void on_btnLow_clicked();
 
   void on_btnEdit_clicked();
 
-  void on_btnAlarm_clicked();
-
-  void on_btnRecycleBin_clicked();
-
   void on_btnDone_clicked();
 
-  void on_btnAddText_clicked();
+  void on_btnAlarm_clicked();
 
- private:
   int curTodoListIndex = -1;
 
   QDate alarmDate;
   QTime alarmTime;
-  QListWidgetItem* editItem;
+  QListWidgetItem *editItem;
   QString audioFileName;
   QString audioFilePath;
   bool isAudioRecordOne = false;
   QString todotxt;
-  QLabel* lblModi;
-  QTextEdit* editModi;
+  QLabel *lblModi;
+  QTextEdit *editModi;
   bool isModi = false;
   bool isWeekValid(QString lblDateTime, QString strDate);
   bool isTomorrow = false;
 
-  QSettings* iniTodo;
+  QSettings *iniTodo;
   void delVoiceFile(int row);
   QString editStyle;
 
   bool isRestore = false;
   QString getNumber(QString str);
-  QTimer* tmeRecordTime;
+  QTimer *tmeRecordTime;
 
   int nRecordSec = 0;
   int nMSec = 0;
@@ -230,4 +230,4 @@ class Todo : public QDialog {
   QString strVoiceTime;
   bool getChkVoice();
 };
-#endif  // TODO_H
+#endif // TODO_H

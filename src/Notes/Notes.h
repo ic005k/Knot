@@ -51,9 +51,12 @@
 #endif
 
 #ifndef Q_OS_ANDROID
-#include "lib/qsci/Qsci/qscilexercpp.h"
-#include "lib/qsci/Qsci/qscilexermarkdown.h"
-#include "lib/qsci/Qsci/qsciscintilla.h"
+
+// 原生 Scintilla Qt 前端头文件
+#include "ILexer.h"        // ILexer5 接口（如需手动操作 lexer）
+#include "Scintilla.h"     // SCI_* 常量、消息定义
+#include "ScintillaEdit.h" // ScintillaEdit 控件封装
+
 #endif
 
 #include "TitleGenerator.h"
@@ -125,7 +128,7 @@ public:
   QString new_title;
 
 #ifndef Q_OS_ANDROID
-  QsciScintilla *m_EditSource = nullptr;
+  ScintillaEdit *m_EditSource = nullptr;
 #endif
 
   QTimer *timerEditNote;
@@ -412,7 +415,7 @@ private:
   void setOpenSearchResultForAndroid(bool isValue, QString strSearchText);
 
 #ifndef Q_OS_ANDROID
-  void initMarkdownEditor(QsciScintilla *editor);
+  void initMarkdownEditor(ScintillaEdit *editor);
 #endif
 
   void searchText(const QString &text, bool forward);
@@ -426,11 +429,14 @@ private:
   void jumpToPrevMatch();
 
 #ifndef Q_OS_ANDROID
-  QsciLexerMarkdown *markdownLexer = nullptr;
 
   QString takeFirstNTokens(const QString &text, int count = 10);
+  int getCursorCharOffset(ScintillaEdit *editor);
+  QString getFullText() const;
+  void getCursorPosition(int &line, int &index);
+  void setCursorPosition(int line, int index);
+  bool findFirst(const QString &text, bool forward, bool wrap);
 
-  int getCursorCharOffset(QsciScintilla *editor);
 #endif
 
   void initMarkdownLexer();

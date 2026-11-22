@@ -169,10 +169,12 @@ if(WIN32)
 endif()
 
 # ============================================================
-# 4. Scintilla / QScintilla (独立静态库)
+# 4. 第三方库: Scintilla(Qt 前端 ScintillaEdit) + Lexilla
+#    源码位于 lib/sci/{scintilla,lexilla}，构建规则见 lib/sci/CMakeLists.txt
+#    产出目标: scintilla_qt / lexilla（纯源码静态集成，已移除 QScintilla）
 # ============================================================
 if(NOT ANDROID)
-    add_subdirectory(lib/qsci)
+    add_subdirectory(lib/sci)
 endif()
 
 # ============================================================
@@ -189,13 +191,9 @@ file(GLOB_RECURSE APP_FORMS CONFIGURE_DEPENDS src/*.ui)
 # set(APP_RESOURCES knotqml.qrc res.qrc)
 set(APP_RESOURCES res.qrc)
 
+# ✅ QScintilla 已移除，其 qscintilla_*.ts 翻译文件一并删除
 set(APP_TRANSLATIONS
     src/cn.ts
-    lib/qsci/qscintilla_cs.ts
-    lib/qsci/qscintilla_de.ts
-    lib/qsci/qscintilla_es.ts
-    lib/qsci/qscintilla_fr.ts
-    lib/qsci/qscintilla_pt_br.ts
 )
 
 # ============================================================
@@ -300,15 +298,13 @@ endif()
 # ============================================================
 # 7. 头文件路径 (全平台公共，与平台无关)
 # ============================================================
+# 注意：Scintilla / Lexilla 的头文件路径已由 scintilla_qt / lexilla
+# 目标以 PUBLIC 方式导出，链接即生效，此处不再手工枚举 lib/sci 路径；
+# 旧的 lib/scintilla、lib/qsci 路径已随 QScintilla 一起移除。
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}               # openssl/, lib/quazip/ 等平铺头文件
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/diff
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/scintilla/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/scintilla/lexlib
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/scintilla/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/qsci/QSci
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/qsci
     ${LLAMA_ROOT}/include
     ${LLAMA_ROOT}/ggml/include
     ${LLAMA_ROOT}/vendor
@@ -323,10 +319,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # ============================================================
 # 8. 编译定义与选项 (target 级别，不污染第三方库)
 # ============================================================
+# SCI_LEXER / SCINTILLA_QT / SCI_QT6 由 scintilla_qt 以 PUBLIC 传播；
+# LEXER_MARKDOWN_INCLUDED / QSCINTILLA_HAVE_MARKDOWNLEXER 是 QScintilla
+# 专用宏，已删除 —— markdown 词法器现在由 Lexilla 直接提供。
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    SCI_LEXER
-    LEXER_MARKDOWN_INCLUDED
-    QSCINTILLA_HAVE_MARKDOWNLEXER
     HAVE_FSEEKO
     QUAZIP_STATIC
     SQLITE_VEC_STATIC
@@ -339,12 +335,7 @@ if(NOT WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE Z_HAVE_UNISTD_H)
 endif()
 
-if(WIN32)
-    target_compile_options(${PROJECT_NAME} PRIVATE
-            /FI${CMAKE_CURRENT_SOURCE_DIR}/lib/qsci/win32_undef_macros.h
-        )
-
-elseif(APPLE)
+if(APPLE)
         # ✅ 使用 CMake 原生变量，替代 execute_process(uname -m)
         # 在 arm64 CI 上 → CMAKE_SYSTEM_PROCESSOR == "arm64"
         # 在 x86_64 CI 上 → CMAKE_SYSTEM_PROCESSOR == "x86_64"
@@ -369,6 +360,7 @@ elseif(UNIX)
     )
     target_compile_options(${PROJECT_NAME} PRIVATE -mavx)
 endif()
+# 注：原 WIN32 分支的 /FI win32_undef_macros.h 是 QScintilla 专用补丁，已删除
 
 # ============================================================
 # 9. 链接库
@@ -381,8 +373,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Positioning
     llama ggml llama_common
     knot_zlib knot_quazip knot_cmark_gfm knot_sqlite
-    # ✅ 仅非 Android 平台链接 qscintilla
-    $<$<NOT:$<BOOL:${ANDROID}>>:qscintilla>
+    # ✅ 仅非 Android 平台链接 Scintilla/Lexilla（与第 4 节守卫保持一致）
+    $<$<NOT:$<BOOL:${ANDROID}>>:scintilla_qt>
+    $<$<NOT:$<BOOL:${ANDROID}>>:lexilla>
 )
 
 # 平台特定链接

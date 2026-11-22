@@ -10,7 +10,7 @@ void Notes::saveMDFile() {
 #ifndef Q_OS_ANDROID
   mw_one->strLatestModify = tr("Modi Notes");
   if (isTextChange) {
-    newText = m_EditSource->text();
+    newText = getFullText();
     newText = formatMDText(newText);
 
     QFileInfo targetInfo(currentMDFile);
@@ -135,7 +135,7 @@ void Notes::saveEditorState(const QString &filePath) {
   groupName.replace("/", "_");
   settings.beginGroup(groupName);
   int line, index;
-  m_EditSource->getCursorPosition(&line, &index);
+  getCursorPosition(line, index);
   settings.setValue("cursorLine", line);
   settings.setValue("cursorIndex", index);
   settings.setValue("vsbar",
@@ -176,7 +176,7 @@ void Notes::restoreEditorState(const QString &filePath) {
   int index = settings.value("cursorIndex", 0).toInt();
   int vsbar = settings.value("vsbar", 0).toInt();
   m_EditSource->verticalScrollBar()->setSliderPosition(vsbar);
-  m_EditSource->setCursorPosition(line, index);
+  setCursorPosition(line, index);
   settings.endGroup();
 #endif
 }

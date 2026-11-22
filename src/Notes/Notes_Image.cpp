@@ -55,7 +55,9 @@ QString Notes::insertImage(QString fileName, bool isToAndroidView) {
 
     if (!isAndroid) {
 #ifndef Q_OS_ANDROID
-      m_EditSource->insert(strImage);
+      QByteArray utf8 = strImage.toUtf8();
+      m_EditSource->send(SCI_REPLACESEL, 0,
+                         reinterpret_cast<sptr_t>(utf8.constData()));
 #endif
     } else {
       if (isToAndroidView)

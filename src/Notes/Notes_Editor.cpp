@@ -1,5 +1,3 @@
-#include <Qsci/qscilexermarkdown.h>
-#include <Qsci/qsciscintilla.h>
 
 #include <QFontDatabase>
 
@@ -7,10 +5,21 @@
 #include "Notes/Notes.h"
 #include "defines.h"
 
+#include "ILexer.h"   // 确保 Scintilla::ILexer5 可见
+#include <SciLexer.h> // SCE_MD_* 全部定义在这里，Scintilla.h 不含它
+
+typedef Scintilla::ILexer5 *(*CreateLexerFn)(const char *name);
+extern "C" Scintilla::ILexer5 *CreateLexer(const char *name);
+static CreateLexerFn createLexer = &CreateLexer;
+
+static inline uptr_t sciColor(const QColor &c) {
+  return static_cast<uptr_t>(c.red() | (c.green() << 8) | (c.blue() << 16));
+}
+
 void Notes::initEditor() {
 #ifndef Q_OS_ANDROID
-  m_EditSource = new QsciScintilla(this);
-  m_EditSource->setUtf8(true);
+  m_EditSource = new ScintillaEdit(this);
+  m_EditSource->send(SCI_SETCODEPAGE, SC_CP_UTF8, 0);
   m_EditSource->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   m_EditSource->installEventFilter(this);
   m_EditSource->viewport()->installEventFilter(this);
@@ -19,139 +28,207 @@ void Notes::initEditor() {
 
   connect(m_EditSource->verticalScrollBar(), &QScrollBar::valueChanged, this,
           &Notes::editVSBarValueChanged);
-  connect(m_EditSource, &QsciScintilla::textChanged, this,
-          &Notes::editSource_textChanged);
+  connect(m_EditSource, &ScintillaEdit::notifyChange, this,
+          [this] { editSource_textChanged(); });
 
   ui->frameEdit->layout()->addWidget(m_EditSource);
 
-  m_EditSource->setFocus();
+  m_EditSource->send(SCI_GRABFOCUS, 0, 0);
 
-  // ⚠ 可以使用 textChanged + cursorPositionChanged 组合，
-  // 或者使用 QScintilla 的 SCN_CLICK 通知（通过 sendScintilla）
-  // 这里用最简单可靠的方式：监听光标位置变化
-  connect(m_EditSource, &QsciScintilla::cursorPositionChanged, this,
-          [this](int line, int index) {
-            Q_UNUSED(index);
-            QString lineText = m_EditSource->text(line);
+  // 监听光标位置变化
+  connect(m_EditSource, &ScintillaEdit::notifyChange, this,
+          [this]() { // ← 移除 (uptr_t, sptr_t) 参数
+            int pos = m_EditSource->send(SCI_GETCURRENTPOS, 0, 0);
+            int line = m_EditSource->send(SCI_LINEFROMPOSITION, pos, 0);
+            int lineStart = m_EditSource->send(SCI_POSITIONFROMLINE, line, 0);
+            int index = m_EditSource->send(SCI_COUNTCHARACTERS, lineStart, pos);
 
-            // ✅ 安全去除行尾换行，不影响 index 的有效性
-            if (lineText.endsWith(QLatin1Char('\n')))
+            int lineLen = m_EditSource->send(SCI_LINELENGTH, line, 0);
+            QString lineText;
+            if (lineLen > 0) {
+              QByteArray buf(lineLen + 1, '\0');
+              m_EditSource->send(SCI_GETLINE, line,
+                                 reinterpret_cast<sptr_t>(buf.data()));
+              lineText = QString::fromUtf8(buf.constData(), lineLen);
+            }
+
+            while (lineText.endsWith(QLatin1Char('\n')) ||
+                   lineText.endsWith(QLatin1Char('\r')))
               lineText.chop(1);
-            if (lineText.endsWith(QLatin1Char('\r')))
-              lineText.chop(1);
 
-            // ✅ 将 index 作为光标位置传入
             updateImagePreview(lineText, index);
           });
-
 #endif
 }
 
 #ifndef Q_OS_ANDROID
-void Notes::initMarkdownEditor(QsciScintilla *editor) {
-  QFont defaultFont = QFont(this->font().family(), fontSize);
-  markdownLexer->setFont(defaultFont, -1);
-  markdownLexer->setFont(defaultFont, QsciLexerMarkdown::CodeBlock);
+QString Notes::getFullText() const {
+  int len = m_EditSource->send(SCI_GETLENGTH, 0, 0);
+  if (len <= 0)
+    return {};
+  QByteArray buf(len + 1, '\0');
+  m_EditSource->send(SCI_GETTEXT, len + 1,
+                     reinterpret_cast<sptr_t>(buf.data()));
+  return QString::fromUtf8(buf.constData(), len);
+}
 
-  editor->setFolding(QsciScintilla::BoxedTreeFoldStyle);
+void Notes::getCursorPosition(int &line, int &index) {
+  int pos = m_EditSource->send(SCI_GETCURRENTPOS, 0, 0);
+  line = m_EditSource->send(SCI_LINEFROMPOSITION, pos, 0);
+  int lineStart = m_EditSource->send(SCI_POSITIONFROMLINE, line, 0);
+  index = m_EditSource->send(SCI_COUNTCHARACTERS, lineStart, pos);
+}
 
-  editor->setAutoIndent(true);
-  editor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
-  editor->setMarginLineNumbers(1, true);
-  editor->setMarginType(0, QsciScintilla::NumberMargin);
+void Notes::setCursorPosition(int line, int index) {
+  int lineStart = m_EditSource->send(SCI_POSITIONFROMLINE, line, 0);
+  if (lineStart < 0)
+    return; // 无效行号
+  int pos = m_EditSource->send(SCI_POSITIONRELATIVE, lineStart, index);
+  m_EditSource->send(SCI_GOTOPOS, pos, 0);
+}
 
-  QFont monoFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-  if (monoFont.family().isEmpty()) {
-    monoFont = QFont("Consolas", 10);
+bool Notes::findFirst(const QString &text, bool forward, bool wrap) {
+  m_EditSource->send(SCI_SETSEARCHFLAGS, SCFIND_NONE, 0);
+  QByteArray s = text.toUtf8();
+  int docLen = m_EditSource->send(SCI_GETLENGTH, 0, 0);
+  int cur = m_EditSource->send(SCI_GETCURRENTPOS, 0, 0);
+
+  auto doSearch = [&](int start, int end) -> int {
+    m_EditSource->send(SCI_SETTARGETSTART, start, 0);
+    m_EditSource->send(SCI_SETTARGETEND, end, 0);
+    return m_EditSource->send(SCI_SEARCHINTARGET, s.length(),
+                              reinterpret_cast<sptr_t>(s.constData()));
+  };
+
+  int pos = forward ? doSearch(cur, docLen) : doSearch(cur, 0);
+  if (pos == -1 && wrap)
+    pos = forward ? doSearch(0, cur) : doSearch(docLen, cur);
+
+  if (pos != -1) {
+    int selStart = m_EditSource->send(SCI_GETTARGETSTART, 0, 0);
+    int selEnd = m_EditSource->send(SCI_GETTARGETEND, 0, 0);
+    m_EditSource->send(SCI_SETSEL, selStart, selEnd);
+    return true;
   }
-  editor->SendScintilla(QsciScintilla::SCI_STYLESETFONT,
-                        QsciScintilla::STYLE_LINENUMBER,
-                        monoFont.family().toUtf8());
+  return false;
+}
 
-  QFontMetrics metrics(monoFont);
-  int maxLineNumber = 10000;
-  int textWidth = metrics.horizontalAdvance(QString(" %1 ").arg(maxLineNumber));
-  editor->setMarginWidth(0, textWidth + 4);
+void Notes::initMarkdownEditor(ScintillaEdit *editor) {
+  //--------------------------------------------------------------
+  // 1. 代码折叠 (Margin 2)
+  //--------------------------------------------------------------
+  const int FOLD_MARGIN = 2;
+  editor->send(SCI_SETMARGINTYPEN, FOLD_MARGIN, SC_MARGIN_SYMBOL);
+  editor->send(SCI_SETMARGINMASKN, FOLD_MARGIN, SC_MASK_FOLDERS);
+  editor->send(SCI_SETMARGINWIDTHN, FOLD_MARGIN, 14);
+  editor->send(SCI_SETMARGINSENSITIVEN, FOLD_MARGIN, 1);
 
-  if (isDark) {
-    editor->setMarginsBackgroundColor(QColor(0x1E, 0x1E, 0x1E));
-    editor->setMarginsForegroundColor(QColor(0x7F, 0x7F, 0x7F));
-  } else {
-    editor->setMarginsBackgroundColor(QColor(240, 240, 240));
-    editor->setMarginsForegroundColor(QColor(96, 96, 96));
+  editor->send(SCI_MARKERDEFINE, SC_MARKNUM_FOLDER, SC_MARK_BOXPLUS);
+  editor->send(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPEN, SC_MARK_BOXMINUS);
+  editor->send(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEREND,
+               SC_MARK_BOXPLUSCONNECTED);
+  editor->send(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPENMID,
+               SC_MARK_BOXMINUSCONNECTED);
+  editor->send(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERMIDTAIL, SC_MARK_TCORNER);
+  editor->send(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERTAIL, SC_MARK_LCORNER);
+  editor->send(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERSUB, SC_MARK_VLINE);
+
+  // 折叠图标颜色跟随主题（默认黑色在深色底上看不见）
+  const QColor foldFg =
+      isDark ? QColor(0xAA, 0xAA, 0xAA) : QColor(0x80, 0x80, 0x80);
+  const QColor foldBg =
+      isDark ? QColor(0x1E, 0x1E, 0x1E) : QColor(0xFF, 0xFF, 0xFF);
+  for (int mk = SC_MARKNUM_FOLDEREND; mk <= SC_MARKNUM_FOLDEROPEN; ++mk) {
+    editor->send(SCI_MARKERSETFORE, mk, sciColor(foldFg));
+    editor->send(SCI_MARKERSETBACK, mk, sciColor(foldBg));
   }
-
-  editor->setMarginType(1, QsciScintilla::SymbolMargin);
-  editor->setMarginWidth(1, 5);
-  editor->setMarginType(2, QsciScintilla::SymbolMargin);
-  editor->setMarginWidth(2, 5);
-  editor->setMarginBackgroundColor(2, QColor(255, 228, 225));
 
   //--------------------------------------------------------------
+  // 2. 行号边栏 (Margin 0)
+  //--------------------------------------------------------------
+  editor->send(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
 
-  // 光标宽度
-  editor->setCaretWidth(2);
-  // 启用当前行高亮
-  editor->setCaretLineVisible(true);
+  QFont monoFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+  if (monoFont.family().isEmpty())
+    monoFont = QFont("Consolas", 10);
 
-  // 光标文字颜色
-  if (isDark)
-    editor->setCaretForegroundColor(Qt::white);
-  else
-    editor->setCaretForegroundColor(Qt::black);
+  QByteArray fontName = monoFont.family().toUtf8();
+  editor->send(SCI_STYLESETFONT, STYLE_LINENUMBER,
+               reinterpret_cast<sptr_t>(fontName.constData()));
+  editor->send(SCI_STYLESETSIZE, STYLE_LINENUMBER, monoFont.pointSize());
 
-  // 当前行背景 + 边框（适配 Qsci 2.14.1）
-  if (isDark) {
-    // 深色模式：极低对比度的灰蓝/灰白，仅比编辑器背景亮 5%~8%
-    editor->setCaretLineBackgroundColor(QColor(255, 255, 255, 12));
-    // ⚠ 强烈建议去掉边框，或最多设为 1px 极淡边框
-    editor->setCaretLineFrameWidth(0);
-  } else {
-    // 浅色模式：极低对比度的灰黑，仅比编辑器背景暗 3%~5%
-    editor->setCaretLineBackgroundColor(QColor(0, 0, 0, 12));
-    editor->setCaretLineFrameWidth(0);
-  }
+  QFontMetrics metrics(monoFont);
+  int textWidth = metrics.horizontalAdvance(QStringLiteral(" 9999 "));
+  editor->send(SCI_SETMARGINWIDTHN, 0, textWidth + 4);
 
-  // ⚠ 关键：确保当前行在文字下方渲染，避免影响字体抗锯齿
-  // ⚠ 使用原始 Scintilla 消息 ID，绕过 QScintilla 封装缺失
-  // SCI_SETCARETLINELAYER = 2768
-  // SC_LAYER_UNDER_TEXT   = 1
-  editor->SendScintilla(2768, 1);
+  const QColor lineBg =
+      isDark ? QColor(0x1E, 0x1E, 0x1E) : QColor(0xF0, 0xF0, 0xF0);
+  const QColor lineFg =
+      isDark ? QColor(0x7F, 0x7F, 0x7F) : QColor(0x60, 0x60, 0x60);
+  editor->send(SCI_STYLESETBACK, STYLE_LINENUMBER, sciColor(lineBg));
+  editor->send(SCI_STYLESETFORE, STYLE_LINENUMBER, sciColor(lineFg));
 
-  //-------------------------------------------------------
+  //--------------------------------------------------------------
+  // 3. 符号边栏 (Margin 1)
+  //--------------------------------------------------------------
+  editor->send(SCI_SETMARGINTYPEN, 1, SC_MARGIN_SYMBOL);
+  editor->send(SCI_SETMARGINWIDTHN, 1, 5);
+  // 注意：这里不要再设置 STYLE_LINENUMBER 的背景色
 
-  editor->SendScintilla(QsciScintilla::SCI_SETPROPERTY, "fold", "1");
-  editor->SendScintilla(QsciScintilla::SCI_SETFOLDFLAGS, 16);
-  editor->setWrapVisualFlags(QsciScintilla::WrapFlagByText);
-  editor->setWrapIndentMode(QsciScintilla::WrapIndentSame);
+  //--------------------------------------------------------------
+  // 4. 光标与当前行
+  //--------------------------------------------------------------
+  // SCI_SHOWCARET 不存在；光标可见性 = 控件焦点 + 样式，用 CARETSTYLE 兜底
+  editor->send(SCI_SETCARETSTYLE, CARETSTYLE_LINE, 0);
+  editor->send(SCI_SETCARETWIDTH, 2, 0);
+  editor->send(SCI_SETCARETFORE,
+               sciColor(isDark ? QColor(0xF0, 0xF0, 0xF0) : QColor(0, 0, 0)),
+               0);
+  editor->send(SCI_SETCARETLINEVISIBLE, 1, 0);
+  editor->send(SCI_SETCARETLINEFRAME, 0, 0);
+  editor->send(
+      SCI_SETCARETLINEBACK,
+      sciColor(isDark ? QColor(0x2A, 0x2A, 0x2A) : QColor(0xF5, 0xF5, 0xDC)),
+      0);
+  editor->send(SCI_SETCARETLINEBACKALPHA, 255, 0);
+  editor->send(SCI_SETCARETLINELAYER, SC_LAYER_UNDER_TEXT, 0);
+
+  //--------------------------------------------------------------
+  // 5. 折叠属性与换行
+  //--------------------------------------------------------------
+  editor->send(SCI_SETPROPERTY, reinterpret_cast<uptr_t>("fold"),
+               reinterpret_cast<sptr_t>("1"));
+  editor->send(SCI_SETFOLDFLAGS, 16, 0);
+  editor->send(SCI_SETWRAPVISUALFLAGS, SC_WRAPVISUALFLAGLOC_DEFAULT, 0);
+  editor->send(SCI_SETWRAPINDENTMODE, SC_WRAPINDENT_SAME, 0);
   editor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   editor->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
+  //--------------------------------------------------------------
+  // 6. 搜索指示器
+  //--------------------------------------------------------------
   const int INDICATOR_SEARCH = 1;
-  editor->SendScintilla(QsciScintilla::SCI_INDICSETSTYLE, INDICATOR_SEARCH,
-                        QsciScintilla::INDIC_ROUNDBOX);
-  editor->SendScintilla(QsciScintilla::SCI_INDICSETFORE, INDICATOR_SEARCH,
-                        QColor(Qt::yellow).rgb());
-  editor->SendScintilla(QsciScintilla::SCI_INDICSETALPHA, INDICATOR_SEARCH,
-                        100);
-  editor->SendScintilla(QsciScintilla::SCI_INDICSETUNDER, INDICATOR_SEARCH,
-                        true);
+  editor->send(SCI_INDICSETSTYLE, INDICATOR_SEARCH, INDIC_ROUNDBOX);
+  editor->send(SCI_INDICSETFORE, INDICATOR_SEARCH,
+               sciColor(QColor(Qt::yellow)));
+  editor->send(SCI_INDICSETALPHA, INDICATOR_SEARCH, 100);
+  editor->send(SCI_INDICSETUNDER, INDICATOR_SEARCH, 1);
 
-  // 文本选中高亮样式（适配 Qsci 2.14.1）
-  if (isDark) {
-    // 深色模式：使用 VS Code / JetBrains 风格的柔和蓝
-    editor->setSelectionBackgroundColor(QColor(38, 79, 120));
-    // ⚠关键：不要设置 ForegroundColor，让 Scintilla 自动计算反色
-    // editor->setSelectionForegroundColor(...)
-  } else {
-    // 浅色模式：使用低饱和度蓝，避免刺眼
-    editor->setSelectionBackgroundColor(QColor(173, 214, 255));
-    // 同样不设置前景色
-  }
+  //--------------------------------------------------------------
+  // 7. 选中文本
+  //--------------------------------------------------------------
+  editor->send(SCI_SETSELBACK, 1,
+               sciColor(isDark ? QColor(38, 79, 120) : QColor(173, 214, 255)));
+  editor->send(SCI_SETSELFORE, 1,
+               sciColor(isDark ? QColor(0xFF, 0xFF, 0xFF) : QColor(0, 0, 0)));
+  editor->send(SCI_SETSELALPHA, 255, 0); // 不是 256
 
-  // ⚠关键：移除或设为 256（禁用 Alpha 混合）
-  editor->SendScintilla(QsciScintilla::SCI_SETSELALPHA, 256);
+  //--------------------------------------------------------------
+  // 8. 主题（必须放最后）
+  //--------------------------------------------------------------
+  applyMdLexerTheme(isDark);
 }
+
 #endif
 
 void Notes::init_md() {
@@ -181,7 +258,7 @@ void Notes::searchText(const QString &text, bool forward) {
 
   // 再做"下一个/上一个"的跳转定位
   int line, index;
-  m_EditSource->getCursorPosition(&line, &index);
+  getCursorPosition(line, index);
   if (!forward) {
     if (index > 0) {
       index--;
@@ -189,15 +266,14 @@ void Notes::searchText(const QString &text, bool forward) {
       line--;
       index = m_EditSource->lineLength(line);
     }
-    m_EditSource->setCursorPosition(line, index);
+    setCursorPosition(line, index);
   }
 
-  bool found =
-      m_EditSource->findFirst(text, false, false, false, true, forward);
+  bool found = findFirst(text, forward, true);
   if (found) {
     // 可选：在列表中高亮当前匹配项
     int curLine, curIndex;
-    m_EditSource->getCursorPosition(&curLine, &curIndex);
+    getCursorPosition(curLine, curIndex);
     highlightCurrentResult(curLine, curIndex);
   }
 #endif
@@ -215,7 +291,7 @@ void Notes::findAllAndShowResults(const QString &text) {
     return;
   }
 
-  QString fullText = m_EditSource->text(); // 获取编辑器全部文本
+  QString fullText = getFullText(); // 获取编辑器全部文本
   QStringList lines = fullText.split('\n');
 
   int totalCount = 0;
@@ -353,18 +429,28 @@ void Notes::onSearchResultClicked(QListWidgetItem *item) {
 
   TextMatch result = item->data(Qt::UserRole).value<TextMatch>();
 
-  // 确保编辑器可见
-  m_EditSource->ensureLineVisible(result.line);
+  // 1. 确保目标行可见 (替代 ensureLineVisible)
+  m_EditSource->send(SCI_ENSUREVISIBLEENFORCEPOLICY, result.line, 0);
 
-  // 选中匹配的文本（实现高亮效果）
-  m_EditSource->setSelection(result.line, result.index, result.line,
-                             result.index + result.length);
+  // 2. 将 (line, index) 转换为字节位置
+  // ⚠️ 使用 SCI_POSITIONRELPATH 或手动计算：先获取行首字节位置，再按字符数偏移
+  int anchorPos = m_EditSource->send(SCI_POSITIONFROMLINE, result.line, 0);
+  anchorPos = m_EditSource->send(SCI_POSITIONRELATIVE, anchorPos, result.index);
 
-  // 设置光标到匹配末尾
-  m_EditSource->setCursorPosition(result.line, result.index + result.length);
+  int caretPos = m_EditSource->send(SCI_POSITIONFROMLINE, result.line, 0);
+  caretPos = m_EditSource->send(SCI_POSITIONRELATIVE, caretPos,
+                                result.index + result.length);
 
-  // 让编辑器获得焦点
-  m_EditSource->setFocus();
+  // 3. 选中文本 (替代 setSelection(line, index, line, index))
+  // ⚠️ 注意参数顺序：SCI_SETSEL(anchor, caret)，anchor 是选区起点，caret
+  // 是光标终点
+  m_EditSource->send(SCI_SETSEL, anchorPos, caretPos);
+
+  // 4. 设置光标到匹配末尾 (已由 SCI_SETSEL 完成，无需额外调用)
+  // 若仅需移动光标而不改变选区，才需要单独调用 SCI_GOTOPOS(caretPos, 0)
+
+  // 5. 让编辑器获得焦点 (Qt 层 API，保留不变)
+  static_cast<QWidget *>(m_EditSource)->setFocus();
 
 #endif
 }
@@ -403,11 +489,13 @@ void Notes::jumpToNextMatch() {
     return;
   m_currentMatchIndex = (m_currentMatchIndex + 1) % m_matchPositions.size();
   auto pos = m_matchPositions[m_currentMatchIndex];
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETSELECTIONSTART, pos.first);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETSELECTIONEND, pos.second);
-  int line = m_EditSource->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION,
-                                         pos.first);
-  m_EditSource->ensureLineVisible(line);
+
+  // 设置选区（anchor=start, caret=end）
+  m_EditSource->send(SCI_SETSEL, pos.first, pos.second);
+
+  // 确保匹配所在行可见并遵循滚动策略
+  int line = m_EditSource->send(SCI_LINEFROMPOSITION, pos.first, 0);
+  m_EditSource->send(SCI_ENSUREVISIBLEENFORCEPOLICY, line, 0);
 #endif
 }
 
@@ -418,23 +506,24 @@ void Notes::jumpToPrevMatch() {
   m_currentMatchIndex = (m_currentMatchIndex - 1 + m_matchPositions.size()) %
                         m_matchPositions.size();
   auto pos = m_matchPositions[m_currentMatchIndex];
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETSELECTIONSTART, pos.first);
-  m_EditSource->SendScintilla(QsciScintilla::SCI_SETSELECTIONEND, pos.second);
-  int line = m_EditSource->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION,
-                                         pos.first);
-  m_EditSource->ensureLineVisible(line);
+
+  // 设置选区（anchor=start, caret=end）
+  m_EditSource->send(SCI_SETSEL, pos.first, pos.second);
+
+  // 确保匹配所在行可见并遵循滚动策略
+  int line = m_EditSource->send(SCI_LINEFROMPOSITION, pos.first, 0);
+  m_EditSource->send(SCI_ENSUREVISIBLEENFORCEPOLICY, line, 0);
 #endif
 }
 
 void Notes::initMarkdownLexer() {
 #ifndef Q_OS_ANDROID
-  if (markdownLexer) {
-    markdownLexer->deleteLater();
-    markdownLexer = nullptr;
-  }
 
-  markdownLexer = new QsciLexerMarkdown(m_EditSource);
-  m_EditSource->setLexer(markdownLexer);
+  // 创建 Markdown Lexer 实例
+  Scintilla::ILexer5 *pLexer = createLexer("markdown");
+
+  // 应用到编辑器
+  m_EditSource->send(SCI_SETILEXER, 0, reinterpret_cast<sptr_t>(pLexer));
 
   // 初始化默认亮色主题
   applyMdLexerTheme(isDark);
@@ -444,206 +533,9 @@ void Notes::initMarkdownLexer() {
 // 一键切换深色/亮色（外部切换主题直接调用这个）
 void Notes::switchMdDarkTheme(bool dark) {
 #ifndef Q_OS_ANDROID
-  if (!markdownLexer || !m_EditSource)
-    return;
+
   applyMdLexerTheme(dark);
-  m_EditSource->recolor();
-#endif
-}
 
-void Notes::applyMdLexerTheme(bool darkMode) {
-#ifndef Q_OS_ANDROID
-  using MdLex = QsciLexerMarkdown;
-  QColor bgMain, fgNormal, caretColor, caretLineBg, selBg, marginBg, marginFg;
-  // 修复：手动构造等宽字体，避开 defaultFont(style) 参数问题
-  QFont monoFont("Consolas, Fira Code, Menlo", 11);
-
-  if (darkMode) {
-    bgMain = QColor(0x1E1E1E);
-    fgNormal = QColor(0xE0E0E0);
-    caretColor = Qt::white;
-    caretLineBg = QColor(0x2D2D30);
-    selBg = QColor(0x404048);
-    marginBg = QColor(0x1E1E1E);
-    marginFg = QColor(0x858585);
-
-    markdownLexer->setDefaultPaper(bgMain);
-    markdownLexer->setDefaultColor(fgNormal);
-
-    // 0 普通正文
-    markdownLexer->setColor(fgNormal, MdLex::Default);
-    markdownLexer->setPaper(bgMain, MdLex::Default);
-
-    // 各级标题
-    markdownLexer->setColor(QColor(0x66CCFF), MdLex::Header1);
-    markdownLexer->setPaper(bgMain, MdLex::Header1);
-    markdownLexer->setColor(QColor(0x66FFFF), MdLex::Header2);
-    markdownLexer->setPaper(bgMain, MdLex::Header2);
-    markdownLexer->setColor(QColor(0xFF99FF), MdLex::Header3);
-    markdownLexer->setPaper(bgMain, MdLex::Header3);
-    markdownLexer->setColor(QColor(0xB0C4FF), MdLex::Header4);
-    markdownLexer->setPaper(bgMain, MdLex::Header4);
-    markdownLexer->setColor(QColor(0xB0C4FF), MdLex::Header5);
-    markdownLexer->setPaper(bgMain, MdLex::Header5);
-    markdownLexer->setColor(QColor(0xB0C4FF), MdLex::Header6);
-    markdownLexer->setPaper(bgMain, MdLex::Header6);
-
-    // 链接 + 下划线
-    markdownLexer->setColor(QColor(0x66CCFF), MdLex::Link);
-    markdownLexer->setPaper(bgMain, MdLex::Link);
-    m_EditSource->SendScintilla(QsciScintilla::SCI_STYLESETUNDERLINE,
-                                MdLex::Link, 1);
-
-    // 行内代码 `xxx` / ``xxx``
-    markdownLexer->setColor(QColor(0xA6E3A1), MdLex::CodeBackticks);
-    markdownLexer->setPaper(QColor(0x2B2B2B), MdLex::CodeBackticks);
-    markdownLexer->setColor(QColor(0xA6E3A1), MdLex::CodeDoubleBackticks);
-    markdownLexer->setPaper(QColor(0x2B2B2B), MdLex::CodeDoubleBackticks);
-
-    // 代码块 ``` ... ```
-    markdownLexer->setColor(QColor(0xF0F0F0), MdLex::CodeBlock);
-    markdownLexer->setPaper(QColor(0x2B2B2B), MdLex::CodeBlock);
-
-    // 引用 > xxx
-    markdownLexer->setColor(QColor(0xD7BA7D), MdLex::BlockQuote);
-    markdownLexer->setPaper(bgMain, MdLex::BlockQuote);
-    QFont fontQuote = monoFont;
-    fontQuote.setItalic(true);
-    markdownLexer->setFont(fontQuote, MdLex::BlockQuote);
-
-    // 无序列表 - *
-    markdownLexer->setColor(QColor(0xFFB86C), MdLex::UnorderedListItem);
-    markdownLexer->setPaper(bgMain, MdLex::UnorderedListItem);
-    // 有序列表 1.
-    markdownLexer->setColor(QColor(0xFFB86C), MdLex::OrderedListItem);
-    markdownLexer->setPaper(bgMain, MdLex::OrderedListItem);
-
-    // 加粗 ** / __
-    QFont fontBold = monoFont;
-    fontBold.setBold(true);
-    markdownLexer->setColor(Qt::white, MdLex::StrongEmphasisAsterisks);
-    markdownLexer->setPaper(bgMain, MdLex::StrongEmphasisAsterisks);
-    markdownLexer->setFont(fontBold, MdLex::StrongEmphasisAsterisks);
-
-    markdownLexer->setColor(Qt::white, MdLex::StrongEmphasisUnderscores);
-    markdownLexer->setPaper(bgMain, MdLex::StrongEmphasisUnderscores);
-    markdownLexer->setFont(fontBold, MdLex::StrongEmphasisUnderscores);
-
-    // 斜体 * / _
-    QFont fontItalic = monoFont;
-    fontItalic.setItalic(true);
-    markdownLexer->setColor(QColor(0xC0C0C0), MdLex::EmphasisAsterisks);
-    markdownLexer->setPaper(bgMain, MdLex::EmphasisAsterisks);
-    markdownLexer->setFont(fontItalic, MdLex::EmphasisAsterisks);
-
-    markdownLexer->setColor(QColor(0xC0C0C0), MdLex::EmphasisUnderscores);
-    markdownLexer->setPaper(bgMain, MdLex::EmphasisUnderscores);
-    markdownLexer->setFont(fontItalic, MdLex::EmphasisUnderscores);
-
-    // 删除线 ~~ 修复：使用数字2031代替不存在的枚举
-    markdownLexer->setColor(QColor(0x888888), MdLex::StrikeOut);
-    markdownLexer->setPaper(bgMain, MdLex::StrikeOut);
-    m_EditSource->SendScintilla(2031, MdLex::StrikeOut, 1);
-
-    // 分割线 HR
-    markdownLexer->setColor(QColor(0x707070), MdLex::HorizontalRule);
-    markdownLexer->setPaper(bgMain, MdLex::HorizontalRule);
-  } else {
-    // 亮色主题
-    bgMain = Qt::white;
-    fgNormal = QColor(0x24292F);
-    caretColor = Qt::black;
-    caretLineBg = QColor(0xF0F4F8);
-    selBg = QColor(0xB3D7FF);
-    marginBg = Qt::white;
-    marginFg = QColor(0x656D76);
-
-    markdownLexer->setDefaultPaper(bgMain);
-    markdownLexer->setDefaultColor(fgNormal);
-
-    markdownLexer->setColor(fgNormal, MdLex::Default);
-    markdownLexer->setPaper(bgMain, MdLex::Default);
-
-    // 标题
-    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header1);
-    markdownLexer->setPaper(bgMain, MdLex::Header1);
-    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header2);
-    markdownLexer->setPaper(bgMain, MdLex::Header2);
-    markdownLexer->setColor(QColor(0x8250DF), MdLex::Header3);
-    markdownLexer->setPaper(bgMain, MdLex::Header3);
-    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header4);
-    markdownLexer->setPaper(bgMain, MdLex::Header4);
-    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header5);
-    markdownLexer->setPaper(bgMain, MdLex::Header5);
-    markdownLexer->setColor(QColor(0x0969DA), MdLex::Header6);
-    markdownLexer->setPaper(bgMain, MdLex::Header6);
-
-    // 链接
-    markdownLexer->setColor(QColor(0x0969DA), MdLex::Link);
-    markdownLexer->setPaper(bgMain, MdLex::Link);
-    m_EditSource->SendScintilla(QsciScintilla::SCI_STYLESETUNDERLINE,
-                                MdLex::Link, 1);
-
-    // 行内代码
-    markdownLexer->setColor(QColor(0xCF222E), MdLex::CodeBackticks);
-    markdownLexer->setPaper(QColor(0xF6F8FA), MdLex::CodeBackticks);
-    markdownLexer->setColor(QColor(0xCF222E), MdLex::CodeDoubleBackticks);
-    markdownLexer->setPaper(QColor(0xF6F8FA), MdLex::CodeDoubleBackticks);
-
-    // 代码块
-    markdownLexer->setColor(fgNormal, MdLex::CodeBlock);
-    markdownLexer->setPaper(QColor(0xF6F8FA), MdLex::CodeBlock);
-
-    // 引用
-    markdownLexer->setColor(QColor(0x656D76), MdLex::BlockQuote);
-    markdownLexer->setPaper(bgMain, MdLex::BlockQuote);
-    QFont fontQuote = monoFont;
-    fontQuote.setItalic(true);
-    markdownLexer->setFont(fontQuote, MdLex::BlockQuote);
-
-    // 列表标记
-    markdownLexer->setColor(QColor(0x9A6700), MdLex::UnorderedListItem);
-    markdownLexer->setPaper(bgMain, MdLex::UnorderedListItem);
-    markdownLexer->setColor(QColor(0x9A6700), MdLex::OrderedListItem);
-    markdownLexer->setPaper(bgMain, MdLex::OrderedListItem);
-
-    // 加粗
-    QFont fontBold = monoFont;
-    fontBold.setBold(true);
-    markdownLexer->setColor(fgNormal, MdLex::StrongEmphasisAsterisks);
-    markdownLexer->setPaper(bgMain, MdLex::StrongEmphasisAsterisks);
-    markdownLexer->setFont(fontBold, MdLex::StrongEmphasisAsterisks);
-    markdownLexer->setColor(fgNormal, MdLex::StrongEmphasisUnderscores);
-    markdownLexer->setPaper(bgMain, MdLex::StrongEmphasisUnderscores);
-    markdownLexer->setFont(fontBold, MdLex::StrongEmphasisUnderscores);
-
-    // 斜体
-    QFont fontItalic = monoFont;
-    fontItalic.setItalic(true);
-    markdownLexer->setColor(QColor(0x57606A), MdLex::EmphasisAsterisks);
-    markdownLexer->setPaper(bgMain, MdLex::EmphasisAsterisks);
-    markdownLexer->setFont(fontItalic, MdLex::EmphasisAsterisks);
-    markdownLexer->setColor(QColor(0x57606A), MdLex::EmphasisUnderscores);
-    markdownLexer->setPaper(bgMain, MdLex::EmphasisUnderscores);
-    markdownLexer->setFont(fontItalic, MdLex::EmphasisUnderscores);
-
-    // 删除线 数字指令
-    markdownLexer->setColor(QColor(0x8C959F), MdLex::StrikeOut);
-    markdownLexer->setPaper(bgMain, MdLex::StrikeOut);
-    m_EditSource->SendScintilla(2031, MdLex::StrikeOut, 1);
-
-    // 分割线
-    markdownLexer->setColor(QColor(0xD1D9E0), MdLex::HorizontalRule);
-    markdownLexer->setPaper(bgMain, MdLex::HorizontalRule);
-  }
-
-  // 全局编辑器UI同步
-  m_EditSource->setCaretForegroundColor(caretColor);
-  m_EditSource->setCaretLineBackgroundColor(caretLineBg);
-  m_EditSource->setMarginsBackgroundColor(marginBg);
-  m_EditSource->setMarginsForegroundColor(marginFg);
-  m_EditSource->setSelectionBackgroundColor(selBg);
-  m_EditSource->setSelectionForegroundColor(fgNormal);
 #endif
 }
 
@@ -861,7 +753,7 @@ void Notes::startBackgroundSearch(const QString &keyword) {
     return;
   }
 
-  const QString fullText = m_EditSource->text();
+  const QString fullText = getFullText();
   const int currentGeneration = ++m_searchGeneration;
   QPointer<Notes> guard(this);
 
@@ -968,5 +860,83 @@ void Notes::applySearchResults(const QList<TextMatch> &matches,
              &Notes::onSearchResultClicked);
   connect(ui->listSearchResults, &QListWidget::itemClicked, this,
           &Notes::onSearchResultClicked);
+#endif
+}
+
+void Notes::applyMdLexerTheme(bool darkMode) {
+#ifndef Q_OS_ANDROID
+  ScintillaEdit *editor = m_EditSource;
+  if (!editor)
+    return;
+
+  if (!darkMode) {
+    editor->send(SCI_STYLESETBACK, STYLE_DEFAULT,
+                 sciColor(QColor(0xFF, 0xFF, 0xFF)));
+    editor->send(SCI_STYLESETFORE, STYLE_DEFAULT,
+                 sciColor(QColor(0x00, 0x00, 0x00)));
+    editor->send(SCI_COLOURISE, 0, -1);
+    return;
+  }
+
+  // ---- 深色模式 ----
+  const QColor bg(0x1E, 0x1E, 0x1E);
+  const QColor fg(0xD4, 0xD4, 0xD4);
+
+  // 默认样式 & 基础文字
+  editor->send(SCI_STYLESETBACK, STYLE_DEFAULT, sciColor(bg));
+  editor->send(SCI_STYLESETFORE, STYLE_DEFAULT, sciColor(fg));
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_DEFAULT, sciColor(fg));
+
+  // 标题 H1-H6 (值 6~11，连续)
+  for (int s = SCE_MARKDOWN_HEADER1; s <= SCE_MARKDOWN_HEADER6; ++s)
+    editor->send(SCI_STYLESETFORE, s, sciColor(QColor(0x56, 0x9C, 0xD6)));
+
+  // 水平分割线
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_HRULE,
+               sciColor(QColor(0x80, 0x80, 0x80)));
+
+  // 链接
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_LINK,
+               sciColor(QColor(0x4E, 0xC9, 0xB0)));
+
+  // 行内代码 & 代码块
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_CODE,
+               sciColor(QColor(0xCE, 0x91, 0x69)));
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_CODE2,
+               sciColor(QColor(0xCE, 0x91, 0x69)));
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_CODEBK,
+               sciColor(QColor(0x6A, 0x99, 0x55)));
+  editor->send(SCI_STYLESETBACK, SCE_MARKDOWN_CODEBK,
+               sciColor(QColor(0x2D, 0x2D, 0x2D)));
+
+  // 斜体 (*em* / _em_)
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_EM1,
+               sciColor(QColor(0xC5, 0x86, 0xC0)));
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_EM2,
+               sciColor(QColor(0xC5, 0x86, 0xC0)));
+
+  // 粗体 (**strong** / __strong__)
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRONG1,
+               sciColor(QColor(0xC5, 0x86, 0xC0)));
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRONG2,
+               sciColor(QColor(0xC5, 0x86, 0xC0)));
+
+  // 引用块
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_BLOCKQUOTE,
+               sciColor(QColor(0x9C, 0x9C, 0x9C)));
+  editor->send(SCI_STYLESETBACK, SCE_MARKDOWN_BLOCKQUOTE,
+               sciColor(QColor(0x25, 0x25, 0x25)));
+
+  // 无序列表 & 有序列表
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_ULIST_ITEM,
+               sciColor(QColor(0xDC, 0xD2, 0xA0)));
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_OLIST_ITEM,
+               sciColor(QColor(0xDC, 0xD2, 0xA0)));
+
+  // 删除线
+  editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRIKEOUT,
+               sciColor(QColor(0x80, 0x80, 0x80)));
+
+  editor->send(SCI_COLOURISE, 0, -1);
 #endif
 }

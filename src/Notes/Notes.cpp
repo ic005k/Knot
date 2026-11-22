@@ -102,7 +102,7 @@ void Notes::showEvent(QShowEvent *event) {
 #ifndef Q_OS_ANDROID
     QFont font = mw_one->font();
     m_EditSource->setFont(font);
-    markdownLexer->setFont(font);
+
 #endif
 
     m_initialized = true;
@@ -163,7 +163,20 @@ bool Notes::eventFilter(QObject *obj, QEvent *evn) {
 
     // Ctrl+F 处理
     if (keyEvent->matches(QKeySequence::Find)) {
-      QString text = m_EditSource->selectedText();
+      QString text;
+
+      // 获取选中区间的字节长度（不含终止符）
+      int selLen = m_EditSource->send(SCI_GETSELTEXT, 0, 0);
+      if (selLen > 0) {
+        QByteArray buf(selLen, '\0');
+        // SCI_GETSELTEXT 返回实际写入字节数（不含 \0），第二个参数是缓冲区指针
+        m_EditSource->send(SCI_GETSELTEXT, 0,
+                           reinterpret_cast<sptr_t>(buf.data()));
+        text = QString::fromUtf8(buf);
+      } else {
+        QString text; // 无选中内容
+      }
+
       if (!text.isEmpty()) {
         ui->editFind->setText(text);
         ui->editFind->setFocus();
@@ -195,7 +208,8 @@ void Notes::closeEvent(QCloseEvent *event) {
   saveEditorState(currentMDFile);
 
 #ifndef Q_OS_ANDROID
-  newText = m_EditSource->text().trimmed();
+
+  newText = getFullText().trimmed();
 #endif
 
   m_Method->Sleep(100);
@@ -257,16 +271,15 @@ void Notes::openEditUI() {
 
   init();
 
-  m_EditSource->setWrapMode(QsciScintilla::WrapNone);
-  m_EditSource->setText(oldText);
-  m_EditSource->setWrapMode(QsciScintilla::WrapWord); // 按单词换行
+  m_EditSource->send(SCI_SETWRAPMODE, SC_WRAP_NONE, 0);
+  m_EditSource->send(SCI_SETTEXT, 0,
+                     reinterpret_cast<sptr_t>(oldText.toUtf8().constData()));
+  m_EditSource->send(SCI_SETWRAPMODE, SC_WRAP_WORD, 0);
 
   if (isLocalAIModel)
     ui->btnAILink->show();
   else
     ui->btnAILink->hide();
-
-  m_EditSource->setFocus();
 
   QTimer::singleShot(100, this,
                      [this]() { restoreEditorState(currentMDFile); });
@@ -276,8 +289,8 @@ void Notes::openEditUI() {
   if (mw_one->isOpenSearchResult) {
     QString findText = mw_one->mySearchText;
     if (findText.length() > 0) {
-      m_EditSource->SendScintilla(QsciScintilla::SCI_SETANCHOR, 0);
-      m_EditSource->SendScintilla(QsciScintilla::SCI_SETCURRENTPOS, 0);
+      m_EditSource->send(SCI_SETANCHOR, 0, 0);
+      m_EditSource->send(SCI_SETCURRENTPOS, 0, 0);
 
       ui->editFind->setText("");
       ui->editFind->setText(findText);
