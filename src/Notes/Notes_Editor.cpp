@@ -5,6 +5,7 @@
 #include "Notes/Notes.h"
 #include "defines.h"
 
+#ifndef Q_OS_ANDROID
 #include "ILexer.h"   // 确保 Scintilla::ILexer5 可见
 #include <SciLexer.h> // SCE_MD_* 全部定义在这里，Scintilla.h 不含它
 
@@ -15,6 +16,8 @@ static CreateLexerFn createLexer = &CreateLexer;
 static inline uptr_t sciColor(const QColor &c) {
   return static_cast<uptr_t>(c.red() | (c.green() << 8) | (c.blue() << 16));
 }
+
+#endif
 
 void Notes::initEditor() {
 #ifndef Q_OS_ANDROID
@@ -881,25 +884,31 @@ void Notes::applyMdLexerTheme(bool darkMode) {
   // ---- 深色模式 ----
   const QColor bg(0x1E, 0x1E, 0x1E);
   const QColor fg(0xD4, 0xD4, 0xD4);
+  const int sciBg = sciColor(bg);
 
-  // 默认样式 & 基础文字
-  editor->send(SCI_STYLESETBACK, STYLE_DEFAULT, sciColor(bg));
+  // 1. 先将所有 Markdown 样式的背景统一设为深色，消除白色块
+  for (int s = SCE_MARKDOWN_DEFAULT; s <= SCE_MARKDOWN_FRONT_KEY; ++s) {
+    editor->send(SCI_STYLESETBACK, s, sciBg);
+  }
+
+  // 2. 默认样式
+  editor->send(SCI_STYLESETBACK, STYLE_DEFAULT, sciBg);
   editor->send(SCI_STYLESETFORE, STYLE_DEFAULT, sciColor(fg));
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_DEFAULT, sciColor(fg));
 
-  // 标题 H1-H6 (值 6~11，连续)
+  // 3. 标题 H1-H6
   for (int s = SCE_MARKDOWN_HEADER1; s <= SCE_MARKDOWN_HEADER6; ++s)
     editor->send(SCI_STYLESETFORE, s, sciColor(QColor(0x56, 0x9C, 0xD6)));
 
-  // 水平分割线
+  // 4. 水平分割线
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_HRULE,
                sciColor(QColor(0x80, 0x80, 0x80)));
 
-  // 链接
+  // 5. 链接
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_LINK,
                sciColor(QColor(0x4E, 0xC9, 0xB0)));
 
-  // 行内代码 & 代码块
+  // 6. 行内代码 & 代码块（代码块用稍亮的背景区分）
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_CODE,
                sciColor(QColor(0xCE, 0x91, 0x69)));
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_CODE2,
@@ -909,31 +918,31 @@ void Notes::applyMdLexerTheme(bool darkMode) {
   editor->send(SCI_STYLESETBACK, SCE_MARKDOWN_CODEBK,
                sciColor(QColor(0x2D, 0x2D, 0x2D)));
 
-  // 斜体 (*em* / _em_)
+  // 7. 斜体
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_EM1,
                sciColor(QColor(0xC5, 0x86, 0xC0)));
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_EM2,
                sciColor(QColor(0xC5, 0x86, 0xC0)));
 
-  // 粗体 (**strong** / __strong__)
+  // 8. 粗体
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRONG1,
                sciColor(QColor(0xC5, 0x86, 0xC0)));
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRONG2,
                sciColor(QColor(0xC5, 0x86, 0xC0)));
 
-  // 引用块
+  // 9. 引用块（稍亮的背景）
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_BLOCKQUOTE,
                sciColor(QColor(0x9C, 0x9C, 0x9C)));
   editor->send(SCI_STYLESETBACK, SCE_MARKDOWN_BLOCKQUOTE,
                sciColor(QColor(0x25, 0x25, 0x25)));
 
-  // 无序列表 & 有序列表
+  // 10. 列表
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_ULIST_ITEM,
                sciColor(QColor(0xDC, 0xD2, 0xA0)));
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_OLIST_ITEM,
                sciColor(QColor(0xDC, 0xD2, 0xA0)));
 
-  // 删除线
+  // 11. 删除线
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRIKEOUT,
                sciColor(QColor(0x80, 0x80, 0x80)));
 
