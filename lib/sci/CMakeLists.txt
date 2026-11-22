@@ -46,6 +46,9 @@ file(GLOB SCINTILLA_QT_SRC CONFIGURE_DEPENDS
 
 add_library(scintilla_qt STATIC ${SCINTILLA_CORE_SRC} ${SCINTILLA_QT_SRC})
 
+# 强制将 EXPORT_IMPORT_API 重定义为空，绕过上游头文件的 dllimport/dllexport 逻辑
+target_compile_definitions(scintilla_qt PUBLIC "EXPORT_IMPORT_API=")
+
 target_include_directories(scintilla_qt PUBLIC
     ${SCI_ROOT}/include
     ${SCI_ROOT}/src
