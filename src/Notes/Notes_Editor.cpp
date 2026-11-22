@@ -181,20 +181,22 @@ void Notes::initMarkdownEditor(ScintillaEdit *editor) {
   //--------------------------------------------------------------
   // 4. 光标与当前行
   //--------------------------------------------------------------
-  // SCI_SHOWCARET 不存在；光标可见性 = 控件焦点 + 样式，用 CARETSTYLE 兜底
   editor->send(SCI_SETCARETSTYLE, CARETSTYLE_LINE, 0);
   editor->send(SCI_SETCARETWIDTH, 2, 0);
   editor->send(SCI_SETCARETFORE,
                sciColor(isDark ? QColor(0xF0, 0xF0, 0xF0) : QColor(0, 0, 0)),
                0);
+
   editor->send(SCI_SETCARETLINEVISIBLE, 1, 0);
   editor->send(SCI_SETCARETLINEFRAME, 0, 0);
-  editor->send(
-      SCI_SETCARETLINEBACK,
-      sciColor(isDark ? QColor(0x2A, 0x2A, 0x2A) : QColor(0xF5, 0xF5, 0xDC)),
-      0);
-  editor->send(SCI_SETCARETLINEBACKALPHA, 255, 0);
-  editor->send(SCI_SETCARETLINELAYER, SC_LAYER_UNDER_TEXT, 0);
+
+  // 用主题色系的浅色，而非黑白+低alpha
+  const QColor caretLineBg = isDark ? QColor(0x2A, 0x2D, 0x31)  // 深蓝灰
+                                    : QColor(0xF2, 0xF6, 0xFC); // 极浅蓝
+  editor->send(SCI_SETCARETLINEBACK, sciColor(caretLineBg), 0);
+  editor->send(SCI_SETCARETLINEBACKALPHA, 255, 0); // 完全不透明
+  editor->send(SCI_SETCARETLINELAYER, SC_LAYER_UNDER_TEXT,
+               0); // 文字之下、样式之上
 
   //--------------------------------------------------------------
   // 5. 折叠属性与换行
@@ -218,16 +220,7 @@ void Notes::initMarkdownEditor(ScintillaEdit *editor) {
   editor->send(SCI_INDICSETUNDER, INDICATOR_SEARCH, 1);
 
   //--------------------------------------------------------------
-  // 7. 选中文本
-  //--------------------------------------------------------------
-  editor->send(SCI_SETSELBACK, 1,
-               sciColor(isDark ? QColor(38, 79, 120) : QColor(173, 214, 255)));
-  editor->send(SCI_SETSELFORE, 1,
-               sciColor(isDark ? QColor(0xFF, 0xFF, 0xFF) : QColor(0, 0, 0)));
-  editor->send(SCI_SETSELALPHA, 255, 0); // 不是 256
-
-  //--------------------------------------------------------------
-  // 8. 主题（必须放最后）
+  // 7. 主题（必须放最后）
   //--------------------------------------------------------------
   applyMdLexerTheme(isDark);
 }
@@ -243,8 +236,9 @@ void Notes::init_md() {
     m_EditSource->verticalScrollBar()->setStyleSheet(lightPCScrollbarStyle);
   }
 
-  initMarkdownLexer();
-  initMarkdownEditor(m_EditSource);
+  initMarkdownLexer();              // 1. 先装 lexer（会重置状态）
+  initMarkdownEditor(m_EditSource); // 2. 再做全部配置（含主题）
+
 #endif
 }
 
@@ -873,10 +867,83 @@ void Notes::applyMdLexerTheme(bool darkMode) {
     return;
 
   if (!darkMode) {
-    editor->send(SCI_STYLESETBACK, STYLE_DEFAULT,
-                 sciColor(QColor(0xFF, 0xFF, 0xFF)));
-    editor->send(SCI_STYLESETFORE, STYLE_DEFAULT,
+    const QColor bg(0xFF, 0xFF, 0xFF);
+    const QColor fg(0x00, 0x00, 0x00);
+    const int sciBg = sciColor(bg);
+
+    // 1. 所有 Markdown 样式背景统一设为白色
+    for (int s = SCE_MARKDOWN_DEFAULT; s <= SCE_MARKDOWN_FRONT_KEY; ++s) {
+      editor->send(SCI_STYLESETBACK, s, sciBg);
+    }
+
+    // 2. 默认样式
+    editor->send(SCI_STYLESETBACK, STYLE_DEFAULT, sciBg);
+    editor->send(SCI_STYLESETFORE, STYLE_DEFAULT, sciColor(fg));
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_DEFAULT, sciColor(fg));
+
+    // 3. 标题 H1-H6（蓝色加粗）
+    for (int s = SCE_MARKDOWN_HEADER1; s <= SCE_MARKDOWN_HEADER6; ++s) {
+      editor->send(SCI_STYLESETFORE, s, sciColor(QColor(0x00, 0x00, 0xFF)));
+      editor->send(SCI_STYLESETBOLD, s, 1);
+    }
+
+    // 4. 水平分割线
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_HRULE,
+                 sciColor(QColor(0x80, 0x80, 0x80)));
+
+    // 5. 链接（蓝绿色）
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_LINK,
+                 sciColor(QColor(0x00, 0x00, 0x80)));
+    editor->send(SCI_STYLESETUNDERLINE, SCE_MARKDOWN_LINK, 1);
+
+    // 6. 行内代码 & 代码块
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_CODE,
+                 sciColor(QColor(0xA3, 0x15, 0x15)));
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_CODE2,
+                 sciColor(QColor(0xA3, 0x15, 0x15)));
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_CODEBK,
+                 sciColor(QColor(0x63, 0x63, 0x63)));
+    editor->send(SCI_STYLESETBACK, SCE_MARKDOWN_CODEBK,
+                 sciColor(QColor(0xF5, 0xF5, 0xF5)));
+
+    // 7. 斜体
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_EM1,
+                 sciColor(QColor(0x00, 0x80, 0x00)));
+    editor->send(SCI_STYLESETITALIC, SCE_MARKDOWN_EM1, 1);
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_EM2,
+                 sciColor(QColor(0x00, 0x80, 0x00)));
+    editor->send(SCI_STYLESETITALIC, SCE_MARKDOWN_EM2, 1);
+
+    // 8. 粗体
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRONG1,
                  sciColor(QColor(0x00, 0x00, 0x00)));
+    editor->send(SCI_STYLESETBOLD, SCE_MARKDOWN_STRONG1, 1);
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRONG2,
+                 sciColor(QColor(0x00, 0x00, 0x00)));
+    editor->send(SCI_STYLESETBOLD, SCE_MARKDOWN_STRONG2, 1);
+
+    // 9. 引用块（灰色斜体 + 浅灰背景）
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_BLOCKQUOTE,
+                 sciColor(QColor(0x60, 0x60, 0x60)));
+    editor->send(SCI_STYLESETBACK, SCE_MARKDOWN_BLOCKQUOTE,
+                 sciColor(QColor(0xF0, 0xF0, 0xF0)));
+    editor->send(SCI_STYLESETITALIC, SCE_MARKDOWN_BLOCKQUOTE, 1);
+
+    // 10. 列表
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_ULIST_ITEM,
+                 sciColor(QColor(0x80, 0x00, 0x00)));
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_OLIST_ITEM,
+                 sciColor(QColor(0x80, 0x00, 0x00)));
+
+    // 11. 删除线
+    editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRIKEOUT,
+                 sciColor(QColor(0xA0, 0xA0, 0xA0)));
+
+    // 亮色模式
+    editor->send(SCI_SETSELBACK, 1, sciColor(QColor(0x33, 0x99, 0xFF)));
+    editor->send(SCI_SETSELFORE, 0, 0); // 不覆盖文字色
+    editor->send(SCI_SETSELALPHA, 100); // 半透明蓝底
+
     editor->send(SCI_COLOURISE, 0, -1);
     return;
   }
@@ -945,6 +1012,11 @@ void Notes::applyMdLexerTheme(bool darkMode) {
   // 11. 删除线
   editor->send(SCI_STYLESETFORE, SCE_MARKDOWN_STRIKEOUT,
                sciColor(QColor(0x80, 0x80, 0x80)));
+
+  // 暗色模式
+  editor->send(SCI_SETSELBACK, 1, sciColor(QColor(0x4F, 0x9C, 0xE0)));
+  editor->send(SCI_SETSELFORE, 0, 0);
+  editor->send(SCI_SETSELALPHA, 90);
 
   editor->send(SCI_COLOURISE, 0, -1);
 #endif
