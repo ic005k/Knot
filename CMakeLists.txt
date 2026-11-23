@@ -394,9 +394,17 @@ if(WIN32)
     endif()
 elseif(APPLE)
     find_package(OpenSSL REQUIRED)
+
+    # ✅ macOS 的 iconv 在独立 libiconv 中，需要显式链接
+    find_library(ICONV_LIBRARY iconv)
+    if(NOT ICONV_LIBRARY)
+        message(FATAL_ERROR "❌ iconv not found on macOS (should be in system SDK)")
+    endif()
+    message(STATUS "✅ macOS iconv linked: ${ICONV_LIBRARY}")
+
     target_link_libraries(${PROJECT_NAME} PRIVATE
         OpenSSL::SSL OpenSSL::Crypto
-
+        ${ICONV_LIBRARY}
     )
 elseif(ANDROID)
     # ✅ Android Bionic 已将 pthread 合入 libc，无需单独链接
