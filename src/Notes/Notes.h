@@ -516,6 +516,7 @@ private:
         QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
             background: transparent;
         })";
+  void wrapSelection(const QString &prefix, const QString &suffix, const QString &defaultText);
 };
 
 #endif // NOTES_H

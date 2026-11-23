@@ -15,109 +15,31 @@ void Notes::on_btnInsertTable_clicked() {
 
 void Notes::on_btnS1_clicked() {
 #ifndef Q_OS_ANDROID
-  // 获取选区文本
-  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
-  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
-  bool hasSel = (selStart != selEnd);
-
-  QString str;
-  if (hasSel) {
-    QByteArray raw(selEnd - selStart, '\0');
-    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
-    str = QString::fromUtf8(raw);
-  } else {
-    str = tr("Bold Italic");
-  }
-
-  QString wrapped = "_**" + str + "**_";
-  QByteArray utf8 = wrapped.toUtf8();
-
-  // SCI_REPLACESEL 同时处理"有选区替换"和"无选区插入"两种情况
-  m_EditSource->send(SCI_REPLACESEL, 0,
-                     reinterpret_cast<sptr_t>(utf8.constData()));
+  wrapSelection("_**", "**_", tr("Bold Italic"));
 #endif
 }
 
 void Notes::on_btnS2_clicked() {
 #ifndef Q_OS_ANDROID
-  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
-  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
-  bool hasSel = (selStart != selEnd);
-
-  QString str;
-  if (hasSel) {
-    QByteArray raw(selEnd - selStart, '\0');
-    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
-    str = QString::fromUtf8(raw);
-  } else {
-    str = tr("Italic");
-  }
-
-  QString wrapped = "_" + str + "_";
-  QByteArray utf8 = wrapped.toUtf8();
-
-  m_EditSource->send(SCI_REPLACESEL, 0,
-                     reinterpret_cast<sptr_t>(utf8.constData()));
+  wrapSelection("_", "_", tr("Italic"));
 #endif
 }
 
 void Notes::on_btnS3_clicked() {
 #ifndef Q_OS_ANDROID
-  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
-  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
-
-  QString str;
-  if (selStart != selEnd) {
-    QByteArray raw(selEnd - selStart, '\0');
-    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
-    str = QString::fromUtf8(raw);
-  } else {
-    str = tr("Underline");
-  }
-
-  QByteArray utf8 = ("<u>" + str + "</u>").toUtf8();
-  m_EditSource->send(SCI_REPLACESEL, 0,
-                     reinterpret_cast<sptr_t>(utf8.constData()));
+  wrapSelection("<u>", "</u>", tr("Underline"));
 #endif
 }
 
 void Notes::on_btnS4_clicked() {
 #ifndef Q_OS_ANDROID
-  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
-  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
-
-  QString str;
-  if (selStart != selEnd) {
-    QByteArray raw(selEnd - selStart, '\0');
-    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
-    str = QString::fromUtf8(raw);
-  } else {
-    str = tr("Strickout");
-  }
-
-  QByteArray utf8 = ("~~" + str + "~~").toUtf8();
-  m_EditSource->send(SCI_REPLACESEL, 0,
-                     reinterpret_cast<sptr_t>(utf8.constData()));
+  wrapSelection("~~", "~~", tr("Strikethrough"));
 #endif
 }
 
 void Notes::on_btnS5_clicked() {
 #ifndef Q_OS_ANDROID
-  int selStart = m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0);
-  int selEnd = m_EditSource->send(SCI_GETSELECTIONEND, 0, 0);
-
-  QString str;
-  if (selStart != selEnd) {
-    QByteArray raw(selEnd - selStart, '\0');
-    m_EditSource->send(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(raw.data()));
-    str = QString::fromUtf8(raw);
-  } else {
-    str = tr("Bold");
-  }
-
-  QByteArray utf8 = ("**" + str + "**").toUtf8();
-  m_EditSource->send(SCI_REPLACESEL, 0,
-                     reinterpret_cast<sptr_t>(utf8.constData()));
+  wrapSelection("**", "**", tr("Bold"));
 #endif
 }
 
@@ -746,4 +668,84 @@ void Notes::on_btnQuestion_clicked() {
 void Notes::on_btnClearQuestion_clicked() {
   ui->editQuestion->clear();
   ui->editQuestion->setFocus();
+}
+
+/**
+ * @brief 通用 Markdown 格式包裹函数
+ * @param prefix  前缀标记，如 "**", "~~", "`"
+ * @param suffix  后缀标记，通常与 prefix 相同
+ * @param defaultText 无选区时的占位文本
+ */
+void Notes::wrapSelection(const QString &prefix, const QString &suffix,
+                          const QString &defaultText) {
+#ifndef Q_OS_ANDROID
+  int selStart =
+      static_cast<int>(m_EditSource->send(SCI_GETSELECTIONSTART, 0, 0));
+  int selEnd = static_cast<int>(m_EditSource->send(SCI_GETSELECTIONEND, 0, 0));
+
+  // ---------- 1. 取选中文本 ----------
+  QString str;
+  if (selStart != selEnd && selEnd > selStart) {
+    Sci_TextRange tr{};
+    tr.chrg.cpMin = selStart;
+    tr.chrg.cpMax = selEnd;
+    QByteArray buf(selEnd - selStart + 1, '\0');
+    tr.lpstrText = buf.data();
+    int got = static_cast<int>(
+        m_EditSource->send(SCI_GETTEXTRANGE, 0, reinterpret_cast<sptr_t>(&tr)));
+    str = QString::fromUtf8(buf.constData(), got > 0 ? got : 0);
+  }
+
+  if (str.isNull())
+    str = defaultText;
+  str = str.trimmed();
+  if (str.isEmpty())
+    str = defaultText;
+
+  // ---------- 2. 取插入点前后的字符（用字符数而非字节数）----------
+  // 当前行信息
+  int line =
+      static_cast<int>(m_EditSource->send(SCI_LINEFROMPOSITION, selStart, 0));
+  int lineStart =
+      static_cast<int>(m_EditSource->send(SCI_POSITIONFROMLINE, line, 0));
+  int charPosInLine = static_cast<int>(
+      m_EditSource->send(SCI_COUNTCHARACTERS, lineStart, selStart));
+
+  // 读整行
+  int lineLen = static_cast<int>(m_EditSource->send(SCI_LINELENGTH, line, 0));
+  QByteArray lineBuf(lineLen + 1, '\0');
+  m_EditSource->send(SCI_GETLINE, line,
+                     reinterpret_cast<sptr_t>(lineBuf.data()));
+  QString lineText = QString::fromUtf8(lineBuf.constData(), lineLen);
+  while (lineText.endsWith('\n') || lineText.endsWith('\r'))
+    lineText.chop(1);
+
+  QChar prevChar =
+      (charPosInLine > 0) ? lineText.at(charPosInLine - 1) : QChar();
+  QChar nextChar =
+      (charPosInLine < lineText.size()) ? lineText.at(charPosInLine) : QChar();
+
+  // ---------- 3. 判断是否需要补空格 ----------
+  auto isBoundary = [](QChar c) -> bool {
+    if (c.isNull())
+      return true; // 行首/行尾
+    if (c.isSpace())
+      return true; // 空白
+    static const QString ok =
+        QStringLiteral("([{\"'`~*_-—，。、；：！？（）【】《》「」『』 \t");
+    return ok.contains(c);
+  };
+
+  QString finalText;
+  if (!isBoundary(prevChar))
+    finalText += QLatin1Char(' ');
+  finalText += prefix + str + suffix;
+  if (!isBoundary(nextChar))
+    finalText += QLatin1Char(' ');
+
+  // ---------- 4. 替换 ----------
+  QByteArray utf8 = finalText.toUtf8();
+  m_EditSource->send(SCI_REPLACESEL, 0,
+                     reinterpret_cast<sptr_t>(utf8.constData()));
+#endif
 }
