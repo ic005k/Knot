@@ -41,7 +41,7 @@ All dependencies are preserved in original format for maintenance and upgrades:
 ### UI & Auxiliary Tools
 | Project Name | Functionality | Repository Link |
 |--------------|---------------|-----------------|
-| **QScintilla** | Desktop note editor | [QScintilla](https://riverbankcomputing.com/software/qscintilla/download) |
+| **Scintilla** | Desktop note editor | [Scintilla](https://www.scintilla.org) |
 
 ### Android-specific Components
 | Project Name | Functionality | Repository Link |
