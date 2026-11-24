@@ -8,8 +8,9 @@
 #include "defines.h"
 
 QStringList c_list;
+using namespace Qt::StringLiterals;
 
-EditRecord::EditRecord(QWidget* parent) : QDialog(parent) {
+EditRecord::EditRecord(QWidget *parent) : QDialog(parent) {
   m_CategoryList = new CategoryList(this);
 }
 
@@ -54,7 +55,7 @@ void EditRecord::on_btnOk_clicked() {
   }
 
   if (str.length() > 0) {
-    QListWidgetItem* item = new QListWidgetItem(str);
+    QListWidgetItem *item = new QListWidgetItem(str);
     m_CategoryList->ui->listWidget->insertItem(0, item);
   }
 
@@ -105,7 +106,7 @@ void EditRecord::on_btnType_clicked() {
   // m_Method->setCurrentIndexFromQW(mw_one->ui->qwCategory, 0);
   m_CategoryList->setTypeRenameText();
 
-  int count = 0;  // m_Method->getCountFromQW(mw_one->ui->qwCategory);
+  int count = 0; // m_Method->getCountFromQW(mw_one->ui->qwCategory);
   // mw_one->ui->lblTypeInfo->setText(QObject::tr("Total") + " : " +
   //                                  QString::number(count));
 
@@ -122,14 +123,16 @@ void EditRecord::saveMyClassification() {
 
   c_list.clear();
   for (int i = 0; i < count; i++) {
-    if (isBreak) break;
+    if (isBreak)
+      break;
     c_list.append(m_CategoryList->ui->listWidget->item(i)->text().trimmed());
   }
 
   removeDuplicates(&c_list);
 
   for (int i = 0; i < c_list.count(); i++) {
-    if (isBreak) break;
+    if (isBreak)
+      break;
     QString str = c_list.at(i);
     if (str.length() > 0)
       Reg.setValue("/CustomDesc/Item" + QString::number(i), str);
@@ -137,24 +140,26 @@ void EditRecord::saveMyClassification() {
   Reg.setValue("/CustomDesc/Count", c_list.count());
 }
 
-int EditRecord::removeDuplicates(QStringList* that) {
+int EditRecord::removeDuplicates(QStringList *that) {
   int n = that->size();
   int j = 0;
   QSet<QString> seen;
   seen.reserve(n);
   int setSize = 0;
   for (int i = 0; i < n; ++i) {
-    const QString& s = that->at(i);
+    const QString &s = that->at(i);
     seen.insert(s);
-    if (setSize == seen.size())  // unchanged size => was already seen
+    if (setSize == seen.size()) // unchanged size => was already seen
       continue;
     ++setSize;
 
-    if (j != i) that->swapItemsAt(i, j);
+    if (j != i)
+      that->swapItemsAt(i, j);
 
     ++j;
   }
-  if (n != j) that->erase(that->begin() + j, that->end());
+  if (n != j)
+    that->erase(that->begin() + j, that->end());
   return n - j;
 }
 
@@ -173,7 +178,7 @@ void EditRecord::init_MyCategory() {
   for (int i = 0; i < descCount; i++) {
     QString str =
         RegDesc.value("/CustomDesc/Item" + QString::number(i)).toString();
-    QListWidgetItem* item = new QListWidgetItem(str);
+    QListWidgetItem *item = new QListWidgetItem(str);
 
     m_CategoryList->ui->listWidget->addItem(item);
     c_list.append(str);
@@ -205,7 +210,7 @@ void EditRecord::on_btnClearAmount_clicked() {}
 
 void EditRecord::on_btnClearDesc_clicked() {}
 
-void EditRecord::on_editAmount_textChanged(const QString& arg1) {}
+void EditRecord::on_editAmount_textChanged(const QString &arg1) {}
 
 void EditRecord::on_hsH_valueChanged(int value) {}
 
@@ -213,17 +218,17 @@ void EditRecord::on_hsM_valueChanged(int value) {}
 
 void EditRecord::on_btnClearDetails_clicked() {}
 
-void EditRecord::on_editCategory_textChanged(const QString& arg1) {}
+void EditRecord::on_editCategory_textChanged(const QString &arg1) {}
 
 void EditRecord::on_editDetails_textChanged() {}
 
 void EditRecord::saveCurrentYearData() {
-  QTreeWidget* tw = (QTreeWidget*)tabData->currentWidget();
+  QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
   if (!tw) {
     return;
   }
 
-  DataManager* dataMgr = new DataManager(iniDir, nullptr);
+  DataManager *dataMgr = new DataManager(iniDir, nullptr);
 
   QString name = tw->objectName();
   QList<int> listAllYear = getExistingYears(tw);
@@ -235,10 +240,12 @@ void EditRecord::saveCurrentYearData() {
     QString file = iniDir + QString::number(year) + "-" + name + ".json";
     if (!QFile::exists(file)) {
       dataMgr->saveData(tw, year);
-      if (year == current_year) currentYearSaved = true;
+      if (year == current_year)
+        currentYearSaved = true;
     }
   }
-  if (!currentYearSaved) dataMgr->saveData(tw);
+  if (!currentYearSaved)
+    dataMgr->saveData(tw);
 
   if (tw->topLevelItemCount() == 0) {
     QString file1 =
@@ -264,13 +271,14 @@ void EditRecord::saveCurrentYearData() {
   flag = "/" + name + "/";
 
   int count = tw->topLevelItemCount();
-  if (count == 0) return;
+  if (count == 0)
+    return;
 
   Reg.setValue(flag + "TopCount", count);
 
   int Sn = 0;
   for (int i = 0; i < count; i++) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
+    QTreeWidgetItem *topItem = tw->topLevelItem(i);
     Sn = i + 1;
     if (topItem->text(3) == strCurrentYear) {
       Reg.setValue(flag + QString::number(Sn) + "-topDate", topItem->text(0));
@@ -283,19 +291,20 @@ void EditRecord::saveCurrentYearData() {
 
       if (childCount > 0) {
         for (int j = 0; j < childCount; j++) {
-          if (isBreak) return;
-          Reg.setValue(
-              flag + QString::number(Sn) + "-childTime" + QString::number(j),
-              topItem->child(j)->text(0));
-          Reg.setValue(
-              flag + QString::number(Sn) + "-childAmount" + QString::number(j),
-              topItem->child(j)->text(1));
-          Reg.setValue(
-              flag + QString::number(Sn) + "-childDesc" + QString::number(j),
-              topItem->child(j)->text(2));
-          Reg.setValue(
-              flag + QString::number(Sn) + "-childDetails" + QString::number(j),
-              topItem->child(j)->text(3));
+          if (isBreak)
+            return;
+          Reg.setValue(flag + QString::number(Sn) + "-childTime" +
+                           QString::number(j),
+                       topItem->child(j)->text(0));
+          Reg.setValue(flag + QString::number(Sn) + "-childAmount" +
+                           QString::number(j),
+                       topItem->child(j)->text(1));
+          Reg.setValue(flag + QString::number(Sn) + "-childDesc" +
+                           QString::number(j),
+                       topItem->child(j)->text(2));
+          Reg.setValue(flag + QString::number(Sn) + "-childDetails" +
+                           QString::number(j),
+                       topItem->child(j)->text(3));
         }
       }
     }
@@ -340,7 +349,8 @@ void EditRecord::monthSum() {
   QString strYear = QString::number(QDate::currentDate().year());
   mw_one->m_Report->startReport1(strYear, strMonth);
 
-  while (isReport) QCoreApplication::processEvents();
+  while (isReport)
+    QCoreApplication::processEvents();
 
   btnYearText = str1;
   btnMonthText = str2;
@@ -348,10 +358,10 @@ void EditRecord::monthSum() {
   isDateSection = b2;
 }
 
-QList<int> EditRecord::getExistingYears(QTreeWidget* tw) {
-  QSet<int> yearsSet;  // 先用QSet自动去重
+QList<int> EditRecord::getExistingYears(QTreeWidget *tw) {
+  QSet<int> yearsSet; // 先用QSet自动去重
   for (int i = 0; i < tw->topLevelItemCount(); ++i) {
-    QTreeWidgetItem* item = tw->topLevelItem(i);
+    QTreeWidgetItem *item = tw->topLevelItem(i);
     bool isNumber;
     int year = item->text(3).toInt(&isNumber);
     if (isNumber && year >= DataManager::kDataStartYear) {
@@ -373,7 +383,8 @@ QList<int> EditRecord::getExistingYears(QTreeWidget* tw) {
 }
 
 void EditRecord::updateCategoryCompleterList() {
-  if (!m_categoryModel) return;
+  if (!m_categoryModel)
+    return;
 
   m_categoryModel->setStringList(c_list);
 }
@@ -401,21 +412,22 @@ void EditRecord::on_AddRecord() {
 #endif
 }
 
-bool EditRecord::eventFilter(QObject* watched, QEvent* event) {
+bool EditRecord::eventFilter(QObject *watched, QEvent *event) {
   return QDialog::eventFilter(watched, event);
 }
 
-void EditRecord::openAddEventRecord(const QString& titleText,
-                                    const QString& categoryText,
-                                    const QString& noteText,
-                                    const QString& amountText,
-                                    const QString& timeTagText) {
+void EditRecord::openAddEventRecord(const QString &titleText,
+                                    const QString &categoryText,
+                                    const QString &noteText,
+                                    const QString &amountText,
+                                    const QString &timeTagText) {
 #ifdef Q_OS_ANDROID
-  QString result = c_list.join(u"|==|"_qs);
+  QString result = c_list.join(u"|==|"_s);
   m_Method->setTempSwapStr(result);
 
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
-  if (!activity.isValid()) return;
+  if (!activity.isValid())
+    return;
 
   QJniObject jTitle = QJniObject::fromString(titleText);
   QJniObject jCategory = QJniObject::fromString(categoryText);
@@ -435,26 +447,30 @@ void EditRecord::reeditMainEventData(int index0, int index1) {
   idxMainDate = index0;
   idxMainDateDetail = index1;
 
-  QTreeWidget* tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
-  int maindateIndex = index0;  // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
+  QTreeWidget *tw = mw_one->get_tw(mw_one->ui->tabWidget->currentIndex());
+  int maindateIndex = index0; // getCurrentIndexFromQW(mw_one->ui->qwMainDate);
   int maineventIndex =
-      index1;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
+      index1; // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
 
-  if (maindateIndex < 0) return;
-  if (maineventIndex < 0) return;
+  if (maindateIndex < 0)
+    return;
+  if (maineventIndex < 0)
+    return;
 
   // int maindateCount = getCountFromQW(mw_one->ui->qwMainDate);
   int topIndex = tw->topLevelItemCount() - 1 - maindateIndex;
-  int childIndex = index1;  // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
+  int childIndex = index1; // getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
 
-  if (topIndex < 0) return;
-  if (childIndex < 0) return;
+  if (topIndex < 0)
+    return;
+  if (childIndex < 0)
+    return;
 
   tw->setCurrentItem(tw->topLevelItem(topIndex)->child(childIndex));
   mw_one->on_twItemDoubleClicked();
 }
 
-void EditRecord::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
+void EditRecord::add_Data(QTreeWidget *tw, QString strTime, QString strAmount,
                           QString strCate, QString strDeta) {
   bool isYes = false;
 
@@ -467,8 +483,8 @@ void EditRecord::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
     if (mw_one->getYMD(str) == mw_one->getYMD(strDate)) {
       isYes = true;
 
-      QTreeWidgetItem* topItem = tw->topLevelItem(topc - 1 - i);
-      QTreeWidgetItem* item11 = new QTreeWidgetItem(topItem);
+      QTreeWidgetItem *topItem = tw->topLevelItem(topc - 1 - i);
+      QTreeWidgetItem *item11 = new QTreeWidgetItem(topItem);
       item11->setText(0, strTime);
       if (strAmount == "")
         item11->setText(1, "");
@@ -503,7 +519,7 @@ void EditRecord::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
   }
 
   if (!isYes) {
-    QTreeWidgetItem* topItem = new QTreeWidgetItem;
+    QTreeWidgetItem *topItem = new QTreeWidgetItem;
 
     QStringList lista = strDate.split(" ");
     if (lista.count() == 4) {
@@ -513,7 +529,7 @@ void EditRecord::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
     }
 
     tw->addTopLevelItem(topItem);
-    QTreeWidgetItem* item11 = new QTreeWidgetItem(topItem);
+    QTreeWidgetItem *item11 = new QTreeWidgetItem(topItem);
     item11->setText(0, strTime);
     if (strAmount == "")
       item11->setText(1, "");
@@ -543,7 +559,7 @@ void EditRecord::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
   }
 
   int topCount = tw->topLevelItemCount();
-  QTreeWidgetItem* topItem = tw->topLevelItem(topCount - 1);
+  QTreeWidgetItem *topItem = tw->topLevelItem(topCount - 1);
   tw->setCurrentItem(topItem);
   mw_one->m_MainHelper->sort_childItem(topItem->child(0));
   tw->setCurrentItem(topItem->child(topItem->childCount() - 1));
@@ -555,9 +571,9 @@ void EditRecord::add_Data(QTreeWidget* tw, QString strTime, QString strAmount,
 
 void EditRecord::modify_Data(QString strTime, QString strAmount,
                              QString strCate, QString strDeta) {
-  QTreeWidget* tw = (QTreeWidget*)mw_one->ui->tabWidget->currentWidget();
-  QTreeWidgetItem* item = tw->currentItem();
-  QTreeWidgetItem* topItem = item->parent();
+  QTreeWidget *tw = (QTreeWidget *)mw_one->ui->tabWidget->currentWidget();
+  QTreeWidgetItem *item = tw->currentItem();
+  QTreeWidgetItem *topItem = item->parent();
   QString newtime = strTime;
   if (item->childCount() == 0 && item->parent()->childCount() > 0) {
     item->setText(0, newtime);
@@ -588,7 +604,7 @@ void EditRecord::modify_Data(QString strTime, QString strAmount,
 
     int childRow1 = 0;
     for (int i = 0; i < topItem->childCount(); i++) {
-      QTreeWidgetItem* childItem = topItem->child(i);
+      QTreeWidgetItem *childItem = topItem->child(i);
 
       QString time = childItem->text(0).split(".").at(1);
       time = time.trimmed();
@@ -601,13 +617,16 @@ void EditRecord::modify_Data(QString strTime, QString strAmount,
 
     int newrow;
     int row =
-        idxMainDateDetail;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
-    if (childRow0 - childRow1 == 0) newrow = row;
-    if (childRow0 - childRow1 < 0) newrow = row + childRow1 - childRow0;
-    if (childRow0 - childRow1 > 0) newrow = row - (childRow0 - childRow1);
+        idxMainDateDetail; // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainEvent);
+    if (childRow0 - childRow1 == 0)
+      newrow = row;
+    if (childRow0 - childRow1 < 0)
+      newrow = row + childRow1 - childRow0;
+    if (childRow0 - childRow1 > 0)
+      newrow = row - (childRow0 - childRow1);
 
     int maindateIndex =
-        idxMainDate;  // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainDate);
+        idxMainDate; // m_Method->getCurrentIndexFromQW(mw_one->ui->qwMainDate);
 
     mw_one->reloadMain();
 
@@ -626,7 +645,7 @@ void EditRecord::showCategorySelectDialog() {
   QStringList list1 = c_list;
 
   QJniObject jArrayList("java/util/ArrayList", "()V");
-  for (const QString& item : list1) {
+  for (const QString &item : list1) {
     QJniObject jItem = QJniObject::fromString(item);
     jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
