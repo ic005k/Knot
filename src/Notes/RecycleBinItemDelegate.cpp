@@ -13,14 +13,14 @@ constexpr int BottomMargin = 10;
 constexpr int CheckBoxSize = 18;
 constexpr int CheckBoxGap = 12;
 constexpr int LineGap = 4;
-}  // namespace Layout
+} // namespace Layout
 
-RecycleBinItemDelegate::RecycleBinItemDelegate(QObject* parent)
+RecycleBinItemDelegate::RecycleBinItemDelegate(QObject *parent)
     : QStyledItemDelegate(parent) {}
 
-void RecycleBinItemDelegate::paint(QPainter* painter,
-                                   const QStyleOptionViewItem& option,
-                                   const QModelIndex& index) const {
+void RecycleBinItemDelegate::paint(QPainter *painter,
+                                   const QStyleOptionViewItem &option,
+                                   const QModelIndex &index) const {
   QStyleOptionViewItem opt = option;
   initStyleOption(&opt, index);
 
@@ -39,7 +39,7 @@ void RecycleBinItemDelegate::paint(QPainter* painter,
   // 【关键】背景高亮 ONLY 取决于复选框是否打勾，彻底剥离系统选中状态残留
   if (isChecked) {
     QColor highlightColor = opt.palette.highlight().color();
-    highlightColor.setAlpha(45);  // 稍淡的高亮效果
+    highlightColor.setAlpha(45); // 稍淡的高亮效果
     painter->fillRect(opt.rect, highlightColor);
   } else if (isMouseOver) {
     painter->fillRect(opt.rect, opt.palette.base().color().darker(103));
@@ -57,7 +57,8 @@ void RecycleBinItemDelegate::paint(QPainter* painter,
   QStyleOptionButton checkOpt;
   checkOpt.rect = checkBoxRect;
   checkOpt.state = QStyle::State_Enabled;
-  if (isChecked) checkOpt.state |= QStyle::State_On;
+  if (isChecked)
+    checkOpt.state |= QStyle::State_On;
 
   // 使用系统原生样式绘制复选框，保证跨平台一致性
   QApplication::style()->drawControl(QStyle::CE_CheckBox, &checkOpt, painter);
@@ -86,7 +87,7 @@ void RecycleBinItemDelegate::paint(QPainter* painter,
   painter->drawText(
       titleRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextSingleLine, title);
 
-  // 6. 绘制第二行：文件路径（小号字体，字色稍淡）
+  // 6. 绘制第二行：文件路径（小号字体，字色稍淡，中间省略）
   QFont pathFont = opt.font;
   int pathFontSize = qMax(8, pathFont.pointSize() - 2);
   pathFont.setPointSize(pathFontSize);
@@ -96,18 +97,22 @@ void RecycleBinItemDelegate::paint(QPainter* painter,
   QRect pathRect(textX, pathY, textW, pathFm.height());
 
   painter->setFont(pathFont);
-  // 字色稍淡：使用 text 颜色并降低透明度
   QColor pathColor = opt.palette.text().color();
   pathColor.setAlpha(140);
   painter->setPen(pathColor);
-  painter->drawText(
-      pathRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextSingleLine, path);
+
+  // 使用 elidedText 实现中间省略
+  QString elidedPath =
+      pathFm.elidedText(path, Qt::ElideMiddle, pathRect.width());
+  painter->drawText(pathRect,
+                    Qt::AlignLeft | Qt::AlignVCenter | Qt::TextSingleLine,
+                    elidedPath);
 
   painter->restore();
 }
 
-QSize RecycleBinItemDelegate::sizeHint(const QStyleOptionViewItem& option,
-                                       const QModelIndex& index) const {
+QSize RecycleBinItemDelegate::sizeHint(const QStyleOptionViewItem &option,
+                                       const QModelIndex &index) const {
   QFont titleFont = option.font;
   QFontMetrics titleFm(titleFont);
 
@@ -122,13 +127,13 @@ QSize RecycleBinItemDelegate::sizeHint(const QStyleOptionViewItem& option,
   return QSize(option.rect.width(), qMax(56, height));
 }
 
-bool RecycleBinItemDelegate::editorEvent(QEvent* event,
-                                         QAbstractItemModel* model,
-                                         const QStyleOptionViewItem& option,
-                                         const QModelIndex& index) {
+bool RecycleBinItemDelegate::editorEvent(QEvent *event,
+                                         QAbstractItemModel *model,
+                                         const QStyleOptionViewItem &option,
+                                         const QModelIndex &index) {
   // 处理单击事件，切换复选框状态
   if (event->type() == QEvent::MouseButtonRelease) {
-    QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+    QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
     if (mouseEvent->button() == Qt::LeftButton &&
         option.rect.contains(mouseEvent->pos())) {
       bool currentChecked = index.data(Qt::UserRole).toBool();
@@ -138,7 +143,7 @@ bool RecycleBinItemDelegate::editorEvent(QEvent* event,
       // QListWidget 对 UserRole 的 setData 不会自动触发重绘，必须手动通知
       emit model->dataChanged(index, index, {Qt::UserRole});
 
-      return true;  // 消费事件
+      return true; // 消费事件
     }
   }
   return QStyledItemDelegate::editorEvent(event, model, option, index);
