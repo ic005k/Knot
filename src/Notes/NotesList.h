@@ -142,8 +142,6 @@ public:
   void getAllFiles(const QString &foldPath, QStringList &folds,
                    const QStringList &formats);
 
-  void moveBy(int ud);
-
   QString getCurrentMDFile();
   void init_NotesListMenu(QMenu *mainMenu);
   void init_NoteBookMenu(QMenu *mainMenu);
@@ -287,19 +285,11 @@ public slots:
 
   void on_btnClose_clicked();
 
-  void on_btnDel_clicked();
-
   int on_btnImport_clicked();
 
   void on_btnExport_clicked(int idx);
 
   void on_btnRecycle();
-
-  void on_btnDel_Recycle_clicked();
-
-  void on_btnUp_clicked();
-
-  void on_btnDown_clicked();
 
   void on_actionRelationshipGraph();
 

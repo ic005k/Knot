@@ -90,33 +90,7 @@ void NotesList::newNoteBook(QString name) {
   }
 }
 
-void NotesList::on_actionDel_NoteBook_triggered() {
-  int index = getNoteBookCurrentIndex();
-  if (index < 0)
-    return;
-
-  tw->setCurrentItem(pNoteBookItems.at(index));
-  on_btnDel_clicked();
-
-  loadAllNoteBook();
-
-  int count = getNoteBookCount();
-  for (int i = 0; i < count; i++) {
-    if (tw->currentItem() == pNoteBookItems.at(i)) {
-      index = i;
-      break;
-    }
-  }
-  setNoteBookCurrentIndex(index);
-
-  setNoteLabel();
-
-  saveNotesList();
-
-  if (count == 0) {
-    m_Notes->loadEmptyNote();
-  }
-}
+void NotesList::on_actionDel_NoteBook_triggered() {}
 
 void NotesList::on_actionRename_NoteBook_triggered() {}
 
@@ -154,30 +128,7 @@ void NotesList::newCreateNote() {
   mw_one->on_btnEditNote_clicked();
 }
 
-void NotesList::on_actionDel_Note_triggered() {
-  if (getNotesListCount() == 0)
-    return;
-
-  int notebookIndex = getNoteBookCurrentIndex();
-  int notelistIndex = getNotesListCurrentIndex();
-
-  if (notebookIndex < 0)
-    return;
-  if (notelistIndex < 0)
-    return;
-
-  on_btnDel_clicked();
-
-  int count = getNotesListCount();
-
-  setNoteLabel();
-
-  saveNotesList();
-
-  if (count == 0) {
-    m_Notes->loadEmptyNote();
-  }
-}
+void NotesList::on_actionDel_Note_triggered() {}
 
 void NotesList::on_actionRename_Note_triggered() {}
 
@@ -298,39 +249,9 @@ void NotesList::delNoteRecycleBinItem(const QStringList &list) {
   }
 }
 
-void NotesList::on_actionMoveUp_Note_triggered() {
-  int indexBook = getNoteBookCurrentIndex();
-  int indexNote = getNotesListCurrentIndex();
-  if (indexBook < 0)
-    return;
-  if (indexNote <= 0)
-    return;
+void NotesList::on_actionMoveUp_Note_triggered() {}
 
-  setNoteBookCurrentItem();
-  tw->setCurrentItem(tw->currentItem()->child(indexNote));
-  on_btnUp_clicked();
-
-  clickNoteBook(indexBook);
-  setNotesListCurrentIndex(indexNote - 1);
-}
-
-void NotesList::on_actionMoveDown_Note_triggered() {
-  int indexBook = getNoteBookCurrentIndex();
-  int indexNote = getNotesListCurrentIndex();
-  if (indexBook < 0)
-    return;
-  if (indexNote < 0)
-    return;
-  if (indexNote + 1 == getNotesListCount())
-    return;
-
-  setNoteBookCurrentItem();
-  tw->setCurrentItem(tw->currentItem()->child(indexNote));
-  on_btnDown_clicked();
-
-  clickNoteBook(indexBook);
-  setNotesListCurrentIndex(indexNote + 1);
-}
+void NotesList::on_actionMoveDown_Note_triggered() {}
 
 void NotesList::on_actionImport_Note_triggered() { on_btnImport_clicked(); }
 
@@ -557,39 +478,9 @@ void NotesList::on_actionShareNoteFile() {
   }
 }
 
-void NotesList::on_actionMoveDown_NoteBook_triggered() {
-  int index = getNoteBookCurrentIndex();
+void NotesList::on_actionMoveDown_NoteBook_triggered() {}
 
-  if (index < 0)
-    return;
-
-  if (index == getNoteBookCount() - 1)
-    return;
-
-  setNoteBookCurrentItem();
-  on_btnDown_clicked();
-
-  int newIndex = getNoteBookIndex_twToqml();
-
-  loadAllNoteBook();
-  setNoteBookCurrentIndex(newIndex);
-  clickNoteBook(index);
-}
-
-void NotesList::on_actionMoveUp_NoteBook_triggered() {
-  int index = getNoteBookCurrentIndex();
-  if (index <= 0)
-    return;
-
-  setNoteBookCurrentItem();
-  on_btnUp_clicked();
-
-  int newIndex = getNoteBookIndex_twToqml();
-
-  loadAllNoteBook();
-  setNoteBookCurrentIndex(newIndex);
-  clickNoteBook(index);
-}
+void NotesList::on_actionMoveUp_NoteBook_triggered() {}
 
 void NotesList::on_actionRelationshipGraph() {
   qDebug() << "on_actionRelationshipGraph called, m_graphController ptr:"

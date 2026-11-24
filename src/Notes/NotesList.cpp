@@ -6,7 +6,7 @@
 #include "src/MainWindow.h"
 #include "src/Notes/VectorSearchService.h"
 
-NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
+NotesList::NotesList(QWidget *parent) : QDialog(parent), ui(new Ui::NotesList) {
   ui->setupUi(this);
   this->installEventFilter(this);
 
@@ -65,7 +65,7 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
   //        &NotesList::onSearchTextChanged);
 
   connect(m_Notes->m_NoteManager, &NoteManager::noteMetaChanged, this,
-          [this](const QString& filePath, const NoteMetadata& meta) {
+          [this](const QString &filePath, const NoteMetadata &meta) {
             if (m_vectorSearchService) {
               m_vectorSearchService->registerNoteMeta(filePath, filePath,
                                                       meta.title);
@@ -73,7 +73,7 @@ NotesList::NotesList(QWidget* parent) : QDialog(parent), ui(new Ui::NotesList) {
           });
 
   connect(m_Notes->m_NoteManager, &NoteManager::noteRemoved, this,
-          [this](const QString& filePath) {
+          [this](const QString &filePath) {
             if (m_vectorSearchService) {
               m_vectorSearchService->unregisterNoteMeta(filePath);
             }
@@ -128,12 +128,13 @@ void NotesList::initVectorSearchService() {
 void NotesList::set_memo_dir() {
   QString path = iniDir + "memo/";
   QDir dir(path);
-  if (!dir.exists()) dir.mkdir(path);
+  if (!dir.exists())
+    dir.mkdir(path);
 }
 
-bool NotesList::eventFilter(QObject* watch, QEvent* evn) {
+bool NotesList::eventFilter(QObject *watch, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       return true;
     }
@@ -153,8 +154,9 @@ QString NotesList::getCurrentMDFile() {
 }
 
 void NotesList::renameCurrentItem(QString title) {
-  QTreeWidgetItem* item = tw->currentItem();
-  if (item == NULL) return;
+  QTreeWidgetItem *item = tw->currentItem();
+  if (item == NULL)
+    return;
 
   item->setText(0, title.trimmed());
 
@@ -174,18 +176,19 @@ void NotesList::renameCurrentItem(QString title) {
   resetQML_List();
 }
 
-void NotesList::closeEvent(QCloseEvent* event) {
+void NotesList::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
   mw_one->on_btnBackNoteList_clicked();
 }
 
 void NotesList::saveNotesList() {
-  if (!m_Notes || !m_Notes->m_NoteManager) return;
+  if (!m_Notes || !m_Notes->m_NoteManager)
+    return;
 
   QHash<QString, NoteMetadata> snapshot =
       m_Notes->m_NoteManager->getMetadataSnapshot();
 
-  int version = ++m_saveVersion;  // ✅ 单调递增版本号
+  int version = ++m_saveVersion; // ✅ 单调递增版本号
 
   QtConcurrent::run([this, snapshot, version]() {
     // ✅ 如果已有更新的版本在排队/执行，直接丢弃本次
@@ -195,7 +198,7 @@ void NotesList::saveNotesList() {
     }
 
     QMutexLocker locker(
-        &m_saveMutex);  // ✅ 防止两个过期检查同时通过后并发写文件
+        &m_saveMutex); // ✅ 防止两个过期检查同时通过后并发写文件
 
     // double-check: 拿到锁后再确认一次
     if (version != m_saveVersion.load(std::memory_order_relaxed)) {
@@ -206,16 +209,18 @@ void NotesList::saveNotesList() {
   }).then([this, version]() {
     // ✅ 只有最新版本的回调才更新 UI 状态
     if (version == m_saveVersion.load(std::memory_order_relaxed)) {
-      if (mw_one) mw_one->strLatestModify = tr("Modi Notes List");
+      if (mw_one)
+        mw_one->strLatestModify = tr("Modi Notes List");
       m_Notes->isSaveNotesConfig = true;
     }
   });
 }
 
 // 递归序列化节点：完全沿用原规则，text(1)空=子笔记本，非空=笔记
-QJsonObject NotesList::serializeNotebookItem(QTreeWidgetItem* item) {
+QJsonObject NotesList::serializeNotebookItem(QTreeWidgetItem *item) {
   QJsonObject obj;
-  if (!item) return obj;
+  if (!item)
+    return obj;
 
   // 笔记本基础字段，和原代码一致
   obj["name"] = item->text(0);
@@ -226,7 +231,7 @@ QJsonObject NotesList::serializeNotebookItem(QTreeWidgetItem* item) {
   int childCount = item->childCount();
 
   for (int j = 0; j < childCount; j++) {
-    QTreeWidgetItem* childItem = item->child(j);
+    QTreeWidgetItem *childItem = item->child(j);
     QString strChild1 = childItem->text(1);
     QString md_file = QDir(iniDir).filePath(strChild1);
 
@@ -250,9 +255,10 @@ QJsonObject NotesList::serializeNotebookItem(QTreeWidgetItem* item) {
 }
 
 void NotesList::saveNotesListToFile(
-    const QHash<QString, NoteMetadata>& metadataSnapshot) {
+    const QHash<QString, NoteMetadata> &metadataSnapshot) {
   // 空指针防护
-  if (!twrb || !m_Method) return;
+  if (!twrb || !m_Method)
+    return;
 
   const QString tempFile = QDir(iniDir).filePath("temp.json");
   const QString endFile = QDir(iniDir).filePath("mainnotes.json");
@@ -277,10 +283,10 @@ void NotesList::saveNotesListToFile(
   // ========== 回收站 完全保留原逻辑 ==========
   QJsonArray recycleBinArray;
   if (twrb->topLevelItemCount() > 0) {
-    QTreeWidgetItem* rbTopItem = twrb->topLevelItem(0);
+    QTreeWidgetItem *rbTopItem = twrb->topLevelItem(0);
     int rbChildCount = rbTopItem->childCount();
     for (int j = 0; j < rbChildCount; j++) {
-      QTreeWidgetItem* childItem = rbTopItem->child(j);
+      QTreeWidgetItem *childItem = rbTopItem->child(j);
       QJsonObject rbObj;
       rbObj["name"] = childItem->text(0);
       rbObj["file"] = childItem->text(1);
@@ -292,14 +298,14 @@ void NotesList::saveNotesListToFile(
   // ========== 待删除文件 完全保留原逻辑 ==========
   needDelFiles.removeDuplicates();
   QJsonArray needDelArray;
-  for (const QString& file : std::as_const(needDelFiles)) {
+  for (const QString &file : std::as_const(needDelFiles)) {
     needDelArray.append(file);
   }
   rootObj["needDelNotes"] = needDelArray;
 
   // ========== 使用传入的快照序列化索引（零数据竞争 + 相对路径）==========
   QJsonObject indexData;
-  QDir baseDir1(iniDir);  // ✅ 构造 QDir 对象用于路径转换
+  QDir baseDir1(iniDir); // ✅ 构造 QDir 对象用于路径转换
 
   for (auto it = metadataSnapshot.constBegin();
        it != metadataSnapshot.constEnd(); ++it) {
@@ -317,17 +323,20 @@ void NotesList::saveNotesListToFile(
 
   // 写入临时文件==================================================
   QFile tempF(tempFile);
-  if (tempF.exists()) tempF.remove();
+  if (tempF.exists())
+    tempF.remove();
 
   QJsonDocument doc(rootObj);
-  if (!tempF.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+  if (!tempF.open(QIODevice::WriteOnly | QIODevice::Text))
+    return;
 
   tempF.write(doc.toJson(QJsonDocument::Indented));
   tempF.close();
 
   // 替换正式文件 + 清理临时文件
   m_Method->upIniFile(tempFile, endFile);
-  if (tempF.exists()) tempF.remove();
+  if (tempF.exists())
+    tempF.remove();
 }
 
 /**
@@ -337,19 +346,20 @@ void NotesList::saveNotesListToFile(
  * @param parentRow 当前节点在父级中的行号
  * @param totalNotes 全局笔记总数（引用，累加所有层级笔记）
  */
-void NotesList::loadSubNotebook(const QJsonObject& bookObj,
-                                QTreeWidgetItem* parentItem, int parentRow,
-                                int& totalNotes) {
+void NotesList::loadSubNotebook(const QJsonObject &bookObj,
+                                QTreeWidgetItem *parentItem, int parentRow,
+                                int &totalNotes) {
   Q_UNUSED(parentRow);
 
-  if (bookObj.isEmpty() || !parentItem) return;
+  if (bookObj.isEmpty() || !parentItem)
+    return;
 
   // 创建子笔记本节点，保留原有UI样式
   QString bookName = bookObj["name"].toString();
   QString colorFlag = bookObj["colorFlag"].toString("#FF0000");
   QString notebookID = bookObj["notebookID"].toString();
 
-  QTreeWidgetItem* subBookItem = new QTreeWidgetItem(parentItem);
+  QTreeWidgetItem *subBookItem = new QTreeWidgetItem(parentItem);
   subBookItem->setText(0, bookName);
   subBookItem->setText(2, colorFlag);
   subBookItem->setText(3, notebookID);
@@ -360,18 +370,20 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
   // 遍历子项：区分 笔记 / 子笔记本
   for (int idx = 0; idx < childrenArray.size(); ++idx) {
     QJsonObject childObj = childrenArray[idx].toObject();
-    if (childObj.isEmpty()) continue;
+    if (childObj.isEmpty())
+      continue;
 
     // 规则：存在 file 字段 = 普通笔记；否则 = 子笔记本
     if (childObj.contains("file")) {
       // 加载笔记
       QString noteName = childObj["name"].toString();
       QString noteFile = childObj["file"].toString();
-      if (noteFile.isEmpty()) continue;
+      if (noteFile.isEmpty())
+        continue;
 
-      totalNotes++;  // 笔记计数累加
+      totalNotes++; // 笔记计数累加
 
-      QTreeWidgetItem* noteItem = new QTreeWidgetItem(subBookItem);
+      QTreeWidgetItem *noteItem = new QTreeWidgetItem(subBookItem);
       noteItem->setText(0, noteName);
       noteItem->setText(1, noteFile);
 
@@ -392,15 +404,18 @@ void NotesList::loadSubNotebook(const QJsonObject& bookObj,
 
 void NotesList::initAllFromJson() {
   const QString jsonFile = QDir(iniDir).filePath("mainnotes.json");
-  if (!QFile::exists(jsonFile)) return;
+  if (!QFile::exists(jsonFile))
+    return;
 
   QFile f(jsonFile);
-  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+  if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+    return;
 
   QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
-  f.close();  // ✅ 读完立即关闭，缩短文件句柄占用
+  f.close(); // ✅ 读完立即关闭，缩短文件句柄占用
 
-  if (doc.isNull() || !doc.isObject()) return;
+  if (doc.isNull() || !doc.isObject())
+    return;
 
   QJsonObject rootObj = doc.object();
 
@@ -417,8 +432,9 @@ void NotesList::initAllFromJson() {
   initRecycle(rootObj);
 }
 
-void NotesList::initNotesList(const QJsonObject& rootObj) {
-  if (!tw) return;
+void NotesList::initNotesList(const QJsonObject &rootObj) {
+  if (!tw)
+    return;
 
   tw->clear();
   noteFiles.clear();
@@ -433,7 +449,7 @@ void NotesList::initNotesList(const QJsonObject& rootObj) {
     QString strTopColorFlag = topObj["colorFlag"].toString("#FF0000");
     QString strTopNoteBookID = topObj["notebookID"].toString();
 
-    QTreeWidgetItem* topItem = new QTreeWidgetItem;
+    QTreeWidgetItem *topItem = new QTreeWidgetItem;
     topItem->setText(0, strTop);
     topItem->setText(2, strTopColorFlag);
     topItem->setText(3, strTopNoteBookID);
@@ -441,15 +457,17 @@ void NotesList::initNotesList(const QJsonObject& rootObj) {
     QJsonArray childrenArray = topObj["children"].toArray();
     for (int j = 0; j < childrenArray.size(); ++j) {
       QJsonObject childObj = childrenArray[j].toObject();
-      if (childObj.isEmpty()) continue;
+      if (childObj.isEmpty())
+        continue;
 
       if (childObj.contains("file")) {
         QString str0 = childObj["name"].toString();
         QString str1 = childObj["file"].toString();
-        if (str1.isEmpty()) continue;
+        if (str1.isEmpty())
+          continue;
 
         notesTotal++;
-        QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
+        QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
         childItem->setText(0, str0);
         childItem->setText(1, str1);
 
@@ -477,26 +495,25 @@ void NotesList::initNotesList(const QJsonObject& rootObj) {
   initRecentOpen();
 }
 
-void NotesList::initRecycle(const QJsonObject& rootObj) {
+void NotesList::initRecycle(const QJsonObject &rootObj) {
   twrb->clear();
   recycleFiles.clear();
 
   QJsonArray recycleBinArray = rootObj["recycleBin"].toArray();
 
-  QTreeWidgetItem* topItem = new QTreeWidgetItem;
+  QTreeWidgetItem *topItem = new QTreeWidgetItem;
   topItem->setText(0, tr("Notes Recycle Bin"));
 
-  for (const QJsonValue& val : recycleBinArray) {
+  for (const QJsonValue &val : recycleBinArray) {
     QJsonObject obj = val.toObject();
     QString str0 = obj["name"].toString();
     QString str1 = obj["file"].toString();
 
-    QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
+    QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
     childItem->setText(0, str0);
     childItem->setText(1, str1);
 
-    recycleFiles.append(
-        QDir(iniDir).filePath(str1));  // ✅ 使用 QDir 拼接更安全
+    recycleFiles.append(QDir(iniDir).filePath(str1)); // ✅ 使用 QDir 拼接更安全
   }
 
   twrb->addTopLevelItem(topItem);
@@ -504,28 +521,32 @@ void NotesList::initRecycle(const QJsonObject& rootObj) {
 }
 
 void NotesList::initNotesList() {
-  if (!tw) return;
+  if (!tw)
+    return;
 
   tw->clear();
   noteFiles.clear();
 
   const QString jsonFile = QDir(iniDir).filePath("mainnotes.json");
-  if (!QFile::exists(jsonFile)) return;
+  if (!QFile::exists(jsonFile))
+    return;
 
   QFile f(jsonFile);
-  if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+  if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+    return;
 
   QByteArray data = f.readAll();
   f.close();
 
   QJsonDocument doc = QJsonDocument::fromJson(data);
-  if (doc.isNull() || !doc.isObject()) return;
+  if (doc.isNull() || !doc.isObject())
+    return;
 
   QJsonObject rootObj = doc.object();
   QJsonArray mainNotesArray = rootObj["mainNotes"].toArray();
 
   int nNoteBook = mainNotesArray.size();
-  int notesTotal = 0;  // 全局笔记总数，所有层级统一累加
+  int notesTotal = 0; // 全局笔记总数，所有层级统一累加
 
   // 遍历所有顶层笔记本
   for (int i = 0; i < mainNotesArray.size(); ++i) {
@@ -535,7 +556,7 @@ void NotesList::initNotesList() {
     QString strTopNoteBookID = topObj["notebookID"].toString();
 
     // 创建顶层笔记本节点
-    QTreeWidgetItem* topItem = new QTreeWidgetItem;
+    QTreeWidgetItem *topItem = new QTreeWidgetItem;
     topItem->setText(0, strTop);
     topItem->setText(2, strTopColorFlag);
     topItem->setText(3, strTopNoteBookID);
@@ -546,16 +567,18 @@ void NotesList::initNotesList() {
     // 遍历子项：区分笔记 / 子笔记本
     for (int j = 0; j < childrenArray.size(); ++j) {
       QJsonObject childObj = childrenArray[j].toObject();
-      if (childObj.isEmpty()) continue;
+      if (childObj.isEmpty())
+        continue;
 
       if (childObj.contains("file")) {
         // 普通笔记
         QString str0 = childObj["name"].toString();
         QString str1 = childObj["file"].toString();
-        if (str1.isEmpty()) continue;
+        if (str1.isEmpty())
+          continue;
 
         notesTotal++;
-        QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
+        QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
         childItem->setText(0, str0);
         childItem->setText(1, str1);
 
@@ -591,7 +614,7 @@ void NotesList::initRecycle() {
   if (QFile::exists(jsonFile)) {
     QFile f(jsonFile);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      return;  // 文件不存在或无法打开
+      return; // 文件不存在或无法打开
     }
 
     QByteArray data = f.readAll();
@@ -599,7 +622,7 @@ void NotesList::initRecycle() {
 
     QJsonDocument doc = QJsonDocument::fromJson(data);
     if (doc.isNull()) {
-      return;  // JSON 解析失败
+      return; // JSON 解析失败
     }
 
     QJsonObject rootObj = doc.object();
@@ -608,18 +631,18 @@ void NotesList::initRecycle() {
     QJsonArray recycleBinArray = rootObj["recycleBin"].toArray();
 
     // 创建顶层项
-    QTreeWidgetItem* topItem = new QTreeWidgetItem;
+    QTreeWidgetItem *topItem = new QTreeWidgetItem;
     topItem->setText(0, tr("Notes Recycle Bin"));
 
     // 遍历回收站数组
     for (QJsonArray::const_iterator it = recycleBinArray.cbegin();
          it != recycleBinArray.cend(); ++it) {
-      const QJsonValue& val = *it;  // 明确使用const引用
+      const QJsonValue &val = *it; // 明确使用const引用
       QJsonObject obj = val.toObject();
       QString str0 = obj["name"].toString();
       QString str1 = obj["file"].toString();
 
-      QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
+      QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
       childItem->setText(0, str0);
       childItem->setText(1, str1);
 
@@ -633,7 +656,7 @@ void NotesList::initRecycle() {
     QSettings iniNotes(iniDir + "mainnotes.ini", QSettings::IniFormat);
 
     int i = 0;
-    QTreeWidgetItem* topItem = new QTreeWidgetItem;
+    QTreeWidgetItem *topItem = new QTreeWidgetItem;
     topItem->setText(0, tr("Notes Recycle Bin"));
 
     int childCount =
@@ -649,7 +672,7 @@ void NotesList::initRecycle() {
                         QString::number(j))
                  .toString();
 
-      QTreeWidgetItem* childItem = new QTreeWidgetItem(topItem);
+      QTreeWidgetItem *childItem = new QTreeWidgetItem(topItem);
       childItem->setText(0, str0);
       childItem->setText(1, str1);
       childItem->setIcon(0, QIcon(":/res/n.png"));
@@ -668,110 +691,19 @@ void NotesList::setWinPos() {
   this->setGeometry(x, mw_one->geometry().y(), w, mw_one->height());
 }
 
-void NotesList::moveBy(int ud) {
-  QTreeWidgetItem* item = tw->currentItem();
-
-  if (item == NULL) return;
-
-  if (item->parent() != NULL) {
-    QTreeWidgetItem* parentItem = item->parent();
-    int index = parentItem->indexOfChild(item);
-    if (ud == -1) {
-      if (index - 1 >= 0) {
-        int n = 0;
-        // NoteBook
-        if (item->text(1).isEmpty()) {
-          for (int i = index - 1; i >= 0; i--) {
-            n++;
-            if (parentItem->child(i)->text(1).isEmpty()) {
-              break;
-            }
-          }
-        }
-        // Note
-        if (!item->text(1).isEmpty()) {
-          for (int i = index - 1; i >= 0; i--) {
-            n++;
-            if (!parentItem->child(i)->text(1).isEmpty()) {
-              break;
-            }
-          }
-        }
-
-        parentItem->removeChild(item);
-        parentItem->insertChild(index - n, item);
-        tw->setCurrentItem(item);
-        tw->scrollToItem(item);
-      }
-    }
-    if (ud == 1) {
-      int count = parentItem->childCount() - 1;
-      int n = 0;
-      // NoteBook
-      if (item->text(1).isEmpty()) {
-        for (int i = index + 1; i <= count; i++) {
-          n++;
-          if (parentItem->child(i)->text(1).isEmpty()) {
-            break;
-          }
-        }
-      }
-      // Note
-      if (!item->text(1).isEmpty()) {
-        for (int i = index + 1; i <= count; i++) {
-          n++;
-          if (!parentItem->child(i)->text(1).isEmpty()) {
-            break;
-          }
-        }
-      }
-
-      if (index + n <= count) {
-        parentItem->removeChild(item);
-        parentItem->insertChild(index + n, item);
-        tw->setCurrentItem(item);
-        tw->scrollToItem(item);
-      }
-    }
-  } else {
-    // top item
-    int index = tw->indexOfTopLevelItem(item);
-    if (ud == -1) {
-      if (index - 1 >= 0) {
-        tw->takeTopLevelItem(index);
-        tw->insertTopLevelItem(index - 1, item);
-        tw->setCurrentItem(item);
-        tw->scrollToItem(item);
-        tw->expandAll();
-      }
-    }
-    if (ud == 1) {
-      if (index + 1 <= tw->topLevelItemCount() - 1) {
-        tw->takeTopLevelItem(index);
-        tw->insertTopLevelItem(index + 1, item);
-        tw->setCurrentItem(item);
-        tw->scrollToItem(item);
-        tw->expandAll();
-      }
-    }
-  }
-
-  resetQML_List();
-  saveNotesList();
-}
-
 QStringList NotesList::loadAllNoteBook() {
   // 1. 清空
   pNoteBookItems.clear();
 
-  QStringList result;  // ← 新增：收集结果
+  QStringList result; // ← 新增：收集结果
 
-  if (!tw) return result;
+  if (!tw)
+    return result;
 
   // 2. 遍历顶层节点
   int topCount = tw->topLevelItemCount();
   for (int i = 0; i < topCount; ++i) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
+    QTreeWidgetItem *topItem = tw->topLevelItem(i);
     // 把 result 的引用传进去
     traverseTreeItem(topItem, -1, 0, result);
   }
@@ -782,14 +714,14 @@ QStringList NotesList::loadAllNoteBook() {
   return result;
 }
 
-int NotesList::countMdFilesImages(const QString& dirPath) {
+int NotesList::countMdFilesImages(const QString &dirPath) {
   // 1. 构造QDir对象，指定目标目录路径
   QDir targetDir(dirPath);
 
   // 2. 仅需调用QDir::exists()，即可校验目录是否存在且为有效目录
   // （QDir::exists() 对目录路径返回true，对文件/无效路径返回false）
   if (!targetDir.exists()) {
-    return 0;  // 无效目录（或文件、不存在路径）返回0个文件
+    return 0; // 无效目录（或文件、不存在路径）返回0个文件
   }
 
   // 3. 设置文件筛选规则：仅获取文件（排除子目录、符号链接等）
@@ -802,7 +734,7 @@ int NotesList::countMdFilesImages(const QString& dirPath) {
 
 int NotesList::getSelectedVersionIndex() { return 0; }
 
-void NotesList::readyNotesData(QTreeWidgetItem* item) {
+void NotesList::readyNotesData(QTreeWidgetItem *item) {
   if (!item) {
     return;
   }
@@ -811,7 +743,7 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
   tw->setCurrentItem(item);
 
   QVector<QPair<QString, QString>> uiDataList;
-  QVector<QTreeWidgetItem*> childItems;
+  QVector<QTreeWidgetItem *> childItems;
 
   int child_count = item->childCount();
   // ========== 关键：无子笔记直接返回，避免空容器引发崩溃 ==========
@@ -826,8 +758,9 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
   }
 
   for (int i = 0; i < child_count; ++i) {
-    QTreeWidgetItem* child = item->child(i);
-    if (!child) continue;  // 子节点空指针防护
+    QTreeWidgetItem *child = item->child(i);
+    if (!child)
+      continue; // 子节点空指针防护
 
     // text(1) 为空 = 子笔记本，直接跳过
     if (child->text(1).isEmpty()) {
@@ -863,11 +796,12 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     rawResults.reserve(validNoteCount);
 
     for (int i = 0; i < validNoteCount; ++i) {
-      const auto& uiData = uiDataList[i];
+      const auto &uiData = uiDataList[i];
       QString text0 = uiData.first;
       QString text3 = uiData.second;
 
-      if (text3.isEmpty()) continue;
+      if (text3.isEmpty())
+        continue;
 
       QString file = iniDirCopy + text3;
       // 基础文件接口防护
@@ -888,17 +822,18 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
     return rawResults;
   });
 
-  QFutureWatcher<QVector<RawResult>>* watcher =
+  QFutureWatcher<QVector<RawResult>> *watcher =
       new QFutureWatcher<QVector<RawResult>>(this);
   connect(watcher, &QFutureWatcher<QVector<RawResult>>::finished, this, [=]() {
     // 防止多次触发、对象已销毁
-    if (!watcher) return;
+    if (!watcher)
+      return;
 
     QVector<RawResult> rawResults = watcher->result();
 
     QList<NoteItem> batchItems;
     batchItems.reserve(rawResults.size());
-    foreach (const auto& result, rawResults) {
+    foreach (const auto &result, rawResults) {
       NoteItem item;
       item.text0 = result.text0;
       item.text1 = result.text1;
@@ -914,7 +849,8 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 
     int noteCount = getNotesListCount();
 
-    if (noteCount == 0) return;
+    if (noteCount == 0)
+      return;
 
     if (isSetCurrentMDFilePosition) {
       isSetCurrentMDFilePosition = false;
@@ -971,21 +907,22 @@ void NotesList::readyNotesData(QTreeWidgetItem* item) {
 }
 
 bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
-  if (!QFile::exists(mdFile)) return false;
+  if (!QFile::exists(mdFile))
+    return false;
 
   QString mdFileFlag = QDir(iniDir).relativeFilePath(mdFile);
 
   // ✅ 不再用递归搜索计算 flatNotebookIndex
   // 直接在 pNoteBookItems（UI扁平列表）中查找匹配的笔记本
   int foundFlatIndex = -1;
-  QTreeWidgetItem* foundNotebookItem = nullptr;
-  QTreeWidgetItem* foundNoteItem = nullptr;
+  QTreeWidgetItem *foundNotebookItem = nullptr;
+  QTreeWidgetItem *foundNoteItem = nullptr;
 
   for (int i = 0; i < pNoteBookItems.size(); ++i) {
-    QTreeWidgetItem* bookItem = pNoteBookItems.at(i);
+    QTreeWidgetItem *bookItem = pNoteBookItems.at(i);
     // 在该笔记本的直接子项中查找目标笔记
     for (int j = 0; j < bookItem->childCount(); ++j) {
-      QTreeWidgetItem* child = bookItem->child(j);
+      QTreeWidgetItem *child = bookItem->child(j);
       if (!child->text(1).isEmpty() && child->text(1) == mdFileFlag) {
         foundFlatIndex = i;
         foundNotebookItem = bookItem;
@@ -993,7 +930,8 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
         break;
       }
     }
-    if (foundFlatIndex != -1) break;
+    if (foundFlatIndex != -1)
+      break;
   }
 
   if (foundFlatIndex == -1 || !foundNoteItem) {
@@ -1002,7 +940,8 @@ bool NotesList::setCurrentItemFromMDFile(QString mdFile) {
   }
 
   int noteListIndex = calcNoteIndexInsideBook(foundNotebookItem, foundNoteItem);
-  if (noteListIndex == -1) return false;
+  if (noteListIndex == -1)
+    return false;
 
   qDebug() << "扁平笔记本索引:" << foundFlatIndex
            << "笔记索引:" << noteListIndex;
@@ -1028,16 +967,17 @@ void NotesList::qmlOpenEdit() {}
  * @brief 在指定笔记本节点内部，计算目标笔记在【右侧笔记列表】中的下标
  * 过滤所有子笔记本节点，只统计笔记节点，和readyNotesData筛选逻辑完全对齐
  */
-int NotesList::calcNoteIndexInsideBook(QTreeWidgetItem* bookItem,
-                                       QTreeWidgetItem* targetNote) {
+int NotesList::calcNoteIndexInsideBook(QTreeWidgetItem *bookItem,
+                                       QTreeWidgetItem *targetNote) {
   int idx = 0;
   int childCnt = bookItem->childCount();
   for (int i = 0; i < childCnt; i++) {
-    QTreeWidgetItem* child = bookItem->child(i);
+    QTreeWidgetItem *child = bookItem->child(i);
     if (child->text(1).isEmpty())
-      continue;  // 子笔记本，跳过（和readyNotesData保持一致）
+      continue; // 子笔记本，跳过（和readyNotesData保持一致）
 
-    if (child == targetNote) return idx;
+    if (child == targetNote)
+      return idx;
     idx++;
   }
   return -1;
@@ -1046,29 +986,31 @@ int NotesList::calcNoteIndexInsideBook(QTreeWidgetItem* bookItem,
 void NotesList::on_btnRecently_clicked() { mw_one->on_btnRecentOpen_clicked(); }
 
 void NotesList::on_btnNoteMenu_clicked() {
-  QMenu* menu = new QMenu(this);
+  QMenu *menu = new QMenu(this);
   menu->setAttribute(Qt::WA_DeleteOnClose);
 
-  QAction* actImport = menu->addAction(tr("Import"));
+  QAction *actImport = menu->addAction(tr("Import"));
   connect(actImport, &QAction::triggered, this, [this]() {
     // TODO: Import
     on_btnImport_clicked();
   });
 
-  QAction* actExport = menu->addAction(tr("Export"));
+  QAction *actExport = menu->addAction(tr("Export"));
   connect(actExport, &QAction::triggered, this, [this]() {
     // TODO: Export
     int idx = getNoteListOrgIndex();
-    if (idx == -1) return;
+    if (idx == -1)
+      return;
 
     on_btnExport_clicked(idx);
   });
 
-  QAction* actDelete = menu->addAction(tr("Delete"));
+  QAction *actDelete = menu->addAction(tr("Delete"));
   connect(actDelete, &QAction::triggered, this, [this]() {
     // TODO: Delete
     int idx = getNoteListOrgIndex();
-    if (idx == -1) return;
+    if (idx == -1)
+      return;
 
     QString title = listNoteEntry.at(idx);
 
@@ -1080,9 +1022,9 @@ void NotesList::on_btnNoteMenu_clicked() {
     msgBox.setInformativeText(
         QStringLiteral("<b>%1</b>").arg(title.toHtmlEscaped()));
 
-    QPushButton* trashBtn =
+    QPushButton *trashBtn =
         msgBox.addButton(tr("Move to Trash"), QMessageBox::AcceptRole);
-    QPushButton* cancelBtn =
+    QPushButton *cancelBtn =
         msgBox.addButton(tr("Cancel"), QMessageBox::RejectRole);
 
     msgBox.setDefaultButton(cancelBtn);
@@ -1097,38 +1039,41 @@ void NotesList::on_btnNoteMenu_clicked() {
 
   menu->addSeparator();
 
-  QAction* actExportPdf = menu->addAction(tr("Export to PDF"));
+  QAction *actExportPdf = menu->addAction(tr("Export to PDF"));
   connect(actExportPdf, &QAction::triggered, this, [this]() {
     // TODO: Export to PDF
     int idx = getNoteListOrgIndex();
-    if (idx == -1) return;
+    if (idx == -1)
+      return;
 
     currentMDFile = MyAllNotes.at(idx);
     m_Notes->on_btnPDF_clicked();
   });
 
-  QAction* actRename = menu->addAction(tr("Rename"));
+  QAction *actRename = menu->addAction(tr("Rename"));
   connect(actRename, &QAction::triggered, this, [this]() { execRename(); });
 
-  QAction* actGraph = menu->addAction(tr("Relation Graph"));
+  QAction *actGraph = menu->addAction(tr("Relation Graph"));
   connect(actGraph, &QAction::triggered, this, [this]() {
     // TODO: Relation Graph
     int idx = getNoteListOrgIndex();
-    if (idx == -1) return;
+    if (idx == -1)
+      return;
 
     on_actionRelationshipGraph();
   });
 
-  QAction* actHistory = menu->addAction(tr("Revision History"));
+  QAction *actHistory = menu->addAction(tr("Revision History"));
   connect(actHistory, &QAction::triggered, this, [this]() {
     // TODO: Revision History
     int idx = getNoteListOrgIndex();
-    if (idx == -1) return;
+    if (idx == -1)
+      return;
 
     on_actionModificationHistory();
   });
 
-  QAction* actStats = menu->addAction(tr("Statistics"));
+  QAction *actStats = menu->addAction(tr("Statistics"));
   connect(actStats, &QAction::triggered, this, [this]() {
     // TODO: Statistics
     m_NotesList->on_actionStatistics();
@@ -1139,9 +1084,10 @@ void NotesList::on_btnNoteMenu_clicked() {
   menu->popup(pos);
 }
 
-void NotesList::execRename(const QString& aiSuggestedName) {
+void NotesList::execRename(const QString &aiSuggestedName) {
   int idx = getNoteListOrgIndex();
-  if (idx == -1) return;
+  if (idx == -1)
+    return;
   QString oldName;
   if (aiSuggestedName == "")
     oldName = listNoteEntry.at(idx);
@@ -1150,18 +1096,18 @@ void NotesList::execRename(const QString& aiSuggestedName) {
   // ========== 自定义重命名对话框（含 AI 重命名按钮）==========
   QDialog dlg(this);
   dlg.setWindowTitle(tr("Rename Note"));
-  auto* layout = new QVBoxLayout(&dlg);
-  auto* label = new QLabel(tr("New name:"), &dlg);
+  auto *layout = new QVBoxLayout(&dlg);
+  auto *label = new QLabel(tr("New name:"), &dlg);
   layout->addWidget(label);
-  auto* lineEdit = new QLineEdit(oldName, &dlg);
-  lineEdit->selectAll();  // 默认全选旧名称，方便直接编辑或替换
+  auto *lineEdit = new QLineEdit(oldName, &dlg);
+  lineEdit->selectAll(); // 默认全选旧名称，方便直接编辑或替换
   layout->addWidget(lineEdit);
 
   // 底部按钮布局：AI Rename | Cancel | OK
-  QHBoxLayout* btnLayout = new QHBoxLayout();
-  QPushButton* aiBtn = new QPushButton(tr("✨ AI Rename"));
-  QPushButton* cancelBtn = new QPushButton(tr("Cancel"));
-  QPushButton* okBtn = new QPushButton(tr("OK"));
+  QHBoxLayout *btnLayout = new QHBoxLayout();
+  QPushButton *aiBtn = new QPushButton(tr("✨ AI Rename"));
+  QPushButton *cancelBtn = new QPushButton(tr("Cancel"));
+  QPushButton *okBtn = new QPushButton(tr("OK"));
 
   // 按目标顺序添加控件
   btnLayout->addWidget(aiBtn);
@@ -1186,7 +1132,7 @@ void NotesList::execRename(const QString& aiSuggestedName) {
   connect(okBtn, &QPushButton::clicked, [&]() {
     if (lineEdit->text().trimmed().isEmpty()) {
       QMessageBox::warning(&dlg, tr("Warning"), tr("Name cannot be empty."));
-      return;  // 阻止对话框关闭
+      return; // 阻止对话框关闭
     }
     dlg.accept();
   });
@@ -1200,7 +1146,7 @@ void NotesList::execRename(const QString& aiSuggestedName) {
 
   // 显示对话框并等待用户操作
   if (dlg.exec() != QDialog::Accepted) {
-    return;  // 用户点击了取消，或关闭窗口
+    return; // 用户点击了取消，或关闭窗口
   }
   // 获取最终名称
   QString newName = lineEdit->text().trimmed();
@@ -1221,7 +1167,7 @@ void NotesList::execAiReanme() {
   QFile file(currentMDFile);
   QString text;
   if (file.open(QIODevice::ReadOnly)) {
-    QByteArray buf = file.read(MAX_READ_BYTE);  // 仅读取前128KB
+    QByteArray buf = file.read(MAX_READ_BYTE); // 仅读取前128KB
     file.close();
     text = QString::fromUtf8(buf);
   } else {
@@ -1255,14 +1201,16 @@ void NotesList::on_btnSearch_clicked() { m_NoteSearch->showNoteSearch(); }
 
 void NotesList::on_btnView_clicked() {
   int idx = getNoteListOrgIndex();
-  if (idx == -1) return;
+  if (idx == -1)
+    return;
 
   m_Notes->previewNote();
 }
 
 void NotesList::on_btnEdit_clicked() {
   int idx = getNoteListOrgIndex();
-  if (idx == -1) return;
+  if (idx == -1)
+    return;
 
   m_Notes->openEditUI();
 }
@@ -1294,12 +1242,13 @@ void NotesList::setDataToNoteList() {
   m_stringListModel->setStringList(listNoteEntry);
 }
 
-void NotesList::on_listNotes_itemClicked(QListWidgetItem* item) {
+void NotesList::on_listNotes_itemClicked(QListWidgetItem *item) {
   Q_UNUSED(item);
 }
 
-void NotesList::on_editKeyWord_textChanged(const QString& arg1) {
-  if (!m_proxyModel) return;
+void NotesList::on_editKeyWord_textChanged(const QString &arg1) {
+  if (!m_proxyModel)
+    return;
 
   if (arg1.trimmed().isEmpty()) {
     // 关键词为空时清除过滤，显示全部
@@ -1332,7 +1281,7 @@ int NotesList::getNoteListOrgIndex() const {
   return proxyIndex.row();
 }
 
-void NotesList::on_listNotes_clicked(const QModelIndex& index) {
+void NotesList::on_listNotes_clicked(const QModelIndex &index) {
   Q_UNUSED(index);
 
   int originalRow = getNoteListOrgIndex();

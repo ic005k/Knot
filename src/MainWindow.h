@@ -532,12 +532,6 @@ public slots:
 
   void on_actionShareFile();
 
-  void on_btnUpMove_clicked();
-
-  void on_btnDownMove_clicked();
-
-  void on_btnDelNote_NoteBook_clicked();
-
   void on_btnNoteRecycle_clicked();
 
   void on_btnAIReportAnalysis_clicked();

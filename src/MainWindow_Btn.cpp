@@ -32,14 +32,6 @@ void MainWindow::on_btnTabMoveDown_clicked() {
 
 void MainWindow::on_btnChart() { m_MainHelper->clickBtnChart(); }
 
-void MainWindow::on_btnUpMove_clicked() { m_NotesList->on_btnUp_clicked(); }
-
-void MainWindow::on_btnDownMove_clicked() { m_NotesList->on_btnDown_clicked(); }
-
-void MainWindow::on_btnDelNote_NoteBook_clicked() {
-  m_NotesList->on_btnDel_clicked();
-}
-
 void MainWindow::on_btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
 
