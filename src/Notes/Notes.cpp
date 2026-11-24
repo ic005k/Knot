@@ -272,12 +272,18 @@ void Notes::openEditUI() {
   init();
 
   m_EditSource->send(SCI_SETWRAPMODE, SC_WRAP_NONE, 0);
+
+  // ✅ 加载前：只设字号，遍历所有 style（不碰颜色/字体名）
+  for (int s = 0; s <= STYLE_MAX; ++s)
+    m_EditSource->send(SCI_STYLESETSIZE, s, defaultFontSize);
+
   QByteArray utf8Data = oldText.toUtf8();
   qInfo() << "UTF8 length:" << utf8Data.size()
           << "first bytes:" << utf8Data.left(20).toHex();
   m_EditSource->send(SCI_CLEARALL, 0, 0);
   m_EditSource->send(SCI_ADDTEXT, utf8Data.size(),
                      reinterpret_cast<sptr_t>(utf8Data.constData()));
+
   m_EditSource->send(SCI_SETWRAPMODE, SC_WRAP_WORD, 0);
 
   if (isLocalAIModel)
