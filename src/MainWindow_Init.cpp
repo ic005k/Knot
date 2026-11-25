@@ -2,7 +2,7 @@
 #include "SearchWorker.h"
 #include "defines.h"
 
-extern SearchWorker* m_searchWorker;
+extern SearchWorker *m_searchWorker;
 
 void MainWindow::init_TotalData() {
   int count = mw_one->ui->tabWidget->tabBar()->count();
@@ -18,8 +18,9 @@ void MainWindow::init_TotalData() {
   for (int i = 0; i < TabCount; i++) {
     QString name;
     name = RegTab.value("twName" + QString::number(i)).toString();
-    if (name.trimmed().length() == 0) name = "tab" + QString::number(i + 1);
-    QTreeWidget* tw = init_TreeWidget(name);
+    if (name.trimmed().length() == 0)
+      name = "tab" + QString::number(i + 1);
+    QTreeWidget *tw = init_TreeWidget(name);
 
     QString tabText = RegTab
                           .value("TabName" + QString::number(i),
@@ -32,7 +33,7 @@ void MainWindow::init_TotalData() {
 
   if (TabCount == 0) {
     QString tw_name = m_Notes->getDateTimeStr() + "_" + QString::number(1);
-    QTreeWidget* tw = init_TreeWidget(tw_name);
+    QTreeWidget *tw = init_TreeWidget(tw_name);
 
     QString tabText = tr("Tab") + " " + QString::number(1);
     mw_one->ui->tabWidget->addTab(tw, tabText);
@@ -50,7 +51,7 @@ void MainWindow::init_TotalData() {
 
   mw_one->ui->tabWidget->setCurrentIndex(currentTabIndex);
 
-  QTreeWidget* twCur = (QTreeWidget*)tabData->currentWidget();
+  QTreeWidget *twCur = (QTreeWidget *)tabData->currentWidget();
   readData(twCur);
   mw_one->ui->actionImport_Data->setEnabled(false);
   mw_one->ui->actionExport_Data->setEnabled(false);
@@ -118,7 +119,7 @@ void MainWindow::init_Instance() {
           &MainWindow::onAndroidBackHandle, Qt::QueuedConnection);
 
   connect(m_CloudBackup, &CloudBackup::connectionCheckFinished, this,
-          [this](bool success, const QString& message) {
+          [this](bool success, const QString &message) {
             // 1. 恢复 UI 状态
             ui->btnTestWebDav->setEnabled(true);
 
@@ -132,11 +133,6 @@ void MainWindow::init_Instance() {
 }
 
 void MainWindow::init_Thread_Timer() {
-  timer = new QTimer(this);
-  connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
-
-  timerSyncData = new QTimer(this);
-  connect(timerSyncData, SIGNAL(timeout()), this, SLOT(on_timerSyncData()));
 
   tmeStartRecordAudio = new QTimer(this);
   connect(tmeStartRecordAudio, SIGNAL(timeout()), this,
@@ -166,7 +162,7 @@ void MainWindow::init_Thread_Timer() {
 
   mySearchThread = new SearchThread();
   connect(mySearchThread, &QThread::finished, this, &MainWindow::searchDone,
-          Qt::QueuedConnection);  // 强制切主线程
+          Qt::QueuedConnection); // 强制切主线程
 
   m_workerThread = new QThread(this);
   m_workerThread->setObjectName("SearchWorkerThread");
@@ -178,7 +174,7 @@ void MainWindow::init_Thread_Timer() {
           &QObject::deleteLater);
   // 搜索结束 → 主线程更新UI
   connect(m_searchWorker, &SearchWorker::searchFinished, this,
-          [this](const QList<QString>& results) {
+          [this](const QList<QString> &results) {
             // 主线程安全更新
             resultsList = results;
             m_Method->initSearchResults();
@@ -195,12 +191,13 @@ void MainWindow::init_Thread_Timer() {
           &MainWindow::GetGpsDataThreadDone);
 }
 
-void MainWindow::init_Stats(QTreeWidget* tw) {
+void MainWindow::init_Stats(QTreeWidget *tw) {
   int count = tw->topLevelItemCount();
   int tatol = 0;
   double amount = 0;
   for (int i = 0; i < count; i++) {
-    if (isBreak) break;
+    if (isBreak)
+      break;
     QString str1 = tw->topLevelItem(i)->text(1);
     QString str2 = tw->topLevelItem(i)->text(2);
     tatol = tatol + str1.toInt();
@@ -306,7 +303,7 @@ void MainWindow::init_UIWidget() {
 
   // init textedit toolbar
   textToolbar = new TextEditToolbar(mw_one);
-  EditEventFilter* editFilter = new EditEventFilter(textToolbar, mw_one);
+  EditEventFilter *editFilter = new EditEventFilter(textToolbar, mw_one);
   editFilter->setParent(mw_one);
   m_Method->setLineEditToolBar(mw_one, editFilter);
   m_Method->setTextEditToolBar(mw_one, editFilter);
@@ -347,18 +344,17 @@ void MainWindow::init_UIWidget() {
 
   mw_one->ui->progBar->setMaximumHeight(4);
   mw_one->ui->progBar->hide();
-  mw_one->ui->progBar->setStyleSheet(
-      "QProgressBar{border:0px solid #FFFFFF;"
-      "height:30;"
-      "background:rgba(25,255,25,0);"
-      "text-align:right;"
-      "color:rgb(255,255,255);"
-      "border-radius:0px;}"
+  mw_one->ui->progBar->setStyleSheet("QProgressBar{border:0px solid #FFFFFF;"
+                                     "height:30;"
+                                     "background:rgba(25,255,25,0);"
+                                     "text-align:right;"
+                                     "color:rgb(255,255,255);"
+                                     "border-radius:0px;}"
 
-      "QProgressBar:chunk{"
-      "border-radius:0px;"
-      "background-color:rgba(18,150,219,255);"
-      "}");
+                                     "QProgressBar:chunk{"
+                                     "border-radius:0px;"
+                                     "background-color:rgba(18,150,219,255);"
+                                     "}");
 
   int nIConFontSize;
 #ifdef Q_OS_ANDROID
@@ -395,8 +391,8 @@ void MainWindow::init_UIWidget() {
   }
 }
 
-QTreeWidget* MainWindow::init_TreeWidget(QString name) {
-  QTreeWidget* tw = new QTreeWidget(mw_one);
+QTreeWidget *MainWindow::init_TreeWidget(QString name) {
+  QTreeWidget *tw = new QTreeWidget(mw_one);
   // tw->setFixedHeight(0);
   tw->setObjectName(name);
 
@@ -414,7 +410,7 @@ QTreeWidget* MainWindow::init_TreeWidget(QString name) {
   tw->setFrameShape(QTreeWidget::NoFrame);
   tw->installEventFilter(mw_one);
   tw->viewport()->installEventFilter(mw_one);
-  tw->setUniformRowHeights(true);  // 加快展开速度
+  tw->setUniformRowHeights(true); // 加快展开速度
   connect(tw, &QTreeWidget::itemClicked, mw_one, &MainWindow::on_twItemClicked);
   connect(tw, &QTreeWidget::itemDoubleClicked, mw_one,
           &MainWindow::on_twItemDoubleClicked);
@@ -422,7 +418,7 @@ QTreeWidget* MainWindow::init_TreeWidget(QString name) {
 
   connect(tw->verticalScrollBar(), &QScrollBar::valueChanged, [=]() {});
 
-  QScrollBar* SB = tw->verticalScrollBar();
+  QScrollBar *SB = tw->verticalScrollBar();
   SB->setStyleSheet(m_Method->vsbarStyleSmall);
   tw->setStyleSheet(mw_one->treeStyle);
   tw->setVerticalScrollMode(QTreeWidget::ScrollPerPixel);

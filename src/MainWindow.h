@@ -276,9 +276,6 @@ public:
   bool isFindTextChange = false;
   int findPos = 0;
 
-  QTimer *timer;
-
-  QTimer *timerSyncData;
   QTimer *tmeStartRecordAudio;
 
   static void readData(QTreeWidget *);
@@ -320,8 +317,6 @@ public:
   void gotoEnd();
 
   void startInitReport();
-
-  void startSyncData();
 
   int getMaxDay(QString sy, QString sm);
   void showProgress();
@@ -376,6 +371,43 @@ public:
   void cleanOldBackups(const QString &dirPath, const QString &pattern,
                        int maxKeep);
 
+  void on_btnAISteps_clicked();
+  void on_btnRecentOpen_clicked();
+  void on_btnAIBookExplanation_clicked(const QString &selectedText);
+  void on_btnHome_clicked();
+  void on_btnShowFindNotes_clicked();
+  void on_actionReport_triggered();
+  void on_tabWidget_currentChanged(int index);
+  void GetGpsDataThreadDone();
+  void readEBookDone();
+  void on_actionOneDriveBackupData();
+
+  void on_btnFind_clicked();
+
+  void on_actionFind_triggered();
+  void on_actionPreferences_triggered();
+
+  void on_btnSteps_clicked();
+
+  void on_btnAddTodo_clicked();
+  void on_btnAddTodo_pressed();
+
+  void on_btnOpen_clicked();
+
+  void on_btnReadList_clicked();
+  void on_btnOpenSearchEdit_clicked();
+
+  void on_btnEditNote_clicked();
+
+  void on_btnStartDate_clicked();
+
+  void on_btnEndDate_clicked();
+  void on_btnBackTabRecycle_clicked();
+
+  void on_btnBackSearch_clicked();
+
+  void on_btnBackBakList_clicked();
+
 protected:
   void closeEvent(QCloseEvent *event) override;
   bool eventFilter(QObject *watch, QEvent *evn) override;
@@ -388,36 +420,11 @@ protected:
   void showEvent(QShowEvent *event) override;
 
 public slots:
-  void on_btnAISteps_clicked();
-  void on_btnRecentOpen_clicked();
-  void on_btnAIBookExplanation_clicked(const QString &selectedText);
-
   void safeCloseProgress();
-
-  void on_btnBookCata_clicked();
-
-  void on_btnHome_clicked();
-
-  void GetGpsDataThreadDone();
-
-  void on_hSlider_sliderMoved(int position);
-
-  void readEBookDone();
-
-  void on_btnShowFindNotes_clicked();
-
-  void on_actionOneDriveBackupData();
-
-  void on_actionReport_triggered();
-
-  void on_timerSyncData();
-  void timerUpdate();
 
   void on_actionAdd_Tab_triggered();
 
   void on_actionDel_Tab_triggered();
-
-  void on_tabWidget_currentChanged(int index);
 
   void on_actionExport_Data_triggered();
 
@@ -428,10 +435,6 @@ public slots:
   void on_twItemDoubleClicked();
 
   void on_actionAbout();
-
-  void on_btnFind_clicked();
-
-  void on_actionFind_triggered();
 
   void saveDone();
 
@@ -445,17 +448,6 @@ public slots:
 
   void searchDone();
 
-  void on_actionPreferences_triggered();
-
-  void on_btnSteps_clicked();
-
-  void on_btnAddTodo_clicked();
-  void on_btnAddTodo_pressed();
-
-  void on_btnOpen_clicked();
-
-  void on_btnReadList_clicked();
-
   void on_actionBakFileList();
 
   void on_btnBack_One_clicked();
@@ -467,14 +459,6 @@ public slots:
   void on_btnStartSearch_clicked(const QString &searchStr);
 
   void on_btnChart();
-
-  void on_btnOpenSearchEdit_clicked();
-
-  void on_btnEditNote_clicked();
-
-  void on_btnStartDate_clicked();
-
-  void on_btnEndDate_clicked();
 
   void on_ExecShortcut();
 
@@ -522,12 +506,6 @@ public slots:
 
   void updateGpsMapDone();
 
-  void on_btnBackTabRecycle_clicked();
-
-  void on_btnBackSearch_clicked();
-
-  void on_btnBackBakList_clicked();
-
   void on_actionTabRecycle();
 
   void on_actionShareFile();
@@ -537,6 +515,7 @@ public slots:
   void on_btnAIReportAnalysis_clicked();
 
 private slots:
+  void on_StartRecordAudio();
 
   void onAndroidBackHandle();
 
@@ -581,8 +560,6 @@ private slots:
   void on_btnShareBook_clicked();
 
   void on_btnAddTodo_released();
-
-  void on_StartRecordAudio();
 
   void on_sliderPlayAudio_sliderPressed();
 

@@ -1242,10 +1242,6 @@ void NotesList::setDataToNoteList() {
   m_stringListModel->setStringList(listNoteEntry);
 }
 
-void NotesList::on_listNotes_itemClicked(QListWidgetItem *item) {
-  Q_UNUSED(item);
-}
-
 void NotesList::on_editKeyWord_textChanged(const QString &arg1) {
   if (!m_proxyModel)
     return;

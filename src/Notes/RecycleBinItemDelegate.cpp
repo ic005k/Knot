@@ -74,18 +74,24 @@ void RecycleBinItemDelegate::paint(QPainter *painter,
   QString title = parts.size() > 0 ? parts[0].trimmed() : "";
   QString path = parts.size() > 1 ? parts[1].trimmed() : "";
 
-  // 5. 绘制第一行：笔记名称（正常字体）
+  // 5. 绘制第一行：笔记名称（正常字体，自动换行，不省略）
   QFont titleFont = opt.font;
   titleFont.setBold(false);
   QFontMetrics titleFm(titleFont);
 
   int titleY = rect.top() + Layout::TopMargin;
-  QRect titleRect(textX, titleY, textW, titleFm.height());
+  QRect titleRect(textX, titleY, textW, rect.height() - Layout::TopMargin);
 
   painter->setFont(titleFont);
   painter->setPen(opt.palette.text().color());
-  painter->drawText(
-      titleRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextSingleLine, title);
+  painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap,
+                    title);
+
+  // 【关键】计算标题换行后的实际高度，用于定位第二行
+  QRect titleBound = titleFm.boundingRect(
+      QRect(0, 0, textW, INT_MAX),
+      Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap, title);
+  int titleHeight = qMax(titleFm.height(), titleBound.height());
 
   // 6. 绘制第二行：文件路径（小号字体，字色稍淡，中间省略）
   QFont pathFont = opt.font;
@@ -93,7 +99,7 @@ void RecycleBinItemDelegate::paint(QPainter *painter,
   pathFont.setPointSize(pathFontSize);
   QFontMetrics pathFm(pathFont);
 
-  int pathY = titleY + titleFm.height() + Layout::LineGap;
+  int pathY = titleY + titleHeight + Layout::LineGap;
   QRect pathRect(textX, pathY, textW, pathFm.height());
 
   painter->setFont(pathFont);
@@ -120,10 +126,24 @@ QSize RecycleBinItemDelegate::sizeHint(const QStyleOptionViewItem &option,
   pathFont.setPointSize(qMax(8, pathFont.pointSize() - 2));
   QFontMetrics pathFm(pathFont);
 
-  int height = Layout::TopMargin + titleFm.height() + Layout::LineGap +
+  // 解析数据，获取标题文本
+  QString rawData = index.data(Qt::DisplayRole).toString();
+  QStringList parts = rawData.split("===");
+  QString title = parts.size() > 0 ? parts[0].trimmed() : "";
+
+  // 计算文本区域的实际可用宽度（与 paint 中一致）
+  int textW = option.rect.width() - Layout::LeftPadding - Layout::CheckBoxSize -
+              Layout::CheckBoxGap - Layout::RightPadding;
+
+  // 【关键】使用 boundingRect 计算自动换行后的实际高度
+  QRect titleBound = titleFm.boundingRect(
+      QRect(0, 0, textW, INT_MAX),
+      Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap, title);
+  int titleHeight = qMax(titleFm.height(), titleBound.height());
+
+  int height = Layout::TopMargin + titleHeight + Layout::LineGap +
                pathFm.height() + Layout::BottomMargin;
 
-  // 保证最小高度，避免内容被裁剪
   return QSize(option.rect.width(), qMax(56, height));
 }
 

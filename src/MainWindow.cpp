@@ -111,13 +111,6 @@ void MainWindow::readDataInThread(int ExceptIndex) {
   }
 }
 
-void MainWindow::timerUpdate() {
-  if (QTime::currentTime().toString("hh-mm-ss") == "00-30-00") {
-    m_Preferences->isFontChange = true;
-    this->close();
-  }
-}
-
 void MainWindow::execDeskShortcut() {
   m_ReceiveShare->closeAllChildWindows();
   m_Method->Sleep(50);
@@ -155,18 +148,6 @@ void MainWindow::on_ReceiveShare() {
   }
 }
 
-void MainWindow::on_timerSyncData() {
-  qDebug() << ".......Sync.......";
-  timerSyncData->stop();
-  on_btnSync_clicked();
-}
-
-void MainWindow::startSyncData() {
-  if (initMain)
-    return;
-  timerSyncData->start(10000);
-}
-
 MainWindow::~MainWindow() {
   delete ui;
   mw_one = nullptr;
@@ -187,15 +168,9 @@ MainWindow::~MainWindow() {
   }
 
   // 停止所有定时器
-  timer->stop();
-  timerSyncData->stop();
-
   tmeStartRecordAudio->stop();
 
   // 释放定时器
-  delete timer;
-  delete timerSyncData;
-
   delete tmeStartRecordAudio;
 
   if (m_ainetMgr) {
@@ -986,14 +961,6 @@ QString MainWindow::getYMD(QString date) {
     str = list.at(1) + list.at(2) + list.at(3);
   }
   return str;
-}
-
-void MainWindow::on_hSlider_sliderMoved(int position) {
-  if (isText) {
-  }
-
-  if (isEpub) {
-  }
 }
 
 QString MainWindow::getTabText() {

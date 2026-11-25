@@ -46,8 +46,6 @@ void MainWindow::on_btnRecentOpen_clicked() {
 
 void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
 
-void MainWindow::on_btnBookCata_clicked() { m_Reader->showCatalogue(); }
-
 void MainWindow::on_btnShowBookmark_clicked() {
   m_Reader->showOrHideBookmark();
 }

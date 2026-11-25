@@ -98,6 +98,8 @@ public:
 
   void updateFontSize();
 
+  void on_cboxModel_currentTextChanged(const QString &arg1);
+
 protected:
   void keyReleaseEvent(QKeyEvent *event) override;
 
@@ -105,9 +107,7 @@ protected:
   void closeEvent(QCloseEvent *event) override;
 
 public slots:
-  void on_cboxModel_currentTextChanged(const QString &arg1);
 
-private slots:
   void on_btnBack_clicked();
 
   void on_chkUIFont_clicked();

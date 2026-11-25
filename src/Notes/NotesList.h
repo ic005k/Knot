@@ -263,6 +263,10 @@ public:
 
   void execAiReanme();
 
+  int on_btnImport_clicked();
+
+  void on_btnExport_clicked(int idx);
+
 protected:
   bool eventFilter(QObject *watch, QEvent *evn) override;
 
@@ -282,12 +286,6 @@ public slots:
   void clickNoteList(int index);
 
   void clickNoteBook(int index);
-
-  void on_btnClose_clicked();
-
-  int on_btnImport_clicked();
-
-  void on_btnExport_clicked(int idx);
 
   void on_btnRecycle();
 
@@ -325,8 +323,6 @@ private slots:
   void on_btnEdit_clicked();
 
   void on_btnNoteRecycle_clicked();
-
-  void on_listNotes_itemClicked(QListWidgetItem *item);
 
   void on_editKeyWord_textChanged(const QString &arg1);
 

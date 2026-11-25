@@ -270,9 +270,6 @@ protected:
 
 public slots:
   void on_btnNext_clicked();
-
-  void editVSBarValueChanged();
-
   void on_btnDone_clicked();
 
   void on_btnPic_clicked();
@@ -293,6 +290,8 @@ public slots:
 
   void on_btnPaste_clicked();
 
+  void editVSBarValueChanged();
+
   void editNote();
   void showNoteList();
   void on_editNote();
@@ -305,6 +304,8 @@ signals:
 private slots:
 
   void editSource_textChanged();
+  void onPopupItemClicked(QListWidgetItem *item);
+  void onSearchResultClicked(QListWidgetItem *item);
 
   void on_btnFind_clicked();
 
@@ -317,8 +318,6 @@ private slots:
   void on_btnView_clicked();
 
   void on_editNoteLink_textChanged(const QString &arg1);
-
-  void onPopupItemClicked(QListWidgetItem *item);
 
   void on_btnReplace_clicked();
 
@@ -333,8 +332,6 @@ private slots:
   void on_btnQuestion_clicked();
 
   void on_btnClearQuestion_clicked();
-
-  void onSearchResultClicked(QListWidgetItem *item);
 
   void on_listNoteBook_currentRowChanged(int currentRow);
 
@@ -516,7 +513,8 @@ private:
         QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
             background: transparent;
         })";
-  void wrapSelection(const QString &prefix, const QString &suffix, const QString &defaultText);
+  void wrapSelection(const QString &prefix, const QString &suffix,
+                     const QString &defaultText);
 };
 
 #endif // NOTES_H

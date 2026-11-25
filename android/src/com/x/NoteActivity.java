@@ -627,15 +627,28 @@ public class NoteActivity extends AppCompatActivity {
         boolean dark = ImmersiveUtil.applyRealImmersive(this);
         int textColor = dark ? 0xFFFFFFFF : 0xFF000000;
         String title = isZh ? "删除笔记" : "Delete Note";
-        String msg = isZh
-            ? "笔记将被移到回收站：\n" + noteTitle
-            : "The note will be moved to recycle bin:\n" + noteTitle;
+        String prefix = isZh
+            ? "笔记将被移到回收站：\n"
+            : "The note will be moved to recycle bin:\n";
+
+        android.text.SpannableString spannable =
+            new android.text.SpannableString(prefix + noteTitle);
+        android.text.style.StyleSpan boldSpan =
+            new android.text.style.StyleSpan(android.graphics.Typeface.BOLD);
+        // 加粗范围：前缀长度之后到末尾
+        spannable.setSpan(
+            boldSpan,
+            prefix.length(),
+            prefix.length() + noteTitle.length(),
+            android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+
         String okText = isZh ? "确定" : "OK";
         String cancelText = isZh ? "取消" : "Cancel";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
-        builder.setMessage(msg);
+        builder.setMessage(spannable);
         builder.setPositiveButton(okText, (dialog, which) -> {
             String cmd = "note_delete|==|" + selectedPos;
             PublicJavaCallCpp(cmd);

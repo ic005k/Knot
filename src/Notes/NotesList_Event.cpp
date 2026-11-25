@@ -96,8 +96,6 @@ void NotesList::on_btnBatchDel_Recycle_clicked() {
   saveNotesList();
 }
 
-void NotesList::on_btnClose_clicked() { this->close(); }
-
 void NotesList::moveChildToRecycle(QTreeWidgetItem *parentItem, QString iniDir,
                                    QVector<QString> &delFilesIndex,
                                    QTreeWidget *twrb) {

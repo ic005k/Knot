@@ -5,7 +5,6 @@
 #include "cmark_wrapper.h"
 #include "defines.h"
 #include "src/MainWindow.h"
-#include "src/Notes/ui_Notes.h"
 #include "subscript.h"
 #include "superscript.h"
 
