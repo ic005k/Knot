@@ -58,7 +58,7 @@ void MainWindow::on_actionAdd_Tab_triggered() {
   connect(dlg, &QDialog::rejected, this, [=]() { dlg->deleteLater(); });
 }
 
-void MainWindow::addTab(const QString &customTabText) {
+void MainWindow::addMyTab(const QString &customTabText) {
   int count = mw_one->ui->tabWidget->tabBar()->count();
 
   QString twName = m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);

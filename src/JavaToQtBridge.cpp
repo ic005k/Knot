@@ -760,7 +760,7 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
             if (list.size() == 2) {
               QString name = list.at(1);
               QTimer::singleShot(100, mw_one, [name]() {
-                mw_one->addTab(name);
+                mw_one->addMyTab(name);
                 m_Method->refreshMainEntranceCards();
               });
             }

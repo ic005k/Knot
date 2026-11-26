@@ -361,7 +361,7 @@ public:
 
   void on_btnAIExerciseSuggestions_clicked();
 
-  void addTab(const QString &customTabText);
+  void addMyTab(const QString &customTabText);
 
   void renameTab(const QString &newName);
 
@@ -371,6 +371,21 @@ public:
   void cleanOldBackups(const QString &dirPath, const QString &pattern,
                        int maxKeep);
 
+  void GetGpsDataThreadDone();
+  void readEBookDone();
+
+protected:
+  void closeEvent(QCloseEvent *event) override;
+  bool eventFilter(QObject *watch, QEvent *evn) override;
+  void paintEvent(QPaintEvent *event) override;
+  void changeEvent(QEvent *event) override;
+  void resizeEvent(QResizeEvent *event) override;
+
+  void hideEvent(QHideEvent *event) override;
+
+  void showEvent(QShowEvent *event) override;
+
+public slots:
   void on_btnAISteps_clicked();
   void on_btnRecentOpen_clicked();
   void on_btnAIBookExplanation_clicked(const QString &selectedText);
@@ -378,8 +393,7 @@ public:
   void on_btnShowFindNotes_clicked();
   void on_actionReport_triggered();
   void on_tabWidget_currentChanged(int index);
-  void GetGpsDataThreadDone();
-  void readEBookDone();
+  void safeCloseProgress();
   void on_actionOneDriveBackupData();
 
   void on_btnFind_clicked();
@@ -407,20 +421,6 @@ public:
   void on_btnBackSearch_clicked();
 
   void on_btnBackBakList_clicked();
-
-protected:
-  void closeEvent(QCloseEvent *event) override;
-  bool eventFilter(QObject *watch, QEvent *evn) override;
-  void paintEvent(QPaintEvent *event) override;
-  void changeEvent(QEvent *event) override;
-  void resizeEvent(QResizeEvent *event) override;
-
-  void hideEvent(QHideEvent *event) override;
-
-  void showEvent(QShowEvent *event) override;
-
-public slots:
-  void safeCloseProgress();
 
   void on_actionAdd_Tab_triggered();
 
