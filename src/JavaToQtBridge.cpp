@@ -67,7 +67,7 @@ static void JavaNotify_8() {
 static void JavaNotify_10() {
   // Open Book
   QMetaObject::invokeMethod(
-      qApp, []() { mw_one->on_btnOpen_clicked(); }, Qt::QueuedConnection);
+      qApp, []() { m_Reader->btnOpen_clicked(); }, Qt::QueuedConnection);
 
   qDebug() << "C++ JavaNotify_10";
 }
@@ -472,7 +472,7 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
               if (list.count() == 2) {
                 QString selectedText = list.at(1);
                 m_Reader->isAIReaderExplanation = true;
-                mw_one->on_btnAIBookExplanation_clicked(selectedText);
+                mw_one->btnAIBookExplanation_clicked(selectedText);
               }
             });
           }
@@ -714,7 +714,7 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
 
           if (strType == "topbtn_upload") {
             QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->ui->btnSync->click(); });
+                               [=]() { mw_one->ui->btnWebDAVBackup->click(); });
           }
 
           if (strType == "topbtn_search") {
@@ -1264,7 +1264,7 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
 
           if (strType.startsWith("note_favorite")) {
             QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->on_btnRecentOpen_clicked(); });
+                               [=]() { mw_one->btnRecentOpen_clicked(); });
           }
 
           if (strType.startsWith("note_open_recycle")) {
@@ -1321,7 +1321,7 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
 
           if (strType == "step_ai_analyse") {
             QTimer::singleShot(100, mw_one,
-                               []() { mw_one->on_btnAISteps_clicked(); });
+                               []() { mw_one->btnAISteps_clicked(); });
           }
 
           // txt to epub

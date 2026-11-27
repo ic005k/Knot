@@ -37,7 +37,7 @@ bool Reader::eventFilter(QObject *obj, QEvent *evn) {
 
 void Reader::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event); }
 
-void Reader::on_btnOpen_clicked() {
+void Reader::btnOpen_clicked() {
   if (isAndroid) {
     m_Method->openFilePicker();
     return;

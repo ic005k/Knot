@@ -126,7 +126,7 @@ void MainWindow::on_ExecShortcut() {
   if (keyType == "reader")
     m_Reader->ContinueReading();
   if (keyType == "add")
-    mw_one->ui->btnAdd->click();
+    mw_one->on_btnAdd_clicked();
   if (keyType == "exercise") {
     // QTimer::singleShot(100, this, []() { mw_one->ui->btnSteps->click(); });
     mw_one->ui->btnSteps->click();
@@ -902,23 +902,7 @@ QTreeWidget *MainWindow::get_tw(int tabIndex) {
   return tw;
 }
 
-void MainWindow::paintEvent(QPaintEvent *event) {
-  Q_UNUSED(event);
-
-  // 获取背景色
-  QPalette pal = mw_one->ui->btnFind->palette();
-  QBrush brush = pal.window();
-  int c_red = brush.color().red();
-
-  if (c_red != red) {
-    red = c_red;
-    if (red < 55) {
-    }
-
-    else {
-    }
-  }
-}
+void MainWindow::paintEvent(QPaintEvent *event) { Q_UNUSED(event); }
 
 void MainWindow::startInitReport() {
   showProgress();

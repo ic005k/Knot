@@ -32,7 +32,7 @@ void MainWindow::on_btnTabMoveDown_clicked() {
 
 void MainWindow::on_btnChart() { m_MainHelper->clickBtnChart(); }
 
-void MainWindow::on_btnRecentOpen_clicked() {
+void MainWindow::btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
 
   m_Notes->refreshRecentOpenByCounter();
@@ -65,8 +65,6 @@ void MainWindow::on_btnBackReaderSet_clicked() {
 
 void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
 
-void MainWindow::on_btnAddTodo_clicked() { m_Todo->AddTodoText(); }
-
 void MainWindow::on_btnAddTodo_pressed() {
   m_Todo->isRecordVoice = false;
   tmeStartRecordAudio->start(750);
@@ -78,13 +76,6 @@ void MainWindow::on_btnAddTodo_released() {
 }
 
 void MainWindow::on_btnSelGpsDate_clicked() { m_Steps->selGpsListYearMonth(); }
-
-void MainWindow::on_btnBackBakList_clicked() {
-  if (!isAndroid) {
-    mw_one->ui->frameMain->show();
-  } else
-    m_Method->openMainEntranceWindow();
-}
 
 void MainWindow::on_btnBackTabRecycle_clicked() {
   if (!isAndroid) {
@@ -141,21 +132,10 @@ void MainWindow::on_btnFindNotes_clicked(const QString &kw) {
   m_NotesList->startFind(str);
 }
 
-void MainWindow::on_btnShowFindNotes_clicked() { m_NotesList->showFindNotes(); }
-
 void MainWindow::on_btnOkType_clicked() { m_CategoryList->on_btnOk_clicked(); }
 
 void MainWindow::on_btnDelType_clicked() {
   m_CategoryList->on_btnDel_clicked();
-}
-
-void MainWindow::on_btnBackSearch_clicked() {
-  clearWidgetFocus();
-
-  if (!isAndroid) {
-    mw_one->ui->frameMain->show();
-  } else
-    m_Method->openMainEntranceWindow();
 }
 
 void MainWindow::on_btnStartSearch_clicked(const QString &searchStr) {
@@ -262,7 +242,7 @@ Rules:
   aiChatQuery(fullPrompt);
 }
 
-void MainWindow::on_btnAIBookExplanation_clicked(const QString &selectedText) {
+void MainWindow::btnAIBookExplanation_clicked(const QString &selectedText) {
   QString trimText = selectedText.trimmed();
   if (trimText.isEmpty()) {
     return;
@@ -315,7 +295,7 @@ Mandatory rules that must be fully followed without omission:
   aiChatQuery(fullPrompt);
 }
 
-void MainWindow::on_btnAISteps_clicked() {
+void MainWindow::btnAISteps_clicked() {
   QString text = m_Steps->ai_stepstext;
   QString trimText = text.trimmed();
   if (trimText.isEmpty()) {
@@ -397,32 +377,12 @@ Consumption records:
   aiChatQuery(fullPrompt);
 }
 
-void MainWindow::on_btnSync_clicked() {
-  if (!mw_one->ui->btnReader->isEnabled() ||
-      !mw_one->ui->btnWebDAVBackup->isEnabled() ||
-      !mw_one->ui->btnWebDAVRestore->isEnabled())
-    return;
-
-  mw_one->ui->btnWebDAVBackup->click();
-}
-
 void MainWindow::on_btnBackDir_clicked() { m_Reader->backDir(); }
 
 void MainWindow::on_btnWebDAVBackup_clicked() { m_CloudBackup->startBakData(); }
 
 void MainWindow::on_btnWebDAVRestore_clicked() {
   m_CloudBackup->webDAVRestoreData();
-}
-
-void MainWindow::on_btnOpenSearchEdit_clicked() {
-  QString mdFile = m_NotesList->getSearchResultQmlFile();
-  if (!QFile::exists(mdFile))
-    return;
-  isOpenSearchResult = true;
-  currentMDFile = mdFile;
-
-  on_btnEditNote_clicked();
-  m_NotesList->setCurrentItemFromMDFile(mdFile);
 }
 
 void MainWindow::on_btnOpenSearchView_clicked() {
@@ -533,14 +493,6 @@ void MainWindow::on_btnNewNote_clicked() {
   m_NotesList->on_actionAdd_Note_triggered();
 }
 
-void MainWindow::on_btnOpen_clicked() {
-  m_Reader->saveReader("", false);
-  m_Reader->savePageVPos();
-
-  m_Reader->closeSelText();
-  m_Reader->on_btnOpen_clicked();
-}
-
 void MainWindow::on_btnEditNote_clicked() { m_Notes->openEditUI(); }
 
 void MainWindow::on_btnTestWebDav_clicked() {
@@ -548,31 +500,12 @@ void MainWindow::on_btnTestWebDav_clicked() {
   m_CloudBackup->checkWebDAVConnectionAsync();
 }
 
-void MainWindow::on_btnFind_clicked() { mw_one->ui->frameMain->hide(); }
-
-void MainWindow::on_btnHome_clicked() {
+void MainWindow::btnHome_clicked() {
   if (isAndroid) {
     m_Method->openMainEntranceWindow();
   }
 
   mw_one->ui->lblStats->hide();
-}
-
-void MainWindow::on_btnReadList_clicked() {
-  m_Reader->saveReader("", false);
-  m_Reader->savePageVPos();
-
-  if (isAndroid)
-    m_Reader->closeMyPDF();
-
-  m_Reader->closeSelText();
-
-  if (mw_one->ui->frameMain->isVisible())
-    mw_one->ui->frameMain->hide();
-
-  m_Reader->showBookListWin();
-
-  m_Reader->getReadList();
 }
 
 void MainWindow::on_btnMenu_clicked() {

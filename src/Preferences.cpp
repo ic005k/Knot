@@ -257,14 +257,11 @@ void Preferences::initOptions() {
 #else
 
   if (!devMode) {
-    mw_one->ui->btnHome->hide();
+
     mw_one->ui->tabWidget->hide();
     mw_one->ui->btnSteps->hide();
 
     mw_one->ui->btnReader->hide();
-    mw_one->ui->btnAdd->hide();
-    mw_one->ui->btnDel->hide();
-    mw_one->ui->btnFind->hide();
 
     mw_one->ui->lblStats->hide();
 

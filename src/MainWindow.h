@@ -386,30 +386,22 @@ protected:
   void showEvent(QShowEvent *event) override;
 
 public slots:
-  void on_btnAISteps_clicked();
-  void on_btnRecentOpen_clicked();
-  void on_btnAIBookExplanation_clicked(const QString &selectedText);
-  void on_btnHome_clicked();
-  void on_btnShowFindNotes_clicked();
+  void btnAISteps_clicked();
+  void btnRecentOpen_clicked();
+  void btnAIBookExplanation_clicked(const QString &selectedText);
+  void btnHome_clicked();
+
   void on_actionReport_triggered();
   void on_tabWidget_currentChanged(int index);
   void safeCloseProgress();
   void on_actionOneDriveBackupData();
-
-  void on_btnFind_clicked();
 
   void on_actionFind_triggered();
   void on_actionPreferences_triggered();
 
   void on_btnSteps_clicked();
 
-  void on_btnAddTodo_clicked();
   void on_btnAddTodo_pressed();
-
-  void on_btnOpen_clicked();
-
-  void on_btnReadList_clicked();
-  void on_btnOpenSearchEdit_clicked();
 
   void on_btnEditNote_clicked();
 
@@ -417,10 +409,6 @@ public slots:
 
   void on_btnEndDate_clicked();
   void on_btnBackTabRecycle_clicked();
-
-  void on_btnBackSearch_clicked();
-
-  void on_btnBackBakList_clicked();
 
   void on_actionAdd_Tab_triggered();
 
@@ -520,8 +508,6 @@ private slots:
   void onAndroidBackHandle();
 
   void on_btnMenu_clicked();
-
-  void on_btnSync_clicked();
 
   void on_btnDelBakFile_clicked();
 

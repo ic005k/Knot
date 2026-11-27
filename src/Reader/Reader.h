@@ -134,7 +134,7 @@ public:
 
   static QString processHtml(QString htmlFile, bool isWriteFile);
 
-  void on_btnOpen_clicked();
+  void btnOpen_clicked();
 
   void setAni();
   void loadQMLText(QString str);

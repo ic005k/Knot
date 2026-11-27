@@ -253,11 +253,6 @@ void Notes::on_btnView_clicked() {
   previewNote();
 }
 
-// 搜索
-void Notes::on_btnFind_clicked() {
-  if (ui->editFind->text().trimmed() == "")
-    return;
-}
 void Notes::on_btnPrev_clicked() {
   ui->editFind->setFocus();
   searchPrevious();

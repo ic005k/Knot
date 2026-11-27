@@ -213,20 +213,10 @@ void MainWindow::init_ButtonStyle() {
 
   // 主按钮
   setToolButtonAnimation(mw_one->ui->btnMenu, true);
-  setToolButtonAnimation(mw_one->ui->btnHome, true);
   setToolButtonAnimation(mw_one->ui->btnReader, true);
   setToolButtonAnimation(mw_one->ui->btnTodo, true);
   setToolButtonAnimation(mw_one->ui->btnSteps, true);
   setToolButtonAnimation(mw_one->ui->btnNotes, true);
-  setToolButtonAnimation(mw_one->ui->btnAdd, true);
-  setToolButtonAnimation(mw_one->ui->btnDel, true);
-
-  setToolButtonAnimation(mw_one->ui->btnSync, true);
-  setToolButtonAnimation(mw_one->ui->btnFind, true);
-
-  if (isDark) {
-  } else {
-  }
 }
 
 void MainWindow::init_Theme() {
@@ -236,19 +226,12 @@ void MainWindow::init_Theme() {
     mw_one->ui->btnSteps->setIcon(QIcon(":/res/steps.svg"));
     mw_one->ui->btnNotes->setIcon(QIcon(":/res/note.svg"));
 
-    mw_one->ui->btnFind->setIcon(QIcon(":/res/find.svg"));
-
     mw_one->ui->btnMenu->setIcon(QIcon(":/res/mainmenu.svg"));
-    mw_one->ui->btnHome->setIcon(QIcon(":/res/home.svg"));
-    mw_one->ui->btnAdd->setIcon(QIcon(":/res/additem.svg"));
-    mw_one->ui->btnDel->setIcon(QIcon(":/res/delitem.svg"));
-    mw_one->ui->btnSync->setIcon(QIcon(":/res/upload.svg"));
 
     m_Steps->m_speedometer->setBackgroundColor(QColor(0xF0, 0xF0, 0xF0));
     m_Steps->m_speedometer->updateThemeColors();
 
   } else {
-    mw_one->ui->btnFind->setIcon(QIcon(":/res/find_l.png"));
 
     mw_one->ui->btnReader->setIcon(QIcon(":/res/reader_l.svg"));
     mw_one->ui->btnTodo->setIcon(QIcon(":/res/todo_l.png"));
@@ -256,10 +239,6 @@ void MainWindow::init_Theme() {
     mw_one->ui->btnNotes->setIcon(QIcon(":/res/note_l.svg"));
 
     mw_one->ui->btnMenu->setIcon(QIcon(":/res/mainmenu_l.svg"));
-    mw_one->ui->btnHome->setIcon(QIcon(":/res/home_l.svg"));
-    mw_one->ui->btnAdd->setIcon(QIcon(":/res/additem_l.svg"));
-    mw_one->ui->btnDel->setIcon(QIcon(":/res/delitem_l.svg"));
-    mw_one->ui->btnSync->setIcon(QIcon(":/res/upload_l.svg"));
 
     m_Steps->m_speedometer->setBackgroundColor(QColor(0x32, 0x32, 0x32));
     m_Steps->m_speedometer->updateThemeColors();
@@ -311,8 +290,6 @@ void MainWindow::init_UIWidget() {
   mw_one->ui->lblVectorStatus->setText("");
   mw_one->ui->lblVectorStatus->hide();
 
-  mw_one->ui->btnSync->hide();
-
   mw_one->ui->menubar->hide();
   mw_one->ui->statusbar->hide();
 
@@ -321,7 +298,6 @@ void MainWindow::init_UIWidget() {
   mw_one->ui->frameMain->layout()->setSpacing(5);
 
   mw_one->ui->frameOne->hide();
-  mw_one->ui->btnDel->hide();
 
   mw_one->ui->twCloudBackup->setCurrentIndex(0);
 
@@ -372,13 +348,6 @@ void MainWindow::init_UIWidget() {
 
   f.setPointSize(nIConFontSize + 0);
   mw_one->ui->btnMenu->setFont(f);
-  mw_one->ui->btnHome->setFont(f);
-  mw_one->ui->btnAdd->setFont(f);
-  mw_one->ui->btnDel->setFont(f);
-  mw_one->ui->btnSync->setFont(f);
-  mw_one->ui->btnFind->setFont(f);
-
-  mw_one->ui->btnFind->setFont(f);
 
   f.setPointSize(fontSize - 2);
   f.setBold(true);

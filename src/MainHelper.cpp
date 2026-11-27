@@ -13,7 +13,7 @@ void MainHelper::selectTab() {
 
   mw_one->m_EditRecord->saveCurrentValue();
 
-  mw_one->ui->btnHome->click();
+  mw_one->btnHome_clicked();
   isSelectTab = true;
 }
 

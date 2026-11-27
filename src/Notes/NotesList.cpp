@@ -983,7 +983,7 @@ int NotesList::calcNoteIndexInsideBook(QTreeWidgetItem *bookItem,
   return -1;
 }
 
-void NotesList::on_btnRecently_clicked() { mw_one->on_btnRecentOpen_clicked(); }
+void NotesList::on_btnRecently_clicked() { mw_one->btnRecentOpen_clicked(); }
 
 void NotesList::on_btnNoteMenu_clicked() {
   QMenu *menu = new QMenu(this);

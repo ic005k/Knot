@@ -52,7 +52,6 @@ Notes::Notes(QWidget *parent) : QDialog(parent), ui(new Ui::Notes) {
 
   ui->btnColor->hide();
   ui->lblCount->hide();
-  ui->btnFind->hide();
   ui->editFind->setMinimumWidth(65);
   if (isLocalAIModel)
     ui->btnAILink->show();
@@ -1030,21 +1029,3 @@ void Notes::on_listNoteList_currentRowChanged(int currentRow) {
   m_NotesList->clickNoteList(currentRow);
   openEditUI();
 }
-
-void Notes::on_listNoteBook_itemClicked(QListWidgetItem *item) {}
-
-void Notes::on_btnNBMenu_clicked() {}
-
-void Notes::on_btnNoteMenu_clicked() {}
-
-void Notes::on_btnNewNote_clicked() {}
-
-void Notes::on_btnSearch_clicked() {}
-
-void Notes::on_btnDel_clicked() {}
-
-void Notes::on_btnMove_clicked() {}
-
-void Notes::on_btnRename_clicked() {}
-
-void Notes::on_btnRecycleBin_clicked() {}

@@ -25,7 +25,7 @@ void MainWindow::on_actionAbout() {
   m_AboutThis->show();
 }
 
-void MainWindow::on_actionFind_triggered() { on_btnFind_clicked(); }
+void MainWindow::on_actionFind_triggered() {}
 
 void MainWindow::on_actionAdd_Tab_triggered() {
   int count = mw_one->ui->tabWidget->tabBar()->count();
