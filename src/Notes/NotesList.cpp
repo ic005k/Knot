@@ -178,7 +178,7 @@ void NotesList::renameCurrentItem(QString title) {
 
 void NotesList::closeEvent(QCloseEvent *event) {
   Q_UNUSED(event);
-  mw_one->on_btnBackNoteList_clicked();
+  mw_one->backNoteList();
 }
 
 void NotesList::saveNotesList() {

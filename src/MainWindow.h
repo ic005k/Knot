@@ -391,11 +391,9 @@ public slots:
 
   void on_btnSteps_clicked();
 
-  void on_btnAddTodo_pressed();
+  void btnStartDate_clicked();
 
-  void on_btnStartDate_clicked();
-
-  void on_btnEndDate_clicked();
+  void btnEndDate_clicked();
 
   void on_actionExport_Data_triggered();
 
@@ -425,27 +423,19 @@ public slots:
 
   void on_btnNotes_clicked();
 
-  void on_btnStartSearch_clicked(const QString &searchStr);
+  void btnStartSearch_clicked(const QString &searchStr);
 
   void on_ExecShortcut();
 
-  void on_btnFindNotes_clicked(const QString &kw);
+  void backNoteList();
 
-  void on_btnBackNoteList_clicked();
-
-  void on_btnAdd_clicked();
-
-  void on_btnDel_clicked();
-
-  void on_btnYear_clicked();
-
-  void on_btnMonth_clicked();
+  void btnDel_clicked();
 
   void closeProgress();
 
   void updateGpsMapDone();
 
-  void on_btnAIReportAnalysis_clicked();
+  void btnAIReportAnalysis_clicked();
 
 private slots:
   void on_StartRecordAudio();
@@ -457,12 +447,6 @@ private slots:
   void on_ReceiveShare();
 
   void on_CloseProgressBar();
-
-  void on_btnAddTodo_released();
-
-  void on_sliderPlayAudio_sliderPressed();
-
-  void on_sliderPlayAudio_sliderReleased();
 
   void on_btnWebDAVBackup_clicked();
 
@@ -487,10 +471,6 @@ private slots:
   void on_editPassword_textChanged(const QString &arg1);
 
   void on_editValidate_textChanged(const QString &arg1);
-
-  void on_editAutoStopTTS_textChanged(const QString &arg1);
-
-  void on_btnOpenSearchView_clicked();
 
   void on_btnReader_clicked();
 

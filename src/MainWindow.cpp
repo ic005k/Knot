@@ -126,7 +126,7 @@ void MainWindow::on_ExecShortcut() {
   if (keyType == "reader")
     m_Reader->ContinueReading();
   if (keyType == "add")
-    mw_one->on_btnAdd_clicked();
+    mw_one->m_EditRecord->on_AddRecord();
   if (keyType == "exercise") {
     // QTimer::singleShot(100, this, []() { mw_one->ui->btnSteps->click(); });
     mw_one->ui->btnSteps->click();
@@ -627,7 +627,7 @@ void MainWindow::clickMainTab(int index) {
   mw_one->ui->frameMain->hide();
 
   if (isSelectTab) {
-    on_btnAdd_clicked();
+    m_EditRecord->on_AddRecord();
     m_EditRecord->setCurrentValue();
   } else {
     m_Method->openMyEventWindow();
@@ -924,18 +924,6 @@ void MainWindow::on_StartRecordAudio() {
   m_Todo->startRecordVoice();
 }
 
-void MainWindow::on_sliderPlayAudio_sliderPressed() {
-  m_Todo->tmePlayProgress->stop();
-  m_Method->pausePlay();
-}
-
-void MainWindow::on_sliderPlayAudio_sliderReleased() {
-  QString strPos = QString::number(90);
-  m_Method->seekTo(strPos);
-  m_Method->startPlay();
-  m_Todo->tmePlayProgress->start(m_Todo->nInterval);
-}
-
 void MainWindow::on_cboxWebDAV_currentTextChanged(const QString &arg1) {
   m_CloudBackup->changeComBoxWebDAV(arg1);
 }
@@ -979,11 +967,6 @@ void MainWindow::on_editPassword_textChanged(const QString &arg1) {
 
 void MainWindow::on_editValidate_textChanged(const QString &arg1) {
   m_Preferences->on_editValidate_textChanged(arg1);
-}
-
-void MainWindow::on_editAutoStopTTS_textChanged(const QString &arg1) {
-  if (arg1.length() > 0)
-    m_Reader->setAutoStopPlayTime();
 }
 
 void MainWindow::showEvent(QShowEvent *event) { QMainWindow::showEvent(event); }

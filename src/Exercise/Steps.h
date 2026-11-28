@@ -259,8 +259,6 @@ private slots:
 
   void refreshSteps();
 
-  void on_btnBack_clicked();
-
   void on_btnGPS_clicked();
 
   void on_btnPause_clicked();

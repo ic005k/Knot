@@ -7,14 +7,14 @@
 bool isGpsTest = false;
 
 // 常量完全同步Java优化版，无任何修改
-const double PI = 3.14159265358979323846;            // 与Java Math.PI一致
-const double EARTH_RADIUS_TENCENT = 6378137.0;       // 腾讯官方地球半径
-const double AXIS_TENCENT = 0.00669342162296594323;  // 官方轴长系数
-const double PRECISION_COMPENSATION = 0.0000001;     // 精度补偿值
+const double PI = 3.14159265358979323846;           // 与Java Math.PI一致
+const double EARTH_RADIUS_TENCENT = 6378137.0;      // 腾讯官方地球半径
+const double AXIS_TENCENT = 0.00669342162296594323; // 官方轴长系数
+const double PRECISION_COMPENSATION = 0.0000001;    // 精度补偿值
 const double GCJ02_LON_MIN =
-    73.66;  // 同步Java的73.66（原C++是73.55，关键差异点）
+    73.66; // 同步Java的73.66（原C++是73.55，关键差异点）
 const double GCJ02_LON_MAX =
-    135.05;  // 同步Java的135.05（原C++是135.08，关键差异点）
+    135.05; // 同步Java的135.05（原C++是135.08，关键差异点）
 const double GCJ02_LAT_MIN = 3.86;
 const double GCJ02_LAT_MAX = 53.55;
 
@@ -43,10 +43,11 @@ inline double transformLng(double x, double y) {
   return ret;
 }
 
-QVector<GPSCoordinate> gaussianFilter(const QVector<GPSCoordinate>& rawData,
+QVector<GPSCoordinate> gaussianFilter(const QVector<GPSCoordinate> &rawData,
                                       int windowSize, double sigma);
-QVector<GPSCoordinate> detectAndCorrectOutliers(
-    const QVector<GPSCoordinate>& data, double threshold, double altThreshold);
+QVector<GPSCoordinate>
+detectAndCorrectOutliers(const QVector<GPSCoordinate> &data, double threshold,
+                         double altThreshold);
 double calculateHaversineDistance(double lat1, double lon1, double lat2,
                                   double lon2);
 
@@ -54,7 +55,7 @@ double calculateHaversineDistance(double lat1, double lon1, double lat2,
 QJniObject gm_activity;
 #endif
 
-Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
+Steps::Steps(QWidget *parent) : QDialog(parent), ui(new Ui::Steps) {
   ui->setupUi(this);
   this->installEventFilter(this);
   ui->lblGpsInfo->installEventFilter(this);
@@ -75,7 +76,8 @@ Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
 
   QDir gpsdir;
   QString gpspath = iniDir + "/memo/gps/";
-  if (!gpsdir.exists(gpspath)) gpsdir.mkpath(gpspath);
+  if (!gpsdir.exists(gpspath))
+    gpsdir.mkpath(gpspath);
 
   // Steps Chart
   m_stepChart = new StepHillChart(this);
@@ -91,10 +93,10 @@ Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
   // Speed
   m_speedometer = new Speedometer(this);
   ui->f_speed->setFixedHeight(120);
-  m_speedometer->setMaxSpeed(10.00);  // 最高时速(km/h)
-  m_speedometer->setMinSpeed(0);      // 最低时速(km/h)
+  m_speedometer->setMaxSpeed(10.00); // 最高时速(km/h)
+  m_speedometer->setMinSpeed(0);     // 最低时速(km/h)
   m_speedometer->setCurrentSpeed(0.0);
-  m_speedometer->setBackgroundColor(QColor(30, 30, 30));  // 背景色
+  m_speedometer->setBackgroundColor(QColor(30, 30, 30)); // 背景色
   ui->f_speed->layout()->setSpacing(0);
   ui->f_speed->layout()->setContentsMargins(0, 0, 0, 0);
   ui->f_speed->layout()->addWidget(m_speedometer);
@@ -114,9 +116,9 @@ Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
   // Weather
   // 直接连接单例的信号（无需创建对象）
   connect(WeatherFetcher::instance(),
-          static_cast<void (WeatherFetcher::*)(double, int, const QString&)>(
+          static_cast<void (WeatherFetcher::*)(double, int, const QString &)>(
               &WeatherFetcher::weatherUpdated),
-          this, [this](double temp, int code, const QString& desc) {
+          this, [this](double temp, int code, const QString &desc) {
             // 1. 将天气代码转换为枚举
             WeatherFetcher::WeatherCondition condition =
                 WeatherFetcher::weatherCodeToCondition(code);
@@ -127,15 +129,15 @@ Steps::Steps(QWidget* parent) : QDialog(parent), ui(new Ui::Steps) {
             // 3. 组合显示（符号+温度+描述）
             strCurrentTemp =
                 "\n" + tr("Weather") + ": " +
-                QString("%1℃  %2")         // 只保留温度和描述的占位符
-                    .arg(temp, 0, 'f', 1)  // 优化：温度保留1位小数更友好
-                    .arg(desc);            // 天气描述（中文/英文）
+                QString("%1℃  %2")        // 只保留温度和描述的占位符
+                    .arg(temp, 0, 'f', 1) // 优化：温度保留1位小数更友好
+                    .arg(desc);           // 天气描述（中文/英文）
 
             qDebug() << "当前天气=" << strCurrentTemp << strCurrentWeatherIcon;
           });
 
   connect(WeatherFetcher::instance(), &WeatherFetcher::errorOccurred, this,
-          [this](const QString& error) {
+          [this](const QString &error) {
             // 处理错误
             qDebug() << "天气获取错误:" << error;
             strCurrentTemp = "";
@@ -187,7 +189,8 @@ void Steps::initUI() {
   ui->rbHiking->setChecked(Reg.value("/GPS/isHiking", 0).toBool());
   ui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
 
-  if (isAndroid) ui->chkPlayRunVoice->setStyleSheet(mw_one->strStyle);
+  if (isAndroid)
+    ui->chkPlayRunVoice->setStyleSheet(mw_one->strStyle);
   ui->chkPlayRunVoice->setChecked(Reg.value("/GPS/isPlayRunVoice", 0).toBool());
   isChkPlayRunVoice = ui->chkPlayRunVoice->isChecked();
 
@@ -195,8 +198,8 @@ void Steps::initUI() {
   ui->btnGPS->hide();
 
   ui->frame_btnGps->setFixedHeight(80);
-  QWidget* centralWidget = new QWidget(mw_one);
-  QVBoxLayout* layout = new QVBoxLayout(centralWidget);
+  QWidget *centralWidget = new QWidget(mw_one);
+  QVBoxLayout *layout = new QVBoxLayout(centralWidget);
 
   mw_one->m_MainHelper->sliderButton = new SliderButton(centralWidget);
   mw_one->m_MainHelper->sliderButton->setTipText(
@@ -231,8 +234,8 @@ void Steps::setAddressResolverConnect() {
       connect(
           addressResolver, &GeoAddressResolver::addressResolved,
           addressResolver,
-          [this](const QString& address) {
-            QMutexLocker locker(&m_dataMutex);  // 一次加锁，覆盖所有变量操作
+          [this](const QString &address) {
+            QMutexLocker locker(&m_dataMutex); // 一次加锁，覆盖所有变量操作
 
             // 过滤完全相同的地址
             if (address != m_lastAddress) {
@@ -251,7 +254,7 @@ void Steps::setAddressResolverConnect() {
           Qt::QueuedConnection);
       connect(
           addressResolver, &GeoAddressResolver::resolveFailed, addressResolver,
-          [this](const QString& error) {
+          [this](const QString &error) {
             qDebug() << "地址解析失败：" << error;
             // 处理错误
             QMutexLocker locker(&m_dataMutex);
@@ -271,11 +274,11 @@ void Steps::setAddressResolverConnect() {
   }
 }
 
-void Steps::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event) }
+void Steps::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event) }
 
-bool Steps::eventFilter(QObject* obj, QEvent* event) {
+bool Steps::eventFilter(QObject *obj, QEvent *event) {
   if (obj == ui->lblGpsInfo && event->type() == QEvent::MouseButtonRelease) {
-    auto* mouseEvent = static_cast<QMouseEvent*>(event);
+    auto *mouseEvent = static_cast<QMouseEvent *>(event);
     if (mouseEvent->button() == Qt::LeftButton) {
       if (isGpsRun) {
         if (isAndroid) {
@@ -286,7 +289,7 @@ bool Steps::eventFilter(QObject* obj, QEvent* event) {
           QMessageBox::information(this, tr("GPS Info"), strGpsInfo);
         }
       }
-      return true;  // 消费事件，不再传递
+      return true; // 消费事件，不再传递
     }
   }
 
@@ -306,7 +309,8 @@ void Steps::closeSteps() {
 void Steps::on_btnReset_clicked() {
   CurrentSteps = 0;
 
-  if (isHardStepSensor == 1) resetSteps = getAndroidSteps();
+  if (isHardStepSensor == 1)
+    resetSteps = getAndroidSteps();
 
   QString date = QString::number(QDate::currentDate().month()) + "-" +
                  QString::number(QDate::currentDate().day());
@@ -331,7 +335,7 @@ void Steps::saveSteps() {
     QFile file(jsonPath);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
       QJsonDocument doc(rootObj);
-      file.write(doc.toJson(QJsonDocument::Indented));  // 格式化输出，便于阅读
+      file.write(doc.toJson(QJsonDocument::Indented)); // 格式化输出，便于阅读
       file.close();
       qDebug() << "JSON文件写入成功:" << jsonPath;
     } else {
@@ -340,7 +344,7 @@ void Steps::saveSteps() {
   });
 
   // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "Steps save completed.";
 
@@ -350,7 +354,8 @@ void Steps::saveSteps() {
 }
 
 void Steps::loadStepsToTable() {
-  if (tmeRefreshSteps->isActive()) return;
+  if (tmeRefreshSteps->isActive())
+    return;
 
   clearAll();
   m_stepData.clear();
@@ -362,7 +367,8 @@ void Steps::loadStepsToTable() {
   // 读取记录总数（对应原/Steps/Count）
   int count = stepsObj["Count"].toInt(0);
   int start = 0;
-  if (count > maxCount) start = 1;
+  if (count > maxCount)
+    start = 1;
 
   // 获取Table数组（对应原/Steps/Table-i-*系列键）
   QJsonArray tableArray = stepsObj["Table"].toArray();
@@ -428,7 +434,8 @@ void Steps::openStepsUI() {
   nMonth = QDate::currentDate().month();
 
   // Route
-  if (!isChina) isChina = m_Method->isInChina();
+  if (!isChina)
+    isChina = m_Method->isInChina();
   // 再次连接信号槽，防止初始化时连接出现问题
   setAddressResolverConnect();
 
@@ -445,10 +452,12 @@ void Steps::addRecord(QString date, qlonglong steps, QString km) {
 
 qlonglong Steps::getCurrentSteps() {
   int count = getCount();
-  if (count == 0) return 0;
+  if (count == 0)
+    return 0;
 
   QString str = getDate(count - 1);
-  if (str == getCurrentDate()) return getSteps(count - 1);
+  if (str == getCurrentDate())
+    return getSteps(count - 1);
   return 0;
 }
 
@@ -523,8 +532,8 @@ void Steps::setTableSteps(qlonglong steps) {
   }
 
   // 读取Steps对象中的Count值（对应原INI的/Steps/Count），默认0
-  QJsonObject stepsObj = rootObj["Steps"].toObject();  // 获取Steps节点
-  int count = stepsObj["Count"].toInt(0);              // 读取Count，默认值0
+  QJsonObject stepsObj = rootObj["Steps"].toObject(); // 获取Steps节点
+  int count = stepsObj["Count"].toInt(0);             // 读取Count，默认值0
 
   // 读取步长和阈值（对应原/Steps/Length和/Steps/Threshold）
   QString stepLength = stepsObj["Length"].toString("35");
@@ -559,7 +568,7 @@ void Steps::setTableSteps(qlonglong steps) {
     }
 
     QString mdate = "";
-    if (!date.isEmpty()) {  // 只有date非空时，才拆分日期
+    if (!date.isEmpty()) { // 只有date非空时，才拆分日期
       mdate = date.split(" ").at(0).trimmed();
     }
 
@@ -572,9 +581,9 @@ void Steps::setTableSteps(qlonglong steps) {
         QJsonArray rowArray = tableArray.at(index).toArray();
 
         // 更新数组中的三个值
-        rowArray[0] = date;           // 对应-0（日期）
-        rowArray[1] = (double)steps;  // 对应-1（步数）
-        rowArray[2] = strKM;          // 对应-2（公里数）
+        rowArray[0] = date;          // 对应-0（日期）
+        rowArray[1] = (double)steps; // 对应-1（步数）
+        rowArray[2] = strKM;         // 对应-2（公里数）
 
         // 将更新后的行放回数组
         tableArray[index] = rowArray;
@@ -583,7 +592,7 @@ void Steps::setTableSteps(qlonglong steps) {
         stepsObj["Table"] = tableArray;
       }
 
-    } else {  // 在当前表中增加新数据
+    } else { // 在当前表中增加新数据
       count++;
 
       if (count > maxCount) {
@@ -596,13 +605,13 @@ void Steps::setTableSteps(qlonglong steps) {
       newRow.append(full_date);
       newRow.append(steps);
       newRow.append(strKM);
-      tableArray.append(newRow);  // 新增到数组
+      tableArray.append(newRow); // 新增到数组
 
       stepsObj["Table"] = tableArray;
       stepsObj["Count"] = count;
     }
-  } else {              // count==0
-    count = count + 1;  // 从0变成1，代表要新增第一条记录
+  } else {             // count==0
+    count = count + 1; // 从0变成1，代表要新增第一条记录
     QJsonArray tableArray = stepsObj["Table"].toArray();
 
     // 1. 创建第一条记录的数组（日期、步数、公里数）
@@ -650,12 +659,12 @@ void Steps::appendSteps(QString date, int steps, QString km) {
   QString strSteps = QString::number(steps);
   double dCalorie = steps * 0.04;
   QString strCalorie =
-      QString("%1").arg(dCalorie, 0, 'f', 2);  // + "  " + tr("Calorie");
+      QString("%1").arg(dCalorie, 0, 'f', 2); // + "  " + tr("Calorie");
 
   double d_km =
       m_StepsOptions->ui->editStepLength->text().trimmed().toDouble() * steps /
       100 / 1000;
-  km = QString("%1").arg(d_km, 0, 'f', 2);  //+ "  " + tr("KM");
+  km = QString("%1").arg(d_km, 0, 'f', 2); //+ "  " + tr("KM");
 
   listSteps.append(date + "===" + strSteps + "===" + km + "===" + strCalorie +
                    "===" + stepsThreshold);
@@ -676,7 +685,8 @@ void Steps::clearAll() {}
 void Steps::setScrollBarPos(double pos) {}
 
 void Steps::startRecordMotion() {
-  if (isGpsRun) return;
+  if (isGpsRun)
+    return;
 
   QSettings Reg(iniDir + "gpslist.ini", QSettings::IniFormat);
 
@@ -693,7 +703,8 @@ void Steps::startRecordMotion() {
 
   gm_activity = QJniObject(QNativeInterface::QAndroidApplication::context());
 
-  if (!startGPSFromService()) return;
+  if (!startGPSFromService())
+    return;
 
 #else
 
@@ -737,7 +748,7 @@ void Steps::startRecordMotion() {
   isInitTime = false;
   m_distance = 0;
   m_speed = 0;
-  oldAlt = NAN;  // 用NaN标识未初始化，而非0
+  oldAlt = NAN; // 用NaN标识未初始化，而非0
   oldLat = 0;
   oldLon = 0;
   altitude = 0;
@@ -757,9 +768,12 @@ void Steps::startRecordMotion() {
   ui->rbRunning->setEnabled(false);
   ui->btnList->setEnabled(false);
 
-  if (ui->rbCycling->isChecked()) saveInterval = 0.016f;
-  if (ui->rbHiking->isChecked()) saveInterval = 0.008f;
-  if (ui->rbRunning->isChecked()) saveInterval = 0.008f;
+  if (ui->rbCycling->isChecked())
+    saveInterval = 0.016f;
+  if (ui->rbHiking->isChecked())
+    saveInterval = 0.008f;
+  if (ui->rbRunning->isChecked())
+    saveInterval = 0.008f;
 
   QTimer::singleShot(1000, mw_one, []() {
     if (!mw_one->myGetGpsDataThread->isRunning()) {
@@ -775,14 +789,14 @@ double Steps::getGpsLatitude() {
 #ifdef Q_OS_ANDROID
   jdouble lat = QJniObject::callStaticMethod<jdouble>(
       "com/x/MyService",
-      "getLatitude",  // 方法名
-      "()D"           // 方法签名：无参数，返回double
+      "getLatitude", // 方法名
+      "()D"          // 方法签名：无参数，返回double
   );
 
   // 判读是否获取失败（NaN != NaN，这是NaN的特性）
   if (lat != lat) {
     qWarning() << "GPS服务未启动或GPS未初始化";
-    return -999;  // 用自定义无效值，而非0
+    return -999; // 用自定义无效值，而非0
   }
   return lat;
 #endif
@@ -810,7 +824,7 @@ double Steps::getGpsMySpeed() {
   // 判断是否获取失败（利用NaN != NaN的特性）
   if (speed != speed) {
     qWarning() << "GPS服务未启动或未获取到当前速度";
-    return -999;  // 自定义无效值，方便业务层判断
+    return -999; // 自定义无效值，方便业务层判断
   }
   return speed;
 #endif
@@ -834,21 +848,21 @@ QString Steps::getGpsStatus() {
 #ifdef Q_OS_ANDROID
   // 1. 第一步：获取 MyService 实例（调用静态方法 getInstance()）
   QJniObject serviceInstance = QJniObject::callStaticObjectMethod(
-      "com/x/MyService",     // Java类名（包名+类名）
-      "getInstance",         // 静态方法名：获取服务实例
-      "()Lcom/x/MyService;"  // 方法签名：无参，返回 MyService 实例
+      "com/x/MyService",    // Java类名（包名+类名）
+      "getInstance",        // 静态方法名：获取服务实例
+      "()Lcom/x/MyService;" // 方法签名：无参，返回 MyService 实例
   );
 
   // 检查服务实例是否有效（服务未启动时会为空）
   if (!serviceInstance.isValid()) {
     qWarning() << "MyService 实例为空（GPS服务未启动）";
-    return "";  // 返回空字符串作为无效值，和你的-999逻辑一致
+    return ""; // 返回空字符串作为无效值，和你的-999逻辑一致
   }
 
   // 2. 第二步：调用非静态方法 getGpsStatus()
   QJniObject jGpsStatus = serviceInstance.callObjectMethod(
-      "getGpsStatus",         // 非静态方法名
-      "()Ljava/lang/String;"  // 方法签名：无参，返回 String 类型
+      "getGpsStatus",        // 非静态方法名
+      "()Ljava/lang/String;" // 方法签名：无参，返回 String 类型
   );
 
   // 3. 转换并返回结果
@@ -872,10 +886,10 @@ bool Steps::startGPSFromService() {
       "com/x/MyService", "getInstance", "()Lcom/x/MyService;");
 
   // 2. 调用 MyService 的 startGPS() 方法（非静态）
-  jboolean success = serviceInstance.callMethod<jboolean>(
-      "startGPS",
-      "()Z"  // 方法签名：无参，返回 boolean
-  );
+  jboolean success =
+      serviceInstance.callMethod<jboolean>("startGPS",
+                                           "()Z" // 方法签名：无参，返回 boolean
+      );
 
   if (success) {
     qInfo() << "GPS 启动成功（前台服务托管）";
@@ -900,7 +914,7 @@ void Steps::stopGPSFromService() {
 
   // 调用 MyService 的 stopGPS() 方法（无返回值）
   serviceInstance.callMethod<void>("stopGPS",
-                                   "()V"  // 方法签名：无参，无返回值
+                                   "()V" // 方法签名：无参，无返回值
   );
   qInfo() << "GPS 已停止（前台服务托管）";
 #endif
@@ -979,9 +993,12 @@ void Steps::updateGetGpsData() {
       strGpsStatus = tr("Average Speed") + " : " + str3 + "\n" + str4 + "\n" +
                      strAltitude + "\n" + str6 + "\n" + str7;
 
-      if (std::isnan(oldAlt)) oldAlt = altitude;
-      if (oldLat == 0) oldLat = latitude;
-      if (oldLon == 0) oldLon = longitude;
+      if (std::isnan(oldAlt))
+        oldAlt = altitude;
+      if (oldLat == 0)
+        oldLat = latitude;
+      if (oldLon == 0)
+        oldLon = longitude;
     }
 
     if (m_time.second() % 3 == 0) {
@@ -992,7 +1009,7 @@ void Steps::updateGetGpsData() {
 
         mySpeed = Speed;
         if (mySpeed > 0) {
-          const double COORD_CHANGE_THRESHOLD = 1e-6;  // 约0.1米的变化阈值
+          const double COORD_CHANGE_THRESHOLD = 1e-6; // 约0.1米的变化阈值
           coordChanged = (qAbs(latitude - oldLat) > COORD_CHANGE_THRESHOLD) ||
                          (qAbs(longitude - oldLon) > COORD_CHANGE_THRESHOLD);
           if (coordChanged) {
@@ -1058,7 +1075,8 @@ void Steps::updateGetGpsData() {
       std::default_random_engine generator(seed);
       std::uniform_real_distribution<double> distribution(0.0, 50.0);
       mySpeed = distribution(generator);
-      if (mySpeed > maxSpeed) maxSpeed = mySpeed;
+      if (mySpeed > maxSpeed)
+        maxSpeed = mySpeed;
 
       strAltitude = "Altitude: " + QString::number(distribution(generator));
 
@@ -1086,7 +1104,7 @@ void Steps::updateGetGpsData() {
   qint64 secondsDiff = startDT.secsTo(endDT);
   // 处理负数（可选）
   bool isNegative = secondsDiff < 0;
-  secondsDiff = qAbs(secondsDiff);  // 若只需正值则取绝对值
+  secondsDiff = qAbs(secondsDiff); // 若只需正值则取绝对值
   // 分解为时、分、秒
   qint64 hours = secondsDiff / 3600;
   qint64 remainingSeconds = secondsDiff % 3600;
@@ -1094,8 +1112,8 @@ void Steps::updateGetGpsData() {
   qint64 seconds = remainingSeconds % 60;
   // 格式化为字符串（补零对齐）
   QString timeStr = QString("%1%2:%3:%4")
-                        .arg(isNegative ? "-" : "")           // 保留负号
-                        .arg(hours, 2, 10, QLatin1Char('0'))  // 2位数字，补零
+                        .arg(isNegative ? "-" : "")          // 保留负号
+                        .arg(hours, 2, 10, QLatin1Char('0')) // 2位数字，补零
                         .arg(minutes, 2, 10, QLatin1Char('0'))
                         .arg(seconds, 2, 10, QLatin1Char('0'));
   strDurationTime = tr("Duration") + " : " + timeStr;
@@ -1145,12 +1163,13 @@ void Steps::updateGetGpsData() {
 
       // Route
       int tr = 150;
-      if (isGpsTest) tr = 5;
+      if (isGpsTest)
+        tr = 5;
       if (isShowRoute) {
         if (m_lastGetAddressTime.secsTo(currentTime) >=
-            tr) {  // 距离上次超过150秒
+            tr) { // 距离上次超过150秒
           refreshRoute();
-          m_lastGetAddressTime = currentTime;  // 更新上次执行时间
+          m_lastGetAddressTime = currentTime; // 更新上次执行时间
         }
 
         if (isGetAddressSuccess) {
@@ -1161,11 +1180,12 @@ void Steps::updateGetGpsData() {
       }
 
       // Weather
-      int ti_w = 1800;  // 30分钟=1800秒
-      if (isGpsTest) ti_w = 16;
+      int ti_w = 1800; // 30分钟=1800秒
+      if (isGpsTest)
+        ti_w = 16;
       if (m_lastFetchWeatherTime.secsTo(currentTime) >= ti_w) {
         WeatherFetcher::instance()->fetchWeather(latitude, longitude);
-        m_lastFetchWeatherTime = currentTime;  // 更新上次请求时间
+        m_lastFetchWeatherTime = currentTime; // 更新上次请求时间
       }
 
       // Play Voice
@@ -1259,9 +1279,12 @@ void Steps::refreshMotionData() {
 
   QString t00, t1, t2, t3, t4, t5;
 
-  if (ui->rbCycling->isChecked()) str_type = tr("Ride");
-  if (ui->rbHiking->isChecked()) str_type = tr("Hike");
-  if (ui->rbRunning->isChecked()) str_type = tr("Run");
+  if (ui->rbCycling->isChecked())
+    str_type = tr("Ride");
+  if (ui->rbHiking->isChecked())
+    str_type = tr("Hike");
+  if (ui->rbRunning->isChecked())
+    str_type = tr("Run");
   t00 = str_type + " " + t0;
 
   t1 = tr("Time") + ": " + strStartTime + " - " + strEndTime + strCurrentTemp;
@@ -1270,7 +1293,8 @@ void Steps::refreshMotionData() {
 
   qint64 secondsDiff = startDt.secsTo(endDt);
   // 若 endDt 在 startDt 之后，返回正数；否则返回负数（取绝对值确保为正）
-  if (secondsDiff < 0) secondsDiff = -secondsDiff;
+  if (secondsDiff < 0)
+    secondsDiff = -secondsDiff;
   // 转换为“时:分:秒”格式
   int h = secondsDiff / 3600;
   int m = (secondsDiff % 3600) / 60;
@@ -1305,7 +1329,8 @@ void Steps::refreshMotionData() {
                       "-=-" + t5 + "-=-" + strCurrentWeatherIcon + "-=-" +
                       strGpsTerrain);
 
-    if (isGpsRun) return;
+    if (isGpsRun)
+      return;
 
     // 里程月总计
     double dMonthTotal = 0;
@@ -1416,14 +1441,19 @@ void Steps::loadGpsList(int n_y, int n_m) {
       t3 = list.at(3);
       t4 = list.at(4);
       t5 = list.at(5);
-      if (list.count() >= 7) t6 = list.at(6);  // 天气图标
-      if (list.count() >= 8) t7 = list.at(7);  // 地形距离汇总
+      if (list.count() >= 7)
+        t6 = list.at(6); // 天气图标
+      if (list.count() >= 8)
+        t7 = list.at(7); // 地形距离汇总
     }
 
     QString s_type;
-    if (t0.contains("骑行") || t0.contains("Ride")) s_type = "🚴 ";
-    if (t0.contains("徒步") || t0.contains("Hike")) s_type = "🥾 ";
-    if (t0.contains("跑步") || t0.contains("Run")) s_type = "🏃 ";
+    if (t0.contains("骑行") || t0.contains("Ride"))
+      s_type = "🚴 ";
+    if (t0.contains("徒步") || t0.contains("Hike"))
+      s_type = "🥾 ";
+    if (t0.contains("跑步") || t0.contains("Run"))
+      s_type = "🏃 ";
 
     QString strGpsTime = t0 + "-=-" + t1 + "-=-" + t2 + "-=-" + t4;
     QString speedFile = getJsonRouteFile(strGpsTime);
@@ -1452,7 +1482,8 @@ void Steps::loadGpsList(int n_y, int n_m) {
     m_Altitude.append(processedAltitude);
   }
 
-  if (!isAndroid) qInfo() << "listText=" << listText.count() << listText;
+  if (!isAndroid)
+    qInfo() << "listText=" << listText.count() << listText;
 }
 
 void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
@@ -1462,7 +1493,7 @@ void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
 
   // 2. 构造 Java ArrayList<String>
   QJniObject jArrayList("java/util/ArrayList", "()V");
-  for (const QString& item : listText) {
+  for (const QString &item : listText) {
     QJniObject jItem = QJniObject::fromString(item);
     jArrayList.callMethod<void>("add", "(Ljava/lang/Object;)Z", jItem.object());
   }
@@ -1470,11 +1501,11 @@ void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
   QJniEnvironment env;
 
   QJniObject jArrayListSpeed("java/util/ArrayList", "()V");
-  for (const QVariantList& item : m_Speed) {
+  for (const QVariantList &item : m_Speed) {
     jdoubleArray jArr = env->NewDoubleArray(item.size());
     QVector<double> buffer;
     buffer.reserve(item.size());
-    for (const QVariant& v : item) {
+    for (const QVariant &v : item) {
       buffer.append(v.toDouble());
     }
     env->SetDoubleArrayRegion(jArr, 0, item.size(), buffer.constData());
@@ -1484,11 +1515,11 @@ void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
   }
 
   QJniObject jArrayListAlt("java/util/ArrayList", "()V");
-  for (const QVariantList& item : m_Altitude) {
+  for (const QVariantList &item : m_Altitude) {
     jdoubleArray jArr = env->NewDoubleArray(item.size());
     QVector<double> buffer;
     buffer.reserve(item.size());
-    for (const QVariant& v : item) {
+    for (const QVariant &v : item) {
       buffer.append(v.toDouble());
     }
     env->SetDoubleArrayRegion(jArr, 0, item.size(), buffer.constData());
@@ -1523,7 +1554,7 @@ void Steps::refreshSportChart(QStringList listText, QList<QVariantList> m_Speed,
 }
 
 void Steps::selGpsListYearMonth() {
-  QStringList list;  // = mw_one->ui->btnSelGpsDate->text().split("-");
+  QStringList list; // = mw_one->ui->btnSelGpsDate->text().split("-");
   int y = 2025;
   int m = 2;
   if (list.count() == 2) {
@@ -1571,7 +1602,8 @@ void Steps::updateMapTrackUi(double lat, double lon) {}
 void Steps::clearTrack() {
   clearTrackAndroid();
 
-  if (!isGpsRun) clearTrackDataToAndroid();
+  if (!isGpsRun)
+    clearTrackDataToAndroid();
 
   return;
 }
@@ -1687,12 +1719,12 @@ void Steps::updateGpsTrack() {
     for (int i = 0; i < optimizedData.count(); i++) {
       lat = optimizedData.at(i).latitude;
       lon = optimizedData.at(i).longitude;
-      alt = optimizedData.at(i).altitude;  // 获取优化后的海拔
+      alt = optimizedData.at(i).altitude; // 获取优化后的海拔
 
       QStringList m_data;
       m_data.append(QString::number(lat, 'f', 6));
       m_data.append(QString::number(lon, 'f', 6));
-      m_data.append(QString::number(alt, 'f', 2));  // 写入海拔（保留2位小数）
+      m_data.append(QString::number(alt, 'f', 2)); // 写入海拔（保留2位小数）
 
       appendToCSV(gpsOptimizedFile, m_data);
     }
@@ -1761,16 +1793,18 @@ void Steps::updateGpsMapUi() {
     setDateLabelToAndroid(strGpsMapDateTime);
 
     QStringList list = strGpsMapSpeed.split("\n");
-    if (list.count() > 1) strGpsMapSpeed = list.at(0);
+    if (list.count() > 1)
+      strGpsMapSpeed = list.at(0);
     setInfoLabelToAndroid(strGpsMapDistnce + " | " + strGpsMapSpeed + "\n" +
                           strGpsTerrain);
   }
 }
 
 // 高斯滤波函数（支持海拔）
-QVector<GPSCoordinate> gaussianFilter(const QVector<GPSCoordinate>& data,
+QVector<GPSCoordinate> gaussianFilter(const QVector<GPSCoordinate> &data,
                                       int windowSize, double sigma) {
-  if (data.isEmpty() || windowSize % 2 == 0) return data;  // 窗口必须是奇数
+  if (data.isEmpty() || windowSize % 2 == 0)
+    return data; // 窗口必须是奇数
 
   QVector<GPSCoordinate> filteredData;
   int halfWindow = windowSize / 2;
@@ -1794,11 +1828,13 @@ QVector<GPSCoordinate> gaussianFilter(const QVector<GPSCoordinate>& data,
     double latSum = 0.0, lonSum = 0.0, altSum = 0.0;
     for (int j = 0; j < windowSize; ++j) {
       int idx = i - halfWindow + j;
-      if (idx < 0) idx = 0;
-      if (idx >= n) idx = n - 1;
+      if (idx < 0)
+        idx = 0;
+      if (idx >= n)
+        idx = n - 1;
       latSum += data[idx].latitude * kernel[j];
       lonSum += data[idx].longitude * kernel[j];
-      altSum += data[idx].altitude * kernel[j];  // 海拔也参与滤波
+      altSum += data[idx].altitude * kernel[j]; // 海拔也参与滤波
     }
     filteredData.append(GPSCoordinate(latSum, lonSum, altSum));
   }
@@ -1828,10 +1864,11 @@ double calculateHaversineDistance(double lat1, double lon1, double lat2,
 }
 
 // 异常点检测函数（支持海拔）
-QVector<GPSCoordinate> detectAndCorrectOutliers(
-    const QVector<GPSCoordinate>& data, double distThreshold,
-    double altThreshold) {
-  if (data.size() < 3) return data;
+QVector<GPSCoordinate>
+detectAndCorrectOutliers(const QVector<GPSCoordinate> &data,
+                         double distThreshold, double altThreshold) {
+  if (data.size() < 3)
+    return data;
 
   QVector<GPSCoordinate> correctedData = data;
 
@@ -1854,7 +1891,7 @@ QVector<GPSCoordinate> detectAndCorrectOutliers(
       double avgLat = (data[i - 1].latitude + data[i + 1].latitude) / 2;
       double avgLon = (data[i - 1].longitude + data[i + 1].longitude) / 2;
       double avgAlt =
-          (data[i - 1].altitude + data[i + 1].altitude) / 2;  // 海拔均值修正
+          (data[i - 1].altitude + data[i + 1].altitude) / 2; // 海拔均值修正
       correctedData[i] = GPSCoordinate(avgLat, avgLon, avgAlt);
     }
   }
@@ -1878,7 +1915,7 @@ void Steps::saveMovementType() {
   });
 
   // 使用 QFutureWatcher 监控进度
-  QFutureWatcher<void>* watcher = new QFutureWatcher<void>(this);
+  QFutureWatcher<void> *watcher = new QFutureWatcher<void>(this);
   connect(watcher, &QFutureWatcher<void>::finished, this, [=]() {
     qDebug() << "MovementType save completed.";
 
@@ -1902,14 +1939,14 @@ void Steps::setVibrate() {
     QJniEnvironment env;
 
     // 调用目标方法（修正后的参数格式）
-    activity.callMethod<void>("setVibrate",  // 方法名
-                              "()V"          // 方法签名（无参无返回值）
+    activity.callMethod<void>("setVibrate", // 方法名
+                              "()V"         // 方法签名（无参无返回值）
     );
 
     // 检查JNI调用异常（逻辑不变）
     if (env->ExceptionCheck()) {
-      env->ExceptionDescribe();  // 打印异常详情
-      env->ExceptionClear();     // 清除异常状态
+      env->ExceptionDescribe(); // 打印异常详情
+      env->ExceptionClear();    // 清除异常状态
     }
   } else {
     qWarning() << "获取Android Activity JNI对象失败！";
@@ -1918,7 +1955,7 @@ void Steps::setVibrate() {
 #endif
 }
 
-void Steps::writeCSV(const QString& filePath, const QList<QStringList>& data) {
+void Steps::writeCSV(const QString &filePath, const QList<QStringList> &data) {
   QFile file(filePath);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
     qWarning() << filePath;
@@ -1926,16 +1963,16 @@ void Steps::writeCSV(const QString& filePath, const QList<QStringList>& data) {
   }
 
   QTextStream out(&file);
-  for (const QStringList& row : data) {
+  for (const QStringList &row : data) {
     out << row.join(",") << "\n";
   }
 
   file.close();
 }
 
-void Steps::appendToCSV(const QString& filePath, const QStringList& data) {
+void Steps::appendToCSV(const QString &filePath, const QStringList &data) {
   QFile file(filePath);
-  if (!file.open(QIODevice::Append | QIODevice::Text))  // 以追加模式打开文件
+  if (!file.open(QIODevice::Append | QIODevice::Text)) // 以追加模式打开文件
   {
     return;
   }
@@ -1958,8 +1995,10 @@ void Steps::updateHardSensorSteps() {
   qlonglong steps = 0;
   qlonglong ts = getAndroidSteps();
   steps = ts - initTodaySteps;
-  if (steps < 0) return;
-  if (steps > 100000000) return;
+  if (steps < 0)
+    return;
+  if (steps > 100000000)
+    return;
   CurrentSteps = ts - resetSteps;
 
   setTableSteps(steps);
@@ -1991,7 +2030,7 @@ void Steps::initTodayInitSteps() {
     }
   }
 
-  QString date = jsonObj["Date"].toString("");  // 第二个参数为默认值
+  QString date = jsonObj["Date"].toString(""); // 第二个参数为默认值
 
   // 获取当前日期（与原逻辑一致）
   QString c_date = getCurrentDate();
@@ -1999,7 +2038,7 @@ void Steps::initTodayInitSteps() {
   if (date != c_date) {
     // 更新JSON对象（基于已有的jsonObj）
     jsonObj["Date"] = c_date;
-    jsonObj["InitValue"] = (double)a;  // 处理长整数类型
+    jsonObj["InitValue"] = (double)a; // 处理长整数类型
     jsonObj["oldSteps"] = 0;
 
     // 写入文件（复用已定义的file对象）
@@ -2012,14 +2051,15 @@ void Steps::initTodayInitSteps() {
   } else {
     //  从JSON中读取InitValue，默认值0，转换为qlonglong
     initTodaySteps = jsonObj["InitValue"].toVariant().toLongLong(0);
-    if (initTodaySteps == 0) initTodaySteps = a;
+    if (initTodaySteps == 0)
+      initTodaySteps = a;
 
     if (a - initTodaySteps <= 0) {
       initTodaySteps = a - (double)getTodaySteps();
 
       // 更新JSON键值
-      jsonObj["InitValue"] = (double)initTodaySteps;  // 存储InitValue
-      jsonObj["oldSteps"] = (double)getTodaySteps();  // 存储oldSteps
+      jsonObj["InitValue"] = (double)initTodaySteps; // 存储InitValue
+      jsonObj["oldSteps"] = (double)getTodaySteps(); // 存储oldSteps
 
       // 写入文件（同步操作，对应Reg.sync()）
       if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -2112,7 +2152,7 @@ void Steps::clearTrackAndroid() {
     myActivity.callMethod<void>("forwardClearTrack", "()V");
     qDebug() << "Qt调用MyActivity.forwardClearTrack()成功，已转发清除轨迹请求";
 
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     qCritical() << "清除轨迹调用异常：" << e.what();
   } catch (...) {
     qCritical() << "清除轨迹发生未知错误";
@@ -2138,8 +2178,8 @@ void Steps::appendTrackPointAndroid(double latitude, double longitude) {
 
     // 新增：调用MyActivity的isMapActivityInstance()判断地图实例是否存在
     jboolean isInstanceValid = myActivity.callMethod<jboolean>(
-        "isMapActivityInstance",  // Java方法名
-        "()Z"  // 方法签名：无参数，返回boolean（Z表示boolean）
+        "isMapActivityInstance", // Java方法名
+        "()Z" // 方法签名：无参数，返回boolean（Z表示boolean）
     );
     if (!isInstanceValid) {
       qWarning() << "地图实例不存在（isMapActivityInstance返回false），跳过追"
@@ -2152,7 +2192,7 @@ void Steps::appendTrackPointAndroid(double latitude, double longitude) {
     qDebug() << "Qt调用MyActivity.forwardAppendTrackPoint()成功，轨迹点："
              << latitude << "," << longitude;
 
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     qCritical() << "追加轨迹点异常：" << e.what();
   } catch (...) {
     qCritical() << "追加轨迹点发生未知错误";
@@ -2174,17 +2214,17 @@ void Steps::addTrackDataToAndroid(double latitude, double longitude) {
     QJniObject activity = QNativeInterface::QAndroidApplication::context();
 
     if (activity.isValid()) {
-      activity.callMethod<void>("addTrackPoint",  // Java方法名
-                                "(DD)V",   // 方法签名：两个double参数，返回void
-                                latitude,  // 第一个参数：纬度
-                                longitude  // 第二个参数：经度
+      activity.callMethod<void>("addTrackPoint", // Java方法名
+                                "(DD)V",  // 方法签名：两个double参数，返回void
+                                latitude, // 第一个参数：纬度
+                                longitude // 第二个参数：经度
       );
       qDebug() << "Qt调用addTrackPoint成功，纬度：" << latitude << "经度："
                << longitude;
     } else {
       qWarning() << "获取MapActivity实例失败，无法添加轨迹点";
     }
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     qCritical() << "调用addTrackPoint失败：" << e.what();
   }
 
@@ -2197,21 +2237,21 @@ void Steps::clearTrackDataToAndroid() {
     QJniObject activity = QNativeInterface::QAndroidApplication::context();
 
     if (activity.isValid()) {
-      activity.callMethod<void>("clearTrackPoints",  // Java方法名
-                                "()V"  // 方法签名：无参数，返回void
+      activity.callMethod<void>("clearTrackPoints", // Java方法名
+                                "()V" // 方法签名：无参数，返回void
       );
       qDebug() << "Qt调用clearTrackPoints成功";
     } else {
       qWarning() << "获取MapActivity实例失败，无法清除轨迹点";
     }
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     qCritical() << "调用clearTrackPoints失败：" << e.what();
   }
 
 #endif
 }
 
-void Steps::setDateLabelToAndroid(const QString& str) {
+void Steps::setDateLabelToAndroid(const QString &str) {
   Q_UNUSED(str);
 #ifdef Q_OS_ANDROID
 
@@ -2227,7 +2267,7 @@ void Steps::setDateLabelToAndroid(const QString& str) {
 #endif
 }
 
-void Steps::setInfoLabelToAndroid(const QString& str) {
+void Steps::setInfoLabelToAndroid(const QString &str) {
 #ifdef Q_OS_ANDROID
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
@@ -2256,8 +2296,8 @@ QGeoCoordinate Steps::wgs84ToGcj02_cpp(double wgs84Lat, double wgs84Lon) {
     return QGeoCoordinate(wgs84Lat, wgs84Lon);
   }
 
-  double x = wgs84Lon - 105.0;  // 对应Java的wgsLng - 105.0
-  double y = wgs84Lat - 35.0;   // 对应Java的wgsLat - 35.0
+  double x = wgs84Lon - 105.0; // 对应Java的wgsLng - 105.0
+  double y = wgs84Lat - 35.0;  // 对应Java的wgsLat - 35.0
 
   // 调用复刻的辅助函数，避免inline计算偏差
   double dLat = transformLat(x, y);
@@ -2289,15 +2329,18 @@ bool Steps::isInChina(double lat, double lon) {
          (lat > GCJ02_LAT_MIN && lat < GCJ02_LAT_MAX);
 }
 
-void Steps::saveRoute(const QString& file, const QString& time, double lat,
-                      double lon, const QString& address) {
-  if (!isGpsRun) return;
+void Steps::saveRoute(const QString &file, const QString &time, double lat,
+                      double lon, const QString &address) {
+  if (!isGpsRun)
+    return;
 
   bool latValid = (lat >= -90 && lat <= 90);
   bool lonValid = (lon >= -180 && lon <= 180);
-  if (!latValid || !lonValid) return;
+  if (!latValid || !lonValid)
+    return;
 
-  if (address == "") return;
+  if (address == "")
+    return;
 
   // 初始化 JSON 数组（读取现有数据或创建新数组）
   QJsonArray routeArray;
@@ -2305,9 +2348,9 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
 
   // 构造新的路由对象（字段类型严格匹配：字符串/数字）
   QJsonObject newRoute;
-  newRoute["time"] = time;  // 字符串类型
-  newRoute["lat"] = lat;    // 数字类型（double）
-  newRoute["lon"] = lon;    // 数字类型（double）
+  newRoute["time"] = time; // 字符串类型
+  newRoute["lat"] = lat;   // 数字类型（double）
+  newRoute["lon"] = lon;   // 数字类型（double）
   newRoute["address"] = directionRoute + "\n" + distanceRoute + " | " +
                         speedRoute + "\n" + strAltitude + "\n\n" + address;
 
@@ -2334,7 +2377,7 @@ void Steps::saveRoute(const QString& file, const QString& time, double lat,
            << routeArray.size() << "条）";
 }
 
-QStringList Steps::readRoute(const QString& file) {
+QStringList Steps::readRoute(const QString &file) {
   QJsonArray routeArray;
   QStringList routeList;
 
@@ -2351,7 +2394,7 @@ QStringList Steps::readRoute(const QString& file) {
 
     // 2. 解析 JSON 数组（仅校验是否为数组，不校验内部字段）
     routeArray = QJsonDocument::fromJson(jsonFile.readAll()).array();
-    jsonFile.close();  // 立即关闭文件
+    jsonFile.close(); // 立即关闭文件
   } else {
     routeArray = routeMemoryCache;
   }
@@ -2367,10 +2410,10 @@ QStringList Steps::readRoute(const QString& file) {
 
     // 读取字段：不存在则返回默认值（字符串空，数字0）
     QString time =
-        QString::number(i + 1) + ". " + obj["time"].toString();  // 缺失 → ""
-    double lat = obj["lat"].toDouble();                          // 缺失 → 0.0
-    double lon = obj["lon"].toDouble();                          // 缺失 → 0.0
-    QString address = obj["address"].toString();                 // 缺失 → ""
+        QString::number(i + 1) + ". " + obj["time"].toString(); // 缺失 → ""
+    double lat = obj["lat"].toDouble();                         // 缺失 → 0.0
+    double lon = obj["lon"].toDouble();                         // 缺失 → 0.0
+    QString address = obj["address"].toString();                // 缺失 → ""
 
     // 格式化经纬度（保留6位小数，0值也会正常显示）
     QString latLonStr =
@@ -2387,7 +2430,8 @@ QStringList Steps::readRoute(const QString& file) {
 }
 
 void Steps::getAddress(double lat, double lon) {
-  if (!addressResolver || !geoThread || !geoThread->isRunning()) return;
+  if (!addressResolver || !geoThread || !geoThread->isRunning())
+    return;
 
   QGeoCoordinate gcj02Coord;
   if (isAndroid)
@@ -2404,7 +2448,8 @@ void Steps::setMapKey() {
   QString arg1 = Reg.value("/Map/MapKey", "").toString();
 
   m_StepsOptions->ui->editMapKey->setPlainText(arg1);
-  if (addressResolver) addressResolver->setTencentApiKey(arg1);
+  if (addressResolver)
+    addressResolver->setTencentApiKey(arg1);
 
 #ifdef Q_OS_ANDROID
 
@@ -2416,7 +2461,7 @@ void Steps::setMapKey() {
     // 调用Java的setMapKey方法，参数为String，返回值为void
     activity.callMethod<void>(
         "setMapKey",
-        "(Ljava/lang/String;)V",  // JNI签名：接收String参数，无返回值
+        "(Ljava/lang/String;)V", // JNI签名：接收String参数，无返回值
         jKey.object<jstring>());
     qDebug() << "已调用Java层setMapKey方法";
   }
@@ -2429,24 +2474,26 @@ void Steps::setMapType() {
   QJniObject activity = QNativeInterface::QAndroidApplication::context();
   if (activity.isValid()) {
     int mapKey = 1;
-    if (m_StepsOptions->ui->rbOsm->isChecked()) mapKey = 1;
-    if (m_StepsOptions->ui->rbTencent->isChecked()) mapKey = 2;
+    if (m_StepsOptions->ui->rbOsm->isChecked())
+      mapKey = 1;
+    if (m_StepsOptions->ui->rbTencent->isChecked())
+      mapKey = 2;
 
     // JNI调用：传递int参数，签名改为"(I)V"
-    activity.callMethod<void>("setMapType",  // Java层方法名
-                              "(I)V",        // JNI签名：接收int参数，无返回值
-                              mapKey         // 直接传递int值
+    activity.callMethod<void>("setMapType", // Java层方法名
+                              "(I)V",       // JNI签名：接收int参数，无返回值
+                              mapKey        // 直接传递int值
     );
   }
 #endif
 }
 
-QString Steps::getJsonRouteFile(const QString& strGpsList) {
+QString Steps::getJsonRouteFile(const QString &strGpsList) {
   QString routeFile = getGpsListFilePath(strGpsList) + ".json";
   return routeFile;
 }
 
-QString Steps::getGpsListFilePath(const QString& strGpsList) {
+QString Steps::getGpsListFilePath(const QString &strGpsList) {
   QStringList list = strGpsList.split("-=-");
 
   QString st1 = list.at(0);
@@ -2486,7 +2533,8 @@ void Steps::getRouteList(int index) {
   QString routeFile = getJsonRouteFile(strGpsList);
 
   qDebug() << "routeFile=" << routeFile;
-  if (!QFile::exists(routeFile)) return;
+  if (!QFile::exists(routeFile))
+    return;
 
   QStringList list;
 
@@ -2531,17 +2579,17 @@ QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
     // double) 类路径："com/x/CoordinateConverterUtil"（注意用/分隔包名）
     // 方法签名："(DD)Lcom/tencent/mapsdk/raster/model/LatLng;"（两个double参数，返回LatLng对象）
     QJniObject gcjLatLng = QJniObject::callStaticObjectMethod(
-        "com/x/CoordinateConverterUtil",  // Java类全路径
-        "wgs84ToGcj02",                   // 静态方法名
-        "(DD)Lcom/tencent/tencentmap/mapsdk/maps/model/LatLng;",  // 方法签名
-        wgs84Lat,  // 参数1：WGS84纬度
-        wgs84Lon   // 参数2：WGS84经度
+        "com/x/CoordinateConverterUtil",                         // Java类全路径
+        "wgs84ToGcj02",                                          // 静态方法名
+        "(DD)Lcom/tencent/tencentmap/mapsdk/maps/model/LatLng;", // 方法签名
+        wgs84Lat, // 参数1：WGS84纬度
+        wgs84Lon  // 参数2：WGS84经度
     );
 
     // 2. 检查返回的LatLng对象是否有效
     if (!gcjLatLng.isValid()) {
       qWarning() << "[Qt6 JNI] 坐标转换失败：返回无效LatLng对象";
-      return QGeoCoordinate(wgs84Lat, wgs84Lon);  // 失败时返回原坐标
+      return QGeoCoordinate(wgs84Lat, wgs84Lon); // 失败时返回原坐标
     }
 
     // 3.
@@ -2552,7 +2600,7 @@ QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
     // 4. 检查JNI调用是否产生异常（Qt6需显式处理）
     if (env->ExceptionCheck()) {
       qWarning() << "[Qt6 JNI] 解析LatLng时发生异常";
-      env->ExceptionClear();  // 清除异常，避免崩溃
+      env->ExceptionClear(); // 清除异常，避免崩溃
       return QGeoCoordinate(wgs84Lat, wgs84Lon);
     }
 
@@ -2561,7 +2609,7 @@ QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
 
     return QGeoCoordinate(gcjLat, gcjLon);
 
-  } catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     qCritical() << "[Qt6 JNI] 转换过程异常：" << e.what();
     // 清除可能的JNI异常
     if (env->ExceptionCheck()) {
@@ -2576,7 +2624,7 @@ QGeoCoordinate Steps::wgs84ToGcj02(double wgs84Lat, double wgs84Lon) {
 }
 
 // 保存速度数据（追加模式，每次调用添加一条带时间戳的速度记录）
-void Steps::saveSpeedData(const QString& jsonFile, double speed,
+void Steps::saveSpeedData(const QString &jsonFile, double speed,
                           double altitude) {
   // 1. 读取已有数据（若文件存在）
   QJsonArray speedArray;
@@ -2589,7 +2637,7 @@ void Steps::saveSpeedData(const QString& jsonFile, double speed,
 
     QJsonDocument doc = QJsonDocument::fromJson(data);
     if (doc.isArray()) {
-      speedArray = doc.array();  // 现有数据是数组，直接复用
+      speedArray = doc.array(); // 现有数据是数组，直接复用
     } else {
       qWarning() << "saveSpeedData: 文件" << jsonFile
                  << "格式错误，将创建新文件";
@@ -2600,15 +2648,15 @@ void Steps::saveSpeedData(const QString& jsonFile, double speed,
   QJsonObject newRecord;
   // 替换原来的时间戳获取方式
   newRecord["timestamp"] =
-      QDateTime::currentMSecsSinceEpoch();  // 直接调用静态方法，更高效
-  newRecord["speed"] = speed;               // 速度值（单位根据业务定，如km/h）
+      QDateTime::currentMSecsSinceEpoch(); // 直接调用静态方法，更高效
+  newRecord["speed"] = speed;              // 速度值（单位根据业务定，如km/h）
   newRecord["altitude"] = altitude;
   speedArray.append(newRecord);
 
   // 3. 写入更新后的数据到文件
   if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
     QJsonDocument doc(speedArray);
-    file.write(doc.toJson(QJsonDocument::Indented));  // 格式化输出，便于调试
+    file.write(doc.toJson(QJsonDocument::Indented)); // 格式化输出，便于调试
     file.close();
   } else {
     qWarning() << "saveSpeedData: 无法打开文件" << jsonFile << "进行写入";
@@ -2616,14 +2664,14 @@ void Steps::saveSpeedData(const QString& jsonFile, double speed,
 }
 
 // 读取所有速度数据，返回QVariantList（便于传递到QML）
-QVariantList Steps::getSpeedData(const QString& jsonFile) {
+QVariantList Steps::getSpeedData(const QString &jsonFile) {
   QVariantList speedList;
   QFile file(jsonFile);
 
   // 检查文件是否存在
   if (!file.exists()) {
     qWarning() << "getSpeedData: 文件" << jsonFile << "不存在";
-    return speedList;  // 返回空列表
+    return speedList; // 返回空列表
   }
 
   // 打开并读取文件
@@ -2645,7 +2693,7 @@ QVariantList Steps::getSpeedData(const QString& jsonFile) {
   QJsonArray speedArray = doc.array();
   // 使用const迭代器遍历，避免容器分离
   for (auto it = speedArray.constBegin(); it != speedArray.constEnd(); ++it) {
-    const QJsonValue& val = *it;  // 通过迭代器获取元素
+    const QJsonValue &val = *it; // 通过迭代器获取元素
     if (val.isObject()) {
       QJsonObject record = val.toObject();
       if (record.contains("speed") && record["speed"].isDouble()) {
@@ -2658,14 +2706,14 @@ QVariantList Steps::getSpeedData(const QString& jsonFile) {
 }
 
 // 读取所有海拔数据，返回QVariantList（便于传递到QML）
-QVariantList Steps::getAltitudeData(const QString& jsonFile) {
+QVariantList Steps::getAltitudeData(const QString &jsonFile) {
   QVariantList altitudeList;
   QFile file(jsonFile);
 
   // 检查文件是否存在
   if (!file.exists()) {
     qWarning() << "getAltitudeData: 文件" << jsonFile << "不存在";
-    return altitudeList;  // 返回空列表
+    return altitudeList; // 返回空列表
   }
 
   // 打开并读取文件
@@ -2688,7 +2736,7 @@ QVariantList Steps::getAltitudeData(const QString& jsonFile) {
   // 使用const迭代器遍历，避免容器分离
   for (auto it = altitudeArray.constBegin(); it != altitudeArray.constEnd();
        ++it) {
-    const QJsonValue& val = *it;  // 通过迭代器获取元素
+    const QJsonValue &val = *it; // 通过迭代器获取元素
     if (val.isObject()) {
       QJsonObject record = val.toObject();
       if (record.contains("altitude") && record["altitude"].isDouble()) {
@@ -2709,18 +2757,19 @@ void Steps::resetTerrainDistance() {
 
 // 从优化后的轨迹数据计算地形距离
 void Steps::calculateTerrainDistance(
-    const QVector<GPSCoordinate>& optimizedData) {
-  if (optimizedData.size() < 2) return;  // 至少需要2个点才能计算
+    const QVector<GPSCoordinate> &optimizedData) {
+  if (optimizedData.size() < 2)
+    return; // 至少需要2个点才能计算
 
   for (int i = 1; i < optimizedData.size(); ++i) {
-    const GPSCoordinate& prev = optimizedData[i - 1];
-    const GPSCoordinate& curr = optimizedData[i];
+    const GPSCoordinate &prev = optimizedData[i - 1];
+    const GPSCoordinate &curr = optimizedData[i];
 
     // 1. 计算水平距离（米），转换为公里
     double horizontalDistance =
         calculateHaversineDistance(prev.latitude, prev.longitude, curr.latitude,
                                    curr.longitude) /
-        1000.0;  // 转换为公里
+        1000.0; // 转换为公里
 
     // 2. 计算海拔差（米）
     double altitudeDiff = curr.altitude - prev.altitude;
@@ -2771,12 +2820,11 @@ void Steps::getTerrain() {
       }
       // 优化3：用容差判断，避免浮点数精度问题
       else if (altitudeDiff >
-               UPHILL_THRESHOLD -
-                   EPS) {  // 等价于 >= UPHILL_THRESHOLD（带容差）
+               UPHILL_THRESHOLD - EPS) { // 等价于 >= UPHILL_THRESHOLD（带容差）
         m_uphillDistance += horizontalDistanceKm;
       } else if (altitudeDiff <
                  DOWNHILL_THRESHOLD +
-                     EPS) {  // 等价于 <= DOWNHILL_THRESHOLD（带容差）
+                     EPS) { // 等价于 <= DOWNHILL_THRESHOLD（带容差）
         m_downhillDistance += horizontalDistanceKm;
       }
       // 优化4：else兜底，100%覆盖所有情况
@@ -2836,7 +2884,8 @@ QString Steps::bearingToDirection(double bearing) {
 
   // 规范化角度到[0, 360)
   bearing = fmod(bearing, 360.0);
-  if (bearing < 0.0) bearing += 360.0;
+  if (bearing < 0.0)
+    bearing += 360.0;
 
   const double EPSILON = 0.001;
 
@@ -2865,7 +2914,7 @@ QString Steps::bearingToDirection(double bearing) {
   double offset = 0.0;
 
   // 3. 象限划分
-  if (bearing > 0 && bearing < 90) {  // 东北象限
+  if (bearing > 0 && bearing < 90) { // 东北象限
     if (bearing <= 45) {
       mainDir = tr("North by East");
       offset = bearing;
@@ -2873,7 +2922,7 @@ QString Steps::bearingToDirection(double bearing) {
       mainDir = tr("East by North");
       offset = 90.0 - bearing;
     }
-  } else if (bearing > 90 && bearing < 180) {  // 东南象限
+  } else if (bearing > 90 && bearing < 180) { // 东南象限
     if (bearing <= 135) {
       mainDir = tr("East by South");
       offset = bearing - 90.0;
@@ -2881,7 +2930,7 @@ QString Steps::bearingToDirection(double bearing) {
       mainDir = tr("South by East");
       offset = 180.0 - bearing;
     }
-  } else if (bearing > 180 && bearing < 270) {  // 西南象限
+  } else if (bearing > 180 && bearing < 270) { // 西南象限
     if (bearing <= 225) {
       mainDir = tr("South by West");
       offset = bearing - 180.0;
@@ -2889,7 +2938,7 @@ QString Steps::bearingToDirection(double bearing) {
       mainDir = tr("West by South");
       offset = 270.0 - bearing;
     }
-  } else {  // 西北象限 270~360
+  } else { // 西北象限 270~360
     if (bearing <= 315) {
       mainDir = tr("West by North");
       offset = bearing - 270.0;
@@ -2910,32 +2959,32 @@ QString Steps::bearingToDirection(double bearing) {
   return mainDir + " " + QString::number(roundedOffset) + " " + tr("degrees");
 }
 
-void Steps::getRemarks(const QString& strGpsTime) {
+void Steps::getRemarks(const QString &strGpsTime) {
   // 构建备注文件路径
   QString file = getGpsListFilePath(strGpsTime) + "_Remarks.json";
 
   if (m_remarksDialog != nullptr) {
-    m_remarksDialog->close();        // 先关闭对话框
-    m_remarksDialog->deleteLater();  // 异步销毁（避免同步delete的坑）
-    m_remarksDialog = nullptr;       // 立即置空，防止野指针
+    m_remarksDialog->close();       // 先关闭对话框
+    m_remarksDialog->deleteLater(); // 异步销毁（避免同步delete的坑）
+    m_remarksDialog = nullptr;      // 立即置空，防止野指针
   }
   // 1. 创建对话框主窗口
   m_remarksDialog = new QDialog(mw_one);
 
-  m_remarksDialog->setWindowTitle(tr("Edit Remarks"));  // 国际化标题
+  m_remarksDialog->setWindowTitle(tr("Edit Remarks")); // 国际化标题
   m_remarksDialog->setGeometry(mw_one->geometry().x() + 10,
                                mw_one->geometry().y() + 0,
                                mw_one->geometry().width() - 20, 350);
 
   // 2. 创建文本编辑框（支持多行备注）
-  QTextEdit* textEdit = new QTextEdit(m_remarksDialog);
+  QTextEdit *textEdit = new QTextEdit(m_remarksDialog);
   textEdit->setPlaceholderText(
-      tr("Please enter remarks here..."));  // 占位提示（国际化）
+      tr("Please enter remarks here...")); // 占位提示（国际化）
   textEdit->verticalScrollBar()->setStyleSheet(m_Method->vsbarStyleBig);
   textEdit->setAcceptRichText(false);
 
   initTextToolbarDynamic(m_remarksDialog);
-  EditEventFilter* editFilter =
+  EditEventFilter *editFilter =
       new EditEventFilter(textToolbarDynamic, m_remarksDialog);
   editFilter->setParent(m_remarksDialog);
   textEdit->installEventFilter(editFilter);
@@ -2963,29 +3012,29 @@ void Steps::getRemarks(const QString& strGpsTime) {
   }
 
   // 3. 创建功能按钮（国际化文本）
-  QPushButton* okBtn = new QPushButton(tr("OK"), m_remarksDialog);
-  QPushButton* cancelBtn = new QPushButton(tr("Cancel"), m_remarksDialog);
+  QPushButton *okBtn = new QPushButton(tr("OK"), m_remarksDialog);
+  QPushButton *cancelBtn = new QPushButton(tr("Cancel"), m_remarksDialog);
 
   // 4. 布局管理
   // 按钮水平布局（右对齐）
-  QHBoxLayout* btnLayout = new QHBoxLayout;
-  btnLayout->addStretch();  // 左侧拉伸，按钮右对齐
+  QHBoxLayout *btnLayout = new QHBoxLayout;
+  btnLayout->addStretch(); // 左侧拉伸，按钮右对齐
   btnLayout->addWidget(okBtn);
-  btnLayout->addSpacing(10);  // 按钮间距
+  btnLayout->addSpacing(10); // 按钮间距
   btnLayout->addWidget(cancelBtn);
 
   // 主垂直布局
-  QVBoxLayout* mainLayout = new QVBoxLayout(m_remarksDialog);
-  mainLayout->setContentsMargins(20, 20, 20, 20);  // 对话框内边距
+  QVBoxLayout *mainLayout = new QVBoxLayout(m_remarksDialog);
+  mainLayout->setContentsMargins(20, 20, 20, 20); // 对话框内边距
   mainLayout->addWidget(textEdit);
-  mainLayout->addSpacing(15);  // 编辑框与按钮间距
+  mainLayout->addSpacing(15); // 编辑框与按钮间距
   mainLayout->addLayout(btnLayout);
 
   m_remarksDialog->setLayout(mainLayout);
 
   // 5. 明暗主题样式适配
   QString dlgStyle, textEditStyle, btnStyle;
-  if (isDark) {  // 暗色主题
+  if (isDark) { // 暗色主题
     dlgStyle = "QDialog { background-color: #2b2b2b; color: #ffffff; }";
     textEditStyle =
         "QTextEdit { "
@@ -2996,7 +3045,7 @@ void Steps::getRemarks(const QString& strGpsTime) {
         "padding: 8px; "
 
         "} "
-        "QTextEdit::placeholder { color: #999999; }";  // 占位文本颜色
+        "QTextEdit::placeholder { color: #999999; }"; // 占位文本颜色
     btnStyle =
         "QPushButton { "
         "background-color: #4a4a4a; "
@@ -3009,18 +3058,17 @@ void Steps::getRemarks(const QString& strGpsTime) {
         "QPushButton:hover { background-color: #555555; } "
         "QPushButton:pressed { background-color: #666666; } "
         "QPushButton:disabled { background-color: #333333; color: #666666; }";
-  } else {  // 亮色主题
+  } else { // 亮色主题
     dlgStyle = "QDialog { background-color: #ffffff; color: #000000; }";
-    textEditStyle =
-        "QTextEdit { "
-        "background-color: #f8f8f8; "
-        "color: #000000; "
-        "border: 1px solid #cccccc; "
-        "border-radius: 4px; "
-        "padding: 8px; "
+    textEditStyle = "QTextEdit { "
+                    "background-color: #f8f8f8; "
+                    "color: #000000; "
+                    "border: 1px solid #cccccc; "
+                    "border-radius: 4px; "
+                    "padding: 8px; "
 
-        "} "
-        "QTextEdit::placeholder { color: #666666; }";
+                    "} "
+                    "QTextEdit::placeholder { color: #666666; }";
     btnStyle =
         "QPushButton { "
         "background-color: #e0e0e0; "
@@ -3059,11 +3107,11 @@ void Steps::getRemarks(const QString& strGpsTime) {
 
     // 构建JSON对象（包含扩展信息，便于后续维护）
     QJsonObject remarkObj;
-    remarkObj["remarks"] = remarksContent;  // 备注内容
-    remarkObj["gps_time"] = strGpsTime;     // 关联的GPS时间
+    remarkObj["remarks"] = remarksContent; // 备注内容
+    remarkObj["gps_time"] = strGpsTime;    // 关联的GPS时间
     remarkObj["update_time"] =
-        QDateTime::currentDateTime().toString(Qt::ISODate);  // 更新时间
-    remarkObj["version"] = "1.0";                            // 版本标识
+        QDateTime::currentDateTime().toString(Qt::ISODate); // 更新时间
+    remarkObj["version"] = "1.0";                           // 版本标识
 
     // 写入JSON文件
     QFile saveFile(file);
@@ -3124,7 +3172,6 @@ void Steps::prepareDestroy() {
   stopGPSFromService();
 #endif
 }
-void Steps::on_btnBack_clicked() {}
 
 void Steps::on_btnGPS_clicked() {
   if (ui->btnGPS->text() == tr("Start")) {
@@ -3150,7 +3197,7 @@ void Steps::on_btnPause_clicked() {
 
 QString Steps::getDirectionText() { return ui->lblDirection->text(); }
 
-QLabel* Steps::getLabelGpsInfoWidget() { return ui->lblGpsInfo; }
+QLabel *Steps::getLabelGpsInfoWidget() { return ui->lblGpsInfo; }
 
 void Steps::on_btnStepsOptions_clicked() { m_StepsOptions->init(); }
 

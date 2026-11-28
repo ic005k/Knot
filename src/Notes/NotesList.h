@@ -206,8 +206,6 @@ public:
   void startBackgroundTaskDelFilesIndex(const QStringList &files);
   QStringList getRecycleNoteFiles();
 
-  void on_btnBack_clicked();
-
   void closeNoteDiff();
 
   void on_actionAdd_Note_triggered();

@@ -28,10 +28,10 @@ class CloudDeleter;
 class QtOneDrive;
 class CloudBackup : public QDialog {
   Q_OBJECT
- public:
-  explicit CloudBackup(QWidget* parent = 0);
+public:
+  explicit CloudBackup(QWidget *parent = 0);
   ~CloudBackup();
-  Ui::CloudBackup* ui;
+  Ui::CloudBackup *ui;
 
   int m_currentRemoteNotesCount;
   bool isGetRemoteFileListEnd = false;
@@ -43,12 +43,6 @@ class CloudBackup : public QDialog {
   QString WEBDAV_URL = "";
   QString USERNAME = "";
   QString APP_PASSWORD = "";
-
-  void loadLogQML();
-
-  void initQuick();
-
-  int getProg();
 
   void uploadData();
 
@@ -66,49 +60,48 @@ class CloudBackup : public QDialog {
   void getRemoteFileList(QString url);
   void createRemoteWebDAVDir();
   void deleteWebDAVFiles(QStringList filesToDelete);
-  void uploadFilesToWebDAV(const QStringList& files);
+  void uploadFilesToWebDAV(const QStringList &files);
   void backExit();
   void init_CloudBacup();
   void webDAVRestoreData();
 
-  void changeComBoxWebDAV(const QString& arg1);
+  void changeComBoxWebDAV(const QString &arg1);
   bool checkWebDAVConnection();
   void checkWebDAVConnectionAsync();
   void on_pushButton_downloadFile_clicked();
-  void on_btnBack_clicked();
 
   QString unifyWebDAVBaseUrlToDavEnd(QString url);
 
-  QString getRemoteKnotDataFullPath(const QString& remoteFile);
+  QString getRemoteKnotDataFullPath(const QString &remoteFile);
 
- signals:
-  void uploadAllFinished();  // 所有上传完成
-  void connectionCheckFinished(bool success, const QString& message);
+signals:
+  void uploadAllFinished(); // 所有上传完成
+  void connectionCheckFinished(bool success, const QString &message);
 
- protected:
-  bool eventFilter(QObject* obj, QEvent* evn) override;
- public slots:
+protected:
+  bool eventFilter(QObject *obj, QEvent *evn) override;
+public slots:
 
- private slots:
+private slots:
   void updateUploadProgress(qint64 bytesSent, qint64 bytesTotal);
   void startNextUpload();
   void onWebDAVCheckFinished();
-  void handleUploadFinished(QNetworkReply* reply, const QString& filePath);
+  void handleUploadFinished(QNetworkReply *reply, const QString &filePath);
 
- private:
-  QNetworkAccessManager* m_networkManager;  // 全局唯一
+private:
+  QNetworkAccessManager *m_networkManager; // 全局唯一
   QQueue<QString> uploadQueue;
-  QSet<QNetworkReply*> activeReplies;
+  QSet<QNetworkReply *> activeReplies;
 
-  QtOneDrive* oneDrive = nullptr;
+  QtOneDrive *oneDrive = nullptr;
   QString initUserInfo(QString info);
 
-  QNetworkAccessManager* m_chk_manager = nullptr;
-  QNetworkAccessManager* m_manager = nullptr;
-  QHash<QNetworkReply*, QFile*> m_activeDownloads;  // 必须声明为类成员
+  QNetworkAccessManager *m_chk_manager = nullptr;
+  QNetworkAccessManager *m_manager = nullptr;
+  QHash<QNetworkReply *, QFile *> m_activeDownloads; // 必须声明为类成员
 
-  QByteArray aes_key = "MySuperSecretKey1234567890";  // 长度不足32会自动处理
-  QByteArray aes_iv = "InitializationVe";             // 16字节
+  QByteArray aes_key = "MySuperSecretKey1234567890"; // 长度不足32会自动处理
+  QByteArray aes_iv = "InitializationVe";            // 16字节
   void resetProgBar();
 
   QString m_currentRemoteDir;
@@ -117,17 +110,17 @@ class CloudBackup : public QDialog {
 
   void fetchNextPage();
   void processFileList();
-  QString parseNextPageUrl(const QList<QNetworkReply::RawHeaderPair>& headers);
+  QString parseNextPageUrl(const QList<QNetworkReply::RawHeaderPair> &headers);
   void save_WebDav();
 };
 
 // 声明一个轻量级信号发射器,列出WebDAV上某个目录下的所有文件
 class WebDavHelper : public QObject {
   Q_OBJECT
- public:
-  explicit WebDavHelper(QObject* parent = nullptr) : QObject(parent) {}
+public:
+  explicit WebDavHelper(QObject *parent = nullptr) : QObject(parent) {}
 
-  void setResponseHeaders(const QList<QNetworkReply::RawHeaderPair>& headers) {
+  void setResponseHeaders(const QList<QNetworkReply::RawHeaderPair> &headers) {
     responseHeaders = headers;
   }
 
@@ -135,37 +128,37 @@ class WebDavHelper : public QObject {
     return responseHeaders;
   }
 
- signals:
-  void listCompleted(const QList<QPair<QString, QDateTime>>& files);
-  void errorOccurred(const QString& error);
+signals:
+  void listCompleted(const QList<QPair<QString, QDateTime>> &files);
+  void errorOccurred(const QString &error);
 
- private:
+private:
   QList<QNetworkReply::RawHeaderPair> responseHeaders;
 };
 
 class WebDavDownloader : public QObject {
   Q_OBJECT
- public:
-  explicit WebDavDownloader(const QString& username, const QString& password,
-                            QObject* parent = nullptr);
+public:
+  explicit WebDavDownloader(const QString &username, const QString &password,
+                            QObject *parent = nullptr);
 
-  void downloadFiles(const QList<QString>& remotePaths,
-                     const QString& localBaseDir, int maxConcurrent = 3);
+  void downloadFiles(const QList<QString> &remotePaths,
+                     const QString &localBaseDir, int maxConcurrent = 3);
 
- signals:
+signals:
   void progressChanged(int current, int total, QString currentFile);
-  void downloadFinished(bool success, const QString& error);
+  void downloadFinished(bool success, const QString &error);
   void fileSaved(QString localPath);
 
- private slots:
-  void handleAuthentication(QNetworkReply* reply, QAuthenticator* auth);
+private slots:
+  void handleAuthentication(QNetworkReply *reply, QAuthenticator *auth);
   void startNextDownload();
-  void onDownloadFinished(QNetworkReply* reply);
+  void onDownloadFinished(QNetworkReply *reply);
 
- private:
+private:
   QNetworkAccessManager manager;
   QQueue<QPair<QString, QString>> downloadQueue;
-  QHash<QNetworkReply*, QString> activeDownloads;
+  QHash<QNetworkReply *, QString> activeDownloads;
   QString m_username;
   QString m_password;
   int maxConcurrent;
@@ -173,4 +166,4 @@ class WebDavDownloader : public QObject {
   int completedFiles;
 };
 
-#endif  // CLOUDBACKUP_H
+#endif // CLOUDBACKUP_H

@@ -1017,15 +1017,3 @@ void Notes::refreshRecentOpenByCounter() {
   m_NotesList->listRecentOpen =
       m_Method->removeDuplicatesFromQStringList(m_NotesList->listRecentOpen);
 }
-
-void Notes::on_listNoteBook_currentRowChanged(int currentRow) {
-  m_NotesList->clickNoteBook(currentRow);
-}
-
-void Notes::on_listNoteList_currentRowChanged(int currentRow) {
-  if (currentRow < 0)
-    return;
-
-  m_NotesList->clickNoteList(currentRow);
-  openEditUI();
-}

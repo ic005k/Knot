@@ -110,16 +110,6 @@ public slots:
 
   void on_btnBack_clicked();
 
-  void on_chkUIFont_clicked();
-
-  void on_sliderFontSize_valueChanged(int value);
-
-  void on_chkDark_clicked(bool checked);
-
-  void on_chkDark_clicked();
-
-  void on_chkUIFont_clicked(bool checked);
-
   void on_btnAISelect_clicked();
 
   void on_btnAITest_clicked();

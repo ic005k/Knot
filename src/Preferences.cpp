@@ -206,10 +206,6 @@ QString Preferences::setFontDemoUI(QString customFontPath, QToolButton *btn,
   return fontName;
 }
 
-void Preferences::on_chkUIFont_clicked() { getCheckStatusChange(); }
-
-void Preferences::on_sliderFontSize_valueChanged(int value) {}
-
 void Preferences::setDefaultFont(QString fontFamily) {
   iniPreferences->setValue("/Options/DefaultFont", fontFamily);
 }
@@ -337,11 +333,6 @@ QStringList Preferences::getBakFilesList() {
   return fileList;
 }
 
-void Preferences::on_chkDark_clicked(bool checked) {
-  isDark = checked;
-  getCheckStatusChange();
-}
-
 void Preferences::initCheckStatus() {
   if (isVisible()) {
     listCheckStatus.clear();
@@ -417,8 +408,6 @@ void Preferences::on_btnShowValidate_pressed() {
 void Preferences::on_btnShowValidate_released() {
   mw_one->ui->editValidate->setEchoMode(QLineEdit::EchoMode::Password);
 }
-
-void Preferences::on_chkDark_clicked() {}
 
 void Preferences::setEncSyncStatusTip() {
   mw_one->ui->lblStats->setStyleSheet(mw_one->labelNormalStyleSheet);
@@ -515,21 +504,6 @@ void Preferences::openPreferences() {
   ui->editAIModelID->installEventFilter(editFilter);
 
   isChanged = false;
-}
-
-void Preferences::on_chkUIFont_clicked(bool checked) {
-  QFont font = this->font();
-  if (!checked) {
-    font.setFamily(defaultFontFamily);
-    qApp->setFont(font);
-
-  } else {
-    QString fontName =
-        iniPreferences->value("/Options/CustomFontName", defaultFontFamily)
-            .toString();
-    font.setFamily(fontName);
-    qApp->setFont(font);
-  }
 }
 
 void Preferences::on_btnAISelect_clicked() {

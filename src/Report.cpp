@@ -6,12 +6,12 @@
 #include "defines.h"
 #include "ui_DateSelector.h"
 
-QTreeWidget* twOut2Img;
+QTreeWidget *twOut2Img;
 QLabel *lblTotal, *lblDetails;
 QToolButton *btnCategory, *btnMonth, *btnYear;
 int twTotalRow = 0;
 
-Report::Report(QWidget* parent) : QDialog(parent) {
+Report::Report(QWidget *parent) : QDialog(parent) {
   twOut2Img = new QTreeWidget(nullptr);
 }
 
@@ -19,14 +19,14 @@ void Report::init() {}
 
 Report::~Report() { delete twOut2Img; }
 
-void Report::keyReleaseEvent(QKeyEvent* event) { Q_UNUSED(event) }
+void Report::keyReleaseEvent(QKeyEvent *event) { Q_UNUSED(event) }
 
-bool Report::eventFilter(QObject* watch, QEvent* evn) {
+bool Report::eventFilter(QObject *watch, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evn);
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
       if (!mw_one->m_Report->isHidden()) {
-        on_btnBack_clicked();
+        btnBack_clicked();
         return true;
       }
     }
@@ -35,14 +35,14 @@ bool Report::eventFilter(QObject* watch, QEvent* evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-void Report::on_btnBack_clicked() {
+void Report::btnBack_clicked() {
   saveYMD();
 
   listCategory.clear();
   indexCategory = 0;
 }
 
-void Report::closeEvent(QCloseEvent* event) { Q_UNUSED(event); }
+void Report::closeEvent(QCloseEvent *event) { Q_UNUSED(event); }
 
 void Report::on_btnSingleYear_clicked() {}
 
@@ -119,7 +119,7 @@ void Report::getData(int y1, int m1, int d1, int y2, int m2, int d2) {
 
 void Report::getMonthData() {
   int index = tabData->currentIndex();
-  QTreeWidget* tw = mw_one->get_tw(index);
+  QTreeWidget *tw = mw_one->get_tw(index);
   QString tabText = tabData->tabText(index);
 
   twTotalRow = 0;
@@ -139,7 +139,7 @@ void Report::getMonthData() {
       if (btnMonthText == "Year-Round") {
         if (strYear == btnYearText) {
           twTotalRow = twTotalRow + 1;
-          QTreeWidgetItem* item;
+          QTreeWidgetItem *item;
           item = tw->topLevelItem(i)->clone();
 
           setTWImgData(item);
@@ -147,7 +147,7 @@ void Report::getMonthData() {
       } else {
         if (strYear == btnYearText && strMonth == btnMonthText) {
           twTotalRow = twTotalRow + 1;
-          QTreeWidgetItem* item;
+          QTreeWidgetItem *item;
           item = tw->topLevelItem(i)->clone();
 
           setTWImgData(item);
@@ -171,7 +171,7 @@ void Report::getMonthData() {
 
       if (secondsDiff1 >= 0 && secondsDiff2 >= 0) {
         twTotalRow = twTotalRow + 1;
-        QTreeWidgetItem* item;
+        QTreeWidgetItem *item;
         item = tw->topLevelItem(i)->clone();
 
         setTWImgData(item);
@@ -180,8 +180,8 @@ void Report::getMonthData() {
   }
 }
 
-void Report::setTWImgData(QTreeWidgetItem* item) {
-  QTreeWidgetItem* newtop = new QTreeWidgetItem;
+void Report::setTWImgData(QTreeWidgetItem *item) {
+  QTreeWidgetItem *newtop = new QTreeWidgetItem;
   QFont f = newtop->font(0);
   f.setBold(true);
   newtop->setFont(0, f);
@@ -213,7 +213,7 @@ void Report::setTWImgData(QTreeWidgetItem* item) {
   totalAmount = totalAmount + m_amount;
 
   for (int z = 0; z < item->childCount(); z++) {
-    QTreeWidgetItem* newchild = new QTreeWidgetItem(newtop);
+    QTreeWidgetItem *newchild = new QTreeWidgetItem(newtop);
     newchild->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
     newchild->setTextAlignment(2, Qt::AlignRight | Qt::AlignVCenter);
     QString strClass = item->child(z)->text(2);
@@ -228,7 +228,7 @@ void Report::setTWImgData(QTreeWidgetItem* item) {
 
     QString strDes = item->child(z)->text(3);
     if (strDes.trimmed().length() > 0) {
-      QTreeWidgetItem* des = new QTreeWidgetItem(newtop);
+      QTreeWidgetItem *des = new QTreeWidgetItem(newtop);
       des->setText(0, tr("Details") + " : " + strDes);
     }
   }
@@ -238,10 +238,11 @@ void Report::setTWImgData(QTreeWidgetItem* item) {
 
 void Report::saveYMD() {}
 
-int Report::cmp(const void* a, const void* b) { return *(int*)a < *(int*)b; }
+int Report::cmp(const void *a, const void *b) { return *(int *)a < *(int *)b; }
 
 void Report::on_btnCategory_clicked() {
-  if (listCategory.count() == 0) return;
+  if (listCategory.count() == 0)
+    return;
 
   int count = getCount();
   if (count == 0) {
@@ -307,7 +308,7 @@ void Report::on_btnCategory_clicked() {
   // qInfo() << "listCateSortDisplay=" << listCateSortDisplay;
 }
 
-void Report::on_CateOk(const QString& cateTitle) {
+void Report::on_CateOk(const QString &cateTitle) {
   QString str0 = cateTitle;
   str0 = str0.replace(tr("Category") + " : ", "").trimmed();
 
@@ -321,12 +322,12 @@ void Report::getCategoryData(QString strCategory, bool appendTable) {
 
   int freq = 0;
   double d_amount = 0;
-  QTreeWidget* tw = twOut2Img;
+  QTreeWidget *tw = twOut2Img;
   for (int i = 0; i < tw->topLevelItemCount(); i++) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
+    QTreeWidgetItem *topItem = tw->topLevelItem(i);
 
     for (int j = 0; j < topItem->childCount(); j++) {
-      QTreeWidgetItem* childItem = topItem->child(j);
+      QTreeWidgetItem *childItem = topItem->child(j);
       QString strClass = childItem->text(2);
       if (strClass == strCategory && strClass.trimmed() != "") {
         freq++;
@@ -337,7 +338,7 @@ void Report::getCategoryData(QString strCategory, bool appendTable) {
           time = childItem->text(0).split(".").at(1);
 
           if (j + 1 < topItem->childCount()) {
-            QTreeWidgetItem* nextChild = topItem->child(j + 1);
+            QTreeWidgetItem *nextChild = topItem->child(j + 1);
 
             if (nextChild->text(0).contains(tr("Details"))) {
               details = nextChild->text(0);
@@ -367,7 +368,8 @@ void Report::getCategoryData(QString strCategory, bool appendTable) {
   }
 
   double bfb;
-  if (totalAmount > 0) bfb = d_amount / totalAmount;
+  if (totalAmount > 0)
+    bfb = d_amount / totalAmount;
 
   QString ta = QString("%1").arg(d_amount, 0, 'f', 2);
   if (appendTable) {
@@ -398,7 +400,8 @@ void Report::delItem(int index) {}
 
 void Report::clearAll() {
   int count = getCount();
-  for (int i = 0; i < count; i++) delItem(0);
+  for (int i = 0; i < count; i++)
+    delItem(0);
 }
 
 void Report::appendSteps_xx(QString date, QString steps, QString km) {}
@@ -409,7 +412,8 @@ void Report::delItem_xx(int index) {}
 
 void Report::clearAll_xx() {
   int count = getCount_xx();
-  for (int i = 0; i < count; i++) delItem_xx(0);
+  for (int i = 0; i < count; i++)
+    delItem_xx(0);
 }
 
 int Report::getCurrentIndex() { return 0; }
@@ -423,7 +427,8 @@ void Report::setScrollBarPos(double pos) {}
 void Report::setScrollBarPos_xx(double pos) {}
 
 void Report::loadDetailsQml() {
-  if (getCount() == 0) return;
+  if (getCount() == 0)
+    return;
 
   btnCategory->setText(tr("View Category"));
 
@@ -439,9 +444,9 @@ void Report::loadDetailsQml() {
     year = list.at(1).trimmed();
   }
 
-  QTreeWidget* tw = mw_one->get_tw(tabData->currentIndex());
+  QTreeWidget *tw = mw_one->get_tw(tabData->currentIndex());
   for (int i = 0; i < tw->topLevelItemCount(); i++) {
-    QTreeWidgetItem* topItem = tw->topLevelItem(i);
+    QTreeWidgetItem *topItem = tw->topLevelItem(i);
     QString str_year = topItem->text(3);
     QString str_date = topItem->text(0);
 
@@ -452,11 +457,12 @@ void Report::loadDetailsQml() {
       int childCount = topItem->childCount();
 
       for (int j = 0; j < childCount; j++) {
-        QTreeWidgetItem* childItem = topItem->child(j);
+        QTreeWidgetItem *childItem = topItem->child(j);
 
         QString text0 = childItem->text(0);
         QStringList list = text0.split(".");
-        if (list.count() == 2) text0 = list.at(1).trimmed();
+        if (list.count() == 2)
+          text0 = list.at(1).trimmed();
         text0 = tr("Time") + " : " + text0;
 
         QString text1 = childItem->text(1);
@@ -464,9 +470,12 @@ void Report::loadDetailsQml() {
         QString text3 = childItem->text(3);
 
         QString str1, str2, str3;
-        if (text1.trimmed().length() > 0) str1 = tr("Amount") + " : " + text1;
-        if (text2.trimmed().length() > 0) str2 = tr("Category") + " : " + text2;
-        if (text3.trimmed().length() > 0) str3 = tr("Details") + " : " + text3;
+        if (text1.trimmed().length() > 0)
+          str1 = tr("Amount") + " : " + text1;
+        if (text2.trimmed().length() > 0)
+          str2 = tr("Category") + " : " + text2;
+        if (text3.trimmed().length() > 0)
+          str3 = tr("Details") + " : " + text3;
 
         // m_Method->addItemToQW(mui->qwReportSub, text0, str1, str2, str3, 0);
       }
@@ -475,7 +484,7 @@ void Report::loadDetailsQml() {
 }
 
 void Report::getDetail(int index) {
-  QTreeWidgetItem* topitem = twOut2Img->topLevelItem(index);
+  QTreeWidgetItem *topitem = twOut2Img->topLevelItem(index);
   int count = topitem->childCount();
   QStringList list;
   for (int i = 0; i < count; i++) {
@@ -494,12 +503,12 @@ void Report::genReportMenu() {
   m_Menu = new QMenu(this);
   m_Menu->setStyleSheet(m_Method->qssMenu);
 
-  QAction* actOuttoPic = new QAction(tr("Output to Image"));
+  QAction *actOuttoPic = new QAction(tr("Output to Image"));
   m_Menu->addAction(actOuttoPic);
   connect(actOuttoPic, &QAction::triggered, this, [=]() { Out2Img(true); });
 
 #ifdef Q_OS_ANDROID
-  QAction* actSharePic = new QAction(tr("Create Image and Share"));
+  QAction *actSharePic = new QAction(tr("Create Image and Share"));
   m_Menu->addAction(actSharePic);
   connect(actSharePic, &QAction::triggered, this, [=]() {
     QString picFile = Out2Img(false);
@@ -508,30 +517,30 @@ void Report::genReportMenu() {
   });
 #endif
 
-  QAction* actSetYear = new QAction(tr("Year-Round"));
+  QAction *actSetYear = new QAction(tr("Year-Round"));
   m_Menu->addAction(actSetYear);
   actSetYear->setVisible(true);
   connect(actSetYear, &QAction::triggered, this,
           [=]() { on_btnSingleYear_clicked(); });
 
-  QAction* actSetYearMonth = new QAction(tr("Year Month"));
+  QAction *actSetYearMonth = new QAction(tr("Year Month"));
   m_Menu->addAction(actSetYearMonth);
   connect(actSetYearMonth, &QAction::triggered, this,
-          [=]() { mw_one->on_btnYear_clicked(); });
+          [=]() { on_btnYear_clicked(); });
 
-  QAction* actStartDate = new QAction(tr("Start Date"));
+  QAction *actStartDate = new QAction(tr("Start Date"));
   m_Menu->addAction(actStartDate);
   connect(actStartDate, &QAction::triggered, this,
-          [=]() { mw_one->on_btnStartDate_clicked(); });
+          [=]() { mw_one->btnStartDate_clicked(); });
 
-  QAction* actEndDate = new QAction(tr("End Date"));
+  QAction *actEndDate = new QAction(tr("End Date"));
   m_Menu->addAction(actEndDate);
   connect(actEndDate, &QAction::triggered, this,
-          [=]() { mw_one->on_btnEndDate_clicked(); });
+          [=]() { mw_one->btnEndDate_clicked(); });
 
   int x = 0;
   x = mw_one->geometry().x() + 2;
-  int y = 0;  // mw_one->geometry().y() + mui->btnMenuReport->height() + 12;
+  int y = 0; // mw_one->geometry().y() + mui->btnMenuReport->height() + 12;
   QPoint pos(x, y);
   m_Menu->exec(pos);
 }
@@ -554,7 +563,7 @@ void Report::aiAnalysis() {
 
   // 获取当前程序生效的语言标识
   QLocale loc = QLocale::system();
-  QString langCode = loc.name();  // 格式 zh_CN / en_US / ja_JP
+  QString langCode = loc.name(); // 格式 zh_CN / en_US / ja_JP
 
   // 标准化英文指令，明确指定输出语言，精准可控
   QString promptTemplate = R"(

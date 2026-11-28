@@ -20,11 +20,6 @@ void NotesList::on_btnRecycle() {
   twrb->setCurrentItem(twrb->topLevelItem(0));
 }
 
-void NotesList::on_btnBack_clicked() {
-  setWinPos();
-  tw->setFocus();
-}
-
 void NotesList::on_btnBatchDel_Recycle_clicked() {
   QList<int> selectedIntIndexes;
 

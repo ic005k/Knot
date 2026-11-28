@@ -16,17 +16,7 @@ void MainWindow::btnRecentOpen_clicked() {
     m_NotesList->m_RecentOpen->showRecentOpen(m_NotesList->listRecentOpen);
 }
 
-void MainWindow::on_btnAddTodo_pressed() {
-  m_Todo->isRecordVoice = false;
-  tmeStartRecordAudio->start(750);
-}
-
-void MainWindow::on_btnAddTodo_released() {
-  tmeStartRecordAudio->stop();
-  m_Todo->stopRecordVoice();
-}
-
-void MainWindow::on_btnBackNoteList_clicked() {
+void MainWindow::backNoteList() {
   // 延迟一小段时间再触发，避免模块快速切换时反复启停
   QTimer::singleShot(500, m_NotesList, &NotesList::rebuilderNotesVector);
 
@@ -56,16 +46,7 @@ void MainWindow::on_btnBackNoteList_clicked() {
   m_Notes->syncToWebDAV();
 }
 
-void MainWindow::on_btnFindNotes_clicked(const QString &kw) {
-  // 笔记精准匹配搜索
-  QString str = kw;
-  if (str.length() == 0)
-    return;
-  mySearchText = str;
-  m_NotesList->startFind(str);
-}
-
-void MainWindow::on_btnStartSearch_clicked(const QString &searchStr) {
+void MainWindow::btnStartSearch_clicked(const QString &searchStr) {
   // 主事件搜索
 
   if (searchStr.length() == 0)
@@ -87,17 +68,13 @@ void MainWindow::on_btnStartSearch_clicked(const QString &searchStr) {
       Qt::QueuedConnection);
 }
 
-void MainWindow::on_btnStartDate_clicked() {
+void MainWindow::btnStartDate_clicked() {
   m_DateSelector->initStartEndDate("start");
 }
 
-void MainWindow::on_btnEndDate_clicked() {
+void MainWindow::btnEndDate_clicked() {
   m_DateSelector->initStartEndDate("end");
 }
-
-void MainWindow::on_btnYear_clicked() { m_Report->on_btnYear_clicked(); }
-
-void MainWindow::on_btnMonth_clicked() { m_Report->on_btnMonth_clicked(); }
 
 void MainWindow::on_btnAIExerciseSuggestions_clicked() {
   if (!isEnabledAiApi)
@@ -246,7 +223,7 @@ Daily walking steps records:
   aiChatQuery(fullPrompt);
 }
 
-void MainWindow::on_btnAIReportAnalysis_clicked() {
+void MainWindow::btnAIReportAnalysis_clicked() {
   QString text = m_Report->catetext;
   QString trimText = text.trimmed();
   if (trimText.isEmpty()) {
@@ -294,28 +271,11 @@ void MainWindow::on_btnWebDAVRestore_clicked() {
   m_CloudBackup->webDAVRestoreData();
 }
 
-void MainWindow::on_btnOpenSearchView_clicked() {
-  QString mdFile = m_NotesList->getSearchResultQmlFile();
-  if (!QFile::exists(mdFile))
-    return;
-
-  currentMDFile = mdFile;
-
-  m_Notes->previewNote();
-  m_NotesList->setCurrentItemFromMDFile(mdFile);
-}
-
 void MainWindow::on_btnSteps_clicked() { m_Steps->openStepsUI(); }
 
 void MainWindow::on_btnNotes_clicked() { m_Notes->openNotes(); }
 
-void MainWindow::on_btnAdd_clicked() {
-  // m_EditRecord->monthSum();
-
-  m_EditRecord->on_AddRecord();
-}
-
-void MainWindow::on_btnDel_clicked() {
+void MainWindow::btnDel_clicked() {
   isMoveEntry = false;
   del_Data((QTreeWidget *)mw_one->ui->tabWidget->currentWidget());
 }

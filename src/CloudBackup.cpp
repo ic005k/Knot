@@ -108,7 +108,7 @@ bool CloudBackup::eventFilter(QObject *obj, QEvent *evn) {
   if (evn->type() == QEvent::KeyRelease) {
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evn);
     if (keyEvent->key() == Qt::Key_Back) {
-      on_btnBack_clicked();
+
       return true;
     }
   }
@@ -147,14 +147,6 @@ QString CloudBackup::getWebDAVArgument() {
   APP_PASSWORD = mw_one->ui->editWebDAVPassword->text().trimmed();
   return url;
 }
-
-void CloudBackup::on_btnBack_clicked() {}
-
-void CloudBackup::loadLogQML() {}
-
-void CloudBackup::initQuick() {}
-
-int CloudBackup::getProg() { return 0; }
 
 void CloudBackup::startBakData() {
   isUpData = true;

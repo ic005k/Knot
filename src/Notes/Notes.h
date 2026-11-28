@@ -331,10 +331,6 @@ private slots:
 
   void on_btnClearQuestion_clicked();
 
-  void on_listNoteBook_currentRowChanged(int currentRow);
-
-  void on_listNoteList_currentRowChanged(int currentRow);
-
 private:
   void findAllAndShowResults(const QString &text);
   void updateResultCount(int count);

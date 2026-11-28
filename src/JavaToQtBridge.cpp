@@ -656,7 +656,7 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
           if (strType.startsWith("data_category_ai_analysis")) {
             QTimer::singleShot(100, mw_one, [=]() {
               // AI分析分类统计的业务逻辑
-              mw_one->on_btnAIReportAnalysis_clicked();
+              mw_one->btnAIReportAnalysis_clicked();
             });
           }
 
@@ -697,12 +697,12 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
 
           if (strType.contains("add_datadetail")) {
             QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->on_btnAdd_clicked(); });
+                               [=]() { mw_one->m_EditRecord->on_AddRecord(); });
           }
 
           if (strType.contains("del_datadetail")) {
             QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->on_btnDel_clicked(); });
+                               [=]() { mw_one->btnDel_clicked(); });
           }
 
           // 主工具栏按钮=============================================
@@ -727,9 +727,8 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
             QStringList list = strType.split("|==|");
             if (list.size() == 2) {
               QString kw = list.at(1);
-              QTimer::singleShot(100, mw_one, [kw]() {
-                mw_one->on_btnStartSearch_clicked(kw);
-              });
+              QTimer::singleShot(
+                  100, mw_one, [kw]() { mw_one->btnStartSearch_clicked(kw); });
             }
           }
 
@@ -1156,7 +1155,7 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
           if (strType == "back_note") {
             QTimer::singleShot(100, mw_one, [=]() {
               if (mw_one->ui->frameMain->isHidden()) {
-                mw_one->on_btnBackNoteList_clicked();
+                mw_one->backNoteList();
                 m_Method->openMainEntranceWindow();
               }
             });
