@@ -206,22 +206,6 @@ QString EditRecord::getTime(int h, int m) {
   return strh + ":" + strm + ":" + strs;
 }
 
-void EditRecord::on_btnClearAmount_clicked() {}
-
-void EditRecord::on_btnClearDesc_clicked() {}
-
-void EditRecord::on_editAmount_textChanged(const QString &arg1) {}
-
-void EditRecord::on_hsH_valueChanged(int value) {}
-
-void EditRecord::on_hsM_valueChanged(int value) {}
-
-void EditRecord::on_btnClearDetails_clicked() {}
-
-void EditRecord::on_editCategory_textChanged(const QString &arg1) {}
-
-void EditRecord::on_editDetails_textChanged() {}
-
 void EditRecord::saveCurrentYearData() {
   QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
   if (!tw) {

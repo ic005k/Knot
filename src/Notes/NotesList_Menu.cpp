@@ -32,7 +32,7 @@ void NotesList::genRecentOpenMenu() {
 #ifdef Q_OS_ANDROID
           mw_one->on_btnOpenNote_clicked();
 #else
-              mw_one->on_btnEditNote_clicked();
+              m_Notes->openEditUI();
 #endif
         });*/
       });
@@ -125,7 +125,7 @@ void NotesList::newCreateNote() {
   else
     setDataToNoteList();
 
-  mw_one->on_btnEditNote_clicked();
+  m_Notes->openEditUI();
 }
 
 void NotesList::on_actionDel_Note_triggered() {}

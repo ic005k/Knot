@@ -25,39 +25,6 @@ void MainWindow::on_actionAbout() {
   m_AboutThis->show();
 }
 
-void MainWindow::on_actionFind_triggered() {}
-
-void MainWindow::on_actionAdd_Tab_triggered() {
-  int count = mw_one->ui->tabWidget->tabBar()->count();
-  QString defaultTabName = tr("Tab") + " " + QString::number(count + 1);
-
-  // 直接调用全局封装的输入框
-  QInputDialog *dlg = m_Method->inputDialog(
-      tr("New Tab"), tr("Please enter tab name:"), defaultTabName);
-  dlg->setOkButtonText(tr("Done"));
-
-  connect(dlg, &QDialog::accepted, this, [=]() {
-    QString customTabText = dlg->textValue().trimmed();
-    dlg->deleteLater();
-    if (customTabText.isEmpty())
-      return;
-
-    // 创建标签页逻辑不变
-    QString twName =
-        m_Notes->getDateTimeStr() + "_" + QString::number(count + 1);
-    QTreeWidget *tw = init_TreeWidget(twName);
-
-    mw_one->ui->tabWidget->addTab(tw, customTabText);
-    mw_one->ui->tabWidget->setCurrentIndex(count);
-
-    reloadMain();
-    saveTab();
-    strLatestModify = tr("Add Tab") + " ( " + customTabText + " ) ";
-  });
-
-  connect(dlg, &QDialog::rejected, this, [=]() { dlg->deleteLater(); });
-}
-
 void MainWindow::addMyTab(const QString &customTabText) {
   int count = mw_one->ui->tabWidget->tabBar()->count();
 
@@ -69,75 +36,6 @@ void MainWindow::addMyTab(const QString &customTabText) {
 
   saveTab();
   strLatestModify = tr("Add Tab") + " ( " + customTabText + " ) ";
-}
-
-void MainWindow::on_actionDel_Tab_triggered() {
-  int index = mw_one->ui->tabWidget->currentIndex();
-  if (index < 0)
-    return;
-
-  QString tab_name = mw_one->ui->tabWidget->tabText(index);
-
-  if (!showConfirm("Knot", tr("Whether to remove") + "  " + tab_name + " ? "))
-    return;
-
-  strLatestModify = tr("Del Tab") + " ( " + tab_name + " ) ";
-
-  QString date_time = m_Notes->getDateTimeStr();
-  m_Method->saveRecycleTabName(date_time, tab_name);
-
-  QTreeWidget *tw = (QTreeWidget *)tabData->currentWidget();
-  QString twName = tw->objectName();
-  int c_year = QDate::currentDate().year();
-
-  bool isFileExists = false;
-  for (int i = 2022; i <= c_year; i++) {
-    QString file = iniDir + QString::number(i) + "-" + twName + ".json";
-    if (QFile::exists(file)) {
-      isFileExists = true;
-      QFileInfo fi(file);
-      QString fn = fi.fileName();
-      QString newFile = iniDir + "recycle_" + tab_name + "_" + fn;
-      QFile::rename(file, newFile);
-    }
-  }
-
-  if (!isFileExists) { // ini files
-    int iniFileCount = c_year - 2025 + 1 + 1;
-    for (int i = 0; i < iniFileCount; i++) {
-      QString tab_file;
-      if (i == 0)
-        tab_file = iniDir + twName + ".ini";
-      else {
-        tab_file =
-            iniDir + QString::number(2025 + i - 1) + "-" + twName + ".ini";
-      }
-
-      if (QFile::exists(tab_file)) {
-        QFile::copy(tab_file, iniDir + "recycle_name" + "_" + date_time + "-" +
-                                  QString::number(i) + ".ini");
-        QFile file(tab_file);
-        file.remove();
-      }
-    }
-  }
-
-  int TabCount = mw_one->ui->tabWidget->tabBar()->count();
-  if (TabCount > 1) {
-    mw_one->ui->tabWidget->removeTab(index);
-  }
-
-  if (TabCount == 1) {
-    mw_one->ui->tabWidget->removeTab(0);
-    QString tw_name = m_Notes->getDateTimeStr() + "_" + QString::number(1);
-    QTreeWidget *tw = init_TreeWidget(tw_name);
-    QString tabText = tr("Tab 1");
-    mw_one->ui->tabWidget->addTab(tw, tabText);
-
-    reloadMain();
-  }
-
-  saveTab();
 }
 
 void MainWindow::delTab() {
@@ -194,8 +92,6 @@ void MainWindow::on_actionOneDriveBackupData() {
   }
   mw_one->ui->frameOne->show();
 }
-
-void MainWindow::on_actionTabRecycle() { m_MainHelper->openTabRecycle(); }
 
 void MainWindow::on_actionExport_Data_triggered() {
   if (!isSaveEnd)
@@ -262,122 +158,23 @@ void MainWindow::renameTab(const QString &newName) {
   strLatestModify = tr("Rename Tab");
 }
 
-void MainWindow::on_actionReport_triggered() {
-  if (isEBook || !isSaveEnd || !isReadEBookEnd)
-    return;
-
-  if (isReadEBookEnd) {
-    m_Report->init();
-    startInitReport();
-  }
-}
-
-void MainWindow::on_actionCopyLog() {
-  AppLogger::instance().copyTodayLogToClipboard();
-}
-
-void MainWindow::on_actionShareFile() {
-  QString path = "/storage/emulated/0/";
-  QString file =
-      QFileDialog::getOpenFileName(this, tr("KnotBak"), path, tr("File (*.*)"));
-
-  if (QFile::exists(file)) {
-#ifdef Q_OS_ANDROID
-    file = m_Method->getRealPathFile(file);
-#endif
-    m_ReceiveShare->shareImage(tr("Share to"), file, "*/*");
-  }
-}
-
 void MainWindow::init_Menu(QMenu *mainMenu) {
-  QAction *actAddTab = new QAction(tr("Add Tab"));
-  QAction *actDelTab = new QAction(tr("Del Tab"));
-
-  QAction *actOpenKnotBakDir = new QAction(tr("Open KnotBak Dir"));
-
-  QAction *actReport = new QAction(tr("Report"));
-  actReport->setVisible(false);
-
-  QAction *actExportData = new QAction(tr("Export Data"));
-  QAction *actImportData = new QAction(tr("Import Data"));
-
   QAction *actPreferences = new QAction(tr("Preferences"));
-
-  QAction *actCopyLog = new QAction(tr("Copy Log to Clipboard"));
-
-  QAction *actAbout = new QAction(tr("About") + " (" + ver + ")");
   QAction *actOneDrive = new QAction(tr("Cloud Backup"));
-
   QAction *actBakFileList = new QAction(tr("Local Backup"));
-  QAction *actTabRecycle = new QAction(tr("Tab Recycle"));
-  QAction *actShareFile = new QAction(tr("Share File"));
+  QAction *actAbout = new QAction(tr("About") + " (" + ver + ")");
 
-  connect(actAddTab, &QAction::triggered, mw_one,
-          &MainWindow::on_actionAdd_Tab_triggered);
-  connect(actDelTab, &QAction::triggered, mw_one,
-          &MainWindow::on_actionDel_Tab_triggered);
-
-  connect(actBakFileList, &QAction::triggered, mw_one,
-          &MainWindow::on_actionBakFileList);
-
-  connect(actTabRecycle, &QAction::triggered, mw_one,
-          &MainWindow::on_actionTabRecycle);
-
-  connect(actOpenKnotBakDir, &QAction::triggered, mw_one,
-          &MainWindow::on_openKnotBakDir);
-  connect(actReport, &QAction::triggered, mw_one,
-          &MainWindow::on_actionReport_triggered);
-
-  connect(actExportData, &QAction::triggered, mw_one,
-          &MainWindow::on_actionExport_Data_triggered);
-
-  connect(actImportData, &QAction::triggered, mw_one,
-          &MainWindow::on_actionImport_Data_triggered);
   connect(actPreferences, &QAction::triggered, mw_one,
           &MainWindow::on_actionPreferences_triggered);
-
   connect(actOneDrive, &QAction::triggered, mw_one,
           &MainWindow::on_actionOneDriveBackupData);
+  connect(actBakFileList, &QAction::triggered, mw_one,
+          &MainWindow::on_actionBakFileList);
   connect(actAbout, &QAction::triggered, mw_one, &MainWindow::on_actionAbout);
-  connect(actShareFile, &QAction::triggered, mw_one,
-          &MainWindow::on_actionShareFile);
-
-  connect(actCopyLog, &QAction::triggered, mw_one,
-          &MainWindow::on_actionCopyLog);
-
-  mainMenu->addAction(actAddTab);
-  mainMenu->addAction(actDelTab);
-
-  mainMenu->addAction(actReport);
-
-  mainMenu->addAction(actExportData);
-  mainMenu->addAction(actImportData);
-
-#ifdef Q_OS_ANDROID
-  mainMenu->addAction(actOpenKnotBakDir);
-  actOpenKnotBakDir->setVisible(false);
-  actShareFile->setVisible(false);
-#else
-  actShareFile->setVisible(false);
-  actExportData->setVisible(false);
-  actImportData->setVisible(false);
-
-  if (!mw_one->m_Preferences->devMode) {
-    actAddTab->setVisible(false);
-    actDelTab->setVisible(false);
-    actTabRecycle->setVisible(false);
-  }
-#endif
-
-  actCopyLog->setVisible(false);
 
   mainMenu->addAction(actPreferences);
-
   mainMenu->addAction(actOneDrive);
   mainMenu->addAction(actBakFileList);
-  mainMenu->addAction(actTabRecycle);
-  mainMenu->addAction(actShareFile);
-  mainMenu->addAction(actCopyLog);
   mainMenu->addAction(actAbout);
 
   mainMenu->setStyleSheet(m_Method->qssMenu);

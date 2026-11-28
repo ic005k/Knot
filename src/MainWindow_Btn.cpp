@@ -4,34 +4,6 @@
 
 SearchWorker *m_searchWorker;
 
-void MainWindow::on_btnModify_clicked() { m_Todo->reeditText(); }
-
-void MainWindow::on_btnTabMoveUp_clicked() {
-  if (tabData->count() == 0)
-    return;
-  int curIndex = tabData->currentIndex();
-  if (curIndex > 0) {
-    tabData->tabBar()->moveTab(curIndex, curIndex - 1);
-
-    saveTab();
-    getMainTabs();
-  }
-}
-
-void MainWindow::on_btnTabMoveDown_clicked() {
-  if (tabData->count() == 0)
-    return;
-  int curIndex = tabData->currentIndex();
-  if (curIndex <= tabData->count() - 2) {
-    tabData->tabBar()->moveTab(curIndex, curIndex + 1);
-
-    saveTab();
-    getMainTabs();
-  }
-}
-
-void MainWindow::on_btnChart() { m_MainHelper->clickBtnChart(); }
-
 void MainWindow::btnRecentOpen_clicked() {
   // m_NotesList->genRecentOpenMenu();
 
@@ -44,27 +16,6 @@ void MainWindow::btnRecentOpen_clicked() {
     m_NotesList->m_RecentOpen->showRecentOpen(m_NotesList->listRecentOpen);
 }
 
-void MainWindow::on_btnMenuReport_clicked() { m_Report->genReportMenu(); }
-
-void MainWindow::on_btnShowBookmark_clicked() {
-  m_Reader->showOrHideBookmark();
-}
-
-void MainWindow::on_btnShareImage_clicked() {
-  m_ReceiveShare->shareImage(tr("Share to"), bookimgFileName, "image/png");
-}
-
-void MainWindow::on_btnBackReaderSet_clicked() {
-  closeTextToolBar();
-
-  qreal pos = m_Reader->getVPos();
-  m_Reader->setVPos(pos + 0.01);
-
-  QSettings Reg(privateDir + "reader.ini", QSettings::IniFormat);
-}
-
-void MainWindow::on_btnShareBook_clicked() { m_Reader->shareBook(); }
-
 void MainWindow::on_btnAddTodo_pressed() {
   m_Todo->isRecordVoice = false;
   tmeStartRecordAudio->start(750);
@@ -74,17 +25,6 @@ void MainWindow::on_btnAddTodo_released() {
   tmeStartRecordAudio->stop();
   m_Todo->stopRecordVoice();
 }
-
-void MainWindow::on_btnSelGpsDate_clicked() { m_Steps->selGpsListYearMonth(); }
-
-void MainWindow::on_btnBackTabRecycle_clicked() {
-  if (!isAndroid) {
-    mw_one->ui->frameMain->show();
-  } else
-    m_Method->openMainEntranceWindow();
-}
-
-void MainWindow::on_btnDelBakFile_clicked() { m_MainHelper->delBakFile(); }
 
 void MainWindow::on_btnBackNoteList_clicked() {
   // 延迟一小段时间再触发，避免模块快速切换时反复启停
@@ -116,13 +56,6 @@ void MainWindow::on_btnBackNoteList_clicked() {
   m_Notes->syncToWebDAV();
 }
 
-void MainWindow::on_btnNoteRecycle_clicked() { m_NotesList->loadAllRecycle(); }
-
-void MainWindow::on_btnDelNoteRecycle_clicked() {
-  m_NotesList->setTWRBCurrentItem();
-  m_NotesList->on_btnBatchDel_Recycle_clicked();
-}
-
 void MainWindow::on_btnFindNotes_clicked(const QString &kw) {
   // 笔记精准匹配搜索
   QString str = kw;
@@ -130,12 +63,6 @@ void MainWindow::on_btnFindNotes_clicked(const QString &kw) {
     return;
   mySearchText = str;
   m_NotesList->startFind(str);
-}
-
-void MainWindow::on_btnOkType_clicked() { m_CategoryList->on_btnOk_clicked(); }
-
-void MainWindow::on_btnDelType_clicked() {
-  m_CategoryList->on_btnDel_clicked();
 }
 
 void MainWindow::on_btnStartSearch_clicked(const QString &searchStr) {
@@ -168,25 +95,9 @@ void MainWindow::on_btnEndDate_clicked() {
   m_DateSelector->initStartEndDate("end");
 }
 
-void MainWindow::on_btnType_clicked() { m_EditRecord->on_btnType_clicked(); }
-
-void MainWindow::on_btnOkEditRecord_clicked() {
-  m_EditRecord->on_btnOk_clicked();
-}
-
-void MainWindow::on_btnBackSteps_clicked() { m_Steps->closeSteps(); }
-
-void MainWindow::on_btnReset_clicked() { m_Steps->on_btnReset_clicked(); }
-
-void MainWindow::on_btnBack_Report_clicked() { m_Report->on_btnBack_clicked(); }
-
 void MainWindow::on_btnYear_clicked() { m_Report->on_btnYear_clicked(); }
 
 void MainWindow::on_btnMonth_clicked() { m_Report->on_btnMonth_clicked(); }
-
-void MainWindow::on_btnViewCategory_clicked() {
-  m_Report->on_btnCategory_clicked();
-}
 
 void MainWindow::on_btnAIExerciseSuggestions_clicked() {
   if (!isEnabledAiApi)
@@ -377,8 +288,6 @@ Consumption records:
   aiChatQuery(fullPrompt);
 }
 
-void MainWindow::on_btnBackDir_clicked() { m_Reader->backDir(); }
-
 void MainWindow::on_btnWebDAVBackup_clicked() { m_CloudBackup->startBakData(); }
 
 void MainWindow::on_btnWebDAVRestore_clicked() {
@@ -394,26 +303,6 @@ void MainWindow::on_btnOpenSearchView_clicked() {
 
   m_Notes->previewNote();
   m_NotesList->setCurrentItemFromMDFile(mdFile);
-}
-
-void MainWindow::on_btnCopyNoteLink_clicked() {
-  QString mdFile = m_NotesList->getSearchResultQmlFile();
-  if (!QFile::exists(mdFile))
-    return;
-  QString file = mdFile;
-  file = file.replace(iniDir, "");
-  QString name = m_Notes->m_NoteManager->getNoteTitle(mdFile);
-  QString strlink = "[" + name + "](" + file + ")";
-  QClipboard *clipboard = QApplication::clipboard();
-  clipboard->setText(strlink);
-  QString res = m_Method->escapeAllHtml(strlink);
-  showInfo(appName, res);
-}
-
-void MainWindow::on_btnSpeak_clicked() {
-  isPlayBook = true;
-  m_Reader->setAutoStopPlayTime();
-  m_Reader->startSpeak();
 }
 
 void MainWindow::on_btnSteps_clicked() { m_Steps->openStepsUI(); }
@@ -447,20 +336,6 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 #endif
 }
 
-void MainWindow::on_btnRecycle() { m_Todo->on_btnRecycle(); }
-
-void MainWindow::on_btnReturnRecycle_clicked() {
-  m_Todo->on_btnReturn_clicked();
-}
-
-void MainWindow::on_btnClearRecycle_clicked() { m_Todo->on_btnClear_clicked(); }
-
-void MainWindow::on_btnDelRecycle_clicked() { m_Todo->on_btnDel_clicked(); }
-
-void MainWindow::on_btnRestoreRecycle_clicked() {
-  m_Todo->on_btnRestore_clicked();
-}
-
 void MainWindow::on_btnDownload_clicked() {
   m_CloudBackup->on_pushButton_downloadFile_clicked();
 }
@@ -470,8 +345,6 @@ void MainWindow::on_btnBack_One_clicked() {
   if (isAndroid)
     m_Method->openMainEntranceWindow();
 }
-
-void MainWindow::on_btnReport() { on_actionReport_triggered(); }
 
 void MainWindow::on_btnShowPassword_pressed() {
   m_Preferences->on_btnShowPassword_pressed();
@@ -488,12 +361,6 @@ void MainWindow::on_btnShowValidate_pressed() {
 void MainWindow::on_btnShowValidate_released() {
   m_Preferences->on_btnShowValidate_released();
 }
-
-void MainWindow::on_btnNewNote_clicked() {
-  m_NotesList->on_actionAdd_Note_triggered();
-}
-
-void MainWindow::on_btnEditNote_clicked() { m_Notes->openEditUI(); }
 
 void MainWindow::on_btnTestWebDav_clicked() {
   ui->btnTestWebDav->setEnabled(false);

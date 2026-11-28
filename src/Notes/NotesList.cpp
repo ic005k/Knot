@@ -1195,7 +1195,7 @@ Note:
   // qDebug() << fullPrompt;
 }
 
-void NotesList::on_btnNewNote_clicked() { m_NotesList->newCreateNote(); }
+void NotesList::on_btnNewNote_clicked() { newCreateNote(); }
 
 void NotesList::on_btnSearch_clicked() { m_NoteSearch->showNoteSearch(); }
 
@@ -1215,9 +1215,7 @@ void NotesList::on_btnEdit_clicked() {
   m_Notes->openEditUI();
 }
 
-void NotesList::on_btnNoteRecycle_clicked() {
-  mw_one->on_btnNoteRecycle_clicked();
-}
+void NotesList::on_btnNoteRecycle_clicked() { loadAllRecycle(); }
 
 void NotesList::showNoteList() {
   setDataToNoteList();

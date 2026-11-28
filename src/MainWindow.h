@@ -307,8 +307,6 @@ public:
 
   QString getTabText();
 
-  void refreshMainUI();
-
   int calcStringPixelWidth(QString s_str, QFont font, int n_font_size);
   int calcStringPixelHeight(QFont font, int n_font_size);
 
@@ -333,11 +331,7 @@ public:
 
   void saveNeedSyncNotes();
 
-  void on_btnBackDir_clicked();
-
   void on_btnDownload_clicked();
-
-  void sendFakeTouch();
 
   void init_ButtonStyle();
 
@@ -354,8 +348,6 @@ public:
                            std::function<void()> onSuccess);
 
   void setVectorStatus(int status, int current, int total);
-
-  QVariantList buildRecentList();
 
   void clickMainTab(int index);
 
@@ -391,28 +383,19 @@ public slots:
   void btnAIBookExplanation_clicked(const QString &selectedText);
   void btnHome_clicked();
 
-  void on_actionReport_triggered();
   void on_tabWidget_currentChanged(int index);
   void safeCloseProgress();
   void on_actionOneDriveBackupData();
 
-  void on_actionFind_triggered();
   void on_actionPreferences_triggered();
 
   void on_btnSteps_clicked();
 
   void on_btnAddTodo_pressed();
 
-  void on_btnEditNote_clicked();
-
   void on_btnStartDate_clicked();
 
   void on_btnEndDate_clicked();
-  void on_btnBackTabRecycle_clicked();
-
-  void on_actionAdd_Tab_triggered();
-
-  void on_actionDel_Tab_triggered();
 
   void on_actionExport_Data_triggered();
 
@@ -442,63 +425,25 @@ public slots:
 
   void on_btnNotes_clicked();
 
-  void on_openKnotBakDir();
-
   void on_btnStartSearch_clicked(const QString &searchStr);
-
-  void on_btnChart();
 
   void on_ExecShortcut();
 
   void on_btnFindNotes_clicked(const QString &kw);
 
-  void on_btnShowBookmark_clicked();
-
   void on_btnBackNoteList_clicked();
-
-  void on_btnBackReaderSet_clicked();
-
-  void on_btnReport();
 
   void on_btnAdd_clicked();
 
   void on_btnDel_clicked();
 
-  void on_btnRecycle();
-
-  void on_btnReturnRecycle_clicked();
-
-  void on_btnClearRecycle_clicked();
-
-  void on_btnDelRecycle_clicked();
-
-  void on_btnRestoreRecycle_clicked();
-
-  void on_editTodo_textChanged();
-
-  void on_btnBackSteps_clicked();
-
-  void on_btnReset_clicked();
-
-  void on_btnBack_Report_clicked();
-
   void on_btnYear_clicked();
 
   void on_btnMonth_clicked();
 
-  void on_btnViewCategory_clicked();
-
   void closeProgress();
 
-  void selTab();
-
   void updateGpsMapDone();
-
-  void on_actionTabRecycle();
-
-  void on_actionShareFile();
-
-  void on_btnNoteRecycle_clicked();
 
   void on_btnAIReportAnalysis_clicked();
 
@@ -509,41 +454,9 @@ private slots:
 
   void on_btnMenu_clicked();
 
-  void on_btnDelBakFile_clicked();
-
-  void on_btnDelNoteRecycle_clicked();
-
-  void on_btnOkType_clicked();
-
-  void on_btnDelType_clicked();
-
-  void on_btnType_clicked();
-
-  void on_btnOkEditRecord_clicked();
-
-  void on_editAmount_textChanged(const QString &arg1);
-
-  void on_editCategory_textChanged(const QString &arg1);
-
-  void on_editDetails_textChanged();
-
-  void on_btnModify_clicked();
-
-  void on_btnTabMoveUp_clicked();
-
-  void on_btnTabMoveDown_clicked();
-
-  void on_btnMenuReport_clicked();
-
   void on_ReceiveShare();
 
-  void on_btnShareImage_clicked();
-
-  void on_hSlider_sliderReleased();
-
   void on_CloseProgressBar();
-
-  void on_btnShareBook_clicked();
 
   void on_btnAddTodo_released();
 
@@ -551,33 +464,13 @@ private slots:
 
   void on_sliderPlayAudio_sliderReleased();
 
-  void on_btnSelGpsDate_clicked();
-
-  void on_rbCycling_clicked();
-
-  void on_rbHiking_clicked();
-
-  void on_rbRunning_clicked();
-
   void on_btnWebDAVBackup_clicked();
 
   void on_btnWebDAVRestore_clicked();
 
-  void on_editFindNote_returnPressed();
-
-  void on_btnCopyNoteLink_clicked();
-
   void on_cboxWebDAV_currentTextChanged(const QString &arg1);
 
   void on_btnShowCboxList_clicked();
-
-  void on_btnNewNote_clicked();
-
-  void on_btnSpeak_clicked();
-
-  void on_chkPlayRunVoice_clicked(bool checked);
-
-  void on_tabMotion_currentChanged(int index);
 
   void on_btnTestWebDav_clicked();
 
@@ -596,12 +489,6 @@ private slots:
   void on_editValidate_textChanged(const QString &arg1);
 
   void on_editAutoStopTTS_textChanged(const QString &arg1);
-
-  void on_chkAutoStopTTS_clicked(bool checked);
-
-  void on_actionCopyLog();
-
-  void on_editTitleKey_textChanged(const QString &arg1);
 
   void on_btnOpenSearchView_clicked();
 
@@ -625,17 +512,11 @@ private:
   qreal aoldX, aoldY, aoldZ;
   int countOne = 0;
 
-  void resetWinPos();
-
   void init_Instance();
-
-  void getMainTabs();
 
   QString strTime, strAmount, strCategory, strDetails;
 
   void init_Thread_Timer();
-
-  void setDisplayResult(const QVariantList &list);
 
 signals:
   void androidBackSignal();

@@ -503,7 +503,6 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
 
           if (strType == "open_category_dialog") {
             QTimer::singleShot(100, mw_one, [=]() {
-              // mw_one->m_EditRecord->on_btnType_clicked();
               mw_one->m_EditRecord->showCategorySelectDialog();
             });
           }
@@ -813,8 +812,8 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
                                [=]() { mw_one->on_actionBakFileList(); });
           }
           if (strType == "menu_id_tab_recycle_bin") {
-            QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->on_actionTabRecycle(); });
+            QTimer::singleShot(
+                100, mw_one, [=]() { mw_one->m_MainHelper->openTabRecycle(); });
           }
           if (strType == "menu_id_about") {
             QTimer::singleShot(100, mw_one,
@@ -1269,7 +1268,7 @@ static void PublicJavaCallCpp(JNIEnv *env, jclass clazz, jstring type) {
 
           if (strType.startsWith("note_open_recycle")) {
             QTimer::singleShot(100, mw_one,
-                               [=]() { mw_one->on_btnNoteRecycle_clicked(); });
+                               [=]() { m_NotesList->loadAllRecycle(); });
           }
 
           // 运动图表 ===================================================

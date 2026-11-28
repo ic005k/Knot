@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
   init_Stats(tw);
 
   if (m_Preferences->devMode) {
-    // resetWinPos();
+
     m_Method->setWinPos(this, 350, 3);
   } else {
     m_Method->setWinPos(this, 350, 3);
@@ -502,25 +502,6 @@ void MainWindow::setMini() {
 #endif
 }
 
-void MainWindow::resetWinPos() {
-  QSettings Reg(privateDir + "winpos.ini", QSettings::IniFormat);
-
-  int x, y, w, h;
-  x = Reg.value("x").toInt();
-  y = Reg.value("y").toInt();
-  w = Reg.value("w").toInt();
-  h = Reg.value("h").toInt();
-
-  if (x < 0)
-    x = 0;
-  if (y < 0)
-    y = 0;
-
-  if (x >= 0 && y >= 0 && w > 0 && h > 0) {
-    this->setGeometry(x, y, w, h);
-  }
-}
-
 void MainWindow::on_twItemClicked() {
   QTreeWidget *tw = (QTreeWidget *)mw_one->ui->tabWidget->currentWidget();
   if (!tw->currentIndex().isValid())
@@ -723,31 +704,6 @@ bool MainWindow::eventFilter(QObject *watch, QEvent *evn) {
   return QWidget::eventFilter(watch, evn);
 }
 
-void MainWindow::sendFakeTouch() {
-  QWidget *w = mw_one->ui->frameMain;
-  if (!w)
-    return;
-
-  auto send = [&](const QPoint &p) {
-    const QPointF pf(p);
-
-    QMouseEvent press(QEvent::MouseButtonPress, pf, pf, Qt::LeftButton,
-                      Qt::LeftButton, Qt::NoModifier,
-                      QPointingDevice::primaryPointingDevice());
-    QApplication::sendEvent(w, &press);
-
-    QMouseEvent release(QEvent::MouseButtonRelease, pf, pf, Qt::LeftButton,
-                        Qt::LeftButton, Qt::NoModifier,
-                        QPointingDevice::primaryPointingDevice());
-    QApplication::sendEvent(w, &release);
-
-    qDebug() << pf << "被点击";
-  };
-
-  send(QPoint(0, 0));
-  send(QPoint(1, 1));
-}
-
 void MainWindow::clearWidgetFocus() {
   // InputMethodReset::instance().fullReset();
   if (QWidget *focused = focusWidget()) {
@@ -916,19 +872,6 @@ void MainWindow::changeEvent(QEvent *event) {
   }
 }
 
-void MainWindow::selTab() {}
-
-void MainWindow::getMainTabs() {}
-
-void MainWindow::on_openKnotBakDir() {
-#ifdef Q_OS_ANDROID
-
-  QJniObject m_activity = QNativeInterface::QAndroidApplication::context();
-  m_activity.callMethod<void>("openKnotBakDir", "()V");
-
-#endif
-}
-
 void MainWindow::stopJavaTimer() {
 #ifdef Q_OS_ANDROID
 
@@ -951,16 +894,6 @@ QString MainWindow::getTabText() {
   return tabData->tabText(tabData->currentIndex());
 }
 
-void MainWindow::refreshMainUI() {
-  this->update();
-  this->repaint();
-  qApp->processEvents();
-}
-
-void MainWindow::on_editTodo_textChanged() {
-  m_Todo->on_editTodo_textChanged();
-}
-
 int MainWindow::getMaxDay(QString sy, QString sm) {
   int maxDay = 0;
   for (int i = 0; i < 50; i++) {
@@ -974,20 +907,6 @@ int MainWindow::getMaxDay(QString sy, QString sm) {
 
   return maxDay;
 }
-
-void MainWindow::on_editAmount_textChanged(const QString &arg1) {
-  m_EditRecord->on_editAmount_textChanged(arg1);
-}
-
-void MainWindow::on_editCategory_textChanged(const QString &arg1) {
-  m_EditRecord->on_editCategory_textChanged(arg1);
-}
-
-void MainWindow::on_editDetails_textChanged() {
-  m_EditRecord->on_editDetails_textChanged();
-}
-
-void MainWindow::on_hSlider_sliderReleased() {}
 
 void MainWindow::on_DelayCloseProgressBar() {
   QTimer::singleShot(200, this, SLOT(on_CloseProgressBar()));
@@ -1016,14 +935,6 @@ void MainWindow::on_sliderPlayAudio_sliderReleased() {
   m_Method->startPlay();
   m_Todo->tmePlayProgress->start(m_Todo->nInterval);
 }
-
-void MainWindow::on_rbCycling_clicked() {}
-
-void MainWindow::on_rbHiking_clicked() {}
-
-void MainWindow::on_rbRunning_clicked() {}
-
-void MainWindow::on_editFindNote_returnPressed() {}
 
 void MainWindow::on_cboxWebDAV_currentTextChanged(const QString &arg1) {
   m_CloudBackup->changeComBoxWebDAV(arg1);
@@ -1060,22 +971,6 @@ void MainWindow::SaveFile(QString SaveType) {
   }
 }
 
-void MainWindow::on_chkPlayRunVoice_clicked(bool checked) {
-  m_Steps->isChkPlayRunVoice = checked;
-  if (checked) {
-    isPlayBook = false;
-    m_Method->stopPlayMyText();
-    m_Method->playMyText(m_Steps->getDirectionText());
-  }
-}
-
-void MainWindow::on_tabMotion_currentChanged(int index) {
-  if (index == 0)
-    m_Steps->tmeRefreshSteps->start(3000);
-  else
-    m_Steps->tmeRefreshSteps->stop();
-}
-
 void MainWindow::on_chkZip_clicked() { m_Preferences->on_chkZip_clicked(); }
 
 void MainWindow::on_editPassword_textChanged(const QString &arg1) {
@@ -1091,78 +986,4 @@ void MainWindow::on_editAutoStopTTS_textChanged(const QString &arg1) {
     m_Reader->setAutoStopPlayTime();
 }
 
-void MainWindow::on_chkAutoStopTTS_clicked(bool checked) {
-  if (checked)
-    m_Reader->setAutoStopPlayTime();
-  else
-    m_Reader->m_autoStopDeadline = QDateTime();
-}
-
 void MainWindow::showEvent(QShowEvent *event) { QMainWindow::showEvent(event); }
-
-void MainWindow::on_editTitleKey_textChanged(const QString &arg1) {
-  QString keyword = arg1.trimmed();
-  QVariantList data;
-
-  if (keyword.isEmpty()) {
-    // 空输入：直接复用成熟最近文件列表
-    data = buildRecentList();
-  } else {
-    // 关键词搜索分支：严格对齐buildRecentList字段结构
-    auto matchList = m_Notes->m_NoteManager->searchTitleWithPath(keyword);
-    for (const auto &pair : matchList) {
-      const QString &title = pair.first;
-      const QString &fullPath = pair.second;
-
-      QVariantMap row;
-      row["title"] = title;
-      row["path"] = fullPath;
-      row["uid"] = fullPath;
-
-      // =====重点：补充relPath，保证字段齐全=====
-      // 根据iniDir绝对路径，换算成相对路径，和buildRecentList逻辑统一
-      QString relPath;
-      if (fullPath.startsWith(iniDir)) {
-        relPath = fullPath.mid(iniDir.length());
-      }
-      row["relPath"] = relPath;
-
-      data.append(row);
-    }
-  }
-
-  setDisplayResult(data);
-}
-
-QVariantList MainWindow::buildRecentList() {
-  QVariantList result;
-  const QString sepStr = "===";
-
-  const QStringList &recentList = m_NotesList->listRecentOpen;
-  for (const QString &line : recentList) {
-    int splitPos = line.indexOf(sepStr);
-    if (splitPos == -1)
-      continue; // 格式不合法，直接跳过
-
-    QString title = line.left(splitPos).trimmed();
-    QString relPath = line.mid(splitPos + sepStr.size()).trimmed();
-
-    // iniDir末尾自带 "/"，直接拼接相对路径
-    QString fullPath = iniDir + relPath;
-
-    QStringList recycleList = m_NotesList->getRecycleNoteFiles();
-
-    if (QFile::exists(fullPath) && !recycleList.contains(fullPath)) {
-      QVariantMap row;
-      row["title"] = title;
-      row["path"] = fullPath;
-      row["relPath"] = relPath;
-      row["uid"] = fullPath; // 使用完整路径作为唯一标识
-
-      result.append(row);
-    }
-  }
-  return result;
-}
-
-void MainWindow::setDisplayResult(const QVariantList &list) {}
