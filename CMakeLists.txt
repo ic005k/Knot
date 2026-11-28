@@ -32,6 +32,11 @@ find_package(Qt6 REQUIRED COMPONENTS
     Xml Svg Concurrent LinguistTools Positioning
 )
 
+# ✅ 处理 QTP0002 警告
+if(QT_KNOWN_POLICY_QTP0002)
+    qt_policy(SET QTP0002 NEW)
+endif()
+
 # ============================================================
 # 2. 第三方库: llama.cpp (通过 add_subdirectory 构建)
 # ============================================================
@@ -234,6 +239,7 @@ endif()
 
 # --- 6.2 创建目标（统一使用 qt_add_executable） ---
 qt_add_executable(${PROJECT_NAME}
+    MANUAL_FINALIZATION
     ${PLATFORM_OPTIONS}
     ${APP_SOURCES}
     ${APP_FORMS}
@@ -569,8 +575,7 @@ if(ANDROID)
 endif()
 
 # ============================================================
-# 15. 最终化目标 (⚠️ 必须在所有 QT_ANDROID_* 属性设置之后)
+# 15. 最终化目标（必须无条件调用，因为上面用了 MANUAL_FINALIZATION）
+#     ⚠️ 必须在所有 QT_ANDROID_* 属性设置之后
 # ============================================================
-if(ANDROID)
-    qt_finalize_target(${PROJECT_NAME})
-endif()
+qt_finalize_target(${PROJECT_NAME})
