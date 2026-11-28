@@ -75,6 +75,33 @@ inline QString iniDir, privateDir, bakfileDir, strDate, readDate, noteText,
 
 inline QString ver;
 inline QString appName = "Knot";
+inline QString strCheckBoxStyle = QStringLiteral(
+    "QCheckBox {"
+    "   spacing: 8px;" /* 仅调整指示器与文字的间距 */
+    "}"
+
+    "QCheckBox::indicator {"
+    "   width: 20px;" /* 放大指示器尺寸，兼顾PC视觉与安卓触控 */
+    "   height: 20px;"
+    "   border-radius: 3px;"
+    "   border: 2px solid #808080;" /* 中性灰边框，明暗模式下均清晰可见 */
+    "   background: transparent;"
+    "}"
+
+    "QCheckBox::indicator:checked {"
+    "   border-color: #0078D7;" /* 经典科技蓝，明暗背景下对比度都很优秀 */
+    "   background: #0078D7;"
+    "   image: none;"
+    "}"
+
+    "QCheckBox::indicator:pressed {"
+    "   background: rgba(0, 120, 215, 0.2);" /* 按下时的浅色反馈 */
+    "}"
+
+    "QCheckBox::indicator:disabled {"
+    "   border-color: #A0A0A0;"
+    "   background: #E0E0E0;"
+    "}");
 
 inline QStringList readTextList, htmlFiles, listCategory, listTop, ncxList,
     tempHtmlList, listM, ymdList, resultsList, needDelWebDAVFiles, MyAllNotes,

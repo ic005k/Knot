@@ -354,9 +354,9 @@ void MainWindow::init_UIWidget() {
   ui->lblSyncNote->setFont(f);
 
   if (isAndroid) {
-    ui->chkAutoSync->setStyleSheet(strStyle);
-    ui->chkWebDAV->setStyleSheet(strStyle);
-    ui->chkZip->setStyleSheet(strStyle);
+    ui->chkAutoSync->setStyleSheet(strCheckBoxStyle);
+    ui->chkWebDAV->setStyleSheet(strCheckBoxStyle);
+    ui->chkZip->setStyleSheet(strCheckBoxStyle);
   }
 }
 

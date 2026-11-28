@@ -190,7 +190,7 @@ void Steps::initUI() {
   ui->rbRunning->setChecked(Reg.value("/GPS/isRunning", 0).toBool());
 
   if (isAndroid)
-    ui->chkPlayRunVoice->setStyleSheet(mw_one->strStyle);
+    ui->chkPlayRunVoice->setStyleSheet(strCheckBoxStyle);
   ui->chkPlayRunVoice->setChecked(Reg.value("/GPS/isPlayRunVoice", 0).toBool());
   isChkPlayRunVoice = ui->chkPlayRunVoice->isChecked();
 
